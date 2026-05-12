@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"

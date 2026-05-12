@@ -92,12 +92,7 @@ func newPooledNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 }
 
 func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, error) {
-	ev, _ := p.pool.Get().(*parser.Evaluator)
-	if ev == nil {
-		// The pool's New is wired in newPooledNikunjyEvaluator and only returns
-		// non-nil values, but be defensive in case parsing failed transiently.
-		return false, fmt.Errorf("nikunjy evaluator pool returned nil")
-	}
+	ev := p.pool.Get().(*parser.Evaluator)
 	defer p.pool.Put(ev)
 	return ev.Process(items)
 }
