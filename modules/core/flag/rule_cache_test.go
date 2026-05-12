@@ -104,7 +104,7 @@ func TestNikunjyEvaluatorCache_ConcurrentSafe(t *testing.T) {
 	wg.Wait()
 }
 
-func TestNikunjyEvaluatorCache_ResizeDropsEntries(t *testing.T) {
+func TestNikunjyEvaluatorCache_ResizePreservesEntries(t *testing.T) {
 	resetNikunjyEvaluatorCache(t)
 	assert.NoError(t, SetRuleEvaluatorCacheSize(5))
 	q := `key eq "a"`
@@ -112,7 +112,30 @@ func TestNikunjyEvaluatorCache_ResizeDropsEntries(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, ensureNikunjyEvaluatorCache().Contains(q))
 
+	// Resizing to a capacity that still fits the existing entry must keep it.
 	assert.NoError(t, SetRuleEvaluatorCacheSize(3))
-	assert.False(t, ensureNikunjyEvaluatorCache().Contains(q),
-		"resize should drop existing entries")
+	assert.True(t, ensureNikunjyEvaluatorCache().Contains(q),
+		"resize should preserve entries that still fit")
+
+	// A no-op resize (same size) must also keep entries.
+	assert.NoError(t, SetRuleEvaluatorCacheSize(3))
+	assert.True(t, ensureNikunjyEvaluatorCache().Contains(q),
+		"no-op resize must not drop entries")
+}
+
+func TestNikunjyEvaluatorCache_ResizeEvictsOverflow(t *testing.T) {
+	resetNikunjyEvaluatorCache(t)
+	assert.NoError(t, SetRuleEvaluatorCacheSize(3))
+	queries := []string{`key eq "a"`, `key eq "b"`, `key eq "c"`}
+	for _, q := range queries {
+		_, err := getNikunjyEvaluator(q)
+		assert.NoError(t, err)
+	}
+
+	// Shrinking below current entry count must evict the LRU entries.
+	assert.NoError(t, SetRuleEvaluatorCacheSize(1))
+	cache := ensureNikunjyEvaluatorCache()
+	assert.False(t, cache.Contains(queries[0]))
+	assert.False(t, cache.Contains(queries[1]))
+	assert.True(t, cache.Contains(queries[2]))
 }

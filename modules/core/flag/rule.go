@@ -52,22 +52,31 @@ func ensureNikunjyEvaluatorCache() *lru.Cache[string, *pooledNikunjyEvaluator] {
 	return nikunjyEvaluatorCache
 }
 
-// SetRuleEvaluatorCacheSize resizes the nikunjy evaluator LRU cache. Existing
-// entries are dropped (the next evaluation will re-parse the query). Returns an
-// error if size <= 0. The cache is process-global, so the last caller wins.
+// SetRuleEvaluatorCacheSize resizes the nikunjy evaluator LRU cache in place,
+// preserving the entries that still fit. Returns an error if size <= 0. The
+// cache is process-global, so the last caller wins.
+//
+// If the cache has not yet been initialized or the existing cache has a
+// different capacity, a new cache is created. When the requested size matches
+// the existing capacity, this is a no-op and cached evaluators are kept.
 func SetRuleEvaluatorCacheSize(size int) error {
 	if size <= 0 {
 		return fmt.Errorf("rule evaluator cache size must be > 0, got %d", size)
+	}
+	// Make sure the Once is consumed so a later first-use does not overwrite us.
+	nikunjyEvaluatorCacheOnce.Do(func() {})
+
+	nikunjyEvaluatorCacheMu.Lock()
+	defer nikunjyEvaluatorCacheMu.Unlock()
+	if nikunjyEvaluatorCache != nil {
+		nikunjyEvaluatorCache.Resize(size)
+		return nil
 	}
 	c, err := lru.New[string, *pooledNikunjyEvaluator](size)
 	if err != nil {
 		return err
 	}
-	// Make sure the Once is consumed so a later first-use does not overwrite us.
-	nikunjyEvaluatorCacheOnce.Do(func() {})
-	nikunjyEvaluatorCacheMu.Lock()
 	nikunjyEvaluatorCache = c
-	nikunjyEvaluatorCacheMu.Unlock()
 	return nil
 }
 
