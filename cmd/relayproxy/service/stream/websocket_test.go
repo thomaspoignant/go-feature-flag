@@ -1,4 +1,4 @@
-package service_test
+package stream_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
@@ -27,7 +27,7 @@ func (m *mockConn) WriteJSON(v any) error {
 
 func TestBroadcastFlagChanges(t *testing.T) {
 	// Create the websocketService instance
-	websocketService := service.NewWebsocketService()
+	websocketService := stream.NewWebsocketService()
 
 	// Prepare the input data
 	diff := notifier.DiffCache{} // You need to define an appropriate DiffCache
@@ -68,7 +68,7 @@ func TestBroadcastFlagChanges(t *testing.T) {
 
 func TestDeregister(t *testing.T) {
 	// Create the websocketService instance
-	websocketService := service.NewWebsocketService()
+	websocketService := stream.NewWebsocketService()
 
 	// Create a mock connection
 	conn := &mockConn{}
@@ -99,7 +99,7 @@ func TestDeregister(t *testing.T) {
 
 func TestClose(t *testing.T) {
 	// Create the websocketService instance
-	websocketService := service.NewWebsocketService()
+	websocketService := stream.NewWebsocketService()
 
 	// Create mock connections
 	conn1 := &mockConn{}
@@ -141,7 +141,7 @@ func TestClose(t *testing.T) {
 
 func TestBroadcastFlagChangesDeadLock(t *testing.T) {
 	// Create the websocketService instance
-	websocketService := service.NewWebsocketService()
+	websocketService := stream.NewWebsocketService()
 	diff := notifier.DiffCache{} // You need to define an appropriate DiffCache
 	conn1 := &mockConn{}
 

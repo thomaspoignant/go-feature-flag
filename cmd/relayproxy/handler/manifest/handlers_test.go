@@ -45,7 +45,7 @@ func TestManifestCtrl_GetManifest_DefaultMode(t *testing.T) {
 		},
 	}
 
-	flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), []notifier.Notifier{})
+	flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), []notifier.Notifier{}, nil)
 	assert.NoError(t, err, "failed to create flagset manager")
 	defer flagsetManager.Close()
 
@@ -150,7 +150,7 @@ func TestManifestCtrl_GetManifest_FlagsetMode(t *testing.T) {
 		},
 	}
 
-	flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), []notifier.Notifier{})
+	flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), []notifier.Notifier{}, nil)
 	assert.NoError(t, err, "failed to create flagset manager")
 	defer flagsetManager.Close()
 

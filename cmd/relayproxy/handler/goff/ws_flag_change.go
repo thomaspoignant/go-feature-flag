@@ -7,14 +7,14 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
-func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logger) Controller {
-	return &wsFlagChange{
+func NewWsFlagChange(websocketService stream.WebsocketService, logger *zap.Logger) *WSFlagChange {
+	return &WSFlagChange{
 		websocketService: websocketService,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(_ *http.Request) bool {
@@ -25,27 +25,47 @@ func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logg
 	}
 }
 
-// wsFlagChange is the implementation of the controller
-type wsFlagChange struct {
-	websocketService service.WebsocketService
+// WSFlagChange is the implementation of the controller
+type WSFlagChange struct {
+	websocketService stream.WebsocketService
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
 }
 
 // Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
 // @Summary      Websocket endpoint to be notified about flag changes
-// @Tags GO Feature Flag Evaluation Websocket API
-// @Description  This endpoint is a websocket endpoint to be notified about flag changes, every change
-// @Description  will send a request to the client with a model.DiffCache format.
-// @Description
+// @Tags         GO Feature Flag Evaluation Stream API
+// @Deprecated
+// @Description  Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
+// @Description  is a websocket endpoint to be notified about flag changes; every
+// @Description  change pushes a notifier.DiffCache message to the client.
 // @Produce      json
-// @Accept		 json
-// @Param 	     apiKey query string false "apiKey use authorize the connection to the relay proxy"
+// @Accept       json
+// @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
 // @Success      200  {object} notifier.DiffCache "Success"
-// @Failure      400 {object} modeldocs.HTTPErrorDoc "Bad Request"
-// @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
-// @Router       /ws/v1/flag/change [post]
-func (f *wsFlagChange) Handler(c echo.Context) error {
+// @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
+// @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
+// @Router       /ws/v1/flag/change [get]
+func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
+	// This handler is deprecated and we keep it for the documentation.
+	return f.Handler(c)
+}
+
+// Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
+// @Summary      Websocket endpoint to be notified about flag changes
+// @Tags         GO Feature Flag Evaluation Stream API
+// @Description  This endpoint is a websocket endpoint to be notified about flag changes;
+// @Description  every change pushes a notifier.DiffCache message to the client.
+// @Produce      json
+// @Accept       json
+// @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
+// @Success      200  {object} notifier.DiffCache "Success"
+// @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
+// @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
+// @Router       /stream/v1/ws/flag/change [get]
+func (f *WSFlagChange) Handler(c echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -87,7 +107,7 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *wsFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
+func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
 	// Ping interval duration
 	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals

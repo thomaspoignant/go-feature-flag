@@ -12,7 +12,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/docs"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	stream "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
@@ -95,15 +97,15 @@ func main() {
 	}
 
 	// Init services
-	wsService := service.NewWebsocketService()
-	defer wsService.Close() // close all the open connections
+	wsService := stream.NewWebsocketService()
+	sseService := stream.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := service.NewNotifierWebsocket(wsService)
+	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
-	})
+	}, sseService)
 
 	if err != nil {
 		logger.ZapLogger.Error(
@@ -115,15 +117,20 @@ func main() {
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
 		WebsocketService:  wsService,
+		SSEService:        sseService,
 		FlagsetManager:    flagsetManager,
 		Metrics:           metricsV2,
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
+
+	// Defers run LIFO: streaming clients disconnect first, then HTTP server stops.
 	defer func() {
 		logger.ZapLogger.Info("Stopping API server")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
+		wsService.Close()
+		sseService.Close()
 		apiServer.Stop(ctx)
 	}()
 	apiServer.StartWithContext(context.Background())
