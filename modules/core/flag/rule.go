@@ -257,7 +257,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		strCtx, err := json.Marshal(mapCtx)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
-				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
+				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
 			return false
 		}
 		var result bytes.Buffer
@@ -268,7 +268,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
-				slog.String("query", query), slog.Any("error", err.Error()))
+				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		resStr := utils.StrTrim(result.String())
@@ -284,13 +284,13 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		ev, err := getNikunjyEvaluator(query)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while parsing the nikunjy query",
-				slog.String("query", query), slog.Any("error", err.Error()))
+				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		ok, err := ev.process(mapCtx)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the nikunjy query",
-				slog.String("query", query), slog.Any("error", err.Error()))
+				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		return ok
