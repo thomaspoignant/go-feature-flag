@@ -41,8 +41,8 @@ func newPooledNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, error) {
 	ev, _ := p.pool.Get().(*parser.Evaluator)
 	if ev == nil {
-		// The pool's New is wired in newPooledNikunjyEvaluator and only returns
-		// non-nil values, but be defensive in case parsing failed transiently.
+		// The pool's New is wired in newPooledNikunjyEvaluator and is expected to return
+		// non-nil values since the query was already validated during pool initialization.
 		return false, fmt.Errorf("nikunjy evaluator pool returned nil")
 	}
 	defer p.pool.Put(ev)
