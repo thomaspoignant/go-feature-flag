@@ -9,14 +9,21 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
+
+// DefaultRuleEvaluatorCacheSize is the default capacity of the nikunjy evaluator
+// LRU cache. It is bounded so that pathological flag configs (or churn from
+// scheduled rollouts / hot reloads) cannot grow the cache without limit.
+const DefaultRuleEvaluatorCacheSize = 1000
 
 // nikunjyEvaluatorCache memoizes a sync.Pool of *parser.Evaluator per query string.
 // Parsing the query via ANTLR is the dominant cost of a nikunjy rule evaluation
@@ -25,9 +32,76 @@ import (
 // concurrent calls require either serialization or a pool of evaluators per query.
 // We use sync.Pool because evaluations are typically high-throughput and short-lived.
 //
-// Memory note: cache entries are not evicted, since a feature flag's query strings
-// are part of static config and the set is bounded in practice.
-var nikunjyEvaluatorCache sync.Map // map[string]*pooledNikunjyEvaluator
+// The cache is an LRU bounded by DefaultRuleEvaluatorCacheSize (overridable via
+// SetRuleEvaluatorCacheSize). Eviction only drops the cached parsed evaluator;
+// the next evaluation of an evicted query simply re-parses.
+//
+// The pointer is set exactly once (whichever of the lazy initializer or
+// SetRuleEvaluatorCacheSize wins the first CAS); afterwards SetRule mutates
+// the LRU in place via Resize. In-flight callers therefore never see the
+// pointer change underneath them.
+var (
+	nikunjyEvaluatorCache        atomic.Pointer[lru.Cache[string, *pooledNikunjyEvaluator]]
+	nikunjyEvaluatorCacheLogOnce sync.Once
+)
+
+// ensureNikunjyEvaluatorCache returns the shared LRU, lazily creating it on
+// first use. If lru.New ever returns an error, it returns nil instead and
+// callers must fall back to uncached parsing. The error is logged exactly
+// once so the failure mode is observable without flooding the logs.
+func ensureNikunjyEvaluatorCache() *lru.Cache[string, *pooledNikunjyEvaluator] {
+	if c := nikunjyEvaluatorCache.Load(); c != nil {
+		return c
+	}
+	c, err := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
+	if err != nil {
+		nikunjyEvaluatorCacheLogOnce.Do(func() {
+			slog.ErrorContext(context.Background(),
+				"failed to initialize nikunjy evaluator cache; falling back to uncached query parsing",
+				slog.Any("error", err),
+			)
+		})
+		return nil
+	}
+	if nikunjyEvaluatorCache.CompareAndSwap(nil, c) {
+		return c
+	}
+	// Lost the race; another goroutine already installed a cache.
+	return nikunjyEvaluatorCache.Load()
+}
+
+// SetRuleEvaluatorCacheSize resizes the nikunjy evaluator LRU cache in place,
+// preserving the entries that still fit. Returns an error if size <= 0. The
+// cache is process-global, so the last caller wins.
+//
+// On the first call after process start, this installs the cache at the
+// requested size. Subsequent calls resize the same underlying LRU, so cached
+// evaluators survive resize and concurrent readers never see a pointer swap.
+func SetRuleEvaluatorCacheSize(size int) error {
+	if size <= 0 {
+		return fmt.Errorf("rule evaluator cache size must be > 0, got %d", size)
+	}
+	if existing := nikunjyEvaluatorCache.Load(); existing != nil {
+		previous := existing.Len()
+		existing.Resize(size)
+		slog.InfoContext(context.Background(),
+			"resized nikunjy evaluator cache (process-global, shared across flagsets)",
+			slog.Int("size", size),
+			slog.Int("previousEntries", previous),
+		)
+		return nil
+	}
+	c, err := lru.New[string, *pooledNikunjyEvaluator](size)
+	if err != nil {
+		return err
+	}
+	if !nikunjyEvaluatorCache.CompareAndSwap(nil, c) {
+		// Another goroutine installed a cache first; resize that one instead
+		// of swapping ours in (swapping would drop the entries it already holds).
+		nikunjyEvaluatorCache.Load().Resize(size)
+	}
+	return nil
+}
 
 type pooledNikunjyEvaluator struct {
 	pool sync.Pool
@@ -50,26 +124,28 @@ func newPooledNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 }
 
 func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, error) {
-	ev, _ := p.pool.Get().(*parser.Evaluator)
-	if ev == nil {
-		// The pool's New is wired in newPooledNikunjyEvaluator and only returns
-		// non-nil values, but be defensive in case parsing failed transiently.
-		return false, fmt.Errorf("nikunjy evaluator pool returned nil")
-	}
+	ev := p.pool.Get().(*parser.Evaluator)
 	defer p.pool.Put(ev)
 	return ev.Process(items)
 }
 
 func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
-	if v, ok := nikunjyEvaluatorCache.Load(query); ok {
-		return v.(*pooledNikunjyEvaluator), nil
+	cache := ensureNikunjyEvaluatorCache()
+	if cache == nil {
+		// Cache init failed; behave as if cache was never enabled.
+		return newPooledNikunjyEvaluator(query)
+	}
+	if v, ok := cache.Get(query); ok {
+		return v, nil
 	}
 	p, err := newPooledNikunjyEvaluator(query)
 	if err != nil {
 		return nil, err
 	}
-	actual, _ := nikunjyEvaluatorCache.LoadOrStore(query, p)
-	return actual.(*pooledNikunjyEvaluator), nil
+	if existing, ok, _ := cache.PeekOrAdd(query, p); ok {
+		return existing, nil
+	}
+	return p, nil
 }
 
 type QueryFormat = string
@@ -181,7 +257,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		strCtx, err := json.Marshal(mapCtx)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
-				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
+				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
 			return false
 		}
 		var result bytes.Buffer
@@ -192,7 +268,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
-				slog.String("query", query), slog.Any("error", err.Error()))
+				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		resStr := utils.StrTrim(result.String())
@@ -207,13 +283,13 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 	default:
 		ev, err := getNikunjyEvaluator(query)
 		if err != nil {
-			slog.Error("error while parsing the nikunjy query",
+			slog.ErrorContext(context.Background(), "error while parsing the nikunjy query",
 				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		ok, err := ev.process(mapCtx)
 		if err != nil {
-			slog.Error("error while evaluating the nikunjy query",
+			slog.ErrorContext(context.Background(), "error while evaluating the nikunjy query",
 				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
