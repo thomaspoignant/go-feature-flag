@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.2...cmd/wasm/v0.2.2) (2026-05-15)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.6 to 1.41.7 ([#5225](https://github.com/thomaspoignant/go-feature-flag/issues/5225)) ([c228000](https://github.com/thomaspoignant/go-feature-flag/commit/c228000d65edf4eefcaa86b5c2eb72790b6d22e2))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.16 to 1.32.17 ([#5228](https://github.com/thomaspoignant/go-feature-flag/issues/5228)) ([977be4f](https://github.com/thomaspoignant/go-feature-flag/commit/977be4fbc82e52a3ac0a3fd6d6370d6f68dabcb7))
+* bump Go version to 1.25.8 ([#4938](https://github.com/thomaspoignant/go-feature-flag/issues/4938)) ([09e24ee](https://github.com/thomaspoignant/go-feature-flag/commit/09e24eef81404ab377ca9b78b66af146b937bf3b))
+* Bump go.opentelemetry.io/otel/sdk from 1.41.0 to 1.42.0 ([#4944](https://github.com/thomaspoignant/go-feature-flag/issues/4944)) ([ede0c19](https://github.com/thomaspoignant/go-feature-flag/commit/ede0c19d7452e55e9b8e27d1c929da9c0492a82a))
+* Bump go.opentelemetry.io/otel/trace from 1.42.0 to 1.43.0 ([#5079](https://github.com/thomaspoignant/go-feature-flag/issues/5079)) ([9505e0b](https://github.com/thomaspoignant/go-feature-flag/commit/9505e0bf1139244123f3d683cfefb698305601e7))
+* **dependencies:** Bump github.com/thomaspoignant/go-feature-flag/modules/core ([#5194](https://github.com/thomaspoignant/go-feature-flag/issues/5194)) ([7391512](https://github.com/thomaspoignant/go-feature-flag/commit/73915127e1d135fc3ba92ab8b8aa86939f83ae70))
+* **dependency:** Bump module modules/core 0.6.1 ([#4977](https://github.com/thomaspoignant/go-feature-flag/issues/4977)) ([c80adc6](https://github.com/thomaspoignant/go-feature-flag/commit/c80adc6b2528f72c1ba652e85a6d36e9e144067b))
+* **dependency:** Bump module modules/core 0.7.1 ([#5282](https://github.com/thomaspoignant/go-feature-flag/issues/5282)) ([5fb70cc](https://github.com/thomaspoignant/go-feature-flag/commit/5fb70cc0aa7b7142782d652a5d87e3090cdf543d))
+* **main:** release cmd/wasm 0.2.0 ([#4800](https://github.com/thomaspoignant/go-feature-flag/issues/4800)) ([1803131](https://github.com/thomaspoignant/go-feature-flag/commit/18031310a00e6261191867a50e0f2b6036066ca3))
+* **main:** release cmd/wasm 0.2.0 ([#4826](https://github.com/thomaspoignant/go-feature-flag/issues/4826)) ([19bba43](https://github.com/thomaspoignant/go-feature-flag/commit/19bba4309c1c79cf0ea489c39c4f71707f40b55f))
+* **main:** release cmd/wasm 0.2.1 ([#4940](https://github.com/thomaspoignant/go-feature-flag/issues/4940)) ([fcf7d42](https://github.com/thomaspoignant/go-feature-flag/commit/fcf7d42f0b62984373fe0c4450c0351219c10295))
+* **main:** release cmd/wasm 0.2.2 ([#5080](https://github.com/thomaspoignant/go-feature-flag/issues/5080)) ([44a10f3](https://github.com/thomaspoignant/go-feature-flag/commit/44a10f350cbcc1834e3463e60fd5bf5c84f1e7a0))
+
+
+### ⚙️ CI/CD
+
+* zizmor 3 ([#5255](https://github.com/thomaspoignant/go-feature-flag/issues/5255)) ([4b4e03a](https://github.com/thomaspoignant/go-feature-flag/commit/4b4e03a5d5d396398dd633b999c30d618f56816b))
+
 ## [0.2.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.1...cmd/wasm/v0.2.2) (2026-05-15)
 
 
