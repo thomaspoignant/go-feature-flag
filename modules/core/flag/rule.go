@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
-	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -150,7 +149,19 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 			return true
 		}
 	default:
-		return parser.Evaluate(query, mapCtx)
+		ev, err := getNikunjyEvaluator(query)
+		if err != nil {
+			slog.Error("error while parsing the nikunjy query",
+				slog.String("query", query), slog.Any("error", err))
+			return false
+		}
+		ok, err := ev.process(mapCtx)
+		if err != nil {
+			slog.Error("error while evaluating the nikunjy query",
+				slog.String("query", query), slog.Any("error", err))
+			return false
+		}
+		return ok
 	}
 }
 

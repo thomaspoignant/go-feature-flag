@@ -20,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 	wasmVersion := os.Args[1]
-	outDir := "./out/contrib"
+	outDir := "../../../out/contrib"
 
 	// Java: Bump the wasm version in the pom.xml file
 	replaceLine(
