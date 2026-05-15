@@ -311,3 +311,6 @@ replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0
 // This fix is needed to resolve semver comparison issues with prerelease versions.
 // Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
 replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+
+// TODO: remove this once https://github.com/apache/thrift/pull/2062 merges and a new version is available
+replace github.com/apache/thrift => github.com/apache/thrift v0.23.1-0.20260429145742-d2acd3c49e58
