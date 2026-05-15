@@ -17,3 +17,4 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | LandsEnd             | https://www.landsend.com                              | FF for backend and frontend apps               |
 | Grafana Labs         | https://grafana.com                                   | GOFF relay with OpenFeature clients            |
 | Miro                 | https://www.miro.com                                  | Feature flags in general with OpenFeature      | 
+| Buzzvil              | https://www.buzzvil.com/en                            | Feature flags for backend and frontend         |
