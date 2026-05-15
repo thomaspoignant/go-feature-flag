@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.0...modules/core/v0.7.1) (2026-05-15)
+
+
+### 💨 Performances
+
+* **rule:** cache parsed nikunjy targeting query evaluators ([#5174](https://github.com/thomaspoignant/go-feature-flag/issues/5174)) ([7af8fc2](https://github.com/thomaspoignant/go-feature-flag/commit/7af8fc2f16d7a357bb378bc7c67aa07b0a5dceed))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.6 to 1.41.7 ([#5225](https://github.com/thomaspoignant/go-feature-flag/issues/5225)) ([c228000](https://github.com/thomaspoignant/go-feature-flag/commit/c228000d65edf4eefcaa86b5c2eb72790b6d22e2))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.16 to 1.32.17 ([#5228](https://github.com/thomaspoignant/go-feature-flag/issues/5228)) ([977be4f](https://github.com/thomaspoignant/go-feature-flag/commit/977be4fbc82e52a3ac0a3fd6d6370d6f68dabcb7))
+* **dependencies:** Bump github.com/diegoholiveira/jsonlogic/v3 ([#5250](https://github.com/thomaspoignant/go-feature-flag/issues/5250)) ([0511cc4](https://github.com/thomaspoignant/go-feature-flag/commit/0511cc48db49adf261147225958c533ae9cc6024))
+
+
+### ⚙️ CI/CD
+
+* zizmor 3 ([#5255](https://github.com/thomaspoignant/go-feature-flag/issues/5255)) ([4b4e03a](https://github.com/thomaspoignant/go-feature-flag/commit/4b4e03a5d5d396398dd633b999c30d618f56816b))
+
 ## [0.7.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.6.1...modules/core/v0.7.0) (2026-04-29)
 
 
