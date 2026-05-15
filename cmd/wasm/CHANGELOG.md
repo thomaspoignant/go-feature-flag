@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.1...cmd/wasm/v0.2.2) (2026-05-15)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.6 to 1.41.7 ([#5225](https://github.com/thomaspoignant/go-feature-flag/issues/5225)) ([c228000](https://github.com/thomaspoignant/go-feature-flag/commit/c228000d65edf4eefcaa86b5c2eb72790b6d22e2))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.16 to 1.32.17 ([#5228](https://github.com/thomaspoignant/go-feature-flag/issues/5228)) ([977be4f](https://github.com/thomaspoignant/go-feature-flag/commit/977be4fbc82e52a3ac0a3fd6d6370d6f68dabcb7))
+* Bump go.opentelemetry.io/otel/trace from 1.42.0 to 1.43.0 ([#5079](https://github.com/thomaspoignant/go-feature-flag/issues/5079)) ([9505e0b](https://github.com/thomaspoignant/go-feature-flag/commit/9505e0bf1139244123f3d683cfefb698305601e7))
+* **dependencies:** Bump github.com/thomaspoignant/go-feature-flag/modules/core ([#5194](https://github.com/thomaspoignant/go-feature-flag/issues/5194)) ([7391512](https://github.com/thomaspoignant/go-feature-flag/commit/73915127e1d135fc3ba92ab8b8aa86939f83ae70))
+* **dependency:** Bump module modules/core 0.7.1 ([#5282](https://github.com/thomaspoignant/go-feature-flag/issues/5282)) ([5fb70cc](https://github.com/thomaspoignant/go-feature-flag/commit/5fb70cc0aa7b7142782d652a5d87e3090cdf543d))
+
+
+### ⚙️ CI/CD
+
+* zizmor 3 ([#5255](https://github.com/thomaspoignant/go-feature-flag/issues/5255)) ([4b4e03a](https://github.com/thomaspoignant/go-feature-flag/commit/4b4e03a5d5d396398dd633b999c30d618f56816b))
+
 ## [0.2.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.0...cmd/wasm/v0.2.1) (2026-03-16)
 
 
