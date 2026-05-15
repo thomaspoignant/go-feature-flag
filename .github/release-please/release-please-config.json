@@ -46,7 +46,8 @@
                 ".github/release-please",
                 "cmd/wasm",
                 "website"
-            ]
+            ],
+            "release-as": "1.53.0"
         },
         "modules/core": {
             "release-type": "go",
@@ -60,8 +61,7 @@
             "path": "cmd/wasm",
             "include-component-in-tag": true,
             "component": "cmd/wasm",
-            "changelog-path": "CHANGELOG.md",
-            "release-as": "0.2.2"
+            "changelog-path": "CHANGELOG.md"
         },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
