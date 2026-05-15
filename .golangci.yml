@@ -123,6 +123,7 @@ linters:
         - github.com/nikunjy/rules
         # fix for Athena v3 parquet query issue - https://github.com/xitongsys/parquet-go/issues/547
         - github.com/xitongsys/parquet-go
+        - github.com/apache/thrift
   exclusions:
     paths:
       - (^|/)bin($|/)
