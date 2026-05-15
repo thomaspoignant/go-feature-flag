@@ -111,6 +111,87 @@ func TestNikunjyPool_Evaluate(t *testing.T) {
 			want:    "cached",
 			wantErr: assert.NoError,
 		},
+		{
+			name: "invalid query syntax is treated as rule-not-apply",
+			rule: flag.Rule{
+				Name:            testconvert.String("pool-invalid-syntax"),
+				VariationResult: testconvert.String("on"),
+				Query:           testconvert.String(`??? not a valid query !!!`),
+			},
+			args: args{
+				key:      "user-1",
+				ctx:      ffcontext.NewEvaluationContext("user-1"),
+				flagName: "test-pool-invalid",
+			},
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
+				var target *internalerror.RuleNotApplyError
+				return assert.ErrorAs(t, err, &target)
+			},
+		},
+		{
+			name: "empty query matches any context (rule applies)",
+			rule: flag.Rule{
+				Name:            testconvert.String("pool-empty-query"),
+				VariationResult: testconvert.String("default-var"),
+				Query:           testconvert.String(""),
+			},
+			args: args{
+				key:      "anyone",
+				ctx:      ffcontext.NewEvaluationContext("anyone"),
+				flagName: "test-pool-empty",
+			},
+			want:    "default-var",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "nil query matches any context (rule applies)",
+			rule: flag.Rule{
+				Name:            testconvert.String("pool-nil-query"),
+				VariationResult: testconvert.String("nil-var"),
+			},
+			args: args{
+				key:      "anyone",
+				ctx:      ffcontext.NewEvaluationContext("anyone"),
+				flagName: "test-pool-nil",
+			},
+			want:    "nil-var",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "query referencing missing attribute does not match",
+			rule: flag.Rule{
+				Name:            testconvert.String("pool-missing-attr"),
+				VariationResult: testconvert.String("on"),
+				Query:           testconvert.String(`missingField eq "value"`),
+			},
+			args: args{
+				key:      "user-1",
+				ctx:      ffcontext.NewEvaluationContext("user-1"),
+				flagName: "test-pool-missing-attr",
+			},
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
+				var target *internalerror.RuleNotApplyError
+				return assert.ErrorAs(t, err, &target)
+			},
+		},
+		{
+			name: "invalid query returns empty variation",
+			rule: flag.Rule{
+				Name:            testconvert.String("pool-invalid-empty-var"),
+				VariationResult: testconvert.String("on"),
+				Query:           testconvert.String(`@@@ garbage`),
+			},
+			args: args{
+				key:      "user-1",
+				ctx:      ffcontext.NewEvaluationContext("user-1"),
+				flagName: "test-pool-invalid-var",
+			},
+			want: "",
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
+				var target *internalerror.RuleNotApplyError
+				return assert.ErrorAs(t, err, &target)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -216,5 +297,35 @@ func TestNikunjyPool_ConcurrentDifferentQueries(t *testing.T) {
 			assert.NoError(t, results[idx].err, "query %d goroutine %d returned an error", i, j)
 			assert.Equal(t, expected, results[idx].variation, "query %d goroutine %d returned wrong variation", i, j)
 		}
+	}
+}
+
+func TestNikunjyPool_ConcurrentInvalidQueries(t *testing.T) {
+	rule := flag.Rule{
+		Name:            testconvert.String("pool-concurrent-invalid"),
+		VariationResult: testconvert.String("on"),
+		Query:           testconvert.String(`!!! invalid syntax !!!`),
+	}
+	ctx := ffcontext.NewEvaluationContext("user-1")
+
+	const goroutines = 30
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+
+	errs := make([]error, goroutines)
+	results := make([]string, goroutines)
+
+	for i := range goroutines {
+		go func(idx int) {
+			defer wg.Done()
+			results[idx], errs[idx] = rule.Evaluate("user-1", ctx, "test-concurrent-invalid", false)
+		}(i)
+	}
+	wg.Wait()
+
+	for i := range goroutines {
+		var target *internalerror.RuleNotApplyError
+		assert.ErrorAs(t, errs[i], &target, "goroutine %d should get RuleNotApplyError", i)
+		assert.Empty(t, results[i], "goroutine %d should return empty variation", i)
 	}
 }
