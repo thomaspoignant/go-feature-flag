@@ -128,7 +128,7 @@ bump-wasm-contrib: create-out-dir ## Bump WASM version in the different contrib 
 		echo "Usage: VERSION=v1.2.3 make bump-wasm-contrib"; \
 		exit 1; \
 	fi
-	$(GOCMD) run .github/ci-scripts/bump-wasm-contrib/main.go $(VERSION)
+	cd .github/ci-scripts/bump-wasm-contrib && $(GOCMD) run main.go $(VERSION)
 
 ## Test:
 test: ## Run the tests of the project
