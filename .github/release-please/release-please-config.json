@@ -12,6 +12,10 @@
             "section": "🚀 New Features"
         },
         {
+            "type": "perf",
+            "section": "💨 Performances"
+        },
+        {
             "type": "fix",
             "section": "🐛 Bug Fixes"
         },
