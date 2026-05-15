@@ -40,13 +40,29 @@ const DefaultRuleEvaluatorCacheSize = 1000
 // SetRuleEvaluatorCacheSize wins the first CAS); afterwards SetRule mutates
 // the LRU in place via Resize. In-flight callers therefore never see the
 // pointer change underneath them.
-var nikunjyEvaluatorCache atomic.Pointer[lru.Cache[string, *pooledNikunjyEvaluator]]
+var (
+	nikunjyEvaluatorCache        atomic.Pointer[lru.Cache[string, *pooledNikunjyEvaluator]]
+	nikunjyEvaluatorCacheLogOnce sync.Once
+)
 
+// ensureNikunjyEvaluatorCache returns the shared LRU, lazily creating it on
+// first use. If lru.New ever returns an error, it returns nil instead and
+// callers must fall back to uncached parsing. The error is logged exactly
+// once so the failure mode is observable without flooding the logs.
 func ensureNikunjyEvaluatorCache() *lru.Cache[string, *pooledNikunjyEvaluator] {
 	if c := nikunjyEvaluatorCache.Load(); c != nil {
 		return c
 	}
-	c, _ := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
+	c, err := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
+	if err != nil {
+		nikunjyEvaluatorCacheLogOnce.Do(func() {
+			slog.ErrorContext(context.Background(),
+				"failed to initialize nikunjy evaluator cache; falling back to uncached query parsing",
+				slog.Any("error", err),
+			)
+		})
+		return nil
+	}
 	if nikunjyEvaluatorCache.CompareAndSwap(nil, c) {
 		return c
 	}
@@ -115,6 +131,10 @@ func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, er
 
 func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 	cache := ensureNikunjyEvaluatorCache()
+	if cache == nil {
+		// Cache init failed; behave as if cache was never enabled.
+		return newPooledNikunjyEvaluator(query)
+	}
 	if v, ok := cache.Get(query); ok {
 		return v, nil
 	}
@@ -122,8 +142,6 @@ func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Re-fetch in case the cache was swapped concurrently by SetRuleEvaluatorCacheSize.
-	cache = ensureNikunjyEvaluatorCache()
 	if existing, ok, _ := cache.PeekOrAdd(query, p); ok {
 		return existing, nil
 	}
