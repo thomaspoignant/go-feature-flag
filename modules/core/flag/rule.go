@@ -143,10 +143,9 @@ func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 	if err != nil {
 		return nil, err
 	}
-	if existing, ok, _ := cache.PeekOrAdd(query, p); ok {
+	if existing, _, _ := cache.PeekOrAdd(query, p); existing != nil {
 		return existing, nil
 	}
-	return p, nil
 }
 
 type QueryFormat = string
