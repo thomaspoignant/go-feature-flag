@@ -19,8 +19,9 @@
 
 The GO Feature Flag Command Line is a CLI tool to interact with GO Feature Flag in your terminal.  
 For now it supports the following commands:
-- `evaluate` to evaluate feature flags directly in your terminal
+- `evaluate` to evaluate feature flags directly in your terminal.
 - `lint` to validate a configuration file format.
+- `generate manifest` to create an OpenFeature flag manifest.
 
 # Quick reference
 
