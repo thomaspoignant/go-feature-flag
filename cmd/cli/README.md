@@ -7,6 +7,7 @@ For now it supports the following commands:
 
 - `evaluate` to evaluate feature flags directly in your terminal
 - `lint` to validate a configuration file format.
+- `generate manifest` to create an OpenFeature flag manifest.
 
 ## How to install the cli
 
