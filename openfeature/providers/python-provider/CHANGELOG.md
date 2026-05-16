@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.0.0...openfeature/providers/python-provider/v1.0.1) (2026-05-16)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.6 to 1.41.7 ([#5225](https://github.com/thomaspoignant/go-feature-flag/issues/5225)) ([c228000](https://github.com/thomaspoignant/go-feature-flag/commit/c228000d65edf4eefcaa86b5c2eb72790b6d22e2))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.16 to 1.32.17 ([#5228](https://github.com/thomaspoignant/go-feature-flag/issues/5228)) ([977be4f](https://github.com/thomaspoignant/go-feature-flag/commit/977be4fbc82e52a3ac0a3fd6d6370d6f68dabcb7))
+* Bump go.opentelemetry.io/otel/trace from 1.42.0 to 1.43.0 ([#5079](https://github.com/thomaspoignant/go-feature-flag/issues/5079)) ([9505e0b](https://github.com/thomaspoignant/go-feature-flag/commit/9505e0bf1139244123f3d683cfefb698305601e7))
+* Bump pygments in /openfeature/providers/python-provider ([#5236](https://github.com/thomaspoignant/go-feature-flag/issues/5236)) ([1e23b31](https://github.com/thomaspoignant/go-feature-flag/commit/1e23b31570acfa3d07fa0b46057e12336a4c5329))
+* **python-provider:** bump dev dependencies ([#5238](https://github.com/thomaspoignant/go-feature-flag/issues/5238)) ([963261c](https://github.com/thomaspoignant/go-feature-flag/commit/963261c045f8ac57ca4f237d71c551ca1f59367e))
+* **python-provider:** drop Python 3.9 support ([#5237](https://github.com/thomaspoignant/go-feature-flag/issues/5237)) ([0e0ff41](https://github.com/thomaspoignant/go-feature-flag/commit/0e0ff41dab63d4044c0673a48994925c1489e85f))
+* Update openfeature-sdk requirement ([#5242](https://github.com/thomaspoignant/go-feature-flag/issues/5242)) ([d0da49b](https://github.com/thomaspoignant/go-feature-flag/commit/d0da49be0dbeeaf192bfcbc2b9c3e7b8b2b63883))
+
+
+### 📚 Documentation
+
+* update provider documentation for in-process evaluation and capabilities ([#5060](https://github.com/thomaspoignant/go-feature-flag/issues/5060)) ([e6864ce](https://github.com/thomaspoignant/go-feature-flag/commit/e6864ce3c152c66842ebb63cb40262d343a3af60))
+
+
+### ⚙️ CI/CD
+
+* zizmor 3 ([#5255](https://github.com/thomaspoignant/go-feature-flag/issues/5255)) ([4b4e03a](https://github.com/thomaspoignant/go-feature-flag/commit/4b4e03a5d5d396398dd633b999c30d618f56816b))
+
 ## [1.0.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v0.5.0...openfeature/providers/python-provider/v1.0.0) (2026-03-31)
 
 

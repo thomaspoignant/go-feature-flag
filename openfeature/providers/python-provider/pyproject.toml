@@ -1,6 +1,6 @@
 [project]
 name = "gofeatureflag-python-provider"
-version = "1.0.0"
+version = "1.0.1"
 wasm_version = "0.2.0"
 description = "GO Feature Flag provider for OpenFeature"
 license = "Apache-2.0"
