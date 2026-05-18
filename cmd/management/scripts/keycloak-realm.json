@@ -1,0 +1,35 @@
+{
+  "realm": "goff",
+  "enabled": true,
+  "registrationAllowed": false,
+  "users": [
+    {
+      "username": "admin@local",
+      "email": "admin@local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Local",
+      "credentials": [
+        { "type": "password", "value": "admin", "temporary": false }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "goff-mgmt",
+      "secret": "goff-mgmt-secret",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8080/auth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:8080"
+      ]
+    }
+  ]
+}

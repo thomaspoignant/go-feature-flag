@@ -1,0 +1,1190 @@
+basePath: /api/v1
+definitions:
+  model.APIResponse:
+    properties:
+      data: {}
+      errors:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  model.AddMemberRequest:
+    properties:
+      email:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+    type: object
+  model.AuditEntry:
+    properties:
+      action:
+        type: string
+      actorEmail:
+        type: string
+      actorUserId:
+        type: string
+      after:
+        type: object
+      before:
+        type: object
+      flagId:
+        type: string
+      flagsetId:
+        type: string
+      id:
+        type: integer
+      metadata:
+        type: object
+      occurredAt:
+        type: string
+      targetId:
+        type: string
+      targetType:
+        type: string
+      teamId:
+        type: string
+    type: object
+  model.CreateAPIKeyResponse:
+    properties:
+      apiKey:
+        type: string
+      keyHash:
+        type: string
+    type: object
+  model.CreateFlagRequest:
+    type: object
+  model.CreateFlagsetRequest:
+    properties:
+      description:
+        type: string
+      exporters:
+        type: object
+      fileFormat:
+        type: string
+      name:
+        type: string
+      notifiers:
+        type: object
+      pollingIntervalMs:
+        type: integer
+      retrievers:
+        type: object
+    type: object
+  model.CreateTeamRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  model.DisableFlagRequest:
+    properties:
+      disabled:
+        type: boolean
+    type: object
+  model.Flag:
+    properties:
+      createdAt:
+        type: string
+      currentVersion:
+        type: integer
+      currentVersionId:
+        type: string
+      disabled:
+        type: boolean
+      flagsetId:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      payload:
+        type: object
+      updatedAt:
+        type: string
+    type: object
+  model.FlagListItem:
+    properties:
+      currentVersion:
+        type: integer
+      disabled:
+        type: boolean
+      flagsetId:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.FlagVersion:
+    properties:
+      comment:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      createdByName:
+        type: string
+      flagId:
+        type: string
+      id:
+        type: string
+      payload:
+        type: object
+      versionNumber:
+        type: integer
+    type: object
+  model.Flagset:
+    properties:
+      apiKeyCount:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      exporters:
+        type: object
+      fileFormat:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      notifiers:
+        type: object
+      pollingIntervalMs:
+        type: integer
+      retrievers:
+        type: object
+      teamId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.MeResponse:
+    properties:
+      membership:
+        items:
+          $ref: '#/definitions/model.TeamMembership'
+        type: array
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.PaginatedResponse-model_AuditEntry:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.AuditEntry'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  model.PaginatedResponse-model_FlagListItem:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.FlagListItem'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  model.PaginatedResponse-model_FlagVersion:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.FlagVersion'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  model.Role:
+    enum:
+    - admin
+    - editor
+    - viewer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleEditor
+    - RoleViewer
+  model.RollbackRequest:
+    properties:
+      comment:
+        type: string
+    type: object
+  model.Team:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.TeamMember:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+      teamId:
+        type: string
+      userId:
+        type: string
+    type: object
+  model.TeamMembership:
+    properties:
+      role:
+        $ref: '#/definitions/model.Role'
+      teamId:
+        type: string
+      teamName:
+        type: string
+    type: object
+  model.UpdateFlagRequest:
+    type: object
+  model.UpdateFlagsetRequest:
+    properties:
+      description:
+        type: string
+      exporters:
+        type: object
+      fileFormat:
+        type: string
+      name:
+        type: string
+      notifiers:
+        type: object
+      pollingIntervalMs:
+        type: integer
+      retrievers:
+        type: object
+    type: object
+  model.UpdateMemberRequest:
+    properties:
+      role:
+        $ref: '#/definitions/model.Role'
+    type: object
+  model.UpdateTeamRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  model.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      isSuperAdmin:
+        type: boolean
+      lastLoginAt:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Source-of-truth API for managing GO Feature Flag flagsets, flags, teams,
+    and audit history.
+  title: GO Feature Flag Management API
+  version: 0.1.0
+paths:
+  /audit:
+    get:
+      parameters:
+      - description: filter by team id
+        in: query
+        name: teamId
+        type: string
+      - description: filter by flagset id
+        in: query
+        name: flagsetId
+        type: string
+      - description: filter by flag id
+        in: query
+        name: flagId
+        type: string
+      - description: filter by actor user id
+        in: query
+        name: actorId
+        type: string
+      - description: filter by action (e.g. flag.create)
+        in: query
+        name: action
+        type: string
+      - description: ISO-8601 lower bound (inclusive)
+        in: query
+        name: from
+        type: string
+      - description: ISO-8601 upper bound (inclusive)
+        in: query
+        name: to
+        type: string
+      - default: 1
+        description: page
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PaginatedResponse-model_AuditEntry'
+              type: object
+      summary: List audit log entries with filters
+      tags:
+      - audit
+  /auth/callback:
+    get:
+      parameters:
+      - description: OIDC authorization code
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: OIDC state
+        in: query
+        name: state
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Found
+      summary: OIDC callback
+      tags:
+      - auth
+  /auth/login:
+    get:
+      responses:
+        "302":
+          description: Found
+      summary: Start OIDC login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Logout
+      tags:
+      - auth
+  /auth/me:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.MeResponse'
+              type: object
+      summary: Get current user + memberships
+      tags:
+      - auth
+  /flags/{id}:
+    delete:
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Soft-delete a flag (audited; versions remain)
+      tags:
+      - flags
+    get:
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flag'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Get a flag with its current version payload
+      tags:
+      - flags
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: new payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateFlagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flag'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Replace flag payload (creates a new version)
+      tags:
+      - flags
+  /flags/{id}/disable:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: disabled state
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.DisableFlagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Toggle the disabled state of a flag (no new version)
+      tags:
+      - flags
+  /flags/{id}/versions:
+    get:
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: 1
+        description: page
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PaginatedResponse-model_FlagVersion'
+              type: object
+      summary: List versions of a flag
+      tags:
+      - versions
+  /flags/{id}/versions/{n}:
+    get:
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: version number
+        in: path
+        name: "n"
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.FlagVersion'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Get a specific flag version
+      tags:
+      - versions
+  /flags/{id}/versions/{n}/rollback:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: flag id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: version number to roll back to
+        in: path
+        name: "n"
+        required: true
+        type: integer
+      - description: optional comment
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/model.RollbackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.FlagVersion'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Roll back to a previous version (creates a new current version)
+      tags:
+      - versions
+  /flagsets/{flagsetId}/flags:
+    get:
+      parameters:
+      - description: flagset id
+        in: path
+        name: flagsetId
+        required: true
+        type: string
+      - description: name contains filter
+        in: query
+        name: name
+        type: string
+      - description: filter disabled flags
+        in: query
+        name: disabled
+        type: boolean
+      - default: 1
+        description: page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PaginatedResponse-model_FlagListItem'
+              type: object
+      summary: List flags of a flagset
+      tags:
+      - flags
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: flagset id
+        in: path
+        name: flagsetId
+        required: true
+        type: string
+      - description: flag payload (GOFF DTO)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateFlagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flag'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Create a flag in a flagset (creates version 1)
+      tags:
+      - flags
+  /flagsets/{id}:
+    delete:
+      parameters:
+      - description: flagset id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Delete a flagset
+      tags:
+      - flagsets
+    get:
+      parameters:
+      - description: flagset id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flagset'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Get a flagset
+      tags:
+      - flagsets
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: flagset id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateFlagsetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flagset'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Update a flagset
+      tags:
+      - flagsets
+  /flagsets/{id}/api-keys:
+    post:
+      parameters:
+      - description: flagset id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.CreateAPIKeyResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Create a new API key for a flagset (raw key returned ONCE)
+      tags:
+      - flagsets
+  /flagsets/{id}/api-keys/{keyHash}:
+    delete:
+      parameters:
+      - description: flagset id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: key hash
+        in: path
+        name: keyHash
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Revoke a flagset API key by hash
+      tags:
+      - flagsets
+  /teams:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Team'
+                  type: array
+              type: object
+      summary: List teams visible to the user
+      tags:
+      - teams
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateTeamRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Team'
+              type: object
+      summary: Create a team (super admin only)
+      tags:
+      - teams
+  /teams/{id}:
+    delete:
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Delete a team (super admin only)
+      tags:
+      - teams
+    get:
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Team'
+              type: object
+      summary: Get team
+      tags:
+      - teams
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Team'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Update a team
+      tags:
+      - teams
+  /teams/{id}/members:
+    get:
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.TeamMember'
+                  type: array
+              type: object
+      summary: List team members
+      tags:
+      - teams
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: member to add
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.TeamMember'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Add a member to a team
+      tags:
+      - teams
+  /teams/{id}/members/{uid}:
+    delete:
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: user id
+        in: path
+        name: uid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Remove a member from a team
+      tags:
+      - teams
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: team id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: user id
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: new role
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Update a team member's role
+      tags:
+      - teams
+  /teams/{teamId}/flagsets:
+    get:
+      parameters:
+      - description: team id
+        in: path
+        name: teamId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Flagset'
+                  type: array
+              type: object
+      summary: List flagsets of a team
+      tags:
+      - flagsets
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team id
+        in: path
+        name: teamId
+        required: true
+        type: string
+      - description: flagset
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateFlagsetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Flagset'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Create a flagset under a team
+      tags:
+      - flagsets
+swagger: "2.0"

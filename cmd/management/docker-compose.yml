@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: goff-mgmt-postgres
+    environment:
+      POSTGRES_DB: goff_mgmt
+      POSTGRES_USER: goff
+      POSTGRES_PASSWORD: goff
+    ports:
+      - "5432:5432"
+    volumes:
+      - goff_mgmt_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goff -d goff_mgmt"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: goff-mgmt-keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./scripts/keycloak-realm.json:/opt/keycloak/data/import/realm.json:ro
+
+volumes:
+  goff_mgmt_pg:
