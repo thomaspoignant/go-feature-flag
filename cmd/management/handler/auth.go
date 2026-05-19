@@ -77,7 +77,11 @@ func (h *AuthHandler) Callback(c echo.Context) error {
 		Domain:   h.cfg.Auth.CookieDomain,
 		Expires:  time.Now().Add(h.cfg.Auth.SessionMaxAge),
 	})
-	return c.Redirect(http.StatusFound, "/")
+	dest := h.cfg.Auth.PostLoginRedirect
+	if dest == "" {
+		dest = "/"
+	}
+	return c.Redirect(http.StatusFound, dest)
 }
 
 // Logout godoc

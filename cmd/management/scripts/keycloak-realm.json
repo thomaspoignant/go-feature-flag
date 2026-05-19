@@ -11,7 +11,26 @@
       "firstName": "Admin",
       "lastName": "Local",
       "credentials": [
-        { "type": "password", "value": "admin", "temporary": false }
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "user@local",
+      "email": "user@local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "User",
+      "lastName": "Local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user",
+          "temporary": false
+        }
       ]
     }
   ],
@@ -25,10 +44,10 @@
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "redirectUris": [
-        "http://localhost:8080/auth/callback"
+        "http://goff.local:8080/auth/callback"
       ],
       "webOrigins": [
-        "http://localhost:8080"
+        "http://goff.local:8080"
       ]
     }
   ]

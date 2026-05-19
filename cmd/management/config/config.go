@@ -32,11 +32,12 @@ type OIDCConfig struct {
 }
 
 type AuthConfig struct {
-	JWTSecret     string        `koanf:"jwtSecret"`
-	SessionMaxAge time.Duration `koanf:"sessionMaxAge"`
-	CookieDomain  string        `koanf:"cookieDomain"`
-	CookieSecure  bool          `koanf:"cookieSecure"`
-	AdminEmails   []string      `koanf:"adminEmails"`
+	JWTSecret         string        `koanf:"jwtSecret"`
+	SessionMaxAge     time.Duration `koanf:"sessionMaxAge"`
+	CookieDomain      string        `koanf:"cookieDomain"`
+	CookieSecure      bool          `koanf:"cookieSecure"`
+	AdminEmails       []string      `koanf:"adminEmails"`
+	PostLoginRedirect string        `koanf:"postLoginRedirect"`
 }
 
 type LogConfig struct {
@@ -60,8 +61,9 @@ func Default() Config {
 			Scopes: []string{"openid", "profile", "email"},
 		},
 		Auth: AuthConfig{
-			SessionMaxAge: 24 * time.Hour,
-			CookieSecure:  true,
+			SessionMaxAge:     24 * time.Hour,
+			CookieSecure:      true,
+			PostLoginRedirect: "/",
 		},
 		Log: LogConfig{
 			Level:  "info",

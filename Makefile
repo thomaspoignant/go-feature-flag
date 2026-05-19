@@ -2,7 +2,7 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
-ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
+ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./cmd/management ./
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
@@ -23,7 +23,7 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-modules build-relayproxy build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
+build: build-modules build-relayproxy build-editor-api build-jsonschema-generator build-cli build-management  ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
@@ -34,6 +34,30 @@ build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
+
+build-management: create-out-dir ## Build the management API in out/bin/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/management ./cmd/management/
+
+test-management: ## Run management API tests
+	cd ./cmd/management && $(GOWORK_ENV) $(GOTEST) ./...
+
+swagger-management: ## Regenerate swagger docs for management API
+	cd ./cmd/management && swag init -g main.go -o docs
+
+migrate-management-up: ## Apply management API migrations (requires goose + GOFF_MGMT_DB_URL)
+	goose -dir ./cmd/management/db/migrations postgres "$$GOFF_MGMT_DB_URL" up
+
+migrate-management-down: ## Roll back the last management API migration
+	goose -dir ./cmd/management/db/migrations postgres "$$GOFF_MGMT_DB_URL" down
+
+management-infra-up: ## Start local Postgres + Keycloak for the management API
+	cd ./cmd/management && docker compose up -d
+
+management-infra-down: ## Stop local Postgres + Keycloak for the management API
+	cd ./cmd/management && docker compose down -v
+
+dev-management: ## Launch management API locally (infra + migrate + run)
+	./cmd/management/scripts/dev.sh
 
 build-editor-api: create-out-dir ## Build the editor api in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/editor-api ./cmd/editor/

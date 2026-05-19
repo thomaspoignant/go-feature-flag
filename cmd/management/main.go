@@ -76,18 +76,20 @@ func run() error {
 		return err
 	}
 	teamSvc := service.NewTeamService(teamRepo, userRepo, auditRepo)
+	onboardingSvc := service.NewOnboardingService(teamRepo, auditRepo)
 	flagsetSvc := service.NewFlagsetService(flagsetRepo, auditRepo)
 	flagSvc := service.NewFlagService(db, flagRepo, versionRepo, flagsetRepo, auditRepo)
 	versionSvc := service.NewVersionService(db, flagRepo, versionRepo, flagsetRepo, auditRepo)
 	auditSvc := service.NewAuditService(auditRepo)
 
 	handlers := api.Handlers{
-		Auth:     handler.NewAuthHandler(*cfg, authSvc, userRepo, teamSvc),
-		Teams:    handler.NewTeamHandler(teamSvc),
-		Flagsets: handler.NewFlagsetHandler(flagsetSvc),
-		Flags:    handler.NewFlagHandler(flagSvc),
-		Versions: handler.NewVersionHandler(versionSvc),
-		Audit:    handler.NewAuditHandler(auditSvc),
+		Auth:       handler.NewAuthHandler(*cfg, authSvc, userRepo, teamSvc),
+		Teams:      handler.NewTeamHandler(teamSvc),
+		Flagsets:   handler.NewFlagsetHandler(flagsetSvc),
+		Flags:      handler.NewFlagHandler(flagSvc),
+		Versions:   handler.NewVersionHandler(versionSvc),
+		Audit:      handler.NewAuditHandler(auditSvc),
+		Onboarding: handler.NewOnboardingHandler(onboardingSvc),
 	}
 	services := api.Services{Auth: authSvc, Teams: teamSvc, Flagsets: flagsetSvc, Flags: flagSvc}
 

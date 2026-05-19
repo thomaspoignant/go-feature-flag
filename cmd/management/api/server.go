@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	emw "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -14,12 +16,13 @@ import (
 )
 
 type Handlers struct {
-	Auth     *handler.AuthHandler
-	Teams    *handler.TeamHandler
-	Flagsets *handler.FlagsetHandler
-	Flags    *handler.FlagHandler
-	Versions *handler.VersionHandler
-	Audit    *handler.AuditHandler
+	Auth       *handler.AuthHandler
+	Teams      *handler.TeamHandler
+	Flagsets   *handler.FlagsetHandler
+	Flags      *handler.FlagHandler
+	Versions   *handler.VersionHandler
+	Audit      *handler.AuditHandler
+	Onboarding *handler.OnboardingHandler
 }
 
 type Services struct {
@@ -35,9 +38,17 @@ func New(cfg config.Config, log *zap.Logger, h Handlers, s Services) *echo.Echo 
 	e.HidePort = true
 
 	e.Use(emw.Recover())
+	// AllowCredentials requires a specific origin (the CORS spec forbids wildcard
+	// with credentials), so echo the request Origin back. Suitable for local dev;
+	// tighten to an explicit allow-list in production.
 	e.Use(emw.CORSWithConfig(emw.CORSConfig{
-		AllowOrigins:     []string{"*"},
+		AllowOriginFunc:  func(origin string) (bool, error) { return true, nil },
 		AllowCredentials: true,
+		AllowMethods: []string{
+			http.MethodGet, http.MethodHead, http.MethodPost,
+			http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions,
+		},
+		AllowHeaders: []string{"Content-Type", "Accept", "Authorization"},
 	}))
 	e.Use(middleware.ZapLogger(log))
 
@@ -58,6 +69,7 @@ func New(cfg config.Config, log *zap.Logger, h Handlers, s Services) *echo.Echo 
 	api := e.Group("/api/v1", auth)
 	api.GET("/auth/me", h.Auth.Me)
 
+	registerOnboardingRoutes(api, h)
 	registerTeamRoutes(api, h, s)
 	registerFlagsetRoutes(api, h, s)
 	registerFlagRoutes(api, h, s)

@@ -98,8 +98,8 @@ fi
 
 # --- run ---
 echo "==> Starting API on :${GOFF_MGMT_SERVER_PORT:-8080}"
-echo "    Swagger:  http://localhost:${GOFF_MGMT_SERVER_PORT:-8080}/swagger/index.html"
-echo "    Login:    http://localhost:${GOFF_MGMT_SERVER_PORT:-8080}/auth/login"
+echo "    Swagger:  http://goff.local:${GOFF_MGMT_SERVER_PORT:-8080}/swagger/index.html"
+echo "    Login:    http://goff.local:${GOFF_MGMT_SERVER_PORT:-8080}/auth/login"
 echo
 
 if [ "$BUILD_ONLY" = "1" ]; then

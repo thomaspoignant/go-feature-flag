@@ -53,17 +53,23 @@ func Load(flags *pflag.FlagSet) (*Config, error) {
 	return &out, nil
 }
 
+// structToMap returns default values keyed using the same lowercase scheme
+// produced by the env-var callback (see Load). Keeping both sources on a
+// single key-casing convention avoids koanf storing duplicate entries
+// ("auth.cookieSecure" vs "auth.cookiesecure") that mapstructure would then
+// resolve non-deterministically.
 func structToMap(c Config) map[string]any {
 	return map[string]any{
 		"server.port":            c.Server.Port,
-		"server.shutdownTimeout": c.Server.ShutdownTimeout,
-		"server.enableSwagger":   c.Server.EnableSwagger,
-		"db.maxConns":            c.DB.MaxConns,
-		"db.minConns":            c.DB.MinConns,
-		"db.connMaxLifetime":     c.DB.ConnMaxLifetime,
+		"server.shutdowntimeout": c.Server.ShutdownTimeout,
+		"server.enableswagger":   c.Server.EnableSwagger,
+		"db.maxconns":            c.DB.MaxConns,
+		"db.minconns":            c.DB.MinConns,
+		"db.connmaxlifetime":     c.DB.ConnMaxLifetime,
 		"oidc.scopes":            c.OIDC.Scopes,
-		"auth.sessionMaxAge":     c.Auth.SessionMaxAge,
-		"auth.cookieSecure":      c.Auth.CookieSecure,
+		"auth.sessionmaxage":     c.Auth.SessionMaxAge,
+		"auth.cookiesecure":      c.Auth.CookieSecure,
+		"auth.postloginredirect": c.Auth.PostLoginRedirect,
 		"log.level":              c.Log.Level,
 		"log.format":             c.Log.Format,
 	}
