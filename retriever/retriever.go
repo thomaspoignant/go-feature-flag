@@ -13,6 +13,17 @@ type Retriever interface {
 	Retrieve(ctx context.Context) ([]byte, error)
 }
 
+// FormatHinter is an optional interface a Retriever can implement to declare
+// the format of the bytes it returns from Retrieve. When implemented, the
+// manager uses this hint to pick the right parser instead of the global
+// FileFormat configuration, avoiding unnecessary YAML parsing of JSON data.
+//
+// Returned values follow the same convention as ffclient.Config.FileFormat:
+// "json", "yaml", or "toml" (case-insensitive).
+type FormatHinter interface {
+	OutputFormat() string
+}
+
 // InitializableRetrieverLegacy is an extended version of the retriever that can be initialized and shutdown.
 type InitializableRetrieverLegacy interface {
 	CommonInitializableRetriever
