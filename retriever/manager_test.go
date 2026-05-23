@@ -172,6 +172,22 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 	}
 }
 
+// formatHintingRetriever is a local test double that implements
+// retriever.FormatHinter so the test can verify that the manager honors the
+// retriever-declared output format.
+type formatHintingRetriever struct {
+	format  string
+	content []byte
+}
+
+func (r *formatHintingRetriever) Retrieve(_ context.Context) ([]byte, error) {
+	return r.content, nil
+}
+
+func (r *formatHintingRetriever) OutputFormat() string {
+	return r.format
+}
+
 // TestManagerInit_FormatHinterOverridesGlobalFileFormat verifies that a
 // Retriever implementing FormatHinter causes the manager to parse its output
 // with the declared format, overriding the global ManagerConfig.FileFormat.
@@ -213,7 +229,7 @@ variation = "A"
 			logger := fflog.FFLogger{}
 			cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
 
-			r := mockretriever.NewFormatHintingRetriever("hinter", tt.hintFormat, tomlContent)
+			r := &formatHintingRetriever{format: tt.hintFormat, content: tomlContent}
 			config := retriever.ManagerConfig{
 				FileFormat:      tt.globalFmt,
 				PollingInterval: 0,
