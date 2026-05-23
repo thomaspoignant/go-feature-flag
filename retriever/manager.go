@@ -310,7 +310,13 @@ func retrieve(ctx context.Context, retrievers []Retriever, fileFormat string) (m
 				resultsChan <- Results{Error: err, Value: nil, Index: index}
 				return
 			}
-			convertedFlag, err := cache.ConvertToFlagStruct(rawValue, format)
+			resolvedFormat := format
+			if hinter, ok := r.(FormatHinter); ok {
+				if hint := hinter.OutputFormat(); hint != "" {
+					resolvedFormat = hint
+				}
+			}
+			convertedFlag, err := cache.ConvertToFlagStruct(rawValue, resolvedFormat)
 			resultsChan <- Results{Error: err, Value: convertedFlag, Index: index}
 		}(r, fileFormat, index, ctx)
 	}
