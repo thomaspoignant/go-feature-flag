@@ -78,15 +78,15 @@ fail if any non-FIPS-approved cryptographic algorithm is used:
 GODEBUG=fips140=only ./out/bin/relayproxy-fips --config=/goff/config.yaml
 ```
 
-## Recommended hardening for FedRAMP deployments
+## Recommended hardening for FedRAMP deployments (Helm)
 
-The FIPS build covers cryptography, but a hardened deployment should also tighten the
-container's runtime security context. The [Helm chart](./deployment/helm) exposes
-`securityContext` options that are commented out by default — for FedRAMP-style boundaries
-we recommend enabling at least:
+If you deploy the relay proxy with our [Helm chart](./deployment/helm), the FIPS build
+covers cryptography but a hardened deployment should also tighten the container's runtime
+security context. The chart exposes `securityContext` options that are commented out by
+default — for FedRAMP-style boundaries we recommend enabling at least:
 
 ```yaml
-# values.yaml
+# values.yaml (Helm)
 securityContext:
   runAsNonRoot: true
   readOnlyRootFilesystem: true
