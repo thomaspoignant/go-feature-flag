@@ -24,6 +24,9 @@ jobs:
           check-latest: true
           cache: false
       - run: make build
+      # Smoke-test the FIPS variant so a dependency that breaks under GOFIPS140
+      # is caught in CI rather than at release time.
+      - run: make build-relayproxy-fips
   Lint:
     runs-on: ubuntu-latest
     permissions:

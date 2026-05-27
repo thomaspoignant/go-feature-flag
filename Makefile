@@ -32,6 +32,10 @@ create-out-dir:
 build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy ./cmd/relayproxy/
 
+build-relayproxy-fips: create-out-dir ## Build the relay proxy in FIPS 140-3 mode in out/bin/
+	# Keep GOFIPS140 in sync with the go-feature-flag-fips build in .goreleaser.yaml.
+	CGO_ENABLED=0 GOFIPS140=v1.0.0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy-fips ./cmd/relayproxy/
+
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
 
