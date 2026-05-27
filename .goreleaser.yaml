@@ -66,10 +66,11 @@ builds:
   # default GODEBUG=fips140=on into the binary so it runs in FIPS mode out of the box.
   - id: go-feature-flag-fips
     main: ./cmd/relayproxy
-    binary: go-feature-flag
+    binary: go-feature-flag-fips
     env:
       - CGO_ENABLED=0
-      # Keep this version in sync with the `build-relayproxy-fips` target in the Makefile.
+      # Single source of truth for the FIPS module version: the `build-relayproxy-fips`
+      # Makefile target reads it from this line.
       - GOFIPS140=v1.0.0
     goos:
       - linux
@@ -310,7 +311,7 @@ dockers_v2:
   - id: go-feature-flag-fips
     ids:
       - go-feature-flag-fips
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserFips
     images:
       - gofeatureflag/go-feature-flag
     tags:
