@@ -310,13 +310,7 @@ func retrieve(ctx context.Context, retrievers []Retriever, fileFormat string) (m
 				resultsChan <- Results{Error: err, Value: nil, Index: index}
 				return
 			}
-			resolvedFormat := format
-			if hinter, ok := r.(FormatHinter); ok {
-				if hint := hinter.OutputFormat(); hint != "" {
-					resolvedFormat = hint
-				}
-			}
-			convertedFlag, err := cache.ConvertToFlagStruct(rawValue, resolvedFormat)
+			convertedFlag, err := cache.ConvertToFlagStruct(rawValue, getOutputFormat(r, format))
 			resultsChan <- Results{Error: err, Value: convertedFlag, Index: index}
 		}(r, fileFormat, index, ctx)
 	}
@@ -337,4 +331,16 @@ func retrieve(ctx context.Context, retrievers []Retriever, fileFormat string) (m
 		}
 	}
 	return newFlags, nil
+}
+
+// getOutputFormat returns the output format of the retriever.
+// If the retriever implements the FormatHinter interface, it will return the output format declared by the retriever.
+// Otherwise, it will return the file format passed as parameter.
+func getOutputFormat(r Retriever, fileFormat string) string {
+	if hinter, ok := r.(FormatHinter); ok {
+		if hint := hinter.OutputFormat(); hint != "" {
+			return hint
+		}
+	}
+	return fileFormat
 }
