@@ -34,7 +34,7 @@ If you need FIPS 140 validated cryptography (e.g. FedRAMP), use the FIPS-tagged 
 ```shell
 docker pull gofeatureflag/go-feature-flag:fips
 ```
-See [FIPS 140-3 mode](./fips) for details on running and verifying it.
+See [FIPS 140-3 mode](./advanced_usage#-fips-140-3-mode) for details on running and verifying it.
 
 ## Summary
 Once **GO Feature Flag** is installed, you can start using it within your application by connecting your OpenFeature provider to it.
