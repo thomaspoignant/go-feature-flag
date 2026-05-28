@@ -171,3 +171,78 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 		})
 	}
 }
+
+// formatHintingRetriever is a local test double that implements
+// retriever.FormatHinter so the test can verify that the manager honors the
+// retriever-declared output format.
+type formatHintingRetriever struct {
+	format  string
+	content []byte
+}
+
+func (r *formatHintingRetriever) Retrieve(_ context.Context) ([]byte, error) {
+	return r.content, nil
+}
+
+func (r *formatHintingRetriever) OutputFormat() string {
+	return r.format
+}
+
+// TestManagerInit_FormatHinterOverridesGlobalFileFormat verifies that a
+// Retriever implementing FormatHinter causes the manager to parse its output
+// with the declared format, overriding the global ManagerConfig.FileFormat.
+//
+// The TOML payload below would fail to parse as YAML (the configured global
+// format), so a passing Init proves the hinter took effect.
+func TestManagerInit_FormatHinterOverridesGlobalFileFormat(t *testing.T) {
+	tomlContent := []byte(`["test-flag"]
+[test-flag.variations]
+A = true
+B = false
+[test-flag.defaultRule]
+variation = "A"
+`)
+
+	tests := []struct {
+		name        string
+		hintFormat  string
+		globalFmt   string
+		expectError bool
+	}{
+		{
+			name:        "FormatHinter toml overrides global yaml",
+			hintFormat:  "toml",
+			globalFmt:   "yaml",
+			expectError: false,
+		},
+		{
+			name:        "Empty FormatHinter falls back to global yaml and fails on toml content",
+			hintFormat:  "",
+			globalFmt:   "yaml",
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			logger := fflog.FFLogger{}
+			cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
+
+			r := &formatHintingRetriever{format: tt.hintFormat, content: tomlContent}
+			config := retriever.ManagerConfig{
+				FileFormat:      tt.globalFmt,
+				PollingInterval: 0,
+			}
+			manager := retriever.NewManager(config, []retriever.Retriever{r}, cacheManager, &logger)
+			err := manager.Init(ctx)
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			_ = manager.Shutdown(ctx)
+		})
+	}
+}
