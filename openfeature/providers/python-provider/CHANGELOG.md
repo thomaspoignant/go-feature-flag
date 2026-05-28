@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.0.1...openfeature/providers/python-provider/v1.1.0) (2026-05-26)
+
+
+### 🚀 New Features
+
+* Bump WASM module to 0.2.2 ([#5323](https://github.com/thomaspoignant/go-feature-flag/issues/5323)) ([cfcfc3c](https://github.com/thomaspoignant/go-feature-flag/commit/cfcfc3c586f5bb9e6673fc499745d2bca1fdbc4b))
+
+
+### 🔧 Chores
+
+* Bump golang.org/x/net from 0.53.0 to 0.54.0 ([#5296](https://github.com/thomaspoignant/go-feature-flag/issues/5296)) ([b31655a](https://github.com/thomaspoignant/go-feature-flag/commit/b31655ac1ab8e12d6f9284b2f725d1cd74b80c3b))
+
 ## [1.0.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.0.0...openfeature/providers/python-provider/v1.0.1) (2026-05-16)
 
 
