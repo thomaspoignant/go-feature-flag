@@ -84,6 +84,9 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_SIGNING_KEY }}
           passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
 
+      - name: Load FIPS module version
+        run: echo "GOFIPS140=$(cat .fips-version | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:

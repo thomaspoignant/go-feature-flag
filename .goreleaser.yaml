@@ -62,16 +62,16 @@ builds:
         goarch: arm
 
   # FIPS 140-3 build of the relay proxy.
-  # Built with GOFIPS140=v1.0.0 (Go Cryptographic Module, CMVP validated), which bakes a
-  # default GODEBUG=fips140=on into the binary so it runs in FIPS mode out of the box.
+  # Built with GOFIPS140 (Go Cryptographic Module, CMVP validated), which bakes a default
+  # GODEBUG=fips140=on into the binary so it runs in FIPS mode out of the box.
   - id: go-feature-flag-fips
     main: ./cmd/relayproxy
     binary: go-feature-flag-fips
     env:
       - CGO_ENABLED=0
-      # Single source of truth for the FIPS module version: the `build-relayproxy-fips`
-      # Makefile target reads it from this line.
-      - GOFIPS140=v1.0.0
+      # Version is read from the .fips-version file at the repo root and injected via the
+      # GOFIPS140 environment variable (see .github/workflows/release.yml and ci.yml).
+      - GOFIPS140={{ .Env.GOFIPS140 }}
     goos:
       - linux
     goarch:

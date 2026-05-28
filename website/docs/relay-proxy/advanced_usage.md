@@ -45,6 +45,10 @@ which goes through the CMVP validation process. Building with `GOFIPS140=v1.0.0`
 default `GODEBUG=fips140=on` into the binary, so the FIPS image runs in FIPS mode out of
 the box — no extra runtime configuration is required.
 
+The exact module version pinned by the project lives in the
+[`.fips-version`](https://github.com/thomaspoignant/go-feature-flag/blob/main/.fips-version)
+file at the repo root; both the Makefile target and GoReleaser read from it.
+
 :::info Scope
 **Inbound TLS is out of scope.** The relay proxy serves plain HTTP and expects TLS to be
 terminated at the ingress / service mesh, so north-south FIPS-validated TLS is handled by
