@@ -115,6 +115,24 @@ func Test_MongoDBRetriever_InvalidURI(t *testing.T) {
 	assert.Equal(t, retriever.RetrieverError, mdb.Status())
 }
 
+func Test_MongoDBRetriever_OutputFormat(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "returns json format hint for manager parser selection",
+			want: "json",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mdb := mongodbretriever.Retriever{}
+			assert.Equal(t, tt.want, mdb.OutputFormat())
+		})
+	}
+}
+
 func removeIDFromJSON(jsonStr string) (string, error) {
 	var data any
 	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
