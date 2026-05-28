@@ -139,6 +139,12 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	return result, nil
 }
 
+// OutputFormat declares that this retriever always returns JSON-encoded data,
+// so the manager can pick the JSON parser regardless of the global FileFormat.
+func (r *Retriever) OutputFormat() string {
+	return "json"
+}
+
 // buildQuery constructs the SQL query and arguments based on whether a flagset is specified.
 // It uses pgx.Identifier to safely quote identifiers and prevent SQL injection.
 func (r *Retriever) buildQuery() string {

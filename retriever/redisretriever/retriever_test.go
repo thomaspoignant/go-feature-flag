@@ -233,6 +233,24 @@ func TestRedisShutdown(t *testing.T) {
 	})
 }
 
+func Test_Redis_OutputFormat(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "returns json format hint for manager parser selection",
+			want: "json",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := redisretriever.Retriever{}
+			assert.Equal(t, tt.want, r.OutputFormat())
+		})
+	}
+}
+
 func readFile(t *testing.T, file string) (string, []byte) {
 	content, err := os.ReadFile(filepath.Join("testdata", file))
 	if err != nil {
