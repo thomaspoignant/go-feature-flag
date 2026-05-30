@@ -24,6 +24,9 @@ jobs:
           check-latest: true
           cache: false
       - run: make build
+      # Smoke-test the FIPS variant so a dependency that breaks under GOFIPS140
+      # is caught in CI rather than at release time.
+      - run: make build-relayproxy-fips
   Lint:
     runs-on: ubuntu-latest
     permissions:
@@ -121,6 +124,9 @@ jobs:
           go-version-file: go.mod
           check-latest: true
           cache: false
+
+      - name: Load FIPS module version
+        run: echo "GOFIPS140=$(cat .fips-version | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: Run GoReleaser .goreleaser.yaml check
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2

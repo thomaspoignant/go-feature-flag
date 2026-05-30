@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/fips140"
 	"fmt"
 	"os"
 	"time"
@@ -81,6 +82,10 @@ func main() {
 
 	// Update the logger's format and level from the config
 	logger.Update(proxyConf.LogFormat, proxyConf.ZapLogLevel())
+
+	// Surface whether the binary is running with FIPS 140-3 validated crypto.
+	// True only for builds produced with GOFIPS140 (see `make build-relayproxy-fips`).
+	logger.ZapLogger.Info("crypto mode", zap.Bool("fips140", fips140.Enabled()))
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version

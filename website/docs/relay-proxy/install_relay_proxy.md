@@ -29,5 +29,12 @@ scoop install go-feature-flag
 ## <i class="fa-brands fa-windows"></i> <i class="fa-brands fa-apple"></i> <i class="fa-brands fa-linux"></i> Binary
 All binaries are available in x86/ARM in the [GitHub Release Page](https://github.com/thomaspoignant/go-feature-flag/releases).
 
+## <i class="fa-solid fa-lock"></i> FIPS 140-3
+If you need FIPS 140 validated cryptography (e.g. FedRAMP), use the FIPS-tagged image:
+```shell
+docker pull gofeatureflag/go-feature-flag:fips
+```
+See [FIPS 140-3 mode](./advanced_usage#-fips-140-3-mode) for details on running and verifying it.
+
 ## Summary
 Once **GO Feature Flag** is installed, you can start using it within your application by connecting your OpenFeature provider to it.

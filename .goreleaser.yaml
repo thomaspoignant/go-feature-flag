@@ -61,6 +61,23 @@ builds:
       - goos: windows
         goarch: arm
 
+  # FIPS 140-3 build of the relay proxy.
+  # Built with GOFIPS140 (Go Cryptographic Module, CMVP validated), which bakes a default
+  # GODEBUG=fips140=on into the binary so it runs in FIPS mode out of the box.
+  - id: go-feature-flag-fips
+    main: ./cmd/relayproxy
+    binary: go-feature-flag-fips
+    env:
+      - CGO_ENABLED=0
+      # Version is read from the .fips-version file at the repo root and injected via the
+      # GOFIPS140 environment variable (see .github/workflows/release.yml and ci.yml).
+      - GOFIPS140={{ .Env.GOFIPS140 }}
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
   - id: go-feature-flag-cli
     main: ./cmd/cli
     binary: go-feature-flag-cli
@@ -161,6 +178,19 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     ids:
       - go-feature-flag
+
+  - id: go-feature-flag-fips
+    name_template: "go-feature-flag-fips_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    ids:
+      - go-feature-flag-fips
 
   - id: go-feature-flag-cli
     name_template: "go-feature-flag-cli_\
@@ -272,6 +302,33 @@ dockers_v2:
       "org.opencontainers.image.revision": "{{ .FullCommit }}"
       "org.opencontainers.image.source": "https://github.com/thomaspoignant/go-feature-flag"
       "org.opencontainers.image.title": "go-feature-flag"
+      "org.opencontainers.image.url": "https://gofeatureflag.org/docs/relay_proxy"
+      "org.opencontainers.image.version": "{{ .Version }}"
+
+  # go-feature-flag-fips (FIPS 140-3 build, gofeatureflag)
+  # Shares the gofeatureflag/go-feature-flag repo with the standard build, so every tag
+  # MUST keep the `-fips` suffix to avoid overwriting the non-FIPS images.
+  - id: go-feature-flag-fips
+    ids:
+      - go-feature-flag-fips
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserFips
+    images:
+      - gofeatureflag/go-feature-flag
+    tags:
+      - "fips"
+      - "v{{ .RawVersion }}-fips"
+      - "v{{ .Major }}-fips"
+      - "v{{ .Major }}.{{ .Minor }}-fips"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.description": "A stand alone server to run GO Feature Flag, built in FIPS 140-3 mode (GOFIPS140)"
+      "org.opencontainers.image.licenses": "MIT"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.source": "https://github.com/thomaspoignant/go-feature-flag"
+      "org.opencontainers.image.title": "go-feature-flag-fips"
       "org.opencontainers.image.url": "https://gofeatureflag.org/docs/relay_proxy"
       "org.opencontainers.image.version": "{{ .Version }}"
 
