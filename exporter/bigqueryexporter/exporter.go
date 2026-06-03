@@ -22,6 +22,21 @@ const (
 	// 10MB) per request, so we chunk well below that ceiling. The relay proxy's
 	// default MaxEventInMemory (100,000) can exceed the limit in a single flush.
 	maxRowsPerInsert = 10000
+
+	// Column names shared between the row builders and the table schemas.
+	colKind              = "kind"
+	colContextKind       = "context_kind"
+	colUserKey           = "user_key"
+	colCreationDate      = "creation_date"
+	colKey               = "key"
+	colVariation         = "variation"
+	colValue             = "value"
+	colDefault           = "default"
+	colVersion           = "version"
+	colSource            = "source"
+	colMetadata          = "metadata"
+	colTrackingDetails   = "tracking_details"
+	colEvaluationContext = "evaluation_context"
 )
 
 var _ exporter.Exporter = &Exporter{}
@@ -137,7 +152,7 @@ func (e *Exporter) initClient(ctx context.Context) error {
 
 	var opts []option.ClientOption
 	if len(e.GoogleCredentials) > 0 {
-		opts = append(opts, option.WithCredentialsJSON(e.GoogleCredentials))
+		opts = append(opts, option.WithAuthCredentialsJSON(credentialsType(e.GoogleCredentials), e.GoogleCredentials))
 	}
 
 	client, err := e.newClientFunc(ctx, e.ProjectID, opts...)
@@ -216,17 +231,17 @@ func featureEventRow(event exporter.FeatureEvent) (rowSaver, error) {
 
 	return rowSaver{
 		values: map[string]bigquery.Value{
-			"kind":          event.Kind,
-			"context_kind":  event.ContextKind,
-			"user_key":      event.UserKey,
-			"creation_date": event.CreationDate,
-			"key":           event.Key,
-			"variation":     event.Variation,
-			"value":         value,
-			"default":       event.Default,
-			"version":       event.Version,
-			"source":        event.Source,
-			"metadata":      metadata,
+			colKind:         event.Kind,
+			colContextKind:  event.ContextKind,
+			colUserKey:      event.UserKey,
+			colCreationDate: event.CreationDate,
+			colKey:          event.Key,
+			colVariation:    event.Variation,
+			colValue:        value,
+			colDefault:      event.Default,
+			colVersion:      event.Version,
+			colSource:       event.Source,
+			colMetadata:     metadata,
 		},
 		insertID: insertID(event),
 	}, nil
@@ -244,13 +259,13 @@ func trackingEventRow(event exporter.TrackingEvent) (rowSaver, error) {
 
 	return rowSaver{
 		values: map[string]bigquery.Value{
-			"kind":               event.Kind,
-			"context_kind":       event.ContextKind,
-			"user_key":           event.UserKey,
-			"creation_date":      event.CreationDate,
-			"key":                event.Key,
-			"tracking_details":   trackingDetails,
-			"evaluation_context": evaluationContext,
+			colKind:              event.Kind,
+			colContextKind:       event.ContextKind,
+			colUserKey:           event.UserKey,
+			colCreationDate:      event.CreationDate,
+			colKey:               event.Key,
+			colTrackingDetails:   trackingDetails,
+			colEvaluationContext: evaluationContext,
 		},
 		insertID: insertID(event),
 	}, nil
@@ -266,29 +281,52 @@ func jsonString(value any) (string, error) {
 
 func featureEventSchema() bigquery.Schema {
 	return bigquery.Schema{
-		{Name: "kind", Type: bigquery.StringFieldType},
-		{Name: "context_kind", Type: bigquery.StringFieldType},
-		{Name: "user_key", Type: bigquery.StringFieldType},
-		{Name: "creation_date", Type: bigquery.IntegerFieldType},
-		{Name: "key", Type: bigquery.StringFieldType},
-		{Name: "variation", Type: bigquery.StringFieldType},
-		{Name: "value", Type: bigquery.JSONFieldType},
-		{Name: "default", Type: bigquery.BooleanFieldType},
-		{Name: "version", Type: bigquery.StringFieldType},
-		{Name: "source", Type: bigquery.StringFieldType},
-		{Name: "metadata", Type: bigquery.JSONFieldType},
+		{Name: colKind, Type: bigquery.StringFieldType},
+		{Name: colContextKind, Type: bigquery.StringFieldType},
+		{Name: colUserKey, Type: bigquery.StringFieldType},
+		{Name: colCreationDate, Type: bigquery.IntegerFieldType},
+		{Name: colKey, Type: bigquery.StringFieldType},
+		{Name: colVariation, Type: bigquery.StringFieldType},
+		{Name: colValue, Type: bigquery.JSONFieldType},
+		{Name: colDefault, Type: bigquery.BooleanFieldType},
+		{Name: colVersion, Type: bigquery.StringFieldType},
+		{Name: colSource, Type: bigquery.StringFieldType},
+		{Name: colMetadata, Type: bigquery.JSONFieldType},
 	}
 }
 
 func trackingEventSchema() bigquery.Schema {
 	return bigquery.Schema{
-		{Name: "kind", Type: bigquery.StringFieldType},
-		{Name: "context_kind", Type: bigquery.StringFieldType},
-		{Name: "user_key", Type: bigquery.StringFieldType},
-		{Name: "creation_date", Type: bigquery.IntegerFieldType},
-		{Name: "key", Type: bigquery.StringFieldType},
-		{Name: "tracking_details", Type: bigquery.JSONFieldType},
-		{Name: "evaluation_context", Type: bigquery.JSONFieldType},
+		{Name: colKind, Type: bigquery.StringFieldType},
+		{Name: colContextKind, Type: bigquery.StringFieldType},
+		{Name: colUserKey, Type: bigquery.StringFieldType},
+		{Name: colCreationDate, Type: bigquery.IntegerFieldType},
+		{Name: colKey, Type: bigquery.StringFieldType},
+		{Name: colTrackingDetails, Type: bigquery.JSONFieldType},
+		{Name: colEvaluationContext, Type: bigquery.JSONFieldType},
+	}
+}
+
+// credentialsType inspects the "type" field of a Google credentials JSON blob
+// and maps it to the option.CredentialsType expected by
+// option.WithAuthCredentialsJSON. It defaults to ServiceAccount, which is the
+// most common credential shape, when the type is missing or unrecognized.
+func credentialsType(creds []byte) option.CredentialsType {
+	var parsed struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(creds, &parsed); err != nil {
+		return option.ServiceAccount
+	}
+	switch parsed.Type {
+	case "authorized_user":
+		return option.AuthorizedUser
+	case "impersonated_service_account":
+		return option.ImpersonatedServiceAccount
+	case "external_account":
+		return option.ExternalAccount
+	default:
+		return option.ServiceAccount
 	}
 }
 
