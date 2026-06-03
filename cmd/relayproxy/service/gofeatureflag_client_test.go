@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/bigqueryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -345,6 +346,23 @@ func Test_initExporter(t *testing.T) {
 				},
 			},
 			wantType:               &pubsubexporterv2.Exporter{},
+			skipCompleteValidation: true,
+		},
+		{
+			name:    "Convert BigQueryExporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:      "bigquery",
+				ProjectID: "fake-project-id",
+				DatasetID: "fake-dataset",
+			},
+			want: ffclient.DataExporter{
+				Exporter: &bigqueryexporter.Exporter{
+					ProjectID: "fake-project-id",
+					DatasetID: "fake-dataset",
+				},
+			},
+			wantType:               &bigqueryexporter.Exporter{},
 			skipCompleteValidation: true,
 		},
 		{

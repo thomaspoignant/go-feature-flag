@@ -193,6 +193,15 @@ export const integrations = {
       docLink: 'google-cloud-pubsub',
     },
     {
+      name: 'Google Cloud BigQuery',
+      description: 'Export evaluation and tracking data to Google Cloud BigQuery.',
+      longDescription: `The Google Cloud BigQuery exporter streams feature flag evaluation and tracking events directly to BigQuery using the official streaming-insert API.`,
+      type: 'bulk',
+      bgColor: 'rgb(194, 223, 255)',
+      logo: pubsublogo,
+      docLink: 'google-cloud-bigquery',
+    },
+    {
       name: 'AWS SQS',
       description: 'Export evaluation data inside a AWS SQS queue.',
       type: 'sync',

@@ -28,6 +28,10 @@ type ExporterConf struct {
 	QueueURL                string                 `mapstructure:"queueUrl"                koanf:"queueurl"`
 	Kafka                   kafkaexporter.Settings `mapstructure:"kafka"                   koanf:"kafka"`
 	ProjectID               string                 `mapstructure:"projectID"               koanf:"projectid"`
+	DatasetID               string                 `mapstructure:"datasetID"               koanf:"datasetid"`
+	TableName               string                 `mapstructure:"tableName"               koanf:"tablename"`
+	TrackingTableName       string                 `mapstructure:"trackingTableName"       koanf:"trackingtablename"`
+	AutoMigrate             bool                   `mapstructure:"autoMigrate"             koanf:"automigrate"`
 	Topic                   string                 `mapstructure:"topic"                   koanf:"topic"`
 	StreamArn               string                 `mapstructure:"streamArn"               koanf:"streamarn"`
 	StreamName              string                 `mapstructure:"streamName"              koanf:"streamname"`
@@ -88,6 +92,13 @@ func (c *ExporterConf) IsValid() error {
 		)
 	}
 
+	if c.Kind == BigQueryExporter && (c.ProjectID == "" || c.DatasetID == "") {
+		return fmt.Errorf(
+			"invalid exporter: \"projectID\" and \"datasetID\" are required for kind \"%s\"",
+			c.Kind,
+		)
+	}
+
 	if c.Kind == AzureExporter && c.Container == "" {
 		return fmt.Errorf(
 			"invalid exporter: no \"container\" property found for kind \"%s\"",
@@ -116,6 +127,7 @@ const (
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
+	BigQueryExporter      ExporterKind = "bigquery"
 	AzureExporter         ExporterKind = "azureBlobStorage"
 	OpenTelemetryExporter ExporterKind = "opentelemetry"
 )
@@ -131,6 +143,7 @@ func (r ExporterKind) IsValid() error {
 		SQSExporter,
 		KafkaExporter,
 		PubSubExporter,
+		BigQueryExporter,
 		KinesisExporter,
 		AzureExporter,
 		OpenTelemetryExporter:
