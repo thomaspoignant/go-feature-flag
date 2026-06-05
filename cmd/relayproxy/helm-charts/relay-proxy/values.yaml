@@ -35,6 +35,8 @@ image:
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion
   tag: ""
+  # -- Use the FIPS 140-3 validated image variant (appends the `-fips` suffix to the tag, available since v1.54.0)
+  fips: false
 
 # -- Specify imagePullSecrets to be used for the deployment
 imagePullSecrets: []
