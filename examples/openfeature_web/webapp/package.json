@@ -32,7 +32,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-env": "^7.29.7",
     "autoprefixer": "^10.5.0",
     "babel-loader": "^10.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -51,7 +51,7 @@
     "sass": "^1.100.0",
     "stylelint": "^17.12.0",
     "webpack": "^5.107.1",
-    "webpack-cli": "^7.0.2"
+    "webpack-cli": "^7.0.3"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
