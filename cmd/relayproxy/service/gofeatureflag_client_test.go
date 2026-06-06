@@ -472,6 +472,30 @@ func Test_initExporter(t *testing.T) {
 	}
 }
 
+func Test_initExporter_BigQueryCredentialsAndTrackingEventType(t *testing.T) {
+	credentials := `{"type":"service_account","project_id":"fake-project-id"}`
+
+	got, err := initDataExporter(&config.ExporterConf{
+		Kind:              config.BigQueryExporter,
+		ProjectID:         "fake-project-id",
+		DatasetID:         "fake-dataset",
+		TableName:         "tracking-events",
+		GoogleCredentials: credentials,
+		AutoMigrate:       true,
+		ExporterEventType: ffclient.TrackingEventExporter,
+	})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ffclient.TrackingEventExporter, got.ExporterEventType)
+	bigQueryExporter, ok := got.Exporter.(*bigqueryexporter.Exporter)
+	assert.True(t, ok)
+	assert.Equal(t, "fake-project-id", bigQueryExporter.ProjectID)
+	assert.Equal(t, "fake-dataset", bigQueryExporter.DatasetID)
+	assert.Equal(t, "tracking-events", bigQueryExporter.TableName)
+	assert.Equal(t, []byte(credentials), bigQueryExporter.GoogleCredentials)
+	assert.True(t, bigQueryExporter.AutoMigrate)
+}
+
 func Test_initNotifier(t *testing.T) {
 	type args struct {
 		c []config.NotifierConf

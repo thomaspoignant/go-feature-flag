@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"text/template"
 
@@ -26,11 +28,10 @@ func TestExporter_ExportFeatureEvents(t *testing.T) {
 	ctx := context.TODO()
 	client := newMockBigQueryClient()
 	e := &Exporter{
-		ProjectID:         "fake-project",
-		DatasetID:         "fake-dataset",
-		TableName:         "feature-table",
-		TrackingTableName: "tracking-table",
-		newClientFunc:     mockNewClientFunc(client),
+		ProjectID:     "fake-project",
+		DatasetID:     "fake-dataset",
+		TableName:     "feature-table",
+		newClientFunc: mockNewClientFunc(client),
 	}
 	events := []exporter.ExportableEvent{
 		exporter.FeatureEvent{
@@ -77,11 +78,10 @@ func TestExporter_ExportTrackingEvents(t *testing.T) {
 	ctx := context.TODO()
 	client := newMockBigQueryClient()
 	e := &Exporter{
-		ProjectID:         "fake-project",
-		DatasetID:         "fake-dataset",
-		TableName:         "feature-table",
-		TrackingTableName: "tracking-table",
-		newClientFunc:     mockNewClientFunc(client),
+		ProjectID:     "fake-project",
+		DatasetID:     "fake-dataset",
+		TableName:     "tracking-table",
+		newClientFunc: mockNewClientFunc(client),
 	}
 	events := []exporter.ExportableEvent{
 		exporter.TrackingEvent{
@@ -116,15 +116,14 @@ func TestExporter_ExportTrackingEvents(t *testing.T) {
 	assert.Equal(t, "checkout|user-key|1617970547", rows[0].insertID)
 }
 
-func TestExporter_ExportMixedBatch(t *testing.T) {
+func TestExporter_ExportMixedBatchReturnsError(t *testing.T) {
 	ctx := context.TODO()
 	client := newMockBigQueryClient()
 	e := &Exporter{
-		ProjectID:         "fake-project",
-		DatasetID:         "fake-dataset",
-		TableName:         "feature-table",
-		TrackingTableName: "tracking-table",
-		newClientFunc:     mockNewClientFunc(client),
+		ProjectID:     "fake-project",
+		DatasetID:     "fake-dataset",
+		TableName:     "events-table",
+		newClientFunc: mockNewClientFunc(client),
 	}
 	events := []exporter.ExportableEvent{
 		exporter.FeatureEvent{
@@ -143,50 +142,54 @@ func TestExporter_ExportMixedBatch(t *testing.T) {
 
 	err := e.Export(ctx, nil, events)
 
-	assert.NoError(t, err)
-	assert.Len(t, client.inserters["fake-dataset.feature-table"].puts, 1)
-	assert.Len(t, client.inserters["fake-dataset.tracking-table"].puts, 1)
-	assert.Len(t, client.inserters["fake-dataset.feature-table"].puts[0].([]rowSaver), 2)
-	assert.Len(t, client.inserters["fake-dataset.tracking-table"].puts[0].([]rowSaver), 1)
+	assert.ErrorContains(t, err, "mixed event types")
+	assert.Empty(t, client.inserters)
 }
 
 func TestExporter_AutoMigrate(t *testing.T) {
 	tests := []struct {
 		name                 string
 		autoMigrate          bool
+		tableName            string
 		events               []exporter.ExportableEvent
 		wantEnsureTableCalls []ensureTableCall
 	}{
 		{
-			name:        "AutoMigrate true ensures written tables",
+			name:        "AutoMigrate true ensures feature table",
 			autoMigrate: true,
+			tableName:   "feature-table",
 			events: []exporter.ExportableEvent{
 				exporter.FeatureEvent{Kind: "feature", Value: true},
-				exporter.TrackingEvent{Kind: "tracking"},
 			},
 			wantEnsureTableCalls: []ensureTableCall{
 				{dataset: "fake-dataset", table: "feature-table", schema: featureEventSchema()},
+			},
+		},
+		{
+			name:        "AutoMigrate true ensures tracking table",
+			autoMigrate: true,
+			tableName:   "tracking-table",
+			events: []exporter.ExportableEvent{
+				exporter.TrackingEvent{Kind: "tracking"},
+			},
+			wantEnsureTableCalls: []ensureTableCall{
 				{dataset: "fake-dataset", table: "tracking-table", schema: trackingEventSchema()},
 			},
 		},
 		{
 			name:        "AutoMigrate false does not ensure tables",
 			autoMigrate: false,
+			tableName:   "feature-table",
 			events: []exporter.ExportableEvent{
 				exporter.FeatureEvent{Kind: "feature", Value: true},
-				exporter.TrackingEvent{Kind: "tracking"},
 			},
 			wantEnsureTableCalls: nil,
 		},
 		{
-			name:        "AutoMigrate true only ensures tables being written",
+			name:        "AutoMigrate true skips empty batches",
 			autoMigrate: true,
-			events: []exporter.ExportableEvent{
-				exporter.FeatureEvent{Kind: "feature", Value: true},
-			},
-			wantEnsureTableCalls: []ensureTableCall{
-				{dataset: "fake-dataset", table: "feature-table", schema: featureEventSchema()},
-			},
+			tableName:   "feature-table",
+			events:      nil,
 		},
 	}
 
@@ -195,12 +198,11 @@ func TestExporter_AutoMigrate(t *testing.T) {
 			ctx := context.TODO()
 			client := newMockBigQueryClient()
 			e := &Exporter{
-				ProjectID:         "fake-project",
-				DatasetID:         "fake-dataset",
-				TableName:         "feature-table",
-				TrackingTableName: "tracking-table",
-				AutoMigrate:       tt.autoMigrate,
-				newClientFunc:     mockNewClientFunc(client),
+				ProjectID:     "fake-project",
+				DatasetID:     "fake-dataset",
+				TableName:     tt.tableName,
+				AutoMigrate:   tt.autoMigrate,
+				newClientFunc: mockNewClientFunc(client),
 			}
 
 			err := e.Export(ctx, nil, tt.events)
@@ -211,7 +213,7 @@ func TestExporter_AutoMigrate(t *testing.T) {
 	}
 }
 
-func TestExporter_DefaultTableNames(t *testing.T) {
+func TestExporter_DefaultTableName(t *testing.T) {
 	ctx := context.TODO()
 	client := newMockBigQueryClient()
 	e := &Exporter{
@@ -221,16 +223,12 @@ func TestExporter_DefaultTableNames(t *testing.T) {
 	}
 	events := []exporter.ExportableEvent{
 		exporter.FeatureEvent{Kind: "feature", Value: true},
-		exporter.TrackingEvent{Kind: "tracking"},
 	}
 
 	err := e.Export(ctx, nil, events)
 
 	assert.NoError(t, err)
-	assert.Equal(t, defaultTableName, e.TableName)
-	assert.Equal(t, defaultTrackingTableName, e.TrackingTableName)
 	assert.Len(t, client.inserters["fake-dataset."+defaultTableName].puts, 1)
-	assert.Len(t, client.inserters["fake-dataset."+defaultTrackingTableName].puts, 1)
 }
 
 func TestExporter_ExportSkipsEmptyBatches(t *testing.T) {
@@ -286,6 +284,7 @@ func TestExporter_ExportErrors(t *testing.T) {
 		client              *mockBigQueryClient
 		newClientErr        error
 		autoMigrate         bool
+		tableName           string
 		wantErrContains     string
 		wantNewClientCalled bool
 	}{
@@ -357,9 +356,8 @@ func TestExporter_ExportErrors(t *testing.T) {
 			wantNewClientCalled: true,
 		},
 		{
-			name: "tracking insert returns error after feature insert succeeds",
+			name: "tracking insert returns error",
 			events: []exporter.ExportableEvent{
-				exporter.FeatureEvent{Kind: "feature", Key: "flag-key", Value: true},
 				exporter.TrackingEvent{
 					Kind:              "tracking",
 					Key:               "checkout",
@@ -370,8 +368,18 @@ func TestExporter_ExportErrors(t *testing.T) {
 			client: &mockBigQueryClient{
 				putErrByTable: map[string]error{"fake-dataset.tracking-table": putErr},
 			},
+			tableName:           "tracking-table",
 			wantErrContains:     "put rows failed",
 			wantNewClientCalled: true,
+		},
+		{
+			name: "mixed event types returns error",
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{Kind: "feature", Key: "flag-key", Value: true},
+				exporter.TrackingEvent{Kind: "tracking", Key: "checkout"},
+			},
+			wantErrContains:     "mixed event types",
+			wantNewClientCalled: false,
 		},
 	}
 
@@ -383,12 +391,15 @@ func TestExporter_ExportErrors(t *testing.T) {
 			}
 			client.ensureInitialized()
 			newClientCalled := false
+			tableName := tt.tableName
+			if tableName == "" {
+				tableName = "feature-table"
+			}
 			e := &Exporter{
-				ProjectID:         "fake-project",
-				DatasetID:         "fake-dataset",
-				TableName:         "feature-table",
-				TrackingTableName: "tracking-table",
-				AutoMigrate:       tt.autoMigrate,
+				ProjectID:   "fake-project",
+				DatasetID:   "fake-dataset",
+				TableName:   tableName,
+				AutoMigrate: tt.autoMigrate,
 				newClientFunc: func(
 					context.Context,
 					string,
@@ -413,11 +424,10 @@ func TestExporter_ExportErrors(t *testing.T) {
 func TestExporter_ExportChunksRows(t *testing.T) {
 	client := newMockBigQueryClient()
 	e := &Exporter{
-		ProjectID:         "fake-project",
-		DatasetID:         "fake-dataset",
-		TableName:         "feature-table",
-		TrackingTableName: "tracking-table",
-		newClientFunc:     mockNewClientFunc(client),
+		ProjectID:     "fake-project",
+		DatasetID:     "fake-dataset",
+		TableName:     "feature-table",
+		newClientFunc: mockNewClientFunc(client),
 	}
 	events := make([]exporter.ExportableEvent, 0, maxRowsPerInsert+3)
 	for i := 0; i < maxRowsPerInsert+3; i++ {
@@ -437,6 +447,42 @@ func TestExporter_ExportChunksRows(t *testing.T) {
 	assert.Len(t, puts, 2)
 	assert.Len(t, puts[0].([]rowSaver), maxRowsPerInsert)
 	assert.Len(t, puts[1].([]rowSaver), 3)
+}
+
+func TestExporter_InitClientOnce(t *testing.T) {
+	client := newMockBigQueryClient()
+	var callCount int32
+	e := &Exporter{
+		ProjectID: "fake-project",
+		DatasetID: "fake-dataset",
+		newClientFunc: func(
+			context.Context,
+			string,
+			...option.ClientOption,
+		) (bigQueryClient, error) {
+			atomic.AddInt32(&callCount, 1)
+			return client, nil
+		},
+	}
+
+	const goroutines = 50
+	errs := make(chan error, goroutines)
+	var wg sync.WaitGroup
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			errs <- e.initClient(context.TODO())
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		assert.NoError(t, err)
+	}
+	assert.Equal(t, int32(1), atomic.LoadInt32(&callCount))
+	assert.Equal(t, client, e.client)
 }
 
 func TestExporter_InitClientPassesCredentialsOptions(t *testing.T) {
@@ -465,7 +511,6 @@ func TestExporter_InitClientPassesCredentialsOptions(t *testing.T) {
 				ProjectID:         "fake-project",
 				DatasetID:         "fake-dataset",
 				TableName:         "feature-table",
-				TrackingTableName: "tracking-table",
 				GoogleCredentials: tt.credentials,
 				newClientFunc: func(
 					_ context.Context,

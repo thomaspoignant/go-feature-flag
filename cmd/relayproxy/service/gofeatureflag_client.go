@@ -302,7 +302,7 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			ProjectID:         c.ProjectID,
 			DatasetID:         c.DatasetID,
 			TableName:         c.TableName,
-			TrackingTableName: c.TrackingTableName,
+			GoogleCredentials: []byte(c.GoogleCredentials),
 			AutoMigrate:       c.AutoMigrate,
 		}, nil
 	case config.AzureExporter:

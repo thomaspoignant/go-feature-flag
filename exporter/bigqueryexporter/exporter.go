@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -14,8 +15,10 @@ import (
 )
 
 const (
-	defaultTableName         = "feature_flag_evaluations"
-	defaultTrackingTableName = "tracking_events"
+	defaultTableName = "feature_flag_evaluations"
+
+	featureEventType  = "feature"
+	trackingEventType = "tracking"
 
 	// maxRowsPerInsert bounds the number of rows sent in a single streaming
 	// insert request. BigQuery limits a streaming insert to 50,000 rows (and
@@ -72,13 +75,9 @@ type Exporter struct {
 	// DatasetID is the BigQuery dataset receiving the events.
 	DatasetID string
 
-	// TableName is the table receiving feature flag evaluation events.
+	// TableName is the table receiving events for this exporter instance.
 	// Default: feature_flag_evaluations
 	TableName string
-
-	// TrackingTableName is the table receiving tracking events.
-	// Default: tracking_events
-	TrackingTableName string
 
 	// GoogleCredentials is an optional Google credentials JSON.
 	// If empty, Application Default Credentials are used.
@@ -92,43 +91,30 @@ type Exporter struct {
 
 	// client is the initialized BigQuery client.
 	client bigQueryClient
+
+	initOnce sync.Once
+	initErr  error
 }
 
-// Export streams feature and tracking events to their configured BigQuery tables.
+// Export streams events to the configured BigQuery table.
 func (e *Exporter) Export(
 	ctx context.Context,
 	_ *fflog.FFLogger,
 	events []exporter.ExportableEvent,
 ) error {
-	e.applyDefaults()
-
-	featureRows, trackingRows, err := e.buildRows(events)
+	rows, schema, err := e.buildRows(events)
 	if err != nil {
 		return err
 	}
-	if len(featureRows) == 0 && len(trackingRows) == 0 {
+	if len(rows) == 0 {
 		return nil
 	}
 
-	if e.client == nil {
-		if err := e.initClient(ctx); err != nil {
-			return err
-		}
+	if err := e.initClient(ctx); err != nil {
+		return err
 	}
 
-	if len(featureRows) > 0 {
-		if err := e.exportRows(ctx, e.TableName, featureEventSchema(), featureRows); err != nil {
-			return err
-		}
-	}
-
-	if len(trackingRows) > 0 {
-		if err := e.exportRows(ctx, e.TrackingTableName, trackingEventSchema(), trackingRows); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return e.exportRows(ctx, e.tableName(), schema, rows)
 }
 
 // IsBulk returns true because BigQuery rows are flushed in batches.
@@ -136,55 +122,71 @@ func (e *Exporter) IsBulk() bool {
 	return true
 }
 
-func (e *Exporter) applyDefaults() {
+func (e *Exporter) tableName() string {
 	if e.TableName == "" {
-		e.TableName = defaultTableName
+		return defaultTableName
 	}
-	if e.TrackingTableName == "" {
-		e.TrackingTableName = defaultTrackingTableName
-	}
+	return e.TableName
 }
 
 func (e *Exporter) initClient(ctx context.Context) error {
-	if e.newClientFunc == nil {
-		e.newClientFunc = newBigQueryClient
-	}
+	e.initOnce.Do(func() {
+		if e.client != nil {
+			return
+		}
 
-	var opts []option.ClientOption
-	if len(e.GoogleCredentials) > 0 {
-		opts = append(opts, option.WithAuthCredentialsJSON(credentialsType(e.GoogleCredentials), e.GoogleCredentials))
-	}
+		newClientFunc := e.newClientFunc
+		if newClientFunc == nil {
+			newClientFunc = newBigQueryClient
+		}
 
-	client, err := e.newClientFunc(ctx, e.ProjectID, opts...)
-	if err != nil {
-		return err
-	}
-	e.client = client
-	return nil
+		var opts []option.ClientOption
+		if len(e.GoogleCredentials) > 0 {
+			opts = append(opts, option.WithAuthCredentialsJSON(credentialsType(e.GoogleCredentials), e.GoogleCredentials))
+		}
+
+		e.client, e.initErr = newClientFunc(ctx, e.ProjectID, opts...)
+	})
+	return e.initErr
 }
 
-func (e *Exporter) buildRows(events []exporter.ExportableEvent) ([]rowSaver, []rowSaver, error) {
-	featureRows := make([]rowSaver, 0)
-	trackingRows := make([]rowSaver, 0)
+func (e *Exporter) buildRows(events []exporter.ExportableEvent) ([]rowSaver, bigquery.Schema, error) {
+	rows := make([]rowSaver, 0, len(events))
+	eventType := ""
+	var schema bigquery.Schema
 
 	for _, event := range events {
 		switch e := event.(type) {
 		case exporter.FeatureEvent:
+			if eventType == "" {
+				eventType = featureEventType
+				schema = featureEventSchema()
+			}
+			if eventType != featureEventType {
+				return nil, nil, fmt.Errorf("bigquery exporter received mixed event types")
+			}
 			row, err := featureEventRow(e)
 			if err != nil {
 				return nil, nil, err
 			}
-			featureRows = append(featureRows, row)
+			rows = append(rows, row)
 		case exporter.TrackingEvent:
+			if eventType == "" {
+				eventType = trackingEventType
+				schema = trackingEventSchema()
+			}
+			if eventType != trackingEventType {
+				return nil, nil, fmt.Errorf("bigquery exporter received mixed event types")
+			}
 			row, err := trackingEventRow(e)
 			if err != nil {
 				return nil, nil, err
 			}
-			trackingRows = append(trackingRows, row)
+			rows = append(rows, row)
 		}
 	}
 
-	return featureRows, trackingRows, nil
+	return rows, schema, nil
 }
 
 func (e *Exporter) exportRows(

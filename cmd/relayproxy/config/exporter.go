@@ -30,15 +30,16 @@ type ExporterConf struct {
 	ProjectID               string                 `mapstructure:"projectID"               koanf:"projectid"`
 	DatasetID               string                 `mapstructure:"datasetID"               koanf:"datasetid"`
 	TableName               string                 `mapstructure:"tableName"               koanf:"tablename"`
-	TrackingTableName       string                 `mapstructure:"trackingTableName"       koanf:"trackingtablename"`
-	AutoMigrate             bool                   `mapstructure:"autoMigrate"             koanf:"automigrate"`
-	Topic                   string                 `mapstructure:"topic"                   koanf:"topic"`
-	StreamArn               string                 `mapstructure:"streamArn"               koanf:"streamarn"`
-	StreamName              string                 `mapstructure:"streamName"              koanf:"streamname"`
-	AccountName             string                 `mapstructure:"accountName"             koanf:"accountname"`
-	AccountKey              string                 `mapstructure:"accountKey"              koanf:"accountkey"`
-	Container               string                 `mapstructure:"container"               koanf:"container"`
-	ExporterEventType       string                 `mapstructure:"eventType"               koanf:"eventtype"`
+	//nolint:gosec
+	GoogleCredentials string `mapstructure:"googleCredentials"       koanf:"googlecredentials"`
+	AutoMigrate       bool   `mapstructure:"autoMigrate"             koanf:"automigrate"`
+	Topic             string `mapstructure:"topic"                   koanf:"topic"`
+	StreamArn         string `mapstructure:"streamArn"               koanf:"streamarn"`
+	StreamName        string `mapstructure:"streamName"              koanf:"streamname"`
+	AccountName       string `mapstructure:"accountName"             koanf:"accountname"`
+	AccountKey        string `mapstructure:"accountKey"              koanf:"accountkey"`
+	Container         string `mapstructure:"container"               koanf:"container"`
+	ExporterEventType string `mapstructure:"eventType"               koanf:"eventtype"`
 }
 
 func (c *ExporterConf) IsValid() error {
