@@ -1,5 +1,5 @@
 {
-    ".": "1.53.0",
+    ".": "1.54.0",
     "cmd/wasm": "0.2.2",
     "openfeature/providers/python-provider": "1.1.0",
     "openfeature/providers/kotlin-provider": "1.0.0",
