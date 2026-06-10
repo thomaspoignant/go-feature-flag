@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout go-feature-flag repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 1
           persist-credentials: false
@@ -44,7 +44,7 @@ jobs:
           VERSION: ${{ inputs.version }}
 
       - name: Checkout OpenFeature java contrib repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: open-feature/java-sdk-contrib
           path: out/contrib/java-sdk-contrib
@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout OpenFeature dotnet contrib repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: open-feature/dotnet-sdk-contrib
           path: out/contrib/dotnet-sdk-contrib
@@ -64,7 +64,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout OpenFeature JS contrib repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: open-feature/js-sdk-contrib
           path: out/contrib/js-sdk-contrib
