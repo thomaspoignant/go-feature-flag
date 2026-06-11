@@ -46,8 +46,7 @@
                 ".github/release-please",
                 "cmd/wasm",
                 "website"
-            ],
-            "release-as": "1.54.1"
+            ]
         },
         "modules/core": {
             "release-type": "go",
