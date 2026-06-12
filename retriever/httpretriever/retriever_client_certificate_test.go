@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -39,7 +40,7 @@ func TestRetriever_getHTTPClient_WithClientCertificate(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, transport.TLSClientConfig)
 	assert.Len(t, transport.TLSClientConfig.Certificates, 1)
-	assert.Equal(t, uint16(tlsVersion12), transport.TLSClientConfig.MinVersion)
+	assert.Equal(t, uint16(tls.VersionTLS12), transport.TLSClientConfig.MinVersion)
 }
 
 func TestRetriever_getHTTPClient_WithCACertificate(t *testing.T) {
@@ -60,7 +61,24 @@ func TestRetriever_getHTTPClient_WithCACertificate(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, transport.TLSClientConfig)
 	require.NotNil(t, transport.TLSClientConfig.RootCAs)
-	assert.Equal(t, uint16(tlsVersion12), transport.TLSClientConfig.MinVersion)
+	assert.Equal(t, uint16(tls.VersionTLS12), transport.TLSClientConfig.MinVersion)
+}
+
+func TestRetriever_getHTTPClient_WithUnsupportedDefaultTransport(t *testing.T) {
+	caCertFile, _ := createClientCertificateFiles(t)
+	defaultTransport := http.DefaultTransport
+	t.Cleanup(func() {
+		http.DefaultTransport = defaultTransport
+	})
+	http.DefaultTransport = unsupportedTransport{}
+
+	retriever := Retriever{
+		CACertPath: caCertFile,
+	}
+
+	_, err := retriever.getHTTPClient()
+	require.Error(t, err)
+	assert.Equal(t, "http default transport is httpretriever.unsupportedTransport, expected *http.Transport", err.Error())
 }
 
 func TestRetriever_getHTTPClient_WithoutClientCertificateConfiguration(t *testing.T) {
@@ -74,6 +92,20 @@ func TestRetriever_getHTTPClient_WithoutClientCertificateConfiguration(t *testin
 	httpClient, ok := client.(*http.Client)
 	require.True(t, ok)
 	assert.Equal(t, 2*time.Second, httpClient.Timeout)
+}
+
+func TestRetriever_getHTTPClient_CacheGeneratedHTTPClient(t *testing.T) {
+	caCertFile, _ := createClientCertificateFiles(t)
+	retriever := Retriever{
+		CACertPath: caCertFile,
+	}
+
+	client, err := retriever.getHTTPClient()
+	require.NoError(t, err)
+
+	cachedClient, err := retriever.getHTTPClient()
+	require.NoError(t, err)
+	assert.Same(t, client, cachedClient)
 }
 
 func TestRetriever_getHTTPClient_WithInvalidClientCertificate(t *testing.T) {
@@ -129,7 +161,11 @@ func TestRetriever_Retrieve_WithIncompleteClientCertificateConfiguration(t *test
 	assert.Equal(t, "client certificate and client key must be provided together", err.Error())
 }
 
-const tlsVersion12 = 0x0303
+type unsupportedTransport struct{}
+
+func (unsupportedTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, nil
+}
 
 func createClientCertificateFiles(t *testing.T) (string, string) {
 	t.Helper()

@@ -83,12 +83,18 @@ func (r *Retriever) getHTTPClient() (internal.HTTPClient, error) {
 			return nil, err
 		}
 
-		tlsTransport := http.DefaultTransport.(*http.Transport).Clone()
+		defaultTransport, ok := http.DefaultTransport.(*http.Transport)
+		if !ok {
+			return nil, fmt.Errorf("http default transport is %T, expected *http.Transport", http.DefaultTransport)
+		}
+
+		tlsTransport := defaultTransport.Clone()
 		tlsTransport.TLSClientConfig = tlsConfig
 		transport = tlsTransport
 	}
 
-	return internal.NewHTTPClient(r.Timeout, transport), nil
+	r.httpClient = internal.NewHTTPClient(r.Timeout, transport)
+	return r.httpClient, nil
 }
 
 func (r *Retriever) tlsConfig() (*tls.Config, error) {
