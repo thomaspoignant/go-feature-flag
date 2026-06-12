@@ -13,14 +13,14 @@ require (
 	github.com/IBM/sarama v1.50.1
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.54.0
-	github.com/aws/aws-sdk-go-v2 v1.41.11
+	github.com/aws/aws-sdk-go-v2 v1.41.12
 	github.com/aws/aws-sdk-go-v2/config v1.32.22
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.21
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.5
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.43.1
-	github.com/aws/smithy-go v1.27.0
+	github.com/aws/smithy-go v1.27.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.54.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
