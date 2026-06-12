@@ -76,11 +76,7 @@ func (r *Retriever) getHTTPClient() (internal.HTTPClient, error) {
 		return r.httpClient, nil
 	}
 	if r.ClientCertPath == "" && r.ClientKeyPath == "" && r.CACertPath == "" {
-		timeout := r.Timeout
-		if timeout <= 0 {
-			timeout = 10 * time.Second
-		}
-		return internal.HTTPClientWithTimeout(timeout), nil
+		return internal.HTTPClientWithTimeout(r.Timeout), nil
 	}
 	tlsConfig, err := r.tlsConfig()
 	if err != nil {
@@ -90,15 +86,7 @@ func (r *Retriever) getHTTPClient() (internal.HTTPClient, error) {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = tlsConfig
 
-	timeout := r.Timeout
-	if timeout <= 0 {
-		timeout = 10 * time.Second
-	}
-
-	return &http.Client{
-		Timeout:   timeout,
-		Transport: transport,
-	}, nil
+	return internal.NewHTTPClient(r.Timeout, transport), nil
 }
 
 func (r *Retriever) tlsConfig() (*tls.Config, error) {
