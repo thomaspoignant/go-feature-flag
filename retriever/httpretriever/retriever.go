@@ -75,16 +75,18 @@ func (r *Retriever) getHTTPClient() (internal.HTTPClient, error) {
 	if r.httpClient != nil {
 		return r.httpClient, nil
 	}
-	if r.ClientCertPath == "" && r.ClientKeyPath == "" && r.CACertPath == "" {
-		return internal.HTTPClientWithTimeout(r.Timeout), nil
-	}
-	tlsConfig, err := r.tlsConfig()
-	if err != nil {
-		return nil, err
-	}
 
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = tlsConfig
+	var transport http.RoundTripper
+	if r.ClientCertPath != "" || r.ClientKeyPath != "" || r.CACertPath != "" {
+		tlsConfig, err := r.tlsConfig()
+		if err != nil {
+			return nil, err
+		}
+
+		tlsTransport := http.DefaultTransport.(*http.Transport).Clone()
+		tlsTransport.TLSClientConfig = tlsConfig
+		transport = tlsTransport
+	}
 
 	return internal.NewHTTPClient(r.Timeout, transport), nil
 }
