@@ -19,7 +19,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.6
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.44.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.2
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.43.2
 	github.com/aws/smithy-go v1.27.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.54.0
