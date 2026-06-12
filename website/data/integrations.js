@@ -5,6 +5,7 @@ import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import kinesislogo from '@site/static/docs/collectors/kinesis.png';
 import pubsublogo from '@site/static/docs/collectors/pubsub.png';
+import bigquerylogo from '@site/static/docs/collectors/bigquery.png';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
 import teamslogo from '@site/static/docs/notifier/teams.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
@@ -62,7 +63,7 @@ export const integrations = {
       description:
         'Retrieves the configuration from a Google Cloud Storage bucket.',
       longDescription: `Retrieves the configuration from a Google Cloud Storage bucket. This retriever is useful when you are using Google Cloud and want to use GCS to store your configuration files.`,
-      bgColor: 'cornflowerblue',
+      bgColor: 'rgb(194, 223, 255)',
       faLogo: 'devicon-googlecloud-plain',
       logo: googlelogo,
       docLink: 'google-cloud-storage',
@@ -149,15 +150,7 @@ export const integrations = {
       logo: azbloblogo,
       docLink: 'azure-blob-storage',
     },
-    {
-      name: 'Google Cloud Storage',
-      description: 'Export evaluation data to a Google Cloud Storage Bucket.',
-      type: 'async',
-      bgColor: 'cornflowerblue',
-      faLogo: 'devicon-googlecloud-plain',
-      logo: googlelogo,
-      docLink: 'google-cloud-storage',
-    },
+    
     {
       name: 'File System',
       description: 'Export evaluation data to a directory in your file system.',
@@ -185,12 +178,31 @@ export const integrations = {
       docLink: 'aws-kinesis',
     },
     {
+      name: 'Google Cloud Storage',
+      description: 'Export evaluation data to a Google Cloud Storage Bucket.',
+      type: 'async',
+      bgColor: 'rgb(194, 223, 255)',
+      faLogo: 'devicon-googlecloud-plain',
+      logo: googlelogo,
+      docLink: 'google-cloud-storage',
+    },
+    {
       name: 'Google Cloud PubSub',
       description: 'Export evaluation data inside a GCP PubSub topic.',
       type: 'sync',
       bgColor: 'rgb(194, 223, 255)',
       logo: pubsublogo,
       docLink: 'google-cloud-pubsub',
+    },
+    {
+      name: 'Google Cloud BigQuery',
+      description:
+        'Export evaluation and tracking data to Google Cloud BigQuery.',
+      longDescription: `The Google Cloud BigQuery exporter streams feature flag evaluation and tracking events directly to BigQuery using the official streaming-insert API.`,
+      type: 'bulk',
+      bgColor: 'rgb(194, 223, 255)',
+      logo: bigquerylogo,
+      docLink: 'google-cloud-bigquery',
     },
     {
       name: 'AWS SQS',

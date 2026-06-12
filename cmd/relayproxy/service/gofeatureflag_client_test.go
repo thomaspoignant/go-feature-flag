@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/bigqueryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -348,6 +349,23 @@ func Test_initExporter(t *testing.T) {
 			skipCompleteValidation: true,
 		},
 		{
+			name:    "Convert BigQueryExporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:      "bigquery",
+				ProjectID: "fake-project-id",
+				DatasetID: "fake-dataset",
+			},
+			want: ffclient.DataExporter{
+				Exporter: &bigqueryexporter.Exporter{
+					ProjectID: "fake-project-id",
+					DatasetID: "fake-dataset",
+				},
+			},
+			wantType:               &bigqueryexporter.Exporter{},
+			skipCompleteValidation: true,
+		},
+		{
 			name:    "Convert GoogleStorageExporter",
 			wantErr: assert.NoError,
 			conf: &config.ExporterConf{
@@ -452,6 +470,30 @@ func Test_initExporter(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_initExporter_BigQueryCredentialsAndTrackingEventType(t *testing.T) {
+	credentials := `{"type":"service_account","project_id":"fake-project-id"}`
+
+	got, err := initDataExporter(&config.ExporterConf{
+		Kind:              config.BigQueryExporter,
+		ProjectID:         "fake-project-id",
+		DatasetID:         "fake-dataset",
+		TableName:         "tracking-events",
+		GoogleCredentials: credentials,
+		AutoMigrate:       true,
+		ExporterEventType: ffclient.TrackingEventExporter,
+	})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ffclient.TrackingEventExporter, got.ExporterEventType)
+	bigQueryExporter, ok := got.Exporter.(*bigqueryexporter.Exporter)
+	assert.True(t, ok)
+	assert.Equal(t, "fake-project-id", bigQueryExporter.ProjectID)
+	assert.Equal(t, "fake-dataset", bigQueryExporter.DatasetID)
+	assert.Equal(t, "tracking-events", bigQueryExporter.TableName)
+	assert.Equal(t, []byte(credentials), bigQueryExporter.GoogleCredentials)
+	assert.True(t, bigQueryExporter.AutoMigrate)
 }
 
 func Test_initNotifier(t *testing.T) {

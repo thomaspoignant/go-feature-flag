@@ -16,6 +16,7 @@ import (
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/bigqueryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -295,6 +296,14 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		return &pubsubexporterv2.Exporter{
 			ProjectID: c.ProjectID,
 			Topic:     c.Topic,
+		}, nil
+	case config.BigQueryExporter:
+		return &bigqueryexporter.Exporter{
+			ProjectID:         c.ProjectID,
+			DatasetID:         c.DatasetID,
+			TableName:         c.TableName,
+			GoogleCredentials: []byte(c.GoogleCredentials),
+			AutoMigrate:       c.AutoMigrate,
 		}, nil
 	case config.AzureExporter:
 		return &azureexporter.Exporter{

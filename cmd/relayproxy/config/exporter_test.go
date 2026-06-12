@@ -22,6 +22,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 		ParquetCompressionCodec string
 		QueueURL                string
 		ProjectID               string
+		DatasetID               string
 		Topic                   string
 		StreamName              string
 		Container               string
@@ -224,6 +225,33 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid exporter: \"projectID\" and \"topic\" are required for kind \"pubsub\"",
 		},
+		{
+			name: "kind BigQuery valid",
+			fields: fields{
+				Kind:      "bigquery",
+				ProjectID: "fake-project-id",
+				DatasetID: "fake-dataset",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind BigQuery without project id",
+			fields: fields{
+				Kind:      "bigquery",
+				DatasetID: "fake-dataset",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"datasetID\" are required for kind \"bigquery\"",
+		},
+		{
+			name: "kind BigQuery without dataset id",
+			fields: fields{
+				Kind:      "bigquery",
+				ProjectID: "fake-project-id",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"datasetID\" are required for kind \"bigquery\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -241,6 +269,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 				QueueURL:                tt.fields.QueueURL,
 				ProjectID:               tt.fields.ProjectID,
+				DatasetID:               tt.fields.DatasetID,
 				Topic:                   tt.fields.Topic,
 				StreamName:              tt.fields.StreamName,
 				AccountName:             tt.fields.AccountName,
