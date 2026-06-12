@@ -24,14 +24,18 @@ retrievers:
     url: https://my-feature-flag-location.com/flags.goff.yaml
 # ...
 ```
-| Field name |    Mandatory     | Type   | Default  | Description                                                                                            |
-|------------|:----------------:|--------|----------|--------------------------------------------------------------------------------------------------------|
-| `kind`     |  <Mandatory />   | String | **none** | **Value should be `http`**.<br/>_This field is mandatory and describes which retriever you are using._ |
-| `url`      |  <Mandatory />   | String | **none** | Location to retrieve the file.                                                                         |
-| `method`   |  <Mandatory />   | String | `GET`    | The HTTP Method you are using to call the HTTP endpoint.                                               |
-| `body`     | <NotMandatory /> | String | **none** | The HTTP Body you are using to call the HTTP endpoint.                                                 |
-| `headers`  | <NotMandatory /> | Object | **none** | The HTTP headers used when calling the HTTP endpoint (useful for authorization).                       |
-| `timeout`  | <NotMandatory /> | String | `10000`  | Timeout in millisecond when calling the HTTP endpoint.                                                 |
+
+| Field name       |    Mandatory     | Type   | Default  | Description                                                                                            |
+|------------------|:----------------:|--------|----------|--------------------------------------------------------------------------------------------------------|
+| `kind`           |  <Mandatory />   | String | **none** | **Value should be `http`**.<br/>_This field is mandatory and describes which retriever you are using._ |
+| `url`            |  <Mandatory />   | String | **none** | Location to retrieve the file.                                                                         |
+| `method`         |  <Mandatory />   | String | `GET`    | The HTTP Method you are using to call the HTTP endpoint.                                               |
+| `body`           | <NotMandatory /> | String | **none** | The HTTP Body you are using to call the HTTP endpoint.                                                 |
+| `headers`        | <NotMandatory /> | Object | **none** | The HTTP headers used when calling the HTTP endpoint (useful for authorization).                       |
+| `clientCertPath` | <NotMandatory /> | String | **none** | Path to the client certificate file used for mTLS. Must be configured with `clientKeyPath`.            |
+| `clientKeyPath`  | <NotMandatory /> | String | **none** | Path to the client certificate key file used for mTLS. Must be configured with `clientCertPath`.       |
+| `caCertPath`     | <NotMandatory /> | String | **none** | Path to the CA certificate file used to verify the server certificate.                                 |
+| `timeout`        | <NotMandatory /> | String | `10000`  | Timeout in millisecond when calling the HTTP endpoint.                                                 |
 
 
 ## Configure the GO Module
@@ -49,10 +53,13 @@ err := ffclient.Init(ffclient.Config{
 defer ffclient.Close()
 ```
 
-| Field       |    Mandatory     | Description                                                                                               |
-|-------------|:----------------:|-----------------------------------------------------------------------------------------------------------|
-| __URL__     |  <Mandatory />   | Location to retrieve the file <br/> _(ex: [http://mydomain.io/flag.yaml](http://mydomain.io/flag.yaml))_. |
-| __Method__  | <NotMandatory /> | the HTTP method you want to use <br/>_(default is `GET`)_.                                                |
-| __Body__    | <NotMandatory /> | If you need a body to get the flags.                                                                      |
-| __Header__  | <NotMandatory /> | Header you should pass while calling the endpoint _(useful for authorization)_.                           |
-| __Timeout__ | <NotMandatory /> | Timeout for the HTTP call <br/>(default is 10 seconds).                                                   |
+| Field              |    Mandatory     | Description                                                                                               |
+|--------------------|:----------------:|-----------------------------------------------------------------------------------------------------------|
+| __URL__            |  <Mandatory />   | Location to retrieve the file <br/> _(ex: [http://mydomain.io/flag.yaml](http://mydomain.io/flag.yaml))_. |
+| __Method__         | <NotMandatory /> | the HTTP method you want to use <br/>_(default is `GET`)_.                                                |
+| __Body__           | <NotMandatory /> | If you need a body to get the flags.                                                                      |
+| __Header__         | <NotMandatory /> | Header you should pass while calling the endpoint _(useful for authorization)_.                           |
+| __ClientCertPath__ | <NotMandatory /> | Path to the client certificate file used for mTLS. Must be configured with `ClientKeyPath`.              |
+| __ClientKeyPath__  | <NotMandatory /> | Path to the client certificate key file used for mTLS. Must be configured with `ClientCertPath`.         |
+| __CACertPath__     | <NotMandatory /> | Path to the CA certificate file used to verify the server certificate.                                   |
+| __Timeout__        | <NotMandatory /> | Timeout for the HTTP call <br/>(default is 10 seconds).                                                   |

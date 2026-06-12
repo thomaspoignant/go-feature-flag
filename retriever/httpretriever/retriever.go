@@ -2,9 +2,12 @@ package httpretriever
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -28,6 +31,15 @@ type Retriever struct {
 	// Timeout we should wait before failing (default: 10 seconds)
 	Timeout time.Duration
 
+	// ClientCertPath is the path to the client certificate file used for mTLS.
+	ClientCertPath string
+
+	// ClientKeyPath is the path to the client certificate key file used for mTLS.
+	ClientKeyPath string
+
+	// CACertPath is the path to the CA certificate file used to verify the server certificate.
+	CACertPath string
+
 	httpClient internal.HTTPClient
 }
 
@@ -39,7 +51,12 @@ func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 
 // Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	resp, err := shared.CallHTTPAPI(ctx, r.URL, r.Method, r.Body, r.Timeout, r.Header, r.httpClient)
+	httpClient, err := r.getHTTPClient()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := shared.CallHTTPAPI(ctx, r.URL, r.Method, r.Body, r.Timeout, r.Header, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -52,4 +69,92 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+func (r *Retriever) getHTTPClient() (internal.HTTPClient, error) {
+	if r.httpClient != nil {
+		return r.httpClient, nil
+	}
+	if r.ClientCertPath == "" && r.ClientKeyPath == "" && r.CACertPath == "" {
+		timeout := r.Timeout
+		if timeout <= 0 {
+			timeout = 10 * time.Second
+		}
+		return internal.HTTPClientWithTimeout(timeout), nil
+	}
+	tlsConfig, err := r.tlsConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig = tlsConfig
+
+	timeout := r.Timeout
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+
+	return &http.Client{
+		Timeout:   timeout,
+		Transport: transport,
+	}, nil
+}
+
+func (r *Retriever) tlsConfig() (*tls.Config, error) {
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	certificates, err := r.clientCertificates()
+	if err != nil {
+		return nil, err
+	}
+	config.Certificates = certificates
+
+	rootCAs, err := r.rootCAs()
+	if err != nil {
+		return nil, err
+	}
+	config.RootCAs = rootCAs
+
+	return config, nil
+}
+
+func (r *Retriever) clientCertificates() ([]tls.Certificate, error) {
+	if (r.ClientCertPath == "") != (r.ClientKeyPath == "") {
+		return nil, fmt.Errorf("client certificate and client key must be provided together")
+	}
+	if r.ClientCertPath == "" {
+		return nil, nil
+	}
+
+	cert, err := tls.LoadX509KeyPair(r.ClientCertPath, r.ClientKeyPath)
+	if err != nil {
+		return nil, err
+	}
+	return []tls.Certificate{cert}, nil
+}
+
+func (r *Retriever) rootCAs() (*x509.CertPool, error) {
+	if r.CACertPath == "" {
+		return nil, nil
+	}
+
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	caCert, err := os.ReadFile(r.CACertPath)
+	if err != nil {
+		return nil, err
+	}
+	if !rootCAs.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("failed to parse CA certificate")
+	}
+	return rootCAs, nil
 }

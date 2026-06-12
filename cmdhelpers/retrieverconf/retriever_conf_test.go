@@ -80,6 +80,26 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"url\" property found for kind \"http\"",
 		},
 		{
+			name: "kind HTTPRetriever with client certificate but without client key",
+			fields: retrieverconf.RetrieverConf{
+				Kind:               "http",
+				URL:                "https://gofeatureflag.org/my-flag-test.yaml",
+				HTTPClientCertPath: "client.crt",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"clientKeyPath\" property found for kind \"http\"",
+		},
+		{
+			name: "kind HTTPRetriever with client key but without client certificate",
+			fields: retrieverconf.RetrieverConf{
+				Kind:              "http",
+				URL:               "https://gofeatureflag.org/my-flag-test.yaml",
+				HTTPClientKeyPath: "client.key",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"clientCertPath\" property found for kind \"http\"",
+		},
+		{
 			name: "kind GCP without Object",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "googleStorage",

@@ -188,6 +188,28 @@ func Test_InitRetriever(t *testing.T) {
 			wantType: &httpretriever.Retriever{},
 		},
 		{
+			name:    "Convert HTTP Retriever with client certificate",
+			wantErr: assert.NoError,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:               "http",
+				URL:                "https://gofeatureflag.org/my-flag-test.yaml",
+				HTTPClientCertPath: "/certs/client.crt",
+				HTTPClientKeyPath:  "/certs/client.key",
+				HTTPCACertPath:     "/certs/ca.crt",
+			},
+			want: &httpretriever.Retriever{
+				URL:            "https://gofeatureflag.org/my-flag-test.yaml",
+				Method:         http.MethodGet,
+				Body:           "",
+				Header:         nil,
+				Timeout:        10000000000,
+				ClientCertPath: "/certs/client.crt",
+				ClientKeyPath:  "/certs/client.key",
+				CACertPath:     "/certs/ca.crt",
+			},
+			wantType: &httpretriever.Retriever{},
+		},
+		{
 			name:    "Convert Google storage Retriever",
 			wantErr: assert.NoError,
 			conf: &retrieverconf.RetrieverConf{
