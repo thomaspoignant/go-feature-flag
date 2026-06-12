@@ -1,12 +1,12 @@
 module github.com/thomaspoignant/go-feature-flag
 
-go 1.26.3
+go 1.26.4
 
 require (
 	cloud.google.com/go/bigquery v1.74.0
 	cloud.google.com/go/pubsub v1.50.2
 	cloud.google.com/go/pubsub/v2 v2.6.0
-	cloud.google.com/go/storage v1.62.2
+	cloud.google.com/go/storage v1.62.3
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.7.0
@@ -14,14 +14,14 @@ require (
 	github.com/IBM/sarama v1.50.1
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.54.0
-	github.com/aws/aws-sdk-go-v2 v1.41.10
-	github.com/aws/aws-sdk-go-v2/config v1.32.21
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.20
-	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.1
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.43.8
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.102.1
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.28
-	github.com/aws/smithy-go v1.27.0
+	github.com/aws/aws-sdk-go-v2 v1.41.12
+	github.com/aws/aws-sdk-go-v2/config v1.32.23
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.22
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.6
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.44.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.2
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.43.2
+	github.com/aws/smithy-go v1.27.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.54.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
@@ -47,7 +47,7 @@ require (
 	github.com/pablor21/echo-etag/v4 v4.0.5
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
-	github.com/prometheus/common v0.68.0
+	github.com/prometheus/common v0.68.1
 	github.com/pterm/pterm v0.12.83
 	github.com/r3labs/diff/v3 v3.0.2
 	github.com/r3labs/sse/v2 v2.10.0
@@ -110,19 +110,19 @@ require (
 	github.com/apache/arrow/go/arrow v0.0.0-20200730104253-651201b0f516 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/apache/thrift v0.23.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.10 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.26 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.26 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.26 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.27 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.26 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.24 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.1.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.31.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.43.0 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.13 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.28 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.28 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.28 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.29 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.21 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.28 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.28 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.1.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.31.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.43.2 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
