@@ -42,14 +42,6 @@ svg:not(:root) {
   margin-left: auto;
 }
 
-.heroContent p {
-  font-size: 1.05rem;
-  line-height: 2rem;
-  font-weight: 400;
-  margin-bottom: 3rem;
-  color: var(--goff-main-ff-description);
-}
-
 .ghStars {
   text-align: center;
 }
@@ -66,13 +58,6 @@ svg:not(:root) {
 
 .availableGH button {
   margin: 0.5rem;
-}
-
-.descriptionFirstLine{
-  font-weight: 100;
-  font-size: 1.4rem;
-  text-transform:capitalize;
-  filter: brightness(1.25);
 }
 
 .pushy__btnGoff{

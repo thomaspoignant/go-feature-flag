@@ -20,25 +20,25 @@ export function UsingIt() {
       name: 'Grafana Labs',
       logo: grafana,
       url: 'https://grafana.com',
-      imgClassName: 'max-w-56',
+      imgClassName: 'max-w-48',
     },
     {
       name: 'Miro',
       logo: miro,
       url: 'https://miro.com',
-      imgClassName: 'max-w-36',
+      imgClassName: 'max-w-32',
     },
     {
       name: 'Cast.ai',
       logo: castai,
       url: 'https://cast.ai',
-      imgClassName: 'max-w-32',
+      imgClassName: 'max-w-24',
     },
     {
       name: 'Lyft',
       logo: lyft,
       url: 'https://lyft.com',
-      imgClassName: 'max-w-20',
+      imgClassName: 'max-w-12',
     },
     {
       name: 'Tencent',
@@ -85,7 +85,9 @@ export function UsingIt() {
   return (
     <section className={'pt-5 px-5'}>
       <div className="grid grid-pad text-center">
-        <span className="text-3xl">Trusted by developers from</span>
+        <span className="text-2xl">
+          Trusted in production by engineering teams at
+        </span>
         <UsingItLogos companies={companies} />
       </div>
     </section>
@@ -113,7 +115,7 @@ function UsingItLogos({companies}) {
               src={company.logo}
               alt={company.name}
               className={
-                company.imgClassName ? company.imgClassName : 'max-w-36'
+                company.imgClassName ? company.imgClassName : 'max-w-28'
               }
             />
           </Link>

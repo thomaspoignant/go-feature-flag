@@ -236,7 +236,7 @@ export const sdk = [
     ),
   },
   {
-    key: 'angular', 
+    key: 'angular',
     language: 'typescript',
     name: 'Angular',
     paradigm: ['Client'],
