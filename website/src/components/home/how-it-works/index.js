@@ -11,7 +11,7 @@ export function HowItWorks() {
         className="text-gray-800 dark:text-gray-50 text-5xl font-poppins font-bold tracking-[-0.18rem]">
         How it works?
       </span>
-      <p className="mt-3 mb-8 max-w-3xl mx-auto text-gray-500 dark:text-gray-400 text-[1.05rem] leading-relaxed">
+      <div className="mt-3 mb-8 max-w-3xl mx-auto text-gray-500 dark:text-gray-400 text-[1.05rem] leading-relaxed">
         <p>
           One <strong>relay-proxy</strong> on your infrastructure, your
           applications consume flags through OpenFeature SDKs, and your flag
@@ -21,7 +21,7 @@ export function HowItWorks() {
           <strong>Retrievers</strong>, <strong>notifiers</strong>, and{' '}
           <strong>exporters</strong> plug into the stack you are using.
         </p>
-      </p>
+      </div>
       <div className="max-w-5xl mx-auto px-4">
         <div className="rounded-2xl bg-white dark:bg-white/95 p-6 md:p-8 shadow-sm border border-solid border-[#273437]/10">
           <img

@@ -42,14 +42,6 @@ svg:not(:root) {
   margin-left: auto;
 }
 
-.heroContent p {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 400;
-  margin-bottom: 3rem;
-  color: var(--goff-main-ff-description);
-}
-
 .ghStars {
   text-align: center;
 }

@@ -9,16 +9,14 @@ import {sdk} from '@site/data/sdk';
 function GetStartedButton() {
   return (
     <div className="relative inline-flex group">
-      <div className="relative inline-flex group">
-        <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
-        <Link
-          to={'/docs/'}
-          title="Get Started with GO Feature Flag"
-          className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden border-2 border-solid border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
-          <FaArrowAltCircleRight className="mr-2" />
-          Get Started in 60 seconds
-        </Link>
-      </div>
+      <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
+      <Link
+        to={'/docs/'}
+        title="Get Started with GO Feature Flag"
+        className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden border-2 border-solid border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+        <FaArrowAltCircleRight className="mr-2" />
+        Get Started in 60 seconds
+      </Link>
     </div>
   );
 }

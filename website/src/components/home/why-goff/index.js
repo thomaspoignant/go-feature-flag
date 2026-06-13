@@ -168,45 +168,47 @@ export function WhyGoff() {
             )}
             role="table"
             aria-label="Feature flag solution comparison">
-            <div
-              className="min-h-[7.5rem] bg-titles-500/10"
-              role="columnheader"
-              aria-hidden
-            />
-
-            {COLUMNS.map(column => (
+            <div className="contents" role="row">
               <div
-                key={column.key}
-                className={clsx(
-                  'relative flex flex-col justify-center items-center min-h-[8.5rem] px-3 py-4 text-center',
-                  column.featured &&
-                    clsx(
-                      'border-solid border-b',
-                      borderClass,
-                      'bg-titles-500/25 border-t-2 border-l-2 border-r-2 !border-t-titles-500 !border-l-titles-500 !border-r-titles-500 rounded-t-xl'
-                    )
-                )}
-                role="columnheader">
-                {column.badge && (
-                  <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-titles-500 text-white text-[0.68rem] font-bold tracking-wide uppercase">
-                    {column.badge}
-                  </span>
-                )}
-                <h3 className="m-0 text-[1.22rem] font-bold leading-snug text-gray-800 dark:text-gray-50">
-                  {column.name}
-                </h3>
-                <p className="mt-1.5 mb-0 text-xs leading-snug text-gray-500 dark:text-gray-400">
-                  {column.tagline}
-                </p>
-              </div>
-            ))}
+                className="min-h-[7.5rem] bg-titles-500/10"
+                role="columnheader"
+                aria-hidden
+              />
+
+              {COLUMNS.map(column => (
+                <div
+                  key={column.key}
+                  className={clsx(
+                    'relative flex flex-col justify-center items-center min-h-[8.5rem] px-3 py-4 text-center',
+                    column.featured &&
+                      clsx(
+                        'border-solid border-b',
+                        borderClass,
+                        'bg-titles-500/25 border-t-2 border-l-2 border-r-2 !border-t-titles-500 !border-l-titles-500 !border-r-titles-500 rounded-t-xl'
+                      )
+                  )}
+                  role="columnheader">
+                  {column.badge && (
+                    <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-titles-500 text-white text-[0.68rem] font-bold tracking-wide uppercase">
+                      {column.badge}
+                    </span>
+                  )}
+                  <h3 className="m-0 text-[1.22rem] font-bold leading-snug text-gray-800 dark:text-gray-50">
+                    {column.name}
+                  </h3>
+                  <p className="mt-1.5 mb-0 text-xs leading-snug text-gray-500 dark:text-gray-400">
+                    {column.tagline}
+                  </p>
+                </div>
+              ))}
+            </div>
 
             {ROWS.map((row, rowIndex) => {
               const isLastRow = rowIndex === lastRowIndex;
               const isAltRow = rowIndex % 2 === 1;
 
               return (
-                <React.Fragment key={row.label}>
+                <div className="contents" role="row" key={row.label}>
                   <div
                     className={clsx(
                       'flex items-center min-h-[3.25rem] px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-50',
@@ -237,7 +239,7 @@ export function WhyGoff() {
                       <CellValue data={row.cells[column.key]} />
                     </div>
                   ))}
-                </React.Fragment>
+                </div>
               );
             })}
           </div>
