@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './styles.module.css';
 import Link from '@docusaurus/Link';
@@ -6,6 +6,37 @@ import clsx from 'clsx';
 
 export function HomeHeader() {
   const {siteConfig} = useDocusaurusContext();
+  const [githubStars, setGithubStars] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const shieldsUrl = `https://img.shields.io/github/stars/${siteConfig.organizationName}/${siteConfig.projectName}.json`;
+
+    fetch(shieldsUrl, {signal: controller.signal})
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`shields.io responded with ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data?.message) {
+          setGithubStars(data.message);
+        }
+      })
+      .catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch GitHub star count:', error);
+        }
+      });
+
+    return () => controller.abort();
+  }, [siteConfig.organizationName, siteConfig.projectName]);
+
+  const githubLinkTitle = githubStars
+    ? `View on GitHub (${githubStars} stars)`
+    : 'View on GitHub';
+
   return (
     <section className={styles.hero}>
       <div className={styles.heroShape}>
@@ -48,8 +79,8 @@ export function HomeHeader() {
         <div className="row">
           <div className="col col--6">
             <div className={styles.heroContent}>
-              <span className="text-gray-800 dark:text-gray-50 text-5xl font-poppins font-bold tracking-[-0.18rem]">
-                GO Feature Flag
+              <span className="text-gray-800 dark:text-gray-50 text-6xl font-poppins font-bold tracking-[-0.18rem]">
+                {`${siteConfig.title}`}
               </span>
               <br />
               <span className="text-titles-500 text-[2.8rem] font-poppins font-bold tracking-[-0.18rem] leading-10">
@@ -57,21 +88,13 @@ export function HomeHeader() {
               </span>
               <p>
                 <span className={styles.descriptionFirstLine}>
-                  Ship Faster, Reduce Risk, and Build Scale
+                  A lightweight, self-hosted feature flag solution built on the
+                  OpenFeature standard.
                 </span>
                 <br />
-                Feature flags lets you modify system behavior without changing
-                code. Deploy every day, release when you are ready. Reduce risk
-                by releasing your features progressively.
+                One container, one config file, <u>no database</u> required - GO
+                Feature Flag works with the softwares you already use.
               </p>
-            </div>
-            <div className={styles.ghStars}>
-              <Link to={siteConfig.customFields.github}>
-                <img
-                  alt="GitHub Repo stars"
-                  src="https://img.shields.io/github/stars/thomaspoignant/go-feature-flag?style=social"
-                />
-              </Link>
             </div>
             <div className={'text-center items-center gap-30'}>
               <div className="relative inline-flex group">
@@ -87,11 +110,18 @@ export function HomeHeader() {
               <div className="relative inline-flex group ml-5 mt-4">
                 <div className="border-gray-700 border-4 absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt hover:no-underline"></div>
                 <Link
-                  to={'/docs/getting-started'}
-                  title="Get Started"
+                  to={siteConfig.customFields.github}
+                  title={githubLinkTitle}
                   className="hover:no-underline hover:text-gray-700 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-[#9fbeb3] font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
-                  <i className="fa-solid fa-circle-right mr-4"></i>
-                  Get Started
+                  <i
+                    className="fa-brands fa-github mr-4"
+                    aria-hidden="true"></i>
+                  View on GitHub
+                  {githubStars && (
+                    <span className="ml-2 font-semibold opacity-90">
+                      ★ {githubStars}
+                    </span>
+                  )}
                 </Link>
               </div>
             </div>

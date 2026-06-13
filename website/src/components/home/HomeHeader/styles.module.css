@@ -42,21 +42,75 @@ svg:not(:root) {
   margin-left: auto;
 }
 
-.heroContent p {
+.brandLine {
+  font-size: 1.25rem;
+  letter-spacing: -0.04rem;
+  line-height: 1.4;
+  margin: 0 0 0.75rem;
+}
+
+.heroHeadline {
+  font-size: clamp(1.75rem, 4.5vw, 2.85rem);
+  letter-spacing: -0.12rem;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+}
+
+.heroSubhead {
   font-size: 1.05rem;
-  line-height: 2rem;
+  line-height: 1.75rem;
   font-weight: 400;
-  margin-bottom: 3rem;
+  margin: 0 0 2rem;
   color: var(--goff-main-ff-description);
 }
 
-.ghStars {
-  text-align: center;
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
-.ghStars img {
-  margin-bottom: 1rem;
-  height: 1.8rem;
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  font-family: Poppins, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.ctaPrimary {
+  color: #fff;
+  background-color: #111827;
+}
+
+.ctaPrimary:hover {
+  color: #fff;
+  background-color: #1f2937;
+}
+
+.ctaSecondary {
+  color: var(--ifm-font-color-base);
+  background-color: transparent;
+  border: 2px solid var(--ifm-color-emphasis-300);
+}
+
+.ctaSecondary:hover {
+  color: var(--ifm-font-color-base);
+  border-color: var(--ifm-color-emphasis-500);
+}
+
+.starCount {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
 .availableGH {
@@ -68,15 +122,8 @@ svg:not(:root) {
   margin: 0.5rem;
 }
 
-.descriptionFirstLine{
-  font-weight: 100;
-  font-size: 1.4rem;
-  text-transform:capitalize;
-  filter: brightness(1.25);
-}
-
-.pushy__btnGoff{
-  background-color: var(--goff-main-subtitle-color)
+.pushy__btnGoff {
+  background-color: var(--goff-main-subtitle-color);
 }
 
 .goffMainSubtitle {
@@ -84,6 +131,6 @@ svg:not(:root) {
   font-family: Poppins, sans-serif;
   font-weight: 700;
   letter-spacing: -0.18rem;
-  font-size: 2.80rem;
+  font-size: 2.8rem;
   line-height: 2.5rem;
 }
