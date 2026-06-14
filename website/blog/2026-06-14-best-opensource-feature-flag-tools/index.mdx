@@ -1,6 +1,9 @@
 ---
-title: Best Open-Source Feature Flag Tools (2026)
+title: Best Open-Source Feature Flagging Tools in 2026
 description: The best open-source feature flag tools in 2026, compared through the OpenFeature standard — so you choose for capability, not lock-in.
+slug: best-opensource-feature-flag-tools
+authors: [thomaspoignant]
+tags: [openfeature, feature flags, open source, comparison]
 keywords:
   - open source feature flags
   - feature flag tools
@@ -8,16 +11,15 @@ keywords:
   - feature management
   - self-hosted feature flags
   - feature flag comparison
-hide_table_of_contents: false
 ---
 
-import {ComparisonTable} from './_components/ComparisonTable';
+import {ComparisonTable} from '@site/src/components/comparison/ComparisonTable';
 import {
   ToolHeader,
   Field,
   Criteria,
   OpenFeatureFlow,
-} from './_components/ToolMeta';
+} from '@site/src/components/comparison/ToolMeta';
 import Link from '@docusaurus/Link';
 import {FaGithub, FaBook, FaExternalLinkAlt} from 'react-icons/fa';
 import goffLogo from '@site/static/img/logo/logo.png';
@@ -29,20 +31,11 @@ import fliptLogo from '@site/static/img/comparison/flipt.png';
 import posthogLogo from '@site/static/img/comparison/posthog.png';
 import featurevisorLogo from '@site/static/img/comparison/featurevisor.png';
 
-<div className="not-prose mb-10 rounded-2xl border border-solid border-[#273437]/10 dark:border-white/10 bg-gradient-to-br from-titles-500/10 to-transparent px-6 py-10 md:px-10 md:py-12">
-  <span className="block text-sm md:text-base font-poppins font-semibold tracking-tight text-titles-500 mb-3">
-    Open-source feature flag comparison · 2026
-  </span>
-  <h1 className="text-[2rem] md:text-[2.75rem] leading-[1.1] font-poppins font-extrabold tracking-[-0.06rem] text-gray-800 dark:text-gray-50 m-0">
-    Best Open-Source Feature Flagging Tools in 2026
-  </h1>
-  <p className="mt-4 mb-0 text-lg leading-relaxed text-gray-600 dark:text-gray-300 max-w-3xl">
-    …and why the <strong>OpenFeature</strong> standard should decide your
-    shortlist. In 2026 the real risk isn&rsquo;t picking the wrong tool — it&rsquo;s
-    locking your codebase to one. Here&rsquo;s how the leading open-source options
-    actually compare, judged for capability and openness, not marketing.
-  </p>
-</div>
+The real risk in 2026 isn't picking the wrong feature-flag tool — it's locking your
+codebase to one. Here's how the leading open-source options compare, judged through
+the **OpenFeature** standard for capability and true openness, not marketing.
+
+
 
 ## The 2026 lens: lock-in, not features
 
@@ -65,6 +58,7 @@ That makes **OpenFeature support a first-class selection criterion in 2026**, no
 a nice-to-have — and it's the axis most listicles skip.
 
 <OpenFeatureFlow />
+{/* truncate */}
 
 So this comparison weighs OpenFeature posture alongside the usual criteria. Two of
 the tools come straight out of the OpenFeature ecosystem: **flagd**, the official
@@ -273,7 +267,7 @@ posture belongs at the top of your shortlist, not the bottom.
       <span className="inline-flex items-center leading-none">Read the docs</span>
     </Link>
     <Link
-      to="/docs"
+      to="https://github.com/thomaspoignant/go-feature-flag"
       className="hover:no-underline hover:text-[#273437] inline-flex items-center justify-center px-7 py-3 text-base font-bold text-titles-500 hover:bg-[#8ca99e] rounded-xl border-2 border-solid border-titles-500 shadow-sm transition-all duration-200">
       <FaGithub className="mr-2" />
       <span className="inline-flex items-center leading-none">Star it on GitHub</span>
