@@ -18,7 +18,10 @@ export default function GitHubStarsNavbarItem() {
         return response.json();
       })
       .then(data => {
-        if (data?.message) {
+        const isStarCount =
+          typeof data?.message === 'string' &&
+          /^[\d.,]+[kmb]?$/i.test(data.message.trim());
+        if (isStarCount) {
           setStars(data.message);
         }
       })

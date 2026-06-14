@@ -37,7 +37,10 @@ function ViewOnGitHubButton() {
         return response.json();
       })
       .then(data => {
-        if (data?.message) {
+        const isStarCount =
+          typeof data?.message === 'string' &&
+          /^[\d.,]+[kmb]?$/i.test(data.message.trim());
+        if (isStarCount) {
           setGithubStars(data.message);
         }
       })
