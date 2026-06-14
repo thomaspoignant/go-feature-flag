@@ -1,0 +1,283 @@
+---
+title: Best Open-Source Feature Flag Tools (2026)
+description: The best open-source feature flag tools in 2026, compared through the OpenFeature standard — so you choose for capability, not lock-in.
+keywords:
+  - open source feature flags
+  - feature flag tools
+  - openfeature
+  - feature management
+  - self-hosted feature flags
+  - feature flag comparison
+hide_table_of_contents: false
+---
+
+import {ComparisonTable} from './_components/ComparisonTable';
+import {
+  ToolHeader,
+  Field,
+  Criteria,
+  OpenFeatureFlow,
+} from './_components/ToolMeta';
+import Link from '@docusaurus/Link';
+import {FaGithub, FaBook, FaExternalLinkAlt} from 'react-icons/fa';
+import goffLogo from '@site/static/img/logo/logo.png';
+import flagdLogo from '@site/static/img/comparison/flagd.png';
+import unleashLogo from '@site/static/img/comparison/unleash.png';
+import flagsmithLogo from '@site/static/img/comparison/flagsmith.png';
+import growthbookLogo from '@site/static/img/comparison/growthbook.png';
+import fliptLogo from '@site/static/img/comparison/flipt.png';
+import posthogLogo from '@site/static/img/comparison/posthog.png';
+import featurevisorLogo from '@site/static/img/comparison/featurevisor.png';
+
+<div className="not-prose mb-10 rounded-2xl border border-solid border-[#273437]/10 dark:border-white/10 bg-gradient-to-br from-titles-500/10 to-transparent px-6 py-10 md:px-10 md:py-12">
+  <span className="block text-sm md:text-base font-poppins font-semibold tracking-tight text-titles-500 mb-3">
+    Open-source feature flag comparison · 2026
+  </span>
+  <h1 className="text-[2rem] md:text-[2.75rem] leading-[1.1] font-poppins font-extrabold tracking-[-0.06rem] text-gray-800 dark:text-gray-50 m-0">
+    Best Open-Source Feature Flagging Tools in 2026
+  </h1>
+  <p className="mt-4 mb-0 text-lg leading-relaxed text-gray-600 dark:text-gray-300 max-w-3xl">
+    …and why the <strong>OpenFeature</strong> standard should decide your
+    shortlist. In 2026 the real risk isn&rsquo;t picking the wrong tool — it&rsquo;s
+    locking your codebase to one. Here&rsquo;s how the leading open-source options
+    actually compare, judged for capability and openness, not marketing.
+  </p>
+</div>
+
+## The 2026 lens: lock-in, not features
+
+Open-source feature flagging has matured. Targeting rules, percentage rollouts,
+and self-hosting are now table stakes — most tools on this list do them well. So
+the interesting question is no longer "which one has the most features?" It's
+"which decision will I still be happy with in three years?"
+
+The thing that outlives your tool choice is the **flag-evaluation code scattered
+across your services**. If those calls are written against a vendor's proprietary
+SDK, switching backends later means touching every call site. That is the lock-in
+that actually costs teams.
+
+[**OpenFeature**](https://openfeature.dev) — the CNCF vendor-neutral specification
+and SDK set — is the answer the category is standardizing on. It decouples the
+*flag API in your application code* from the *backend that serves the flags*. You
+write against the OpenFeature SDK once, then plug in a provider for whatever
+backend you run. Swap the backend later and your application code doesn't change.
+That makes **OpenFeature support a first-class selection criterion in 2026**, not
+a nice-to-have — and it's the axis most listicles skip.
+
+<OpenFeatureFlow />
+
+So this comparison weighs OpenFeature posture alongside the usual criteria. Two of
+the tools come straight out of the OpenFeature ecosystem: **flagd**, the official
+reference implementation that proves the standard, and **GO Feature Flag**, a
+production-grade, batteries-included OpenFeature-native backend. They're listed
+first because, on the 2026 lens, that's where they land.
+
+## How we evaluated
+
+<Criteria />
+
+## The tools
+
+### GO Feature Flag {#go-feature-flag}
+
+<ToolHeader logo={goffLogo} alt="GO Feature Flag" posture="OpenFeature-native" postureTone="good">
+The most complete OpenFeature-native backend — and one of the simplest to install, because there's no database to run.
+</ToolHeader>
+
+GO Feature Flag (GOFF) is a self-hosted feature-flag solution built around
+OpenFeature from the ground up, with native providers across Go, Node/JS, Python,
+Java, .NET, PHP, Ruby, Swift/Android, Kotlin and web (React/Angular) — plus OFREP
+for anything else. Flags are plain configuration — YAML, JSON, or TOML — that GOFF
+retrieves and keeps in memory. With no database to provision, migrate, or back up,
+**it's about as simple to install and operate as a feature-flag backend gets**:
+run a single binary, point it at your config, done.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Teams that want OpenFeature-native flagging they can stand up in minutes — no database to run — that stays GitOps-friendly, fully open, and never paywalls a core feature.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">There is **no runtime admin dashboard** — GOFF ships a web flag <Link to="/editor">_editor_</Link> for authoring and validating configs; management is otherwise GitOps-driven. Evaluation is over HTTP/OFREP.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">**MIT, fully open** — no paywalled enterprise tier. Single Go binary (distroless images, Helm, Lambda); flags load from HTTP, S3, GCS, Azure Blob, Kubernetes, files, GitHub/GitLab/Bitbucket, MongoDB, PostgreSQL, or Redis.</Field>
+
+GOFF also does the parts that matter past the basics: targeting rules, progressive
+and scheduled rollouts, A/B experimentation, data **exporters** (S3, GCS, Azure,
+Kafka, Kinesis, Pub/Sub, SQS, BigQuery, OpenTelemetry, webhook, file, logs) for
+usage analytics, and change **notifiers** (Slack, Discord, Microsoft Teams,
+webhook). It supports both **remote evaluation** (via the relay proxy) and
+**in-process evaluation** (a WebAssembly module embedded in the SDKs), so you can
+trade a network hop for local-latency reads.
+
+### flagd {#flagd}
+
+<ToolHeader logo={flagdLogo} alt="flagd" posture="OpenFeature reference" postureTone="good">
+The CNCF reference backend that proves the standard.
+</ToolHeader>
+
+flagd is the OpenFeature project's own flag-evaluation daemon: a minimal,
+config-driven engine that demonstrates how an OpenFeature backend should behave. It
+reads flag definitions from files, HTTP, or gRPC sync sources and evaluates them
+with targeting and fractional rollout — no database, no extra services. As the
+reference implementation, it has first-party providers across the OpenFeature SDKs.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Learning OpenFeature, local development, and minimal setups where you want the standard with as few moving parts as possible.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">It's intentionally **not a management platform** — no admin UI, no experimentation/analytics, no notifiers. You edit flag definitions directly and assemble the rest yourself.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">**Apache-2.0, fully open.** Self-hosted Go daemon.</Field>
+
+flagd and GOFF are allies in the same ecosystem, not rivals. The simplest way to
+think about it: flagd proves the standard; GOFF is what that standard looks like
+productionized — flagd's evaluation model plus retrievers, exporters, notifiers,
+and a multi-language provider set.
+
+### Unleash {#unleash}
+
+<ToolHeader logo={unleashLogo} alt="Unleash" posture="Community provider" postureTone="warn">
+A mature, widely-adopted platform with a polished UI — and a paid tier.
+</ToolHeader>
+
+Unleash is one of the best-known names in OSS feature management, with a full admin
+dashboard, SDKs across many languages, and a strong activation/gradual-rollout
+model. OpenFeature providers for Unleash exist (JS, Java, Go) but live in the
+community `sdk-contrib` repos rather than being vendor-maintained.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Teams that want a battle-tested platform with a rich management UI and are comfortable with the open-core model.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">It follows an **open-core** model — features like advanced RBAC and SSO sit in the paid Enterprise edition. Self-hosting **requires PostgreSQL**. **OpenFeature** support is light and **community-maintained**, Unleashed does not ship any native providers for OpenFeature.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">Apache-2.0 core (open-core); self-hosted with PostgreSQL.</Field>
+
+### Flagsmith {#flagsmith}
+
+<ToolHeader logo={flagsmithLogo} alt="Flagsmith" posture="Official provider" postureTone="good">
+A flag platform with a clear security/compliance posture and an official OpenFeature provider.
+</ToolHeader>
+
+Flagsmith offers feature flags, remote config, and segmentation with a focus on
+governance and self-hosting for regulated environments. As an ecosystem member, it
+maintains its own (vendor-maintained) OpenFeature providers.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Organizations that prioritize compliance/governance and want vendor-maintained OpenFeature support out of the box.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Self-hosting is **heavier (requires PostgreSQL)**, and advanced governance/SSO features are part of the **paid Enterprise** edition (open-core). A/B testing typically leans on integrations rather than a built-in stats engine.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">BSD-3 core (open-core); self-hosted with PostgreSQL.</Field>
+
+### GrowthBook {#growthbook}
+
+<ToolHeader logo={growthbookLogo} alt="GrowthBook" posture="Official provider" postureTone="good">
+An A/B testing platform with strong statistics, where flags are one piece.
+</ToolHeader>
+
+GrowthBook is built around experimentation: it connects to your data warehouse and
+runs Bayesian/frequentist analysis on experiments, with feature flags as the
+delivery mechanism. It maintains official OpenFeature providers (Go, Java, Python,
+.NET, Web/React). Its experimentation strength is real.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Teams whose primary need is rigorous experimentation and metric analysis tied to a data warehouse.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Flag management is one part of a larger experimentation product; **MongoDB is required** to self-host, and governance features sit in **commercial tiers** (open-core).</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">MIT core with some commercially-licensed directories (open-core); self-hosted with MongoDB.</Field>
+
+If experimentation and statistical analysis are the job, GrowthBook is a genuinely
+strong pick — more so than GOFF, whose experimentation pairs A/B rollouts with data
+exporters you analyze in your own stack.
+
+### Flipt {#flipt}
+
+<ToolHeader logo={fliptLogo} alt="Flipt" posture="Provider + OFREP" postureTone="good">
+The tool closest to GOFF's niche: lightweight, Go, and loved by DevOps.
+</ToolHeader>
+
+Flipt is a self-hosted, Go-based flag engine with a clean web UI. Flipt v2 went
+**Git-native**, storing flag state in a Git repository and removing the database
+dependency that v1 required — a GitOps model that lands close to GOFF's. It
+implements OFREP (usable from any OpenFeature SDK) and ships Flipt-specific
+providers.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">DevOps teams that want a Git-native, low-footprint flag server with a built-in UI.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">It's intentionally **narrower** — no built-in experimentation/analytics engine — and the ecosystem is smaller than the bigger platforms. Licensing changed: the client is MIT, but the **server moved to the Fair Core License** (source-available, converts to MIT over time) — open in spirit, but not classic OSS.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">MIT (client) / Fair Core License (server, source-available); v2 is Git-native (no DB).</Field>
+
+### PostHog {#posthog}
+
+<ToolHeader logo={posthogLogo} alt="PostHog" posture="Community provider" postureTone="warn">
+Feature flags as one module of a large product-analytics platform.
+</ToolHeader>
+
+PostHog bundles product analytics, session replay, experiments, and feature flags.
+If you already run PostHog, its flags and experiments are tightly integrated with
+your analytics. OpenFeature support is third-party (community) and not
+vendor-maintained — some providers are dated.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Teams already invested in PostHog's analytics suite who want flags and experiments in the same place.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Flags are a feature of a **large platform**, so self-hosting is **heavy — PostgreSQL, ClickHouse, and Redis** — and PostHog steers most users to its cloud. If you only need feature flags, this is a lot of infrastructure to operate.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">MIT core with a separate enterprise directory (open-core); self-hosted with PostgreSQL + ClickHouse + Redis.</Field>
+
+### Featurevisor {#featurevisor}
+
+<ToolHeader logo={featurevisorLogo} alt="Featurevisor" posture="No OpenFeature provider" postureTone="bad">
+Flags as code, with no backend or database by design.
+</ToolHeader>
+
+Featurevisor takes GitOps to its logical end: flag definitions live in your Git
+repo, a CLI builds static "datafiles," and you publish them to a CDN. There's no
+server to run and no database — your existing Git review and CI flow is the control
+plane. It ships its own polyglot SDKs rather than an OpenFeature provider.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">Teams that want maximal simplicity and a pure files-in-Git workflow, and don't need a management UI or hosted evaluation server.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Minimal by intent — **no management UI** (it generates a read-only status site) and **no managed evaluation server**; you assemble more of the surrounding workflow yourself. A/B tests can be _defined_ declaratively, but there's no built-in statistical analysis.</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">**MIT, fully open.** No server, no database.</Field>
+
+Featurevisor is a useful contrast: it makes GOFF's middle ground obvious — GOFF
+keeps the no-database, config-as-code GitOps model but adds a managed evaluation
+proxy, native OpenFeature providers, exporters, and notifiers.
+
+## At a glance
+
+<ComparisonTable />
+
+## How to choose
+
+Feature-flag tooling isn't one-size-fits-all. A few common scenarios:
+
+- **You want OpenFeature-native flagging you can install in minutes and that stays fully open.** This is GO Feature Flag's home turf: a single binary with no database to operate, MIT-licensed with no paid core, GitOps-friendly retrievers, native providers across many languages, and both remote and in-process evaluation. **→ GO Feature Flag.**
+- **Experimentation with real statistical analysis is the primary goal.** **GrowthBook** (warehouse-native stats) or **PostHog** (if you already run its analytics suite) will serve you better than a flag-first tool.
+- **You need enterprise governance, RBAC, SSO, and commercial support.** **Unleash** or **Flagsmith** are mature open-core platforms built for that — just budget for the paid tier and a PostgreSQL deployment.
+- **You want pure GitOps with no server at all.** **Flipt v2** (Git-native server with a UI) fit that brief.
+
+The throughline: whichever you choose, write your application against **OpenFeature**.
+That's what keeps the decision reversible — and it's exactly why a tool's OpenFeature
+posture belongs at the top of your shortlist, not the bottom.
+
+<div className="not-prose mt-12 rounded-2xl border border-solid border-titles-500/30 bg-titles-500/10 px-6 py-8 md:px-10 text-center">
+  <h2 className="text-2xl md:text-3xl font-poppins font-extrabold text-gray-800 dark:text-gray-50 m-0">
+    Try the OpenFeature-native option
+  </h2>
+  <p className="mt-3 mb-6 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+    GO Feature Flag is 100% open source (MIT) and runs as a single lightweight
+    binary — with no database to provision, you can install it and have a flag
+    evaluating in minutes.
+  </p>
+  <div className="flex flex-wrap items-center justify-center gap-4">
+    <Link
+      to="/docs"
+      className="hover:no-underline hover:text-[#273437] inline-flex items-center justify-center px-7 py-3 text-base font-bold text-[#273437] bg-titles-500 hover:bg-[#8ca99e] rounded-xl border-2 border-solid border-titles-500 shadow-sm transition-all duration-200">
+      <FaBook className="mr-2" />
+      <span className="inline-flex items-center leading-none">Read the docs</span>
+    </Link>
+    <Link
+      to="/docs"
+      className="hover:no-underline hover:text-[#273437] inline-flex items-center justify-center px-7 py-3 text-base font-bold text-titles-500 hover:bg-[#8ca99e] rounded-xl border-2 border-solid border-titles-500 shadow-sm transition-all duration-200">
+      <FaGithub className="mr-2" />
+      <span className="inline-flex items-center leading-none">Star it on GitHub</span>
+      <FaExternalLinkAlt className="ml-1 w-3 h-3" />
+    </Link>
+  </div>
+</div>
