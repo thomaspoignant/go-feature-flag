@@ -78,7 +78,6 @@ function ViewOnGitHubButton() {
                   'min-w-[4ch] transition-opacity duration-300',
                   !githubStars && 'opacity-0'
                 )}>
-
                 {githubStars ?? '0.0k'}
               </span>
             </div>
