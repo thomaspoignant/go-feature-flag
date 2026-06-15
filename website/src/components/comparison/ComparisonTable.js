@@ -21,129 +21,112 @@ const COLUMNS = [
   {key: 'open', label: 'Truly open (no paywalled core)?'},
 ];
 
-// Every cell value below is verified against the project's own docs / the
-// OpenFeature ecosystem (June 2026). Keep this qualitative — no numbers.
-// tone: 'good' | 'bad' | 'warn' | null (neutral). icon: 'check' | 'cross' | 'partial'.
+// Cell builders — explicitly named for the recurring visual semantics so the
+// row data below stays a one-liner per cell. Verified against each project's
+// own docs / the OpenFeature ecosystem (June 2026). Qualitative only — no numbers.
+const cellG = text => ({text, icon: 'check', tone: 'good'}); // green check
+const cellY = text => ({text, icon: 'partial', tone: 'warn'}); // amber partial
+const cellR = text => ({text, icon: 'cross', tone: 'bad'}); // red cross
+const cellCross = text => ({text, icon: 'cross'}); // neutral cross
+const cellCheck = text => ({text, icon: 'check'}); // neutral check
+const cellTxt = (text, tone) => (tone ? {text, tone} : {text});
+
 const ROWS = [
   {
     featured: true,
     tool: 'GO Feature Flag',
     logo: goffLogo,
     cells: {
-      stack: {text: 'Go'},
-      license: {text: 'MIT', tone: 'good'},
-      db: {text: 'None', icon: 'check', tone: 'good'},
-      openfeature: {text: 'Native (ecosystem)', icon: 'check', tone: 'good'},
-      ui: {
-        text: 'Config editor (no runtime admin UI)',
-        tone: 'warn',
-        icon: 'partial',
-      },
-      experimentation: {
-        text: 'A/B + data exporters',
-        icon: 'check',
-        tone: 'good',
-      },
-      open: {text: 'Yes — fully open', icon: 'check', tone: 'good'},
+      license: cellTxt('MIT', 'good'),
+      db: cellG('None'),
+      openfeature: cellG('Native (ecosystem)'),
+      ui: cellY('Config editor (no runtime admin UI)'),
+      experimentation: cellG('A/B + data exporters'),
+      open: cellG('Yes — fully open'),
     },
   },
   {
     tool: 'flagd',
     logo: flagdLogo,
     cells: {
-      stack: {text: 'Go'},
-      license: {text: 'Apache-2.0', tone: 'good'},
-      db: {text: 'None', icon: 'check', tone: 'good'},
-      openfeature: {
-        text: 'Native (reference impl)',
-        icon: 'check',
-        tone: 'good',
-      },
-      ui: {text: 'None (headless daemon)', icon: 'cross'},
-      experimentation: {text: 'No', icon: 'cross'},
-      open: {text: 'Yes — fully open', icon: 'check', tone: 'good'},
+      license: cellTxt('Apache-2.0', 'good'),
+      db: cellG('None'),
+      openfeature: cellG('Native (reference impl)'),
+      ui: cellCross('None (headless daemon)'),
+      experimentation: cellCross('No'),
+      open: cellG('Yes — fully open'),
     },
   },
   {
     tool: 'Unleash',
     logo: unleashLogo,
     cells: {
-      stack: {text: 'Node.js'},
-      license: {text: 'Apache-2.0 (open-core)'},
-      db: {text: 'PostgreSQL', icon: 'cross'},
-      openfeature: {text: 'Community provider', icon: 'partial', tone: 'warn'},
-      ui: {text: 'Yes', icon: 'check'},
-      experimentation: {text: 'Partial', icon: 'partial', tone: 'warn'},
-      open: {text: 'No — paid Enterprise tier', icon: 'cross', tone: 'bad'},
+      license: cellTxt('Apache-2.0 (open-core)'),
+      db: cellCross('PostgreSQL'),
+      openfeature: cellY('Community provider'),
+      ui: cellCheck('Yes'),
+      experimentation: cellY('Partial'),
+      open: cellR('No — paid Enterprise tier'),
     },
   },
   {
     tool: 'Flagsmith',
     logo: flagsmithLogo,
     cells: {
-      stack: {text: 'Python / Django'},
-      license: {text: 'BSD-3 (open-core)'},
-      db: {text: 'PostgreSQL', icon: 'cross'},
-      openfeature: {text: 'Official provider', icon: 'check', tone: 'good'},
-      ui: {text: 'Yes', icon: 'check'},
-      experimentation: {text: 'Partial', icon: 'partial', tone: 'warn'},
-      open: {text: 'No — paid Enterprise tier', icon: 'cross', tone: 'bad'},
+      license: cellTxt('BSD-3 (open-core)'),
+      db: cellCross('PostgreSQL'),
+      openfeature: cellG('Official provider'),
+      ui: cellCheck('Yes'),
+      experimentation: cellY('Partial'),
+      open: cellR('No — paid Enterprise tier'),
     },
   },
   {
     tool: 'GrowthBook',
     logo: growthbookLogo,
     cells: {
-      stack: {text: 'Node.js'},
-      license: {text: 'MIT (open-core)'},
-      db: {text: 'MongoDB', icon: 'cross'},
-      openfeature: {text: 'Official provider', icon: 'check', tone: 'good'},
-      ui: {text: 'Yes', icon: 'check'},
-      experimentation: {
-        text: 'Yes — core strength',
-        icon: 'check',
-        tone: 'good',
-      },
-      open: {text: 'No — commercial tiers', icon: 'cross', tone: 'bad'},
+      license: cellTxt('MIT (open-core)'),
+      db: cellCross('MongoDB'),
+      openfeature: cellG('Official provider'),
+      ui: cellCheck('Yes'),
+      experimentation: cellG('Yes — core strength'),
+      open: cellR('No — commercial tiers'),
     },
   },
   {
     tool: 'Flipt',
     logo: fliptLogo,
     cells: {
-      stack: {text: 'Go'},
-      license: {text: 'MIT client / FCL server'},
-      db: {text: 'None (v2, Git-native)', icon: 'check', tone: 'good'},
-      openfeature: {text: 'Provider + OFREP', icon: 'check', tone: 'good'},
-      ui: {text: 'Yes', icon: 'check'},
-      experimentation: {text: 'Partial', icon: 'partial', tone: 'warn'},
-      open: {text: 'Source-available server', icon: 'partial', tone: 'warn'},
+      license: cellTxt('MIT client / FCL server'),
+      db: cellG('None (v2, Git-native)'),
+      openfeature: cellG('Provider + OFREP'),
+      ui: cellCheck('Yes'),
+      experimentation: cellY('Partial'),
+      open: cellY('Source-available server'),
     },
   },
   {
     tool: 'PostHog',
     logo: posthogLogo,
     cells: {
-      stack: {text: 'Python'},
-      license: {text: 'MIT (open-core)'},
-      db: {text: 'Postgres + ClickHouse + Redis', icon: 'cross', tone: 'bad'},
-      openfeature: {text: 'Community provider', icon: 'partial', tone: 'warn'},
-      ui: {text: 'Yes (full suite)', icon: 'check'},
-      experimentation: {text: 'Yes', icon: 'check', tone: 'good'},
-      open: {text: 'No — enterprise dir', icon: 'cross', tone: 'bad'},
+      license: cellTxt('MIT (open-core)'),
+      db: cellR('Postgres + ClickHouse + Redis'),
+      openfeature: cellY('Community provider'),
+      ui: cellCheck('Yes (full suite)'),
+      experimentation: cellG('Yes'),
+      open: cellR('No — enterprise dir'),
     },
   },
   {
     tool: 'Featurevisor',
     logo: featurevisorLogo,
     cells: {
-      stack: {text: 'TypeScript'},
-      license: {text: 'MIT', tone: 'good'},
-      db: {text: 'None (GitOps)', icon: 'check', tone: 'good'},
-      openfeature: {text: 'None (own SDKs)', icon: 'cross', tone: 'bad'},
-      ui: {text: 'None (Git/CLI)', icon: 'cross'},
-      experimentation: {text: 'Definition only', icon: 'partial', tone: 'warn'},
-      open: {text: 'Yes — fully open', icon: 'check', tone: 'good'},
+      license: cellTxt('MIT', 'good'),
+      db: cellG('None (GitOps)'),
+      openfeature: cellR('None (own SDKs)'),
+      ui: cellCross('None (Git/CLI)'),
+      experimentation: cellY('Definition only'),
+      open: cellG('Yes — fully open'),
     },
   },
 ];
