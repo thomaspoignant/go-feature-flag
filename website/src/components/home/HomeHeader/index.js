@@ -24,6 +24,7 @@ function GetStartedButton() {
 function ViewOnGitHubButton() {
   const {siteConfig} = useDocusaurusContext();
   const [githubStars, setGithubStars] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -42,11 +43,14 @@ function ViewOnGitHubButton() {
           /^[\d.,]+[kmb]?$/i.test(data.message.trim());
         if (isStarCount) {
           setGithubStars(data.message);
+        } else {
+          setFailed(true);
         }
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
           console.error('Failed to fetch GitHub star count:', error);
+          setFailed(true);
         }
       });
 
@@ -65,10 +69,13 @@ function ViewOnGitHubButton() {
         className="hover:no-underline inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-gray-800 dark:text-gray-100 hover:text-white bg-transparent hover:bg-[#9fbeb3] border-2 border-solid border-[#9fbeb3] transition-all duration-200 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
         <i className="fa-brands fa-github mr-4" aria-hidden="true"></i>
         View on GitHub
-        {githubStars && (
+        {(githubStars !== null || !failed) && (
           <span className="ml-2 font-semibold">
-            <div className="flex">
-              <FaStar className="w-6 h-6 mr-1" /> <span>{githubStars}</span>
+            <div className="flex items-center tabular-nums">
+              <FaStar className="w-6 h-6 mr-1" />{' '}
+              <span className={clsx('min-w-[3ch]', !githubStars && 'opacity-0')}>
+                {githubStars ?? '0.0k'}
+              </span>
             </div>
           </span>
         )}

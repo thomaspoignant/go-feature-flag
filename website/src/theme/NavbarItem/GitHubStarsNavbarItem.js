@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Link from '@docusaurus/Link';
+import clsx from 'clsx';
 
 export default function GitHubStarsNavbarItem() {
   const {siteConfig} = useDocusaurusContext();
   const [stars, setStars] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -23,11 +25,14 @@ export default function GitHubStarsNavbarItem() {
           /^[\d.,]+[kmb]?$/i.test(data.message.trim());
         if (isStarCount) {
           setStars(data.message);
+        } else {
+          setFailed(true);
         }
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
           console.error('Failed to fetch GitHub star count:', error);
+          setFailed(true);
         }
       });
 
@@ -48,10 +53,12 @@ export default function GitHubStarsNavbarItem() {
         className="fa-brands fa-github text-xl leading-none"
         aria-hidden="true"
       />
-      {stars && (
-        <span className="text-sm tabular-nums">
+      {(stars !== null || !failed) && (
+        <span className="text-sm tabular-nums inline-flex items-center">
           <i className="fa-solid fa-star mr-1 text-[#f5b400]" aria-hidden="true" />
-          {stars}
+          <span className={clsx('min-w-[3ch]', !stars && 'opacity-0')}>
+            {stars ?? '0.0k'}
+          </span>
         </span>
       )}
     </Link>
