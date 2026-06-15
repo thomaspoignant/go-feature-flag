@@ -7,7 +7,7 @@ const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
-  tagline: 'Cloud Native Feature Flagging',
+  tagline: 'Open-source feature flags — built on OpenFeature.',
   url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -360,19 +360,17 @@ const config = {
             position: 'right',
           },
           {
+            type: 'custom-githubStars',
+            position: 'right',
+            className: 'navbar__right',
+          },
+          {
             type: 'search',
             position: 'right',
           },
           {
             type: 'docsVersionDropdown',
             position: 'right',
-            dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
-          },
-          {
-            href: 'https://github.com/thomaspoignant/go-feature-flag',
-            position: 'right',
-            className: 'header-github-link navbar__right',
-            'aria-label': 'GitHub repository',
             dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
           },
           {

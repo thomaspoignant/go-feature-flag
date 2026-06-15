@@ -72,8 +72,8 @@ We will review your pull request as soon as possible.
 Please be patient, as it might take some time for us to get back to you.
 Your contributions are highly valued!
 
-If you want an early feedback on your pull requests, you can use gemini AI pull request review by adding the comment `/gemini review` as a message in the pull request.
-It will trigger gemini to review your pull request.
+If you want an early feedback on your pull requests, you can use greptile AI pull request review by adding the comment `@greptileai` as a message in the pull request.
+It will trigger `greptile` to review your pull request.
 
 ## 🧑‍💻 Development Setup
 
@@ -112,8 +112,8 @@ make test
 ```
 
 ### AI review
-The repository is ready to receive gemini reviews.  
-If you want a fast feedback loop you can add a comment `/gemini review` in your pull request and gemini will review the pull request.
+The repository is ready to receive greptile reviews.  
+If you want a fast feedback loop you can add a comment `@greptileai` in your pull request and `greptile` will review the pull request.
 
 ## 🤔 Where can I ask questions about the project?
 

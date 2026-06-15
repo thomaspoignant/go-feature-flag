@@ -150,7 +150,7 @@ export const integrations = {
       logo: azbloblogo,
       docLink: 'azure-blob-storage',
     },
-    
+
     {
       name: 'File System',
       description: 'Export evaluation data to a directory in your file system.',
