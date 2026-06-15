@@ -1,38 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Link from '@docusaurus/Link';
+import clsx from 'clsx';
+import useGitHubStars from '@site/src/hooks/useGitHubStars';
 
 export default function GitHubStarsNavbarItem() {
   const {siteConfig} = useDocusaurusContext();
-  const [stars, setStars] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const shieldsUrl = `https://img.shields.io/github/stars/${siteConfig.organizationName}/${siteConfig.projectName}.json`;
-
-    fetch(shieldsUrl, {signal: controller.signal})
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`shields.io responded with ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const isStarCount =
-          typeof data?.message === 'string' &&
-          /^[\d.,]+[kmb]?$/i.test(data.message.trim());
-        if (isStarCount) {
-          setStars(data.message);
-        }
-      })
-      .catch(error => {
-        if (error.name !== 'AbortError') {
-          console.error('Failed to fetch GitHub star count:', error);
-        }
-      });
-
-    return () => controller.abort();
-  }, [siteConfig.organizationName, siteConfig.projectName]);
+  const {stars, failed} = useGitHubStars();
 
   const ariaLabel = stars
     ? `GitHub repository (${stars} stars)`
@@ -48,10 +22,19 @@ export default function GitHubStarsNavbarItem() {
         className="fa-brands fa-github text-xl leading-none"
         aria-hidden="true"
       />
-      {stars && (
-        <span className="text-sm tabular-nums">
-          <i className="fa-solid fa-star mr-1 text-[#f5b400]" aria-hidden="true" />
-          {stars}
+      {(stars !== null || !failed) && (
+        <span className="text-sm tabular-nums inline-flex items-center">
+          <i
+            className="fa-solid fa-star mr-1 text-[#f5b400]"
+            aria-hidden="true"
+          />
+          <span
+            className={clsx(
+              'min-w-[4ch] transition-opacity duration-300',
+              !stars && 'opacity-0'
+            )}>
+            {stars ?? '0.0k'}
+          </span>
         </span>
       )}
     </Link>
