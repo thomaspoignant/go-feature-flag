@@ -73,7 +73,12 @@ function ViewOnGitHubButton() {
           <span className="ml-2 font-semibold">
             <div className="flex items-center tabular-nums">
               <FaStar className="w-6 h-6 mr-1" />{' '}
-              <span className={clsx('min-w-[3ch]', !githubStars && 'opacity-0')}>
+              <span
+                className={clsx(
+                  'min-w-[4ch] transition-opacity duration-300',
+                  !githubStars && 'opacity-0'
+                )}>
+
                 {githubStars ?? '0.0k'}
               </span>
             </div>

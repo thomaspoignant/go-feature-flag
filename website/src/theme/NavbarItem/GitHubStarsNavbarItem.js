@@ -56,7 +56,11 @@ export default function GitHubStarsNavbarItem() {
       {(stars !== null || !failed) && (
         <span className="text-sm tabular-nums inline-flex items-center">
           <i className="fa-solid fa-star mr-1 text-[#f5b400]" aria-hidden="true" />
-          <span className={clsx('min-w-[3ch]', !stars && 'opacity-0')}>
+          <span
+            className={clsx(
+              'min-w-[4ch] transition-opacity duration-300',
+              !stars && 'opacity-0'
+            )}>
             {stars ?? '0.0k'}
           </span>
         </span>
