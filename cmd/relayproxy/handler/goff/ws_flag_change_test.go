@@ -202,20 +202,23 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 		_ = ws.Close()
 	}()
 
-	// Drain incoming messages so the server-side writes can make progress.
+	// Drain incoming messages so the server-side writes can make progress, and
+	// signal the first one so we know the connection is registered.
 	clientDone := make(chan struct{})
+	firstMsg := make(chan struct{}, 1)
 	go func() {
 		defer close(clientDone)
+		first := true
 		for {
 			if _, _, err := ws.ReadMessage(); err != nil {
 				return
 			}
+			if first {
+				first = false
+				firstMsg <- struct{}{}
+			}
 		}
 	}()
-
-	// Wait for the registration to complete to avoid broadcasting before the
-	// connection is registered in the service.
-	time.Sleep(100 * time.Millisecond)
 
 	diff := notifier.DiffCache{
 		Updated: map[string]notifier.DiffUpdated{
@@ -228,6 +231,22 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	// Actively confirm the connection is registered before the flood: broadcast
+	// until the client actually receives a message. A fixed sleep is fragile on
+	// loaded CI runners — if the broadcasts fire before Register() completes,
+	// they hit an empty client map and the test passes vacuously.
+	registerDeadline := time.After(5 * time.Second)
+	for registered := false; !registered; {
+		websocketService.BroadcastFlagChanges(diff)
+		select {
+		case <-firstMsg:
+			registered = true
+		case <-registerDeadline:
+			t.Fatal("connection never registered: no broadcast reached the client")
+		case <-time.After(20 * time.Millisecond):
+		}
 	}
 
 	// Fire many broadcasts concurrently while the 1s ping loop is running.
