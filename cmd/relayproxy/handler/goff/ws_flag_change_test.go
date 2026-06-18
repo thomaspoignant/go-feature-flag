@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -161,5 +162,93 @@ func Test_websocket_flag_change(t *testing.T) {
 			assert.NoError(t, err)
 			assert.JSONEq(t, string(expectedMessage), string(receivedMessage))
 		})
+	}
+}
+
+// Test_websocket_concurrent_writes is a regression test for issue #5463.
+// The ping loop and the flag-change broadcast both write to the same websocket
+// connection. Without synchronization gorilla/websocket panics with
+// "concurrent write to websocket connection" and crashes the relay proxy.
+// Run with -race to surface the data race if the writes are not serialized.
+func Test_websocket_concurrent_writes(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	websocketService := stream.NewWebsocketService()
+	defer func() {
+		websocketService.Close()
+		if err := websocketService.WaitForCleanup(5 * time.Second); err != nil {
+			t.Errorf("websocket service cleanup failed: %v", err)
+		}
+	}()
+
+	ctrl := controller.NewWsFlagChange(websocketService, zap.L())
+
+	e := echo.New()
+	e.GET("/ws/v1/flag/change", ctrl.Handler)
+	testServer := httptest.NewServer(e)
+	defer testServer.Close()
+
+	url := "ws" + strings.TrimPrefix(testServer.URL, "http") + "/ws/v1/flag/change"
+
+	dialer := &websocket.Dialer{HandshakeTimeout: 10 * time.Second}
+	ws, _, err := dialer.DialContext(ctx, url, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect to WebSocket: %v", err)
+	}
+	defer func() {
+		_ = ws.SetWriteDeadline(time.Now().Add(5 * time.Second))
+		_ = ws.Close()
+	}()
+
+	// Drain incoming messages so the server-side writes can make progress.
+	clientDone := make(chan struct{})
+	go func() {
+		defer close(clientDone)
+		for {
+			if _, _, err := ws.ReadMessage(); err != nil {
+				return
+			}
+		}
+	}()
+
+	// Wait for the registration to complete to avoid broadcasting before the
+	// connection is registered in the service.
+	time.Sleep(100 * time.Millisecond)
+
+	diff := notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{
+			"my-flag": {
+				Before: &flag.InternalFlag{
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+				},
+				After: &flag.InternalFlag{
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("B")},
+				},
+			},
+		},
+	}
+
+	// Fire many broadcasts concurrently while the 1s ping loop is running.
+	// This reproduces both concurrency vectors: broadcast vs ping and
+	// broadcast vs broadcast (BroadcastFlagChanges only holds an RLock).
+	const broadcasters = 8
+	const broadcastsEach = 50
+	var wg sync.WaitGroup
+	for range broadcasters {
+		wg.Go(func() {
+			for range broadcastsEach {
+				websocketService.BroadcastFlagChanges(diff)
+			}
+		})
+	}
+	wg.Wait()
+
+	// Close the connection and make sure the client goroutine stops.
+	_ = ws.Close()
+	select {
+	case <-clientDone:
+	case <-time.After(5 * time.Second):
+		t.Fatal("client read loop did not stop")
 	}
 }

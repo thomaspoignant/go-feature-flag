@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -10,6 +11,30 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
+
+// threadSafeConn serializes all writes to a single websocket connection.
+// gorilla/websocket only supports one concurrent writer, and both the ping
+// loop and the flag-change broadcast write to the same connection. Without
+// this guard the relay proxy panics with "concurrent write to websocket
+// connection" (see issue #5463).
+type threadSafeConn struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
+}
+
+// WriteJSON satisfies stream.WebsocketConnector (used by BroadcastFlagChanges).
+func (c *threadSafeConn) WriteJSON(v any) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.conn.WriteJSON(v)
+}
+
+// ping sends a ping control message to the client.
+func (c *threadSafeConn) ping() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.conn.WriteMessage(websocket.PingMessage, nil)
+}
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
@@ -72,8 +97,13 @@ func (f *WSFlagChange) Handler(c echo.Context) error {
 	}
 	defer func() { _ = conn.Close() }()
 
-	f.websocketService.Register(conn)
-	defer f.websocketService.Deregister(conn)
+	// Wrap the connection so that all writes (ping loop + flag-change broadcast)
+	// are serialized through a single mutex. gorilla/websocket only supports one
+	// concurrent writer.
+	safeConn := &threadSafeConn{conn: conn}
+
+	f.websocketService.Register(safeConn)
+	defer f.websocketService.Deregister(safeConn)
 	f.logger.Debug("registering new websocket connection", zap.Any("connection", conn))
 
 	// Create context for cancellation
@@ -81,7 +111,7 @@ func (f *WSFlagChange) Handler(c echo.Context) error {
 	defer cancel()
 
 	// Start the ping pong loop
-	go f.pingPongLoop(ctx, conn)
+	go f.pingPongLoop(ctx, safeConn)
 
 	const readDeadline = 60 * time.Second
 
@@ -107,7 +137,7 @@ func (f *WSFlagChange) Handler(c echo.Context) error {
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
+func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *threadSafeConn) {
 	// Ping interval duration
 	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals
@@ -118,7 +148,7 @@ func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
 		select {
 		case <-ticker.C:
 			// Send a ping message to the client
-			err := conn.WriteMessage(websocket.PingMessage, nil)
+			err := conn.ping()
 			if err != nil {
 				f.logger.Debug(
 					"closing websocket connection",
