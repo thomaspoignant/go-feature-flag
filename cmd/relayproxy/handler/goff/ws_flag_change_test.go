@@ -166,6 +166,31 @@ func Test_websocket_flag_change(t *testing.T) {
 	}
 }
 
+// broadcastUntilRegistered broadcasts until the client confirms receipt of a
+// message (signalled on firstMsg), which proves the connection is in the
+// service's client map. This replaces a fixed sleep, which is fragile on loaded
+// CI runners: if broadcasts fire before Register() completes they hit an empty
+// map and the test passes vacuously without exercising the write path.
+func broadcastUntilRegistered(
+	t *testing.T,
+	svc stream.WebsocketService,
+	diff notifier.DiffCache,
+	firstMsg <-chan struct{},
+) {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		svc.BroadcastFlagChanges(diff)
+		select {
+		case <-firstMsg:
+			return
+		case <-deadline:
+			t.Fatal("connection never registered: no broadcast reached the client")
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+}
+
 // Test_websocket_concurrent_writes is a regression test for issue #5463.
 // The ping loop and the flag-change broadcast both write to the same websocket
 // connection. Without synchronization gorilla/websocket panics with
@@ -233,21 +258,9 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 		},
 	}
 
-	// Actively confirm the connection is registered before the flood: broadcast
-	// until the client actually receives a message. A fixed sleep is fragile on
-	// loaded CI runners — if the broadcasts fire before Register() completes,
-	// they hit an empty client map and the test passes vacuously.
-	registerDeadline := time.After(5 * time.Second)
-	for registered := false; !registered; {
-		websocketService.BroadcastFlagChanges(diff)
-		select {
-		case <-firstMsg:
-			registered = true
-		case <-registerDeadline:
-			t.Fatal("connection never registered: no broadcast reached the client")
-		case <-time.After(20 * time.Millisecond):
-		}
-	}
+	// Confirm the connection is registered before the flood; a fixed sleep is
+	// fragile on loaded CI runners (see broadcastUntilRegistered).
+	broadcastUntilRegistered(t, websocketService, diff, firstMsg)
 
 	// Fire many broadcasts concurrently while the 1s ping loop is running.
 	// This reproduces both concurrency vectors: broadcast vs ping and
