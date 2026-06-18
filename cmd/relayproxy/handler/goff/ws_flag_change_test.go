@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
@@ -251,4 +252,57 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("client read loop did not stop")
 	}
+}
+
+// Test_websocket_legacy_handler verifies the deprecated LegacyHandler endpoint
+// still delegates to Handler and pushes flag changes to the client.
+func Test_websocket_legacy_handler(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	websocketService := stream.NewWebsocketService()
+	defer func() {
+		websocketService.Close()
+		if err := websocketService.WaitForCleanup(5 * time.Second); err != nil {
+			t.Errorf("websocket service cleanup failed: %v", err)
+		}
+	}()
+
+	ctrl := controller.NewWsFlagChange(websocketService, zap.L())
+
+	e := echo.New()
+	e.GET("/ws/v1/flag/change", ctrl.LegacyHandler)
+	testServer := httptest.NewServer(e)
+	defer testServer.Close()
+
+	url := "ws" + strings.TrimPrefix(testServer.URL, "http") + "/ws/v1/flag/change"
+	dialer := &websocket.Dialer{HandshakeTimeout: 10 * time.Second}
+	ws, _, err := dialer.DialContext(ctx, url, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect to WebSocket: %v", err)
+	}
+	defer func() { _ = ws.Close() }()
+	require.NoError(t, ws.SetReadDeadline(time.Now().Add(10*time.Second)))
+
+	time.Sleep(100 * time.Millisecond)
+
+	diff := notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{
+			"my-flag": {
+				Before: &flag.InternalFlag{
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+				},
+				After: &flag.InternalFlag{
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("B")},
+				},
+			},
+		},
+	}
+	websocketService.BroadcastFlagChanges(diff)
+
+	_, received, err := ws.ReadMessage()
+	assert.NoError(t, err)
+	expected, err := json.Marshal(diff)
+	assert.NoError(t, err)
+	assert.JSONEq(t, string(expected), string(received))
 }

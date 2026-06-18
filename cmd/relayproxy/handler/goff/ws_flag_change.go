@@ -46,15 +46,21 @@ func NewWsFlagChange(websocketService stream.WebsocketService, logger *zap.Logge
 				return true
 			},
 		},
-		logger: logger,
+		logger:       logger,
+		pingInterval: defaultPingInterval,
 	}
 }
+
+// defaultPingInterval is how often a keep-alive ping is sent to the client.
+const defaultPingInterval = 1 * time.Second
 
 // WSFlagChange is the implementation of the controller
 type WSFlagChange struct {
 	websocketService stream.WebsocketService
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
+	// pingInterval is the keep-alive ping period; defaults to defaultPingInterval.
+	pingInterval time.Duration
 }
 
 // Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
@@ -138,8 +144,12 @@ func (f *WSFlagChange) Handler(c echo.Context) error {
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
 func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *threadSafeConn) {
-	// Ping interval duration
-	pingInterval := 1 * time.Second
+	// Ping interval duration (fall back to the default for a zero-valued struct
+	// so time.NewTicker never panics on a non-positive duration).
+	pingInterval := f.pingInterval
+	if pingInterval <= 0 {
+		pingInterval = defaultPingInterval
+	}
 	// Create a ticker to send pings at regular intervals
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
