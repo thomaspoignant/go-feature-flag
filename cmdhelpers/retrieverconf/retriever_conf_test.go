@@ -376,6 +376,81 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid retriever: no \"table\" property found for kind \"postgresql\"",
 		},
+		{
+			name: "kind postgresql valid with pool block",
+			fields: retrieverconf.RetrieverConf{
+				Kind:            "postgresql",
+				URI:             "xxx",
+				Table:           "xxx",
+				MaxOpenConns:    20,
+				MaxIdleConns:    5,
+				ConnMaxLifetime: "1h",
+				ConnMaxIdleTime: "30m",
+			},
+		},
+		{
+			name: "kind postgresql invalid negative maxOpenConns",
+			fields: retrieverconf.RetrieverConf{
+				Kind:         "postgresql",
+				URI:          "xxx",
+				Table:        "xxx",
+				MaxOpenConns: -1,
+			},
+			wantErr: true,
+			errValue: "invalid retriever configuration, " +
+				"\"maxOpenConns\" must not be negative for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgresql invalid negative maxIdleConns",
+			fields: retrieverconf.RetrieverConf{
+				Kind:         "postgresql",
+				URI:          "xxx",
+				Table:        "xxx",
+				MaxIdleConns: -2,
+			},
+			wantErr: true,
+			errValue: "invalid retriever configuration, " +
+				"\"maxIdleConns\" must not be negative for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgresql invalid maxIdleConns greater than maxOpenConns",
+			fields: retrieverconf.RetrieverConf{
+				Kind:         "postgresql",
+				URI:          "xxx",
+				Table:        "xxx",
+				MaxOpenConns: 5,
+				MaxIdleConns: 10,
+			},
+			wantErr: true,
+			errValue: "invalid retriever configuration, " +
+				"\"maxIdleConns\" must not be greater than \"maxOpenConns\" for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgresql invalid connMaxLifetime duration",
+			fields: retrieverconf.RetrieverConf{
+				Kind:            "postgresql",
+				URI:             "xxx",
+				Table:           "xxx",
+				ConnMaxLifetime: "not-a-duration",
+			},
+			wantErr: true,
+			errValue: "invalid retriever configuration, " +
+				"\"connMaxLifetime\" is not a valid duration for kind \"postgresql\": " +
+				"time: invalid duration \"not-a-duration\"",
+		},
+		{
+			name: "kind postgresql invalid connMaxIdleTime duration",
+			fields: retrieverconf.RetrieverConf{
+				Kind:            "postgresql",
+				URI:             "xxx",
+				Table:           "xxx",
+				ConnMaxIdleTime: "xyz",
+			},
+			wantErr: true,
+			errValue: "invalid retriever configuration, " +
+				"\"connMaxIdleTime\" is not a valid duration for kind \"postgresql\": " +
+				"time: invalid duration \"xyz\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

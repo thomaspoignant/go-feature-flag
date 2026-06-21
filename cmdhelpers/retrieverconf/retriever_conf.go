@@ -55,6 +55,14 @@ type RetrieverConf struct {
 	Database   string            `mapstructure:"database"       koanf:"database"`
 	Collection string            `mapstructure:"collection"     koanf:"collection"`
 
+	// MaxOpenConns, MaxIdleConns, ConnMaxLifetime and ConnMaxIdleTime are
+	// optional connection pool settings used by the postgresql retriever.
+	// When left unset, the driver defaults are used and behavior is unchanged.
+	MaxOpenConns    int    `mapstructure:"maxOpenConns"    koanf:"maxopenconns"`
+	MaxIdleConns    int    `mapstructure:"maxIdleConns"    koanf:"maxidleconns"`
+	ConnMaxLifetime string `mapstructure:"connMaxLifetime" koanf:"connmaxlifetime"`
+	ConnMaxIdleTime string `mapstructure:"connMaxIdleTime" koanf:"connmaxidletime"`
+
 	// RedisOptions is the serializable redis configuration that can be used in JSON/YAML files
 	RedisOptions *SerializableRedisOptions `mapstructure:"redisOptions"   koanf:"redisOptions"`
 
@@ -113,6 +121,30 @@ func (c *RetrieverConf) validatePostgreSQLRetriever() error {
 	}
 	if c.Table == "" {
 		return err.NewRetrieverConfError("table", string(c.Kind))
+	}
+	if c.MaxOpenConns < 0 {
+		return fmt.Errorf("invalid retriever configuration, "+
+			"\"maxOpenConns\" must not be negative for kind \"%s\"", c.Kind)
+	}
+	if c.MaxIdleConns < 0 {
+		return fmt.Errorf("invalid retriever configuration, "+
+			"\"maxIdleConns\" must not be negative for kind \"%s\"", c.Kind)
+	}
+	if c.MaxOpenConns > 0 && c.MaxIdleConns > c.MaxOpenConns {
+		return fmt.Errorf("invalid retriever configuration, "+
+			"\"maxIdleConns\" must not be greater than \"maxOpenConns\" for kind \"%s\"", c.Kind)
+	}
+	if c.ConnMaxLifetime != "" {
+		if _, errParse := time.ParseDuration(c.ConnMaxLifetime); errParse != nil {
+			return fmt.Errorf("invalid retriever configuration, "+
+				"\"connMaxLifetime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
+		}
+	}
+	if c.ConnMaxIdleTime != "" {
+		if _, errParse := time.ParseDuration(c.ConnMaxIdleTime); errParse != nil {
+			return fmt.Errorf("invalid retriever configuration, "+
+				"\"connMaxIdleTime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
+		}
 	}
 	return nil
 }

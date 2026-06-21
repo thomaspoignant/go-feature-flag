@@ -90,6 +90,10 @@ retrievers:
 | `uri`      |  <Mandatory />   | string | **none** | Connection URI of your postgres instance.                                                                                                                              |
 | `table`    |  <Mandatory />   | string | **none** | Name of the table where your flags are stored.                                                                                                                      |
 | `columns`  | <NotMandatory /> | object | **none** | Custom column name mapping. See [How to use custom column names](#how-to-use-custom-column-names) for more details.                                                                                                                       |
+| `maxOpenConns`    | <NotMandatory /> | int    | _driver default_ | Maximum number of open connections in the pool. See [How to configure the connection pool](#how-to-configure-the-connection-pool). |
+| `maxIdleConns`    | <NotMandatory /> | int    | _driver default_ | Minimum number of connections the pool keeps open (the pool floor). Must not be greater than `maxOpenConns`. |
+| `connMaxLifetime` | <NotMandatory /> | string | _driver default_ | Maximum lifetime of a connection, as a Go duration string (e.g. `1h`, `30m`). |
+| `connMaxIdleTime` | <NotMandatory /> | string | _driver default_ | Maximum idle time of a connection before it is closed, as a Go duration string (e.g. `5m`). |
 
 ### How to use custom column names
 
@@ -111,6 +115,27 @@ retrievers:
 
 The `columns` field, is a map of the default column names to the custom column names in your postgres table.
 
+### How to configure the connection pool
+
+By default the retriever relies on the driver defaults for connection pool sizing
+and lifetimes. For production workloads you can tune the pool by adding the
+optional pool settings. When a setting is omitted, the corresponding default is
+kept, so existing configurations are unaffected.
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: postgresql
+    uri: "postgres://user:password@localhost:5432/dbname"
+    table: "go_feature_flag"
+    // highlight-start
+    maxOpenConns: 25
+    maxIdleConns: 5
+    connMaxLifetime: "1h"
+    connMaxIdleTime: "30m"
+    // highlight-end
+```
+
 
 ## Configure the GO Module
 To configure your GO module to use the {retrieverName} retriever, you need to add the following
@@ -127,6 +152,12 @@ err := ffclient.Init(ffclient.Config{
         "flagset": "namespace",
         "config": "settings",
       },
+      Pool: postgresqlretriever.PoolConfig{
+        MaxOpenConns:    25,
+        MaxIdleConns:    5,
+        ConnMaxLifetime: 1 * time.Hour,
+        ConnMaxIdleTime: 30 * time.Minute,
+      },
     },
 })
 defer ffclient.Close()
@@ -135,6 +166,7 @@ defer ffclient.Close()
 
 | Field         |    Mandatory     | Description                                                                                                                                      |
 |---------------|:----------------:|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| `uri`      |  <Mandatory />   | Connection URI of your postgres instance.                                                                                                                              |
-| `table`    |  <Mandatory />   | Name of the table where your flags are stored.                                                                                                                      |
-| `columns`  | <NotMandatory /> | Custom column name mapping. See [How to use custom column names](#how-to-use-custom-column-names) for more details.                                                                                                                       |
+| `URI`      |  <Mandatory />   | Connection URI of your postgres instance.                                                                                                                              |
+| `Table`    |  <Mandatory />   | Name of the table where your flags are stored.                                                                                                                      |
+| `Columns`  | <NotMandatory /> | Custom column name mapping. See [How to use custom column names](#how-to-use-custom-column-names) for more details.                                                                                                                       |
+| `Pool`     | <NotMandatory /> | Optional connection pool settings (`MaxOpenConns`, `MaxIdleConns`, `ConnMaxLifetime`, `ConnMaxIdleTime`). When omitted, driver defaults are used. |

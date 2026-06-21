@@ -42,11 +42,11 @@ func TestGetPool_MultipleURIsAndReuse(t *testing.T) {
 	uri2 := baseURI + "&application_name=B"
 
 	// First Calls (RefCount = 1)
-	pool1a, err := rr.GetPool(ctx, uri1)
+	pool1a, err := rr.GetPool(ctx, uri1, rr.PoolConfig{})
 	assert.NoError(t, err)
 	assert.NotNil(t, pool1a)
 
-	pool2a, err := rr.GetPool(ctx, uri2)
+	pool2a, err := rr.GetPool(ctx, uri2, rr.PoolConfig{})
 	assert.NoError(t, err)
 	assert.NotNil(t, pool2a)
 
@@ -54,32 +54,32 @@ func TestGetPool_MultipleURIsAndReuse(t *testing.T) {
 	assert.NotEqual(t, pool1a, pool2a)
 
 	// Reuse Logic (RefCount = 2 for URI1)
-	pool1b, err := rr.GetPool(ctx, uri1)
+	pool1b, err := rr.GetPool(ctx, uri1, rr.PoolConfig{})
 	assert.NoError(t, err)
 	assert.Equal(t, pool1a, pool1b, "Should return exact same pool instance")
 
 	// Release Logic
 	// URI1 RefCount: 2 -> 1
-	rr.ReleasePool(ctx, uri1)
+	rr.ReleasePool(ctx, uri1, rr.PoolConfig{})
 
 	// URI1 RefCount: 1 -> 0 (Closed & Removed)
-	rr.ReleasePool(ctx, uri1)
+	rr.ReleasePool(ctx, uri1, rr.PoolConfig{})
 
 	// Recreation Logic
 	// URI1 should now create a NEW pool
-	pool1c, err := rr.GetPool(ctx, uri1)
+	pool1c, err := rr.GetPool(ctx, uri1, rr.PoolConfig{})
 	assert.NoError(t, err)
 	assert.NotEqual(t, pool1a, pool1c, "Should be a new pool instance after full release")
 
 	// Cleanup new pool
-	rr.ReleasePool(ctx, uri1)
+	rr.ReleasePool(ctx, uri1, rr.PoolConfig{})
 
 	// URI2 Cleanup verification
-	rr.ReleasePool(ctx, uri2) // RefCount -> 0
+	rr.ReleasePool(ctx, uri2, rr.PoolConfig{}) // RefCount -> 0
 
-	pool2b, err := rr.GetPool(ctx, uri2)
+	pool2b, err := rr.GetPool(ctx, uri2, rr.PoolConfig{})
 	assert.NoError(t, err)
 	assert.NotEqual(t, pool2a, pool2b, "URI2 should be recreated")
 
-	rr.ReleasePool(ctx, uri2)
+	rr.ReleasePool(ctx, uri2, rr.PoolConfig{})
 }

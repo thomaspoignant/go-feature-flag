@@ -177,5 +177,28 @@ func createAzBlobStorageRetriever(
 
 func createPostgreSQLRetriever(
 	c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
-	return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Columns: c.Columns}, nil
+	poolCfg := postgresqlretriever.PoolConfig{
+		MaxOpenConns: int32(c.MaxOpenConns),
+		MaxIdleConns: int32(c.MaxIdleConns),
+	}
+	if c.ConnMaxLifetime != "" {
+		d, err := time.ParseDuration(c.ConnMaxLifetime)
+		if err != nil {
+			return nil, fmt.Errorf("invalid connMaxLifetime for postgresql retriever: %w", err)
+		}
+		poolCfg.ConnMaxLifetime = d
+	}
+	if c.ConnMaxIdleTime != "" {
+		d, err := time.ParseDuration(c.ConnMaxIdleTime)
+		if err != nil {
+			return nil, fmt.Errorf("invalid connMaxIdleTime for postgresql retriever: %w", err)
+		}
+		poolCfg.ConnMaxIdleTime = d
+	}
+	return &postgresqlretriever.Retriever{
+		URI:     c.URI,
+		Table:   c.Table,
+		Columns: c.Columns,
+		Pool:    poolCfg,
+	}, nil
 }
