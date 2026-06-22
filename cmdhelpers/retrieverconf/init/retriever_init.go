@@ -131,7 +131,14 @@ func createHTTPRetriever(
 				return retrieverconf.DefaultRetrieverConfig.HTTPMethod
 			}
 			return c.HTTPMethod
-		}(), Body: c.HTTPBody, Header: c.HTTPHeaders, Timeout: timeout}, nil
+		}(),
+		Body:           c.HTTPBody,
+		Header:         c.HTTPHeaders,
+		Timeout:        timeout,
+		ClientCertPath: c.HTTPClientCertPath,
+		ClientKeyPath:  c.HTTPClientKeyPath,
+		CACertPath:     c.HTTPCACertPath,
+	}, nil
 }
 
 func createGoogleStorageRetriever(

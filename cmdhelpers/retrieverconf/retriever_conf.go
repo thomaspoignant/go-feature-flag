@@ -25,20 +25,23 @@ type RetrieverConf struct {
 	Branch         string        `mapstructure:"branch"           koanf:"branch"`
 	Path           string        `mapstructure:"path"             koanf:"path"`
 	// Deprecated: Please use AuthToken instead
-	GithubToken string              `mapstructure:"githubToken"   koanf:"githubtoken"`
-	URL         string              `mapstructure:"url"           koanf:"url"`
-	Timeout     int64               `mapstructure:"timeout"       koanf:"timeout"`
-	HTTPMethod  string              `mapstructure:"method"        koanf:"method"`
-	HTTPBody    string              `mapstructure:"body"          koanf:"body"`
-	HTTPHeaders map[string][]string `mapstructure:"headers"       koanf:"headers"`
-	Bucket      string              `mapstructure:"bucket"        koanf:"bucket"`
-	Object      string              `mapstructure:"object"        koanf:"object"`
-	Item        string              `mapstructure:"item"          koanf:"item"`
-	Namespace   string              `mapstructure:"namespace"     koanf:"namespace"`
-	ConfigMap   string              `mapstructure:"configmap"     koanf:"configmap"`
-	Key         string              `mapstructure:"key"           koanf:"key"`
-	BaseURL     string              `mapstructure:"baseUrl"       koanf:"baseurl"`
-	AuthToken   string              `mapstructure:"token"         koanf:"token"` //nolint:gosec // G117
+	GithubToken        string              `mapstructure:"githubToken"   koanf:"githubtoken"`
+	URL                string              `mapstructure:"url"           koanf:"url"`
+	Timeout            int64               `mapstructure:"timeout"       koanf:"timeout"`
+	HTTPMethod         string              `mapstructure:"method"        koanf:"method"`
+	HTTPBody           string              `mapstructure:"body"          koanf:"body"`
+	HTTPHeaders        map[string][]string `mapstructure:"headers"       koanf:"headers"`
+	HTTPClientCertPath string              `mapstructure:"clientCertPath" koanf:"clientcertpath"`
+	HTTPClientKeyPath  string              `mapstructure:"clientKeyPath"  koanf:"clientkeypath"`
+	HTTPCACertPath     string              `mapstructure:"caCertPath"     koanf:"cacertpath"`
+	Bucket             string              `mapstructure:"bucket"        koanf:"bucket"`
+	Object             string              `mapstructure:"object"        koanf:"object"`
+	Item               string              `mapstructure:"item"          koanf:"item"`
+	Namespace          string              `mapstructure:"namespace"     koanf:"namespace"`
+	ConfigMap          string              `mapstructure:"configmap"     koanf:"configmap"`
+	Key                string              `mapstructure:"key"           koanf:"key"`
+	BaseURL            string              `mapstructure:"baseUrl"       koanf:"baseurl"`
+	AuthToken          string              `mapstructure:"token"         koanf:"token"` //nolint:gosec // G117
 
 	// URI is used by
 	// - the postgresql retriever
@@ -79,8 +82,8 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == S3Retriever && c.Item == "" {
 		return err.NewRetrieverConfError("item", string(c.Kind))
 	}
-	if c.Kind == HTTPRetriever && c.URL == "" {
-		return err.NewRetrieverConfError("url", string(c.Kind))
+	if c.Kind == HTTPRetriever {
+		return c.validateHTTPRetriever()
 	}
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
 		return err.NewRetrieverConfError("object", string(c.Kind))
@@ -102,6 +105,19 @@ func (c *RetrieverConf) IsValid() error {
 	}
 	if c.Kind == AzBlobStorageRetriever {
 		return c.validateAzBlobStorageRetriever()
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateHTTPRetriever() error {
+	if c.URL == "" {
+		return err.NewRetrieverConfError("url", string(c.Kind))
+	}
+	if c.HTTPClientCertPath != "" && c.HTTPClientKeyPath == "" {
+		return err.NewRetrieverConfError("clientKeyPath", string(c.Kind))
+	}
+	if c.HTTPClientCertPath == "" && c.HTTPClientKeyPath != "" {
+		return err.NewRetrieverConfError("clientCertPath", string(c.Kind))
 	}
 	return nil
 }
