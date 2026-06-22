@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Retriever is a configuration struct for an HTTP endpoint retriever.
@@ -41,12 +43,39 @@ type Retriever struct {
 	CACertPath string
 
 	httpClient internal.HTTPClient
+	status     retriever.Status
 }
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.
 // It is also used for the tests.
 func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
+}
+
+// Init is initializing the retriever to start fetching the flags configuration.
+func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
+	r.status = retriever.RetrieverNotReady
+	if _, err := r.getHTTPClient(); err != nil {
+		r.status = retriever.RetrieverError
+		return err
+	}
+	r.status = retriever.RetrieverReady
+	return nil
+}
+
+// Shutdown gracefully shutdown the retriever and set the status as not ready.
+func (r *Retriever) Shutdown(_ context.Context) error {
+	r.httpClient = nil
+	r.status = retriever.RetrieverNotReady
+	return nil
+}
+
+// Status is the function returning the internal state of the retriever.
+func (r *Retriever) Status() retriever.Status {
+	if r == nil || r.status == "" {
+		return retriever.RetrieverNotReady
+	}
+	return r.status
 }
 
 // Retrieve is the function in charge of fetching the flag configuration.

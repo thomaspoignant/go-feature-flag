@@ -17,6 +17,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	retrieverpkg "github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
@@ -76,9 +77,10 @@ func TestRetriever_getHTTPClient_WithUnsupportedDefaultTransport(t *testing.T) {
 		CACertPath: caCertFile,
 	}
 
-	_, err := retriever.getHTTPClient()
+	err := retriever.Init(context.Background(), nil)
 	require.Error(t, err)
 	assert.Equal(t, "http default transport is httpretriever.unsupportedTransport, expected *http.Transport", err.Error())
+	assert.Equal(t, retrieverpkg.RetrieverError, retriever.Status())
 }
 
 func TestRetriever_getHTTPClient_WithoutClientCertificateConfiguration(t *testing.T) {
@@ -106,6 +108,28 @@ func TestRetriever_getHTTPClient_CacheGeneratedHTTPClient(t *testing.T) {
 	cachedClient, err := retriever.getHTTPClient()
 	require.NoError(t, err)
 	assert.Same(t, client, cachedClient)
+}
+
+func TestRetriever_Init(t *testing.T) {
+	caCertFile, _ := createClientCertificateFiles(t)
+	retriever := Retriever{
+		CACertPath: caCertFile,
+	}
+
+	assert.Equal(t, retrieverpkg.RetrieverNotReady, retriever.Status())
+
+	err := retriever.Init(context.Background(), nil)
+	require.NoError(t, err)
+	assert.Equal(t, retrieverpkg.RetrieverReady, retriever.Status())
+
+	client, err := retriever.getHTTPClient()
+	require.NoError(t, err)
+	assert.Same(t, retriever.httpClient, client)
+
+	err = retriever.Shutdown(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, retrieverpkg.RetrieverNotReady, retriever.Status())
+	assert.Nil(t, retriever.httpClient)
 }
 
 func TestRetriever_getHTTPClient_WithInvalidClientCertificate(t *testing.T) {
