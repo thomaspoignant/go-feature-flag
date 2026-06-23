@@ -394,6 +394,15 @@ flagSets:
         bucket: evaluation-data-bucket
 ```
 
+**Runtime updates**: flag sets can be **added** or **removed** at runtime without restarting the relay proxy.  
+When the configuration file changes, the relay proxy detects it and reconciles the running flag sets:
+a newly added flag set is started immediately and a removed flag set is stopped.
+
+:::warning
+- **Modifying** an existing flag set (its `retrievers`, `exporters`, `notifiers`, `pollingInterval`, …) is **not supported at runtime**. The only exception is its `apiKeys`, which can be changed live. Any other modification is **ignored** and an error is logged; the change will only be applied the next time the relay proxy is **restarted**.
+- Runtime add/remove only works for flag sets that have an explicit, unique [`name`](#flagsetname). Flag sets without a name (or named `default`) get a generated name at startup and cannot be added or removed at runtime.
+:::
+
 ### `envVariablePrefix`
 
 Prefix for your environment variables.  
@@ -642,8 +651,8 @@ The name of the flag set. This allows you to identify the flag set.
 - mandatory: <NotMandatory />
 
 :::warning
-If you want to update API keys at runtime without restarting the relay proxy, you **must provide a `name`** for your flag set.  
-Without a name (or using `default` as the name), a UUID is generated and runtime API key updates will not work.
+If you want to **add/remove the flag set** or **update its API keys** at runtime without restarting the relay proxy, you **must provide a `name`** for your flag set.  
+Without a name (or using `default` as the name), a UUID is generated and the flag set cannot be managed at runtime.
 :::
 
 #### `flagSet.apiKeys`
