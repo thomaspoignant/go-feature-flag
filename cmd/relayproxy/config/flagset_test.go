@@ -189,6 +189,105 @@ func TestConfigGetFlagSetAPIKeys(t *testing.T) {
 	}
 }
 
+func TestConfigGetFlagSets(t *testing.T) {
+	t.Run("returns all configured flagsets", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				{Name: flagset2Name, APIKeys: []string{"key-2"}},
+			},
+		}
+		got := cfg.GetFlagSets()
+		require.Len(t, got, 2)
+		assert.Equal(t, flagset1Name, got[0].Name)
+		assert.Equal(t, flagset2Name, got[1].Name)
+	})
+
+	t.Run("returns an empty slice when no flagset is configured", func(t *testing.T) {
+		cfg := &config.Config{FlagSets: []config.FlagSet{}}
+		assert.Empty(t, cfg.GetFlagSets())
+	})
+
+	t.Run("returns a copy that is independent of the configuration", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+			},
+		}
+		got := cfg.GetFlagSets()
+		// Mutating the returned slice (rename, append) must not affect the config.
+		got[0].Name = "mutated"
+		got = append(got, config.FlagSet{Name: "extra"})
+		_ = got
+
+		fresh := cfg.GetFlagSets()
+		require.Len(t, fresh, 1)
+		assert.Equal(t, flagset1Name, fresh[0].Name)
+	})
+}
+
+func TestConfigAddFlagSet(t *testing.T) {
+	t.Run("adds a new flagset", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+			},
+		}
+		err := cfg.AddFlagSet(config.FlagSet{Name: flagset2Name, APIKeys: []string{"key-2"}})
+		require.NoError(t, err)
+
+		got := cfg.GetFlagSets()
+		require.Len(t, got, 2)
+		keys, err := cfg.GetFlagSetAPIKeys(flagset2Name)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"key-2"}, keys)
+	})
+
+	t.Run("returns an error when the flagset already exists", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+			},
+		}
+		err := cfg.AddFlagSet(config.FlagSet{Name: flagset1Name, APIKeys: []string{"key-2"}})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "flagset flagset-1 already exists")
+		// The existing flagset must be untouched.
+		assert.Len(t, cfg.GetFlagSets(), 1)
+	})
+}
+
+func TestConfigRemoveFlagSet(t *testing.T) {
+	t.Run("removes an existing flagset", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				{Name: flagset2Name, APIKeys: []string{"key-2"}},
+			},
+		}
+		err := cfg.RemoveFlagSet(flagset1Name)
+		require.NoError(t, err)
+
+		got := cfg.GetFlagSets()
+		require.Len(t, got, 1)
+		assert.Equal(t, flagset2Name, got[0].Name)
+		_, err = cfg.GetFlagSetAPIKeys(flagset1Name)
+		assert.Error(t, err)
+	})
+
+	t.Run("returns an error when the flagset does not exist", func(t *testing.T) {
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{Name: flagset1Name, APIKeys: []string{"key-1"}},
+			},
+		}
+		err := cfg.RemoveFlagSet("non-existing")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "flagset non-existing not found")
+		assert.Len(t, cfg.GetFlagSets(), 1)
+	})
+}
+
 func TestFlagSetAPIKeysConcurrency(t *testing.T) {
 	cfg := &config.Config{
 		FlagSets: []config.FlagSet{
