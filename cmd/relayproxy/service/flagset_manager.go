@@ -284,10 +284,18 @@ func (m *flagsetManagerImpl) Close() {
 	if m.DefaultFlagSet != nil {
 		m.DefaultFlagSet.Close()
 	}
+	// Snapshot the clients under the lock, then close them outside of it. Close() flushes the
+	// exporters and can block, so holding the lock for every flush would needlessly block a
+	// concurrent config reload for the whole teardown. This mirrors removeFlagset.
 	m.flagsetsMutex.RLock()
-	defer m.flagsetsMutex.RUnlock()
+	clients := make([]*ffclient.GoFeatureFlag, 0, len(m.FlagSets))
 	for _, flagset := range m.FlagSets {
-		flagset.Close()
+		clients = append(clients, flagset)
+	}
+	m.flagsetsMutex.RUnlock()
+
+	for _, client := range clients {
+		client.Close()
 	}
 }
 
@@ -526,7 +534,6 @@ func (m *flagsetManagerImpl) rebuildNamedAPIKeysMapping(currentByName, newByName
 	reconciled := indexNamedFlagsets(m.config.GetFlagSets())
 
 	m.flagsetsMutex.Lock()
-	defer m.flagsetsMutex.Unlock()
 
 	// Drop every routing entry that targets a named flagset involved in this reload (added,
 	// removed or kept). Entries targeting unnamed flagsets are left untouched.
@@ -561,9 +568,16 @@ func (m *flagsetManagerImpl) rebuildNamedAPIKeysMapping(currentByName, newByName
 			assigned[apiKey] = name
 		}
 	}
-	for apiKey, pair := range collisions {
+	for apiKey := range collisions {
 		delete(assigned, apiKey)
-		// Do not log the API key itself (it is a secret); log the flagsets it collides between.
+	}
+	maps.Copy(m.APIKeysToFlagSetName, assigned)
+	m.flagsetsMutex.Unlock()
+
+	// Log collisions outside the lock to keep the critical section minimal (the logger sink may
+	// be slow or contended). Do not log the API key itself (it is a secret); log the flagsets it
+	// collides between.
+	for _, pair := range collisions {
 		m.logger.Error(
 			"an API key is configured on multiple flagsets after reconciliation; its routing is "+
 				"disabled until the configuration is fixed. This can happen when an API-key move is "+
@@ -571,7 +585,6 @@ func (m *flagsetManagerImpl) rebuildNamedAPIKeysMapping(currentByName, newByName
 			zap.String("flagset", pair[0]), zap.String("otherFlagset", pair[1]),
 		)
 	}
-	maps.Copy(m.APIKeysToFlagSetName, assigned)
 }
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.
