@@ -128,12 +128,12 @@ retrievers:
   - kind: postgresql
     uri: "postgres://user:password@localhost:5432/dbname"
     table: "go_feature_flag"
-    // highlight-start
+    # highlight-start
     maxOpenConns: 25
     maxIdleConns: 5
     connMaxLifetime: "1h"
     connMaxIdleTime: "30m"
-    // highlight-end
+    # highlight-end
 ```
 
 
