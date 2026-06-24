@@ -3,6 +3,7 @@ package init
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
@@ -177,6 +178,12 @@ func createAzBlobStorageRetriever(
 
 func createPostgreSQLRetriever(
 	c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
+	if c.MaxOpenConns < 0 || c.MaxOpenConns > math.MaxInt32 {
+		return nil, fmt.Errorf("maxOpenConns out of range for postgresql retriever: %d", c.MaxOpenConns)
+	}
+	if c.MaxIdleConns < 0 || c.MaxIdleConns > math.MaxInt32 {
+		return nil, fmt.Errorf("maxIdleConns out of range for postgresql retriever: %d", c.MaxIdleConns)
+	}
 	poolCfg := postgresqlretriever.PoolConfig{
 		MaxOpenConns: int32(c.MaxOpenConns),
 		MaxIdleConns: int32(c.MaxIdleConns),

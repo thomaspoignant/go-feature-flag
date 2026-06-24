@@ -58,10 +58,10 @@ type RetrieverConf struct {
 	// MaxOpenConns, MaxIdleConns, ConnMaxLifetime and ConnMaxIdleTime are
 	// optional connection pool settings used by the postgresql retriever.
 	// When left unset, the driver defaults are used and behavior is unchanged.
-	MaxOpenConns    int    `mapstructure:"maxOpenConns"    koanf:"maxopenconns"`
-	MaxIdleConns    int    `mapstructure:"maxIdleConns"    koanf:"maxidleconns"`
-	ConnMaxLifetime string `mapstructure:"connMaxLifetime" koanf:"connmaxlifetime"`
-	ConnMaxIdleTime string `mapstructure:"connMaxIdleTime" koanf:"connmaxidletime"`
+	MaxOpenConns    int    `mapstructure:"maxOpenConns"    koanf:"maxopenconns"    json:",omitempty"`
+	MaxIdleConns    int    `mapstructure:"maxIdleConns"    koanf:"maxidleconns"    json:",omitempty"`
+	ConnMaxLifetime string `mapstructure:"connMaxLifetime" koanf:"connmaxlifetime" json:",omitempty"`
+	ConnMaxIdleTime string `mapstructure:"connMaxIdleTime" koanf:"connmaxidletime" json:",omitempty"`
 
 	// RedisOptions is the serializable redis configuration that can be used in JSON/YAML files
 	RedisOptions *SerializableRedisOptions `mapstructure:"redisOptions"   koanf:"redisOptions"`
