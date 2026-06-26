@@ -534,30 +534,46 @@ func (m *flagsetManagerImpl) rebuildNamedAPIKeysMapping(currentByName, newByName
 	reconciled := indexNamedFlagsets(m.config.GetFlagSets())
 
 	m.flagsetsMutex.Lock()
+	m.dropManagedAPIKeyRouting(currentByName, newByName)
+	assigned, collisions := resolveNamedAPIKeyRouting(reconciled, m.FlagSets)
+	maps.Copy(m.APIKeysToFlagSetName, assigned)
+	m.flagsetsMutex.Unlock()
 
-	// Drop every routing entry that targets a named flagset involved in this reload (added,
-	// removed or kept). Entries targeting unnamed flagsets are left untouched.
+	// Log collisions outside the lock to keep the critical section minimal (the logger sink may
+	// be slow or contended).
+	logAPIKeyCollisions(m.logger, collisions)
+}
+
+// dropManagedAPIKeyRouting removes every routing entry that targets a named flagset involved in
+// this reload (added, removed or kept). Entries targeting unnamed flagsets are left untouched.
+// The caller must hold flagsetsMutex.
+func (m *flagsetManagerImpl) dropManagedAPIKeyRouting(currentByName, newByName map[string]config.FlagSet) {
 	for apiKey, target := range m.APIKeysToFlagSetName {
-		if _, ok := currentByName[target]; ok {
-			delete(m.APIKeysToFlagSetName, apiKey)
-			continue
-		}
-		if _, ok := newByName[target]; ok {
+		_, current := currentByName[target]
+		_, added := newByName[target]
+		if current || added {
 			delete(m.APIKeysToFlagSetName, apiKey)
 		}
 	}
+}
 
-	// Compute the routing entries for every named flagset that has a running client.
-	// A key can legitimately collide here even though newConfig.IsValid() deduped the incoming
-	// config: when an API-key move onto flagset A is accepted while a forbidden modification on
-	// flagset B (which still holds that key) is rejected, the reconciled config ends up with the
-	// same key on both A and B. We must not route such a key non-deterministically to one of the
-	// two flagsets, so we fail closed: the ambiguous key is left unrouted (resolves to no flagset)
-	// and an error is logged until the configuration is fixed.
-	assigned := make(map[string]string)
-	collisions := make(map[string][2]string)
+// resolveNamedAPIKeyRouting computes the API-key -> flagset-name routing for the reconciled named
+// flagsets that have a running client. It returns the unambiguous assignments and the keys that
+// are configured on more than one flagset.
+//
+// A key can collide here even though newConfig.IsValid() deduped the incoming config: when an
+// API-key move onto flagset A is accepted while a forbidden modification on flagset B (which still
+// holds that key) is rejected, the reconciled config ends up with the same key on both A and B.
+// Such a key must not route non-deterministically, so we fail closed — it is left out of the
+// returned assignments (resolves to no flagset) and reported as a collision.
+func resolveNamedAPIKeyRouting(
+	reconciled map[string]config.FlagSet,
+	running map[string]*ffclient.GoFeatureFlag,
+) (assigned map[string]string, collisions map[string][2]string) {
+	assigned = make(map[string]string)
+	collisions = make(map[string][2]string)
 	for name, flagset := range reconciled {
-		if _, running := m.FlagSets[name]; !running {
+		if _, ok := running[name]; !ok {
 			continue
 		}
 		for _, apiKey := range flagset.APIKeys {
@@ -571,14 +587,14 @@ func (m *flagsetManagerImpl) rebuildNamedAPIKeysMapping(currentByName, newByName
 	for apiKey := range collisions {
 		delete(assigned, apiKey)
 	}
-	maps.Copy(m.APIKeysToFlagSetName, assigned)
-	m.flagsetsMutex.Unlock()
+	return assigned, collisions
+}
 
-	// Log collisions outside the lock to keep the critical section minimal (the logger sink may
-	// be slow or contended). Do not log the API key itself (it is a secret); log the flagsets it
-	// collides between.
+// logAPIKeyCollisions reports keys configured on multiple flagsets. It does not log the API key
+// itself (it is a secret); it logs the flagsets the key collides between.
+func logAPIKeyCollisions(logger *zap.Logger, collisions map[string][2]string) {
 	for _, pair := range collisions {
-		m.logger.Error(
+		logger.Error(
 			"an API key is configured on multiple flagsets after reconciliation; its routing is "+
 				"disabled until the configuration is fixed. This can happen when an API-key move is "+
 				"bundled with a rejected flagset modification.",
