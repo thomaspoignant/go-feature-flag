@@ -32,13 +32,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-env": "^8.0.2",
     "autoprefixer": "^10.5.0",
     "babel-loader": "^10.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.4",
-    "eslint": "^10.4.1",
+    "eslint": "^10.5.0",
     "eslint-webpack-plugin": "^6.0.0",
     "htmlnano": "^3.3.2",
     "npm-run-all": "^4.1.5",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
-    "@openfeature/web-sdk": "^1.8.0",
+    "@openfeature/web-sdk": "^1.9.0",
     "highlight.js": "^11.11.1",
     "uuid": "^14.0.0"
   }
