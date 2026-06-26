@@ -91,6 +91,42 @@ type CommonFlagSet struct {
 	Environment string `mapstructure:"environment" koanf:"environment"`
 }
 
+// GetFlagSets returns a shallow copy of the configured flag sets.
+// The copy is taken under the read lock so callers can safely iterate the result
+// while the configuration is being reloaded concurrently.
+func (c *Config) GetFlagSets() []FlagSet {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	out := make([]FlagSet, len(c.FlagSets))
+	copy(out, c.FlagSets)
+	return out
+}
+
+// AddFlagSet adds a new flag set to the configuration.
+// It returns an error if a flag set with the same name already exists.
+func (c *Config) AddFlagSet(flagset FlagSet) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	if _, err := c.getFlagSetIndexFromName(flagset.Name); err == nil {
+		return fmt.Errorf("flagset %s already exists", flagset.Name)
+	}
+	c.FlagSets = append(c.FlagSets, flagset)
+	return nil
+}
+
+// RemoveFlagSet removes the flag set with the given name from the configuration.
+// It returns an error if the flag set is not found.
+func (c *Config) RemoveFlagSet(flagsetName string) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	index, err := c.getFlagSetIndexFromName(flagsetName)
+	if err != nil {
+		return err
+	}
+	c.FlagSets = append(c.FlagSets[:index], c.FlagSets[index+1:]...)
+	return nil
+}
+
 func (c *Config) SetFlagSetAPIKeys(flagsetName string, apiKeys []string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

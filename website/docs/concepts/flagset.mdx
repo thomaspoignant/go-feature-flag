@@ -73,3 +73,18 @@ The API key is what we use to route the request to the appropriate flag set, so 
 2. **Find flag set**: It looks up which flag set is associated with that API key
 3. **Route request**: The evaluation request is routed to that specific flag set
 4. **Return result**: The evaluation result comes from that flag set's flags
+
+## Managing flag sets at runtime
+
+The relay proxy watches its configuration file and applies changes to flag sets **without a restart**:
+
+- ➕ **Adding** a flag set: the new flag set is started immediately and becomes reachable as soon as the file change is detected.
+- ➖ **Removing** a flag set: the flag set is stopped and its API keys stop being accepted.
+- 🔑 **Changing the API keys** of an existing flag set: applied live.
+
+:::warning
+**Modifying** an existing flag set (its `retrievers`, `exporters`, `notifiers`, `pollingInterval`, …) is **not supported at runtime** — the only exception is its API keys.
+Any other modification is **ignored** and an error is logged; the change will only take effect the next time the relay proxy is **restarted** (because, on restart, the whole configuration file is loaded from scratch).
+
+Runtime add/remove only works for flag sets that have an explicit, unique `name`. Flag sets without a name (or named `default`) get a generated name at startup and cannot be managed at runtime.
+:::
