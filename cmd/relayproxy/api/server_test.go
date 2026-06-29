@@ -344,11 +344,7 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 
 func Test_AuthenticationMiddleware(t *testing.T) {
 	t.Run("Non Admin Endpoint", func(t *testing.T) {
-		tests := []struct {
-			name          string
-			configAPIKeys *config.APIKeys
-			want          int // http status code
-		}{
+		tests := []authMiddlewareTestCase{
 			{
 				name:          "Authentication disabled",
 				configAPIKeys: nil,
@@ -371,66 +367,15 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 			},
 		}
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				proxyConf := &config.Config{
-					CommonFlagSet: config.CommonFlagSet{
-						Retrievers: &[]retrieverconf.RetrieverConf{
-							{
-								Kind: "file",
-								Path: "../../../testdata/flag-config.yaml",
-							},
-						},
-					},
-					Server: config.Server{
-						Mode: config.ServerModeHTTP,
-						Port: 11024,
-					},
-					DisableVersionHeader: true,
-				}
-				if tt.configAPIKeys != nil {
-					proxyConf.AuthorizedKeys = *tt.configAPIKeys
-				}
-				proxyConf.ForceReloadAPIKeys()
-
-				log := log.InitLogger()
-				defer func() { _ = log.ZapLogger.Sync() }()
-
-				metricsV2, err := metric.NewMetrics()
-				require.NoError(t, err)
-				wsService := stream.NewWebsocketService()
-				defer wsService.Close()
-				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
-				require.NoError(t, err)
-
-				services := service.Services{
-					MonitoringService: service.NewMonitoring(flagsetManager),
-					WebsocketService:  wsService,
-					FlagsetManager:    flagsetManager,
-					Metrics:           metricsV2,
-				}
-
-				s := api.New(proxyConf, services, log.ZapLogger)
-				go func() { s.StartWithContext(context.Background()) }()
-				defer s.Stop(context.Background())
-				time.Sleep(10 * time.Millisecond)
-
-				response, err := http.Post("http://localhost:11024/ofrep/v1/evaluate/flags/test-flag", "application/json",
-					strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
-				)
-				assert.NoError(t, err)
-				defer func() { _ = response.Body.Close() }()
-				assert.Equal(t, tt.want, response.StatusCode)
-			})
-		}
+		runAuthMiddlewareTests(t, tests, func(_ *testing.T, _ authMiddlewareTestCase) (*http.Response, error) {
+			return http.Post("http://localhost:11024/ofrep/v1/evaluate/flags/test-flag", "application/json",
+				strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
+			)
+		})
 	})
 
 	t.Run("Admin Endpoint", func(t *testing.T) {
-		tests := []struct {
-			name          string
-			configAPIKeys *config.APIKeys
-			want          int // http status code
-		}{
+		tests := []authMiddlewareTestCase{
 			{
 				name:          "Authentication disabled",
 				configAPIKeys: nil,
@@ -453,63 +398,83 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 			},
 		}
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				proxyConf := &config.Config{
-					CommonFlagSet: config.CommonFlagSet{
-						Retrievers: &[]retrieverconf.RetrieverConf{
-							{
-								Kind: "file",
-								Path: "../../../testdata/flag-config.yaml",
-							},
+		runAuthMiddlewareTests(t, tests, func(t *testing.T, tt authMiddlewareTestCase) (*http.Response, error) {
+			request, err := http.NewRequest("POST", "http://localhost:11024/admin/v1/retriever/refresh", nil)
+			assert.NoError(t, err)
+			request.Header.Add("Content-Type", "application/json")
+			if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
+				request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
+			}
+			return http.DefaultClient.Do(request)
+		})
+	})
+}
+
+type authMiddlewareTestCase struct {
+	name          string
+	configAPIKeys *config.APIKeys
+	want          int // http status code
+}
+
+// runAuthMiddlewareTests starts a relay proxy for each test case, issues the
+// request returned by doRequest, and asserts the resulting HTTP status code.
+// It holds the shared table-test setup so Test_AuthenticationMiddleware stays flat.
+func runAuthMiddlewareTests(
+	t *testing.T,
+	tests []authMiddlewareTestCase,
+	doRequest func(t *testing.T, tt authMiddlewareTestCase) (*http.Response, error),
+) {
+	t.Helper()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			proxyConf := &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					Retrievers: &[]retrieverconf.RetrieverConf{
+						{
+							Kind: "file",
+							Path: "../../../testdata/flag-config.yaml",
 						},
 					},
-					Server: config.Server{
-						Mode: config.ServerModeHTTP,
-						Port: 11024,
-					},
-					DisableVersionHeader: true,
-				}
-				if tt.configAPIKeys != nil {
-					proxyConf.AuthorizedKeys = *tt.configAPIKeys
-				}
-				proxyConf.ForceReloadAPIKeys()
+				},
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 11024,
+				},
+				DisableVersionHeader: true,
+			}
+			if tt.configAPIKeys != nil {
+				proxyConf.AuthorizedKeys = *tt.configAPIKeys
+			}
+			proxyConf.ForceReloadAPIKeys()
 
-				log := log.InitLogger()
-				defer func() { _ = log.ZapLogger.Sync() }()
+			log := log.InitLogger()
+			defer func() { _ = log.ZapLogger.Sync() }()
 
-				metricsV2, err := metric.NewMetrics()
-				require.NoError(t, err)
-				wsService := stream.NewWebsocketService()
-				defer wsService.Close()
-				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
-				require.NoError(t, err)
+			metricsV2, err := metric.NewMetrics()
+			require.NoError(t, err)
+			wsService := stream.NewWebsocketService()
+			defer wsService.Close()
+			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+			require.NoError(t, err)
 
-				services := service.Services{
-					MonitoringService: service.NewMonitoring(flagsetManager),
-					WebsocketService:  wsService,
-					FlagsetManager:    flagsetManager,
-					Metrics:           metricsV2,
-				}
+			services := service.Services{
+				MonitoringService: service.NewMonitoring(flagsetManager),
+				WebsocketService:  wsService,
+				FlagsetManager:    flagsetManager,
+				Metrics:           metricsV2,
+			}
 
-				s := api.New(proxyConf, services, log.ZapLogger)
-				go func() { s.StartWithContext(context.Background()) }()
-				defer s.Stop(context.Background())
-				time.Sleep(10 * time.Millisecond)
+			s := api.New(proxyConf, services, log.ZapLogger)
+			go func() { s.StartWithContext(context.Background()) }()
+			defer s.Stop(context.Background())
+			time.Sleep(10 * time.Millisecond)
 
-				request, err := http.NewRequest("POST", "http://localhost:11024/admin/v1/retriever/refresh", nil)
-				assert.NoError(t, err)
-				request.Header.Add("Content-Type", "application/json")
-				if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
-					request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
-				}
-				response, err := http.DefaultClient.Do(request)
-				assert.NoError(t, err)
-				defer func() { _ = response.Body.Close() }()
-				assert.Equal(t, tt.want, response.StatusCode)
-			})
-		}
-	})
+			response, err := doRequest(t, tt)
+			assert.NoError(t, err)
+			defer func() { _ = response.Body.Close() }()
+			assert.Equal(t, tt.want, response.StatusCode)
+		})
+	}
 }
 
 // Helper function to create an HTTP client that can connect via Unix socket

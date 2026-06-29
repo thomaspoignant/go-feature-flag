@@ -153,40 +153,55 @@ func (e *Exporter) initClient(ctx context.Context) error {
 func (e *Exporter) buildRows(events []exporter.ExportableEvent) ([]rowSaver, bigquery.Schema, error) {
 	rows := make([]rowSaver, 0, len(events))
 	eventType := ""
-	var schema bigquery.Schema
 
 	for _, event := range events {
-		switch e := event.(type) {
-		case exporter.FeatureEvent:
-			if eventType == "" {
-				eventType = featureEventType
-				schema = featureEventSchema()
-			}
-			if eventType != featureEventType {
-				return nil, nil, fmt.Errorf("bigquery exporter received mixed event types")
-			}
-			row, err := featureEventRow(e)
-			if err != nil {
-				return nil, nil, err
-			}
-			rows = append(rows, row)
-		case exporter.TrackingEvent:
-			if eventType == "" {
-				eventType = trackingEventType
-				schema = trackingEventSchema()
-			}
-			if eventType != trackingEventType {
-				return nil, nil, fmt.Errorf("bigquery exporter received mixed event types")
-			}
-			row, err := trackingEventRow(e)
-			if err != nil {
-				return nil, nil, err
-			}
-			rows = append(rows, row)
+		row, rowType, err := buildRow(event)
+		if err != nil {
+			return nil, nil, err
 		}
+		if rowType == "" {
+			// Skip events this exporter does not handle.
+			continue
+		}
+		if eventType == "" {
+			eventType = rowType
+		}
+		if eventType != rowType {
+			return nil, nil, errors.New("bigquery exporter received mixed event types")
+		}
+		rows = append(rows, row)
 	}
 
-	return rows, schema, nil
+	return rows, schemaForEventType(eventType), nil
+}
+
+// buildRow converts a single exportable event into a BigQuery row and reports
+// the event type it belongs to. The returned event type is empty for events
+// this exporter does not handle.
+func buildRow(event exporter.ExportableEvent) (rowSaver, string, error) {
+	switch evt := event.(type) {
+	case exporter.FeatureEvent:
+		row, err := featureEventRow(evt)
+		return row, featureEventType, err
+	case exporter.TrackingEvent:
+		row, err := trackingEventRow(evt)
+		return row, trackingEventType, err
+	default:
+		return rowSaver{}, "", nil
+	}
+}
+
+// schemaForEventType returns the BigQuery schema matching the resolved event
+// type, or nil when no rows were produced.
+func schemaForEventType(eventType string) bigquery.Schema {
+	switch eventType {
+	case featureEventType:
+		return featureEventSchema()
+	case trackingEventType:
+		return trackingEventSchema()
+	default:
+		return nil
+	}
 }
 
 func (e *Exporter) exportRows(
