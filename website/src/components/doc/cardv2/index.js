@@ -46,26 +46,22 @@ export function Card(props) {
         </div>
         <p className={styles.message}>{props.content}</p>
         <div className={styles.badgeSection}>
-          {props.badges &&
-            props.badges.map(item => {
-              return (
-                <span
-                  className={clsx(styles.badge, styles.badgeInfo)}
-                  key={item}>
-                  {item}
-                </span>
-              );
-            })}
-          {props.warningBadges &&
-            props.warningBadges.map(item => {
-              return (
-                <span
-                  className={clsx(styles.badge, styles.badgeWarning)}
-                  key={item}>
-                  {item}
-                </span>
-              );
-            })}
+          {props.badges?.map(item => {
+            return (
+              <span className={clsx(styles.badge, styles.badgeInfo)} key={item}>
+                {item}
+              </span>
+            );
+          })}
+          {props.warningBadges?.map(item => {
+            return (
+              <span
+                className={clsx(styles.badge, styles.badgeWarning)}
+                key={item}>
+                {item}
+              </span>
+            );
+          })}
         </div>
       </div>
     </Link>
