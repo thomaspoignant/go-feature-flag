@@ -136,39 +136,53 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 			}
 
 			// Verify that Init was called on the expected retrievers
-			for retrieverName, shouldBeCalled := range tt.expectedInitCalls {
-				retrieverFound := false
-				for _, r := range tt.retrievers {
-					if mockRetriever, ok := r.(interface{ GetName() string }); ok {
-						if mockRetriever.GetName() == retrieverName {
-							retrieverFound = true
-							if legacyRetriever, ok := r.(*mockretriever.InitializableRetrieverLegacy); ok {
-								if shouldBeCalled {
-									assert.True(t, legacyRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							if standardRetriever, ok := r.(*mockretriever.InitializableRetriever); ok {
-								if shouldBeCalled {
-									assert.True(t, standardRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							if flagsetRetriever, ok := r.(*mockretriever.InitializableRetrieverWithFlagset); ok {
-								if shouldBeCalled {
-									assert.True(t, flagsetRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							break
-						}
-					}
-				}
-				if shouldBeCalled {
-					assert.True(t, retrieverFound, "Retriever %s should have been found", retrieverName)
-				}
-			}
+			assertInitCalls(t, tt.retrievers, tt.expectedInitCalls)
 
 			// Clean up
 			_ = manager.Shutdown(ctx)
 		})
+	}
+}
+
+// findRetrieverByName returns the first retriever exposing GetName() == name,
+// or nil when none matches.
+func findRetrieverByName(retrievers []retriever.Retriever, name string) retriever.Retriever {
+	for _, r := range retrievers {
+		if named, ok := r.(interface{ GetName() string }); ok && named.GetName() == name {
+			return r
+		}
+	}
+	return nil
+}
+
+// initCalled reports whether Init was recorded as called on a mock retriever.
+// The second return value is false when r is not an initializable mock type.
+func initCalled(r retriever.Retriever) (called bool, ok bool) {
+	switch v := r.(type) {
+	case *mockretriever.InitializableRetrieverLegacy:
+		return v.InitCalled, true
+	case *mockretriever.InitializableRetriever:
+		return v.InitCalled, true
+	case *mockretriever.InitializableRetrieverWithFlagset:
+		return v.InitCalled, true
+	default:
+		return false, false
+	}
+}
+
+// assertInitCalls verifies that Init was called on each retriever that the test
+// case expects to have been initialized.
+func assertInitCalls(t *testing.T, retrievers []retriever.Retriever, expected map[string]bool) {
+	t.Helper()
+	for name, shouldBeCalled := range expected {
+		if !shouldBeCalled {
+			continue
+		}
+		r := findRetrieverByName(retrievers, name)
+		assert.NotNil(t, r, "Retriever %s should have been found", name)
+		if called, ok := initCalled(r); ok {
+			assert.True(t, called, "Init should have been called on %s", name)
+		}
 	}
 }
 

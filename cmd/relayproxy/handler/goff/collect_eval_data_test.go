@@ -243,26 +243,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.NoError(t, err)
 			defer os.Remove(exporterFile.Name())
 
-			if len(tt.config.FlagSets) > 0 {
-				out := make([]config.FlagSet, len(tt.config.FlagSets))
-				for index, flagSet := range tt.config.FlagSets {
-					flagSet.Exporters = &[]config.ExporterConf{
-						{
-							Kind:     "file",
-							Filename: exporterFile.Name(),
-						},
-					}
-					out[index] = flagSet
-				}
-				tt.config.FlagSets = out
-			} else {
-				tt.config.Exporters = &[]config.ExporterConf{
-					{
-						Kind:     "file",
-						Filename: exporterFile.Name(),
-					},
-				}
-			}
+			setCollectEvalDataFileExporter(&tt.config, exporterFile.Name())
 
 			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err)
@@ -292,14 +273,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			handlerErr := ctrl.Handler(c)
 
 			if tt.want.handlerErr {
-				assert.Error(t, handlerErr, "handler should return an error")
-				he, ok := handlerErr.(*echo.HTTPError)
-				if ok {
-					assert.Equal(t, tt.want.errorCode, he.Code)
-					assert.Equal(t, tt.want.errorMsg, he.Message)
-				} else {
-					assert.Equal(t, tt.want.errorMsg, handlerErr.Error())
-				}
+				assertCollectEvalDataHandlerError(t, handlerErr, tt.want.errorCode, tt.want.errorMsg)
 				return
 			}
 			flagsetManager.Close()
@@ -321,6 +295,39 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.JSONEq(t, string(wantCollectData), string(exportedData), "Invalid exported data")
 		})
 	}
+}
+
+// setCollectEvalDataFileExporter configures cfg to export collected data to the
+// given file, handling both the flag-set and the legacy single-config layouts.
+func setCollectEvalDataFileExporter(cfg *config.Config, filename string) {
+	exporter := config.ExporterConf{
+		Kind:     "file",
+		Filename: filename,
+	}
+	if len(cfg.FlagSets) == 0 {
+		cfg.Exporters = &[]config.ExporterConf{exporter}
+		return
+	}
+	out := make([]config.FlagSet, len(cfg.FlagSets))
+	for index, flagSet := range cfg.FlagSets {
+		flagSet.Exporters = &[]config.ExporterConf{exporter}
+		out[index] = flagSet
+	}
+	cfg.FlagSets = out
+}
+
+// assertCollectEvalDataHandlerError asserts that the handler returned the
+// expected error, supporting both echo.HTTPError and plain error values.
+func assertCollectEvalDataHandlerError(t *testing.T, handlerErr error, errorCode int, errorMsg string) {
+	t.Helper()
+	assert.Error(t, handlerErr, "handler should return an error")
+	he, ok := handlerErr.(*echo.HTTPError)
+	if !ok {
+		assert.Equal(t, errorMsg, handlerErr.Error())
+		return
+	}
+	assert.Equal(t, errorCode, he.Code)
+	assert.Equal(t, errorMsg, he.Message)
 }
 
 func TestCollectEvalData_Handler_cancellation(t *testing.T) {
