@@ -59,7 +59,7 @@ Variation.propTypes = {
 function Variation({type, label, remove, index, icon}) {
   const {register} = useFormContext();
   const valueField = (type, label, register) => {
-    const isJson = type?.toUpperCase() === 'JSON';
+    const isJson = typeof type === 'string' && type.toUpperCase() === 'JSON';
     if (isJson) {
       return <JsonEditor register={register} required={true} label={label} />;
     }
