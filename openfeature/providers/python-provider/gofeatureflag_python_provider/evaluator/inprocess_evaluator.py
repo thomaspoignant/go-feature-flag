@@ -93,10 +93,7 @@ class InProcessEvaluator(AbstractEvaluator):
         try:
             response = self._api.retrieve_flag_configuration(etag=etag)
         except Exception:
-            logger.error(
-                "Failed to refresh flag configuration",
-                exc_info=True,
-            )
+            logger.exception("Failed to refresh flag configuration")
             return
         with self._lock:
             if response.flags:
