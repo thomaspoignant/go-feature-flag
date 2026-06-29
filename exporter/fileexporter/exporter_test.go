@@ -466,53 +466,79 @@ func TestFile_Export(t *testing.T) {
 			assert.Equal(t, 1, len(files), "Directory %s should have only one file", outputDir)
 			assert.Regexp(t, tt.expected.fileNameRegex, files[0].Name(), "Invalid file name")
 
-			if tt.fields.Format == "parquet" {
-				switch tt.fields.EventType {
-				case "tracking":
-					fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
-					assert.NoError(t, err)
-					defer fr.Close()
-					pr, err := reader.NewParquetReader(
-						fr,
-						new(exporter.TrackingEvent),
-						int64(runtime.NumCPU()),
-					)
-					assert.NoError(t, err)
-					defer pr.ReadStop()
-					gotFeatureEvents := make([]exporter.TrackingEvent, pr.GetNumRows())
-					err = pr.Read(&gotFeatureEvents)
-					assert.NoError(t, err)
-					assert.ElementsMatch(t, tt.expected.trackingEvents, gotFeatureEvents)
-					return
-				default:
-					fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
-					assert.NoError(t, err)
-					defer fr.Close()
-					pr, err := reader.NewParquetReader(
-						fr,
-						new(exporter.FeatureEvent),
-						int64(runtime.NumCPU()),
-					)
-					assert.NoError(t, err)
-					defer pr.ReadStop()
-					gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
-					err = pr.Read(&gotFeatureEvents)
-					assert.NoError(t, err)
-					assert.ElementsMatch(t, tt.expected.featureEvents, gotFeatureEvents)
-					return
-				}
-			}
-
-			expectedContent, _ := os.ReadFile(tt.expected.content)
-			gotContent, _ := os.ReadFile(outputDir + "/" + files[0].Name())
-			assert.Equal(
+			assertExportOutput(
 				t,
-				string(expectedContent),
-				string(gotContent),
-				"Wrong content in the output file",
+				tt.fields.Format,
+				tt.fields.EventType,
+				outputDir+"/"+files[0].Name(),
+				tt.expected.content,
+				tt.expected.featureEvents,
+				tt.expected.trackingEvents,
 			)
 		})
 	}
+}
+
+// readParquetFeatureEvents reads the parquet file at filePath and returns the
+// FeatureEvent records it contains.
+func readParquetFeatureEvents(t *testing.T, filePath string) []exporter.FeatureEvent {
+	t.Helper()
+	fr, err := local.NewLocalFileReader(filePath)
+	assert.NoError(t, err)
+	defer fr.Close()
+	pr, err := reader.NewParquetReader(fr, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
+	assert.NoError(t, err)
+	defer pr.ReadStop()
+	gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
+	err = pr.Read(&gotFeatureEvents)
+	assert.NoError(t, err)
+	return gotFeatureEvents
+}
+
+// readParquetTrackingEvents reads the parquet file at filePath and returns the
+// TrackingEvent records it contains.
+func readParquetTrackingEvents(t *testing.T, filePath string) []exporter.TrackingEvent {
+	t.Helper()
+	fr, err := local.NewLocalFileReader(filePath)
+	assert.NoError(t, err)
+	defer fr.Close()
+	pr, err := reader.NewParquetReader(fr, new(exporter.TrackingEvent), int64(runtime.NumCPU()))
+	assert.NoError(t, err)
+	defer pr.ReadStop()
+	gotTrackingEvents := make([]exporter.TrackingEvent, pr.GetNumRows())
+	err = pr.Read(&gotTrackingEvents)
+	assert.NoError(t, err)
+	return gotTrackingEvents
+}
+
+// assertExportOutput validates the exported file. Parquet output is decoded and
+// compared against the expected feature or tracking events depending on the
+// event type; any other format is compared byte-for-byte against the expected
+// content file.
+func assertExportOutput(
+	t *testing.T,
+	format, eventType, filePath, expectedContentPath string,
+	expectedFeatureEvents []exporter.FeatureEvent,
+	expectedTrackingEvents []exporter.TrackingEvent,
+) {
+	t.Helper()
+	if format == "parquet" {
+		if eventType == "tracking" {
+			assert.ElementsMatch(t, expectedTrackingEvents, readParquetTrackingEvents(t, filePath))
+			return
+		}
+		assert.ElementsMatch(t, expectedFeatureEvents, readParquetFeatureEvents(t, filePath))
+		return
+	}
+
+	expectedContent, _ := os.ReadFile(expectedContentPath)
+	gotContent, _ := os.ReadFile(filePath)
+	assert.Equal(
+		t,
+		string(expectedContent),
+		string(gotContent),
+		"Wrong content in the output file",
+	)
 }
 
 func TestFile_IsBulk(t *testing.T) {
