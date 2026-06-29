@@ -173,6 +173,10 @@ vuln-check: ## Run govulncheck on all modules in the workspace
 		cd - >/dev/null; \
 	done
 
+vuln-check-relayproxy: ## Run govulncheck on the relay proxy only
+	@which govulncheck > /dev/null 2>&1 || $(GOCMD) install golang.org/x/vuln/cmd/govulncheck@latest
+	$(GOWORK_ENV) govulncheck ./cmd/relayproxy/...
+
 ## Help:
 help: ## Show this help.
 	@echo ''
