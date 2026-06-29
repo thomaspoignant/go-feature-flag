@@ -375,7 +375,7 @@ function convertToFormattedArray(input) {
 
     if (isNumeric(trimmedElement)) {
       // Keep numeric values unquoted in the resulting array.
-      return String(parseInt(trimmedElement, 10));
+      return String(Number.parseInt(trimmedElement, 10));
     }
     // Remove double quotes around string elements and JSON-encode them.
     return JSON.stringify(trimmedElement.replace(/^"(.*)"$/, '$1'));
