@@ -175,12 +175,12 @@ export function OpenFeatureFlow() {
       <div className="flex flex-col items-center text-center">
         <div className="w-full max-w-sm px-4 py-3 rounded-xl bg-white dark:bg-[#2a2a2a] border border-solid border-[#273437]/10 dark:border-white/10 font-semibold text-gray-800 dark:text-gray-100">
           <i className="fa-solid fa-code mr-2 text-gray-400" aria-hidden />
-          Your application code
+          <span>Your application code</span>
         </div>
         <Arrow />
         <div className="w-full max-w-sm px-4 py-3 rounded-xl bg-titles-500/90 text-[#273437] font-bold shadow-sm">
           <i className="fa-solid fa-plug mr-2" aria-hidden />
-          OpenFeature SDK
+          <span>OpenFeature SDK</span>
           <span className="block text-xs font-semibold opacity-80">
             write against this once
           </span>

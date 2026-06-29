@@ -227,6 +227,9 @@ export function ComparisonTable() {
         <tbody>
           {ROWS.map((row, rowIndex) => {
             const isAlt = rowIndex % 2 === 1;
+            const rowHeaderBg = isAlt
+              ? 'bg-titles-500/[0.04]'
+              : 'bg-white dark:bg-[#2a2a2a]';
             return (
               <tr
                 key={row.tool}
@@ -241,12 +244,7 @@ export function ComparisonTable() {
                     borderClass,
                     row.featured
                       ? 'text-titles-500 bg-titles-500/[0.12]'
-                      : clsx(
-                          'text-gray-800 dark:text-gray-50',
-                          isAlt
-                            ? 'bg-titles-500/[0.04]'
-                            : 'bg-white dark:bg-[#2a2a2a]'
-                        )
+                      : clsx('text-gray-800 dark:text-gray-50', rowHeaderBg)
                   )}>
                   <span className="inline-flex items-center gap-2">
                     {row.logo && (

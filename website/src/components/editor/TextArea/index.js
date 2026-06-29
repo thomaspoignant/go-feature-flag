@@ -28,8 +28,7 @@ export function TextArea({
   const {register} = useFormContext();
 
   return (
-    <div
-      className={clsx(className ? className : styles.editorTextAreaContainer)}>
+    <div className={clsx(className || styles.editorTextAreaContainer)}>
       <textarea
         id={`${label}.textarea`}
         defaultValue={defaultValue}
