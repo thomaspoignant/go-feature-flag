@@ -33,8 +33,7 @@ function Footer() {
 const CustomForm = ({status, message, onValidated}) => {
   let email;
   const submit = () =>
-    email &&
-    email.value.includes('@') &&
+    email?.value.includes('@') &&
     onValidated({
       EMAIL: email.value,
     });

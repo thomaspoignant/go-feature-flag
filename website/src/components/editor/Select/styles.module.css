@@ -19,7 +19,6 @@
     );
   color: var(--goff-editor-input-placeholder);
   border-radius: 0.25em;
-  /*box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);*/
   cursor: pointer;
 }
 .selector select option {
