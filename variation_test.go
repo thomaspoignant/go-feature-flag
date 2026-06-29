@@ -54,6 +54,24 @@ func (c *cacheMock) GetFlag(_ string) (flag.Flag, error) {
 }
 func (c *cacheMock) AllFlags() (map[string]flag.Flag, error) { return nil, nil }
 
+// assertExpectedLog waits for the async logger to flush and asserts that a log
+// message containing expectedLog was emitted. It is a no-op when expectedLog is
+// empty.
+func assertExpectedLog(handler *slogassert.Handler, expectedLog string) {
+	if expectedLog == "" {
+		return
+	}
+	// since the log is async, we are waiting to be sure it's written
+	time.Sleep(40 * time.Millisecond)
+	handler.Assert(func(message slogassert.LogMessage) bool {
+		if !strings.Contains(message.Message, expectedLog) {
+			handler.Fail("impossible to find %s in %s", expectedLog, message.Message)
+			return false
+		}
+		return true
+	})
+}
+
 func TestBoolVariation(t *testing.T) {
 	type args struct {
 		flagKey       string
@@ -355,22 +373,7 @@ func TestBoolVariation(t *testing.T) {
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "BoolVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -832,22 +835,7 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(
@@ -1165,22 +1153,7 @@ func TestFloat64Variation(t *testing.T) {
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -1501,22 +1474,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -1818,22 +1776,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 			// clean logger
 			ff = nil
 		})
@@ -2147,22 +2090,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 			// clean logger
 			ff = nil
 		})
@@ -2434,22 +2362,7 @@ func TestJSONVariation(t *testing.T) {
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -2683,22 +2596,7 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3008,22 +2906,7 @@ func TestStringVariation(t *testing.T) {
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3255,22 +3138,7 @@ func TestStringVariationDetails(t *testing.T) {
 			}
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3580,22 +3448,7 @@ func TestIntVariation(t *testing.T) {
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3869,22 +3722,7 @@ func TestIntVariationDetails(t *testing.T) {
 			}
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -4256,22 +4094,7 @@ func TestRawVariation(t *testing.T) {
 
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			if tt.expectedLog != "" {
-				time.Sleep(
-					40 * time.Millisecond,
-				) // since the log is async, we are waiting to be sure it's written
-				if tt.expectedLog == "" {
-					handler.AssertEmpty()
-				} else {
-					handler.Assert(func(message slogassert.LogMessage) bool {
-						if !strings.Contains(message.Message, tt.expectedLog) {
-							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
-							return false
-						}
-						return true
-					})
-				}
-			}
+			assertExpectedLog(handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "RawVariation() error = %v, wantErr %v", err, tt.wantErr)
