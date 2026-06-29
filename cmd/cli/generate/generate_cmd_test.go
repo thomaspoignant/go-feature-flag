@@ -5,23 +5,26 @@ import (
 	"testing"
 
 	"github.com/pterm/pterm"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate"
 )
 
+type generateCmdTestCase struct {
+	name          string
+	args          []string
+	wantErr       bool
+	expectedErr   string
+	expectedOut   string
+	checkManifest bool
+}
+
 func TestNewGenerateCmd(t *testing.T) {
 	pterm.DisableStyling()
 	pterm.DisableColor()
 
-	tests := []struct {
-		name          string
-		args          []string
-		wantErr       bool
-		expectedErr   string
-		expectedOut   string
-		checkManifest bool
-	}{
+	tests := []generateCmdTestCase{
 		{
 			name:        "no subcommand provided",
 			args:        []string{},
@@ -48,27 +51,46 @@ func TestNewGenerateCmd(t *testing.T) {
 
 			err := cmd.Execute()
 
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.expectedErr)
-			} else {
-				require.NoError(t, err)
-			}
-
-			if tt.expectedOut != "" {
-				assert.Equal(t, tt.expectedOut, buf.String())
-			}
-
-			if tt.checkManifest {
-				found := false
-				for _, c := range cmd.Commands() {
-					if c.Name() == "manifest" {
-						found = true
-						break
-					}
-				}
-				assert.True(t, found, "manifest subcommand should be wired into generate")
-			}
+			verifyGenerateCmdResult(t, tt, cmd, &buf, err)
 		})
 	}
+}
+
+// verifyGenerateCmdResult asserts the outcome of executing the generate command
+// for a single test case. Keeping it flat (no deep nesting) avoids inflating the
+// cognitive complexity of the parent test.
+func verifyGenerateCmdResult(
+	t *testing.T,
+	tt generateCmdTestCase,
+	cmd *cobra.Command,
+	buf *bytes.Buffer,
+	err error,
+) {
+	t.Helper()
+
+	if tt.wantErr {
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), tt.expectedErr)
+	} else {
+		require.NoError(t, err)
+	}
+
+	if tt.expectedOut != "" {
+		assert.Equal(t, tt.expectedOut, buf.String())
+	}
+
+	if tt.checkManifest {
+		assert.True(t, hasManifestSubcommand(cmd),
+			"manifest subcommand should be wired into generate")
+	}
+}
+
+// hasManifestSubcommand reports whether the manifest subcommand is wired into cmd.
+func hasManifestSubcommand(cmd *cobra.Command) bool {
+	for _, c := range cmd.Commands() {
+		if c.Name() == "manifest" {
+			return true
+		}
+	}
+	return false
 }
