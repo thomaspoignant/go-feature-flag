@@ -5,8 +5,8 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 export function Cards(props) {
-  const listItems = props.cards.map((item, index) => (
-    <Card {...item} key={index} />
+  const listItems = props.cards.map(item => (
+    <Card {...item} key={item.title} />
   ));
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xl:grid-cols-3">

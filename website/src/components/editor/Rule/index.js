@@ -23,6 +23,22 @@ Rule.propTypes = {
   label: PropTypes.string.isRequired,
   isDefaultRule: PropTypes.bool,
 };
+function AddGroupAction(props) {
+  return <AddAction {...props} variant="group" />;
+}
+
+function AddRuleAction(props) {
+  return <AddAction {...props} variant="rule" />;
+}
+
+function RemoveGroupAction(props) {
+  return <RemoveAction {...props} variant="group" />;
+}
+
+function RemoveRuleAction(props) {
+  return <RemoveAction {...props} variant="rule" />;
+}
+
 export function Rule({variations, label, isDefaultRule}) {
   const [query, setQuery] = useState({
     combinator: 'and',
@@ -98,18 +114,10 @@ export function Rule({variations, label, isDefaultRule}) {
                 valueEditor: FieldSelector,
                 operatorSelector: OperatorSelector,
                 combinatorSelector: CombinatorSelector,
-                addGroupAction: ({handleOnClick}) => (
-                  <AddAction handleOnClick={handleOnClick} variant="group" />
-                ),
-                addRuleAction: ({handleOnClick}) => (
-                  <AddAction handleOnClick={handleOnClick} variant="rule" />
-                ),
-                removeGroupAction: ({handleOnClick}) => (
-                  <RemoveAction handleOnClick={handleOnClick} variant="group" />
-                ),
-                removeRuleAction: ({handleOnClick}) => (
-                  <RemoveAction handleOnClick={handleOnClick} variant="rule" />
-                ),
+                addGroupAction: AddGroupAction,
+                addRuleAction: AddRuleAction,
+                removeGroupAction: RemoveGroupAction,
+                removeRuleAction: RemoveRuleAction,
               }}
               resetOnFieldChange={false}
               resetOnOperatorChange={false}
@@ -366,14 +374,14 @@ function convertToFormattedArray(input) {
     const trimmedElement = element.trim();
 
     if (isNumeric(trimmedElement)) {
-      return parseInt(trimmedElement, 10); // Ensure to specify the radix when parsing integers.
-    } else {
-      // Remove double quotes around string elements
-      return trimmedElement.replace(/^"(.*)"$/, '$1');
+      // Keep numeric values unquoted in the resulting array.
+      return String(parseInt(trimmedElement, 10));
     }
+    // Remove double quotes around string elements and JSON-encode them.
+    return JSON.stringify(trimmedElement.replace(/^"(.*)"$/, '$1'));
   });
 
-  return JSON.stringify(formattedArray);
+  return `[${formattedArray.join(',')}]`;
 }
 const ruleOperators = [
   {name: 'eq', label: 'Equals To'},

@@ -48,7 +48,7 @@ export function Input({
   });
 
   return (
-    <div className={clsx(className ? className : styles.editorInputContainer)}>
+    <div className={clsx(className || styles.editorInputContainer)}>
       <input
         id={`${label}.input`}
         defaultValue={defaultValue}
