@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import Layout from '@theme/Layout';
+import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -39,6 +40,15 @@ const TARGETING_YAML = `show-email-contact:
       variation: enabled
   defaultRule:
     variation: disabled`;
+
+const PERCENTAGE_YAML = `new-checkout-flow:
+  variations:
+    new: true
+    old: false
+  defaultRule:
+    percentage:
+      new: 5 # start at 5%, widen as the metrics hold
+      old: 95`;
 
 const GO_SNIPPET = `// Connect to your relay proxy through the OpenFeature SDK.
 provider, _ := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
@@ -164,6 +174,36 @@ export default function FeatureFlagPage() {
     siteConfig.customFields?.github ??
     'https://github.com/thomaspoignant/go-feature-flag';
 
+  const siteUrl = siteConfig.url;
+  const pageUrl = `${siteUrl}/product/what-are-feature-flags`;
+  const ogImage = `${siteUrl}/img/landing/feature-flag/multi-ff.png`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
+      image: ogImage,
+      author: {'@type': 'Organization', name: siteConfig.title, url: siteUrl},
+      publisher: {
+        '@type': 'Organization',
+        name: siteConfig.title,
+        logo: {'@type': 'ImageObject', url: `${siteUrl}/img/logo/logo.png`},
+      },
+      datePublished: '2026-06-30',
+      dateModified: '2026-06-30',
+      mainEntityOfPage: {'@type': 'WebPage', '@id': pageUrl},
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {'@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/`},
+        {'@type': 'ListItem', position: 2, name: PAGE_TITLE, item: pageUrl},
+      ],
+    },
+  ];
+
   return (
     <Layout
       title={PAGE_TITLE}
@@ -177,6 +217,16 @@ export default function FeatureFlagPage() {
         'open source feature flags',
         'self-hosted feature flags',
       ]}>
+      <Head>
+        <link rel="canonical" href={pageUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="896" />
+        <meta name="twitter:image" content={ogImage} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Head>
       <Title
         title={PAGE_TITLE}
         description="Deploy your code one day and release the feature another — to the users you choose, with an instant off switch."
@@ -199,6 +249,8 @@ export default function FeatureFlagPage() {
         eyebrow="The core idea"
         title="What is a feature flag?"
         imageSrc={deployVsRelease}
+        imageWidth={1200}
+        imageHeight={896}
         imageAlt="Deploying code and releasing a feature are separate steps: shipped code passes through a feature-flag toggle that rolls out to a growing share of users.">
         <p className={prose}>
           A switch in your code that turns a feature on or off at runtime —{' '}
@@ -241,6 +293,13 @@ export default function FeatureFlagPage() {
             settle the debate with data, not opinions.
           </li>
         </ul>
+        <p className={clsx(prose, 'mt-4')}>
+          Feature flags are the building block of the wider practice of{' '}
+          <Link to="/product/what_is_feature_management">
+            feature management
+          </Link>
+          .
+        </p>
       </FeatureRow>
 
       <Cards
@@ -325,6 +384,8 @@ export default function FeatureFlagPage() {
         eyebrow="The key element"
         title="Decouple deploy from release"
         imageSrc={killswitch}
+        imageWidth={1200}
+        imageHeight={747}
         reverse
         imageAlt="A kill switch turning a live feature off instantly, separating the moment code is deployed from the moment a feature is released.">
         <p className="mb-4">
@@ -343,6 +404,8 @@ export default function FeatureFlagPage() {
         eyebrow="In practice"
         title="What you can do with feature flags"
         imageSrc={evaluationFlow}
+        imageWidth={1200}
+        imageHeight={896}
         imageAlt="A honeycomb of feature flag use cases: a toggle switch, A/B testing, a progressive rollout rocket, a kill switch, a safe-rollback shield, user targeting, and branching.">
         <ul className="m-0 list-disc space-y-2 pl-6">
           <li>
@@ -378,13 +441,57 @@ export default function FeatureFlagPage() {
         cards={FLAG_TYPE_CARDS}
       />
 
+      {/* Worked example */}
+      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+        <h2 className={`${sectionHeading} text-center`}>
+          A feature flag, end to end
+        </h2>
+        <p className={prose}>
+          Say you&rsquo;re rebuilding checkout. Here is the whole life of one
+          flag, start to finish:
+        </p>
+        <ol className="mb-6 list-decimal space-y-2 pl-6 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <li>
+            <strong>Define it, off by default.</strong> Merge and deploy — the
+            old checkout still runs for everyone, so the deploy is a non-event.
+          </li>
+          <li>
+            <strong>Turn it on for your team.</strong> Add a targeting rule for
+            internal users and click through the new flow in production.
+          </li>
+          <li>
+            <strong>Open the gate gradually.</strong> Serve it to 5% of traffic,
+            watch error rates and conversion, then widen to 25% and 100% as the
+            numbers hold.
+          </li>
+          <li>
+            <strong>Clean up.</strong> Once it&rsquo;s live everywhere and
+            stable, delete the flag and the old code path.
+          </li>
+        </ol>
+        <p className={prose}>
+          A percentage rollout is only a few lines — bump the numbers and the
+          relay proxy picks them up on its next poll:
+        </p>
+        <div className="mx-auto w-full max-w-3xl">
+          <CodeCard
+            filename="flags.goff.yaml"
+            language="yaml"
+            code={PERCENTAGE_YAML}
+            callout="Change the split in the file; no redeploy, no restart. The next poll rolls it out."
+          />
+        </div>
+      </section>
+
       {/* GOFF positioning */}
       <FeatureRow
         eyebrow="Self-hosted"
         title="Feature flags with GO Feature Flag"
         imageSrc={gofflogo}
+        imageWidth={400}
+        imageHeight={378}
         imageAlt="GO Feature Flag logo"
-        imageClassName="mx-auto w-auto max-w-[500px]"
+        imageClassName="mx-auto h-auto w-auto max-w-[500px]"
         actions={[
           {label: 'Why GO Feature Flag', href: '/product/why_go_feature_flag'},
         ]}>
@@ -456,6 +563,38 @@ export default function FeatureFlagPage() {
           mind, or mix tools later, and your evaluation code stays the same.
         </p>
       </FeatureRow>
+
+      {/* Lifecycle / flag debt */}
+      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+        <h2 className={`${sectionHeading} text-center`}>
+          Lifecycle and flag debt
+        </h2>
+        <p className={prose}>
+          Not every flag is temporary, and treating them all the same is how
+          teams get into trouble.
+        </p>
+        <ul className="mb-4 list-disc space-y-2 pl-6 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <li>
+            <strong>Release flags are short-lived.</strong> They exist to ship
+            one feature safely, then they should be removed. Left behind, they
+            become <em>flag debt</em> — dead conditionals that make code harder
+            to read, test, and reason about.
+          </li>
+          <li>
+            <strong>
+              Operational and permission flags can live for years.
+            </strong>{' '}
+            Kill switches and entitlement checks are part of how the system
+            runs, not temporary scaffolding.
+          </li>
+        </ul>
+        <p className="m-0 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          The discipline that keeps flags from rotting is simple: give every
+          flag an owner and an expected lifespan, review the list on a schedule,
+          and delete release flags the moment a feature is fully live. A flag
+          you&rsquo;re afraid to remove is a flag you no longer understand.
+        </p>
+      </section>
 
       {/* Best practices */}
       <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">

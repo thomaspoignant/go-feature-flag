@@ -2,14 +2,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Link from '@docusaurus/Link';
 
-function Media({imageSrc, imageAlt, placeholderLabel, imageClassName}) {
+function Media({
+  imageSrc,
+  imageAlt,
+  placeholderLabel,
+  imageClassName,
+  imageWidth,
+  imageHeight,
+}) {
   if (imageSrc) {
     return (
       <img
         src={imageSrc}
         alt={imageAlt}
+        width={imageWidth}
+        height={imageHeight}
+        loading="lazy"
+        decoding="async"
         className={
-          imageClassName ?? 'mx-auto w-full max-w-xl rounded-2xl md:max-w-none'
+          imageClassName ??
+          'mx-auto h-auto w-full max-w-xl rounded-2xl md:max-w-none'
         }
       />
     );
@@ -34,6 +46,8 @@ Media.propTypes = {
   imageAlt: PropTypes.string,
   placeholderLabel: PropTypes.node,
   imageClassName: PropTypes.string,
+  imageWidth: PropTypes.number,
+  imageHeight: PropTypes.number,
 };
 
 export default function FeatureRow({
@@ -43,6 +57,8 @@ export default function FeatureRow({
   imageSrc,
   imageAlt,
   imageClassName,
+  imageWidth,
+  imageHeight,
   placeholderLabel,
   reverse,
   actions,
@@ -85,6 +101,8 @@ export default function FeatureRow({
             imageSrc={imageSrc}
             imageAlt={imageAlt}
             imageClassName={imageClassName}
+            imageWidth={imageWidth}
+            imageHeight={imageHeight}
             placeholderLabel={placeholderLabel}
           />
         </div>
@@ -101,6 +119,9 @@ FeatureRow.propTypes = {
   imageSrc: PropTypes.string,
   imageAlt: PropTypes.string,
   imageClassName: PropTypes.string,
+  // Intrinsic pixel dimensions — set both to reserve space and avoid layout shift.
+  imageWidth: PropTypes.number,
+  imageHeight: PropTypes.number,
   placeholderLabel: PropTypes.node,
   // Put the media on the left (text on the right) when true.
   reverse: PropTypes.bool,
