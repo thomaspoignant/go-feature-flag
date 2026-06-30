@@ -14,7 +14,7 @@ SocialIcon.propTypes = {
   backgroundColor: PropTypes.string,
 };
 
-function SocialIcon(props) {
+export function SocialIcon(props) {
   return (
     <div className={styles.tooltip}>
       <span
