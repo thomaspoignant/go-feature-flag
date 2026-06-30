@@ -26,7 +26,7 @@ import deployVsRelease from '@site/static/img/landing/feature-flag/deploy.png';
 import killswitch from '@site/static/img/landing/feature-flag/kill-switch.png';
 import gofflogo from '@site/static/img/logo/logo.png';
 
-const PAGE_TITLE = 'What is a feature flag?';
+const PAGE_TITLE = 'What are feature flags?';
 const PAGE_DESCRIPTION =
   "A developer's guide to feature flags (feature toggles): what they are, how they work, what they're for, and how to self-host them for free.";
 
