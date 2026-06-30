@@ -54,6 +54,7 @@ export default function FeatureRow({
   eyebrow,
   title,
   children,
+  media,
   imageSrc,
   imageAlt,
   imageClassName,
@@ -97,14 +98,16 @@ export default function FeatureRow({
           )}
         </div>
         <div className="w-full md:flex-1">
-          <Media
-            imageSrc={imageSrc}
-            imageAlt={imageAlt}
-            imageClassName={imageClassName}
-            imageWidth={imageWidth}
-            imageHeight={imageHeight}
-            placeholderLabel={placeholderLabel}
-          />
+          {media ?? (
+            <Media
+              imageSrc={imageSrc}
+              imageAlt={imageAlt}
+              imageClassName={imageClassName}
+              imageWidth={imageWidth}
+              imageHeight={imageHeight}
+              placeholderLabel={placeholderLabel}
+            />
+          )}
         </div>
       </div>
     </section>
@@ -115,6 +118,9 @@ FeatureRow.propTypes = {
   eyebrow: PropTypes.node,
   title: PropTypes.node,
   children: PropTypes.node,
+  // Custom media node for the image column. Takes precedence over imageSrc /
+  // the placeholder when provided (e.g. an inline SVG logo).
+  media: PropTypes.node,
   // When omitted, a styled placeholder box is rendered instead of an <img>.
   imageSrc: PropTypes.string,
   imageAlt: PropTypes.string,

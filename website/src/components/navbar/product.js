@@ -24,7 +24,7 @@ export function generateProductDropdownHTML() {
         },
         {
           label: 'OpenFeature',
-          href: '/product/open_feature_support',
+          href: '/product/open-feature',
           icon: FaToggleOn,
         },
         {label: 'Rollouts', href: '/product/rollouts', icon: MdRocketLaunch},

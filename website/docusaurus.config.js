@@ -36,6 +36,10 @@ const config = {
       {
         redirects: [
           {
+            from: '/product/open_feature_support',
+            to: '/product/open-feature',
+          },
+          {
             from: '/docs/configure_flag/flag_format',
             to: '/docs/configure_flag/create-flags',
           },
@@ -386,7 +390,7 @@ const config = {
               },
               {
                 label: 'OpenFeature',
-                to: '/product/open_feature_support',
+                to: '/product/open-feature',
               },
               {
                 label: 'Documentation',
