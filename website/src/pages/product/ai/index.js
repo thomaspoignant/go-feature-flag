@@ -1,6 +1,5 @@
 import React from 'react';
 import Layout from '@theme/Layout';
-import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {
@@ -12,6 +11,7 @@ import {
   FaPowerOff,
 } from 'react-icons/fa';
 import {CodeCard} from '@site/src/components/home/HomepageQuickStart/CodeCard';
+import SeoHead from '../../../components/landingPage/seo';
 import Title from '../../../components/landingPage/title';
 import Cards from '../../../components/landingPage/cards';
 import FeatureRow from '../../../components/landingPage/featureRow';
@@ -182,37 +182,6 @@ export default function AIPage() {
     siteConfig.customFields?.github ??
     'https://github.com/thomaspoignant/go-feature-flag';
 
-  const siteUrl = siteConfig.url;
-  const pageUrl = `${siteUrl}/product/ai`;
-  // Page-specific social card: the AI hero illustration (absolute URL for crawlers).
-  const ogImage = `${siteUrl}${aiHero}`;
-  const structuredData = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'TechArticle',
-      headline: PAGE_TITLE,
-      description: PAGE_DESCRIPTION,
-      image: ogImage,
-      author: {'@type': 'Organization', name: siteConfig.title, url: siteUrl},
-      publisher: {
-        '@type': 'Organization',
-        name: siteConfig.title,
-        logo: {'@type': 'ImageObject', url: `${siteUrl}/img/logo/logo.png`},
-      },
-      datePublished: '2026-06-30',
-      dateModified: '2026-06-30',
-      mainEntityOfPage: {'@type': 'WebPage', '@id': pageUrl},
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {'@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/`},
-        {'@type': 'ListItem', position: 2, name: PAGE_TITLE, item: pageUrl},
-      ],
-    },
-  ];
-
   return (
     <Layout
       title={PAGE_TITLE}
@@ -227,17 +196,15 @@ export default function AIPage() {
         'AI kill switch',
         'ship AI safely',
       ]}>
-      <Head>
-        <link rel="canonical" href={pageUrl} />
-        {/* Override the default site card with the page-specific AI hero. */}
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="655" />
-        <meta name="twitter:image" content={ogImage} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </Head>
+      <SeoHead
+        title={PAGE_TITLE}
+        description={PAGE_DESCRIPTION}
+        path="/product/ai"
+        image={aiHero}
+        imageMeta
+        imageWidth={1200}
+        imageHeight={655}
+      />
 
       <Title
         title={PAGE_TITLE}
