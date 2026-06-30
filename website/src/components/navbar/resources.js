@@ -50,11 +50,11 @@ export function generateResourcesDropdownHTML() {
     )
     .join('');
 
-  const featuredHtml = generateFeaturedCard({
+  /*const featuredHtml = generateFeaturedCard({
     columnTitle: 'Explore',
     title: 'How to migrate <br />from Launch Darkly <br />to GO Feature Flag',
     href: '/resources/migrate-from-launchdarkly',
-  });
+  });*/
 
-  return generateMegaMenu(columnsHtml + featuredHtml);
+  return generateMegaMenu(columnsHtml /*+ featuredHtml*/);
 }
