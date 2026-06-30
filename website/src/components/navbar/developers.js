@@ -23,6 +23,12 @@ export function generateDevelopersDropdownHTML() {
       title: 'Resources',
       items: [
         {
+          label: 'GitHub',
+          href: 'https://github.com/thomaspoignant/go-feature-flag',
+          icon: FaGithub,
+          external: true,
+        },
+        {
           label: 'Release Notes',
           href: 'https://github.com/thomaspoignant/go-feature-flag/releases',
           icon: FaGithub,

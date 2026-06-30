@@ -37,7 +37,7 @@ export function generateResourcesDropdownHTML() {
         },
         {
           label: 'GO Feature Flag vs Others',
-          href: '/product/comparison',
+          href: '/blog/best-opensource-feature-flag-tools',
           icon: FaBalanceScale,
         },
       ],
