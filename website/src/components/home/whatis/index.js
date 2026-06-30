@@ -11,7 +11,8 @@ export function Whatis() {
         What is GO Feature Flag?
       </span>
       <p className="mt-3 mb-1 max-w-4xl mx-auto text-center text-gray-500 dark:text-gray-400 text-[1.05rem] leading-relaxed">
-        GO Feature Flag is an open-source, OpenFeature-native feature flag
+        GO Feature Flag is an open-source, OpenFeature-native{' '}
+        <Link to="/product/what-are-feature-flags">feature flag</Link>{' '}
         management system that runs on the infrastructure you already have - no
         database to operate, no vendor to lock into, and no per-seat bill.
       </p>

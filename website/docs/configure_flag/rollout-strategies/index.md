@@ -8,6 +8,10 @@ A critical part of every new feature release is orchestrating the actual launch 
 
 Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times. But it doesn’t have to! Having a complex rollout strategy allows you to have lifecycle for your flags.
 
+:::tip
+New to rollouts? See [**Feature flag rollouts**](/product/rollouts) for an overview of each strategy and when to use it, then come back here for the configuration details.
+:::
+
 ## Releasing features with GO Feature Flag
 
 The following table compares functionality that GO Feature Flag provides for releasing features:

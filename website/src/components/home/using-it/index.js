@@ -83,7 +83,7 @@ export function UsingIt() {
   ];
 
   return (
-    <section className={'pt-5 px-5'}>
+    <section className={'pt-5 px-5 bg-white dark:bg-[#1b1b1d]'}>
       <div className="grid grid-pad text-center">
         <span className="text-2xl">
           Trusted in production by engineering teams at
