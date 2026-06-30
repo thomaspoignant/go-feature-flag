@@ -138,6 +138,60 @@ div[class^="announcementBar_"] {
     color: #73c6b6;
 }
 
+/* ============================================================================
+   Responsive navbar mega-menus (mobile sidebar)
+   ============================================================================
+   The "Product", "Resources" and "Developers" mega-menus are injected as raw
+   HTML (see src/components/navbar/menu.js) and reused as-is inside the mobile
+   navbar sidebar. Their desktop layout is a wide, fixed-width row of columns
+   (`flex-row flex-nowrap w-max` with `min-w-[180px]` columns), which overflows
+   the narrow mobile sidebar and crops the right-hand columns/links.
+
+   These overrides are scoped to `.navbar-sidebar` so they only affect the menu
+   when it is rendered in the mobile sidebar; the desktop dropdown popup keeps
+   its original side-by-side layout. */
+.navbar-sidebar .megamenu-dropdown,
+.navbar-sidebar .megamenu-dropdown > div {
+    width: 100%;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+/* Columns: fill the width and drop the fixed min-width that forces overflow. */
+.navbar-sidebar .megamenu-dropdown [class*="min-w-"] {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Remove the vertical separator that only makes sense side-by-side. The
+   horizontal padding is handled uniformly by the `px-6` rule below, so every
+   column (with or without a divider) shares the same left edge. */
+.navbar-sidebar .megamenu-dropdown [class*="border-l"] {
+    border-left: 0;
+}
+
+/* Trim the generous horizontal padding so links are not pushed off-screen, and
+   apply it uniformly to every column so the stacked sections stay aligned. */
+.navbar-sidebar .megamenu-dropdown [class*="px-6"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Give stacked sub-sections (every column after the first) a little breathing
+   room above their heading, since they no longer sit in their own column. */
+.navbar-sidebar .megamenu-dropdown [class*="border-l"] > h3 {
+    margin-top: 1rem;
+}
+
+/* Stack the "Get Help" cards row and let each card use the full width. */
+.navbar-sidebar .megamenu-dropdown [class*="flex-row"] {
+    flex-direction: column;
+}
+
+.navbar-sidebar .megamenu-dropdown [class*="w-72"] {
+    width: 100%;
+}
+
 html.plugin-blog h2,
 html.plugin-blog.blog-post-page h1 {
     font-size: 2rem;
