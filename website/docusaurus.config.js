@@ -3,6 +3,15 @@
 
 const {sdk} = require('./data/sdk');
 const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
+const {
+  generateProductDropdownHTML,
+} = require('./src/components/navbar/product');
+const {
+  generateResourcesDropdownHTML,
+} = require('./src/components/navbar/resources');
+const {
+  generateDevelopersDropdownHTML,
+} = require('./src/components/navbar/developers');
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -296,63 +305,42 @@ const config = {
           {
             position: 'left',
             label: 'Product',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
             items: [
               {
-                to: '/product/what_is_feature_management',
-                html: '<i class="fa-solid fa-list-check menu-icon"></i> What is Feature Management?',
+                type: 'html',
+                value: generateProductDropdownHTML(),
+                className: 'dyte-dropdown',
               },
+            ],
+          },
+          {
+            position: 'left',
+            label: 'Resources',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
+            items: [
               {
-                to: '/product/why_go_feature_flag',
-                html: '<i class="fa-solid fa-laptop-code menu-icon"></i> Why GO Feature Flag?',
-              },
-              {
-                to: '/product/open_feature_support',
-                html: '<i class="fa-solid fa-toggle-on menu-icon"></i> Open Feature Support',
+                type: 'html',
+                value: generateResourcesDropdownHTML(),
+                className: 'dyte-dropdown',
               },
             ],
           },
           {
             position: 'left',
             label: 'Developers',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
             items: [
               {
-                to: '/docs/getting-started',
-                html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
-              },
-              {
-                to: '/docs/sdk',
-                html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
-              },
-              {
-                to: '/editor',
-                html: '<i class="fa-solid fa-pencil menu-icon"></i> Flag Editor',
-              },
-              {
-                html: '<i class="fa-solid fa-book menu-icon"></i> Documentation',
-                type: 'doc',
-                docId: 'index',
-              },
-              {
-                html: '<i class="fa-solid fa-eye menu-icon"></i> Examples <i class="fa fa-external-link" aria-hidden="true"></i>',
-                to: 'https://github.com/thomaspoignant/go-feature-flag/tree/main/examples',
-              },
-              {
-                html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
-                to: '/blog/feature-flag-best-practice',
-              },
-              {
-                to: '/slack',
-                html: '<i class="fa-brands fa-slack menu-icon"></i> Community <i class="fa fa-external-link" aria-hidden="true"></i>',
-              },
-              {
-                to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-                html: '<i class="fa-brands fa-github menu-icon"></i> Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+                type: 'html',
+                value: generateDevelopersDropdownHTML(),
+                className: 'dyte-dropdown',
               },
             ],
           },
-          {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
-          {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', html: 'Editor', position: 'left'},
           {to: '/pricing', html: 'Pricing', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
