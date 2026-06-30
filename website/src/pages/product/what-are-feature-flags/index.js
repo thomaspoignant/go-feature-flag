@@ -308,7 +308,7 @@ export default function FeatureFlagPage() {
       />
 
       {/* How it works + tabbed code */}
-      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+      <section className="px-6 py-12 max-w-[1400px] mx-auto">
         <h2 className={`${sectionHeading} text-center`}>
           How feature flags work
         </h2>
@@ -409,8 +409,11 @@ export default function FeatureFlagPage() {
         imageAlt="A honeycomb of feature flag use cases: a toggle switch, A/B testing, a progressive rollout rocket, a kill switch, a safe-rollback shield, user targeting, and branching.">
         <ul className="m-0 list-disc space-y-2 pl-6">
           <li>
-            <strong>Progressive rollouts</strong> — ship to 1%, then 10%, then
-            everyone, watching your metrics as you go.
+            <strong>
+              <Link to="/product/rollouts">Progressive rollouts</Link>
+            </strong>{' '}
+            — ship to 1%, then 10%, then everyone, watching your metrics as you
+            go.
           </li>
           <li>
             <strong>A/B testing and experimentation</strong> — serve different
@@ -442,7 +445,7 @@ export default function FeatureFlagPage() {
       />
 
       {/* Worked example */}
-      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+      <section className="px-6 py-12 max-w-[1400px] mx-auto">
         <h2 className={`${sectionHeading} text-center`}>
           A feature flag, end to end
         </h2>
@@ -526,7 +529,7 @@ export default function FeatureFlagPage() {
         </p>
       </FeatureRow>
 
-      <section className="px-6 pb-12 lg:px-16 xl:px-64 2xl:px-96">
+      <section className="px-6 pb-12 max-w-[1400px] mx-auto">
         <p className={`${prose} text-center`}>
           Point the relay proxy at your config file and you have a working flag
           backend:
@@ -565,7 +568,7 @@ export default function FeatureFlagPage() {
       </FeatureRow>
 
       {/* Lifecycle / flag debt */}
-      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+      <section className="px-6 py-12 max-w-[1400px] mx-auto">
         <h2 className={`${sectionHeading} text-center`}>
           Lifecycle and flag debt
         </h2>
@@ -597,7 +600,7 @@ export default function FeatureFlagPage() {
       </section>
 
       {/* Best practices */}
-      <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+      <section className="px-6 py-12 max-w-[1400px] mx-auto">
         <h2 className={`${sectionHeading} text-center`}>
           Feature flag best practices
         </h2>
