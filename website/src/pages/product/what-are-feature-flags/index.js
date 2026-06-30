@@ -208,7 +208,7 @@ export default function FeatureFlagPage() {
         eyebrow="The core idea"
         title="What is a feature flag?"
         imageSrc={deployVsRelease}
-        placeholderLabel="Prompt A — deploy-vs-release / progressive rollout diagram">
+        imageAlt="Deploying code and releasing a feature are separate steps: shipped code passes through a feature-flag toggle that rolls out to a growing share of users.">
         <p className={prose}>
           A switch in your code that turns a feature on or off at runtime —{' '}
           <strong>no redeploy required</strong>.
@@ -231,26 +231,25 @@ export default function FeatureFlagPage() {
         </div> */}
         <p className={clsx(prose, 'mt-4')}>
           Once that switch exists, it earns its keep:
-          <ul className="mb-4 list-disc space-y-2 pl-6 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-            <li>
-              <strong>Progressive rollout</strong> — release to 1% of users,
-              watch the dashboards, widen the cohort only once you trust it.
-            </li>
-            <li>
-              <strong>Kill switch</strong> — flip an expensive or risky feature
-              off in seconds when traffic spikes. No redeploy, no incident
-              bridge.
-            </li>
-            <li>
-              <strong>Targeted release</strong> — gate features by plan, region,
-              or user, so the right people get the right experience.
-            </li>
-            <li>
-              <strong>Experiments</strong> — send cohorts down different paths
-              and settle the debate with data, not opinions.
-            </li>
-          </ul>
         </p>
+        <ul className="mb-4 list-disc space-y-2 pl-6 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <li>
+            <strong>Progressive rollout</strong> — release to 1% of users, watch
+            the dashboards, widen the cohort only once you trust it.
+          </li>
+          <li>
+            <strong>Kill switch</strong> — flip an expensive or risky feature
+            off in seconds when traffic spikes. No redeploy, no incident bridge.
+          </li>
+          <li>
+            <strong>Targeted release</strong> — gate features by plan, region,
+            or user, so the right people get the right experience.
+          </li>
+          <li>
+            <strong>Experiments</strong> — send cohorts down different paths and
+            settle the debate with data, not opinions.
+          </li>
+        </ul>
       </FeatureRow>
 
       <Cards
@@ -336,7 +335,7 @@ export default function FeatureFlagPage() {
         title="Decouple deploy from release"
         imageSrc={killswitch}
         reverse
-        placeholderLabel="Prompt A — deploy-vs-release / progressive rollout diagram">
+        imageAlt="A kill switch turning a live feature off instantly, separating the moment code is deployed from the moment a feature is released.">
         <p className="mb-4">
           Deploying code and releasing a feature used to be the same event.
           Feature flags split them apart. Your code ships to production turned
@@ -395,7 +394,6 @@ export default function FeatureFlagPage() {
         imageSrc={gofflogo}
         imageAlt="GO Feature Flag logo"
         imageClassName="mx-auto w-auto max-w-[500px]"
-        placeholderLabel="Prompt B — self-hosted architecture (relay proxy + YAML file + multi-language SDKs)"
         actions={[
           {label: 'Why GO Feature Flag', href: '/product/why_go_feature_flag'},
         ]}>
