@@ -469,7 +469,9 @@ export default function RolloutsPage() {
         </p>
         <p className="mb-0">
           <strong>When to use it:</strong> a time-boxed A/B test - you want a
-          clean measurement period, then an automatic return to the default.
+          clean measurement period, then an automatic return to the default. The
+          same approach lets you compare two models or prompts with{' '}
+          <Link to="/product/ai">feature flags for AI</Link>.
         </p>
       </FeatureRow>
       <section className="px-6 pb-12 max-w-[1400px] mx-auto">

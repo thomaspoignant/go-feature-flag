@@ -435,6 +435,13 @@ export default function FeatureFlagPage() {
             <strong>Trunk-based development</strong> — merge unfinished work
             behind an off flag instead of keeping long-lived branches.
           </li>
+          <li>
+            <strong>
+              <Link to="/product/ai">Feature flags for AI</Link>
+            </strong>{' '}
+            — ship AI-generated code dark and roll out models and prompts
+            safely, with a kill switch one flag away.
+          </li>
         </ul>
       </FeatureRow>
 
@@ -553,7 +560,7 @@ export default function FeatureFlagPage() {
         actions={[
           {
             label: 'Our OpenFeature support',
-            href: '/product/open_feature_support',
+            href: '/product/open-feature',
           },
         ]}>
         <p className="mb-4">

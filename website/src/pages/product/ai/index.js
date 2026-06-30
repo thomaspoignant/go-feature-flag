@@ -25,7 +25,7 @@ import aiKillSwitch from '@site/static/img/landing/ai/prompte.png';
 
 const PAGE_TITLE = 'Feature flags for AI';
 const PAGE_DESCRIPTION =
-  'Why feature flags are the safety net for AI-generated code and AI features: ship agent-written code dark, roll a model out to a percentage, A/B test prompts, and keep an instant kill switch - no redeploy.';
+  'Why feature flags are the safety net for AI code and AI features - ship agent code dark, canary a model, A/B test prompts, and keep an instant kill switch.';
 
 const ROLLOUT_DOCS = '/docs/configure_flag/rollout-strategies/';
 
@@ -184,8 +184,8 @@ export default function AIPage() {
 
   const siteUrl = siteConfig.url;
   const pageUrl = `${siteUrl}/product/ai`;
-  // Use the default GO Feature Flag social card (themeConfig.image) for sharing.
-  const ogImage = `${siteUrl}/img/logo/x-card.png`;
+  // Page-specific social card: the AI hero illustration (absolute URL for crawlers).
+  const ogImage = `${siteUrl}${aiHero}`;
   const structuredData = [
     {
       '@context': 'https://schema.org',
@@ -229,6 +229,11 @@ export default function AIPage() {
       ]}>
       <Head>
         <link rel="canonical" href={pageUrl} />
+        {/* Override the default site card with the page-specific AI hero. */}
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="655" />
+        <meta name="twitter:image" content={ogImage} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
