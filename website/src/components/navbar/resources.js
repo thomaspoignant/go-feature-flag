@@ -56,5 +56,5 @@ export function generateResourcesDropdownHTML() {
     href: '/resources/migrate-from-launchdarkly',
   });
 
-  return generateMegaMenu(columnsHtml);
+  return generateMegaMenu(columnsHtml + featuredHtml);
 }
