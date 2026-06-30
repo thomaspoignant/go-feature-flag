@@ -64,7 +64,7 @@ export default function FeatureRow({
   actions,
 }) {
   return (
-    <section className="px-6 py-2 lg:px-16 xl:px-64 2xl:px-96">
+    <section className="px-6 py-2 max-w-[1400px] mx-auto">
       <div
         className={`flex flex-col items-center gap-10 lg:gap-16 ${
           reverse ? 'md:flex-row-reverse' : 'md:flex-row'

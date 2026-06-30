@@ -72,7 +72,7 @@ Card.propTypes = CardBody.propTypes;
 export default function Cards({title, cards, columns}) {
   const colClass = COLUMN_CLASS[columns] ?? COLUMN_CLASS[3];
   return (
-    <section className="px-6 py-12 lg:px-16 xl:px-64 2xl:px-96">
+    <section className="px-6 py-12 max-w-[1400px] mx-auto">
       {title && (
         <h2 className="mb-10 text-center text-3xl font-bold text-gray-800 dark:text-gray-50">
           {title}
