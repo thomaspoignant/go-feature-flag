@@ -30,15 +30,6 @@ const PAGE_TITLE = 'What is a feature flag?';
 const PAGE_DESCRIPTION =
   "A developer's guide to feature flags (feature toggles): what they are, how they work, what they're for, and how to self-host them for free.";
 
-const SIMPLE_FLAG_YAML = `new-checkout-flow:
-  variations:
-    enabled: true
-    disabled: false
-  defaultRule:
-    percentage:
-      enabled: 5      # roll out to 5% first, watch your metrics, widen when you trust it
-      disabled: 95`;
-
 const TARGETING_YAML = `show-email-contact:
   variations:
     enabled: true

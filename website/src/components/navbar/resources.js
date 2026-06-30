@@ -52,7 +52,7 @@ export function generateResourcesDropdownHTML() {
 
   const featuredHtml = generateFeaturedCard({
     columnTitle: 'Explore',
-    title: 'How to migrate from Launch Darkly<br />to GO Feature Flag',
+    title: 'How to migrate <br />from Launch Darkly <br />to GO Feature Flag',
     href: '/resources/migrate-from-launchdarkly',
   });
 
