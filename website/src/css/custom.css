@@ -163,16 +163,24 @@ div[class^="announcementBar_"] {
     min-width: 0;
 }
 
-/* Remove the vertical separator that only makes sense side-by-side. */
+/* Remove the vertical separator that only makes sense side-by-side. The
+   horizontal padding is handled uniformly by the `px-6` rule below, so every
+   column (with or without a divider) shares the same left edge. */
 .navbar-sidebar .megamenu-dropdown [class*="border-l"] {
     border-left: 0;
-    padding-left: 0;
 }
 
-/* Trim the generous horizontal padding so links are not pushed off-screen. */
+/* Trim the generous horizontal padding so links are not pushed off-screen, and
+   apply it uniformly to every column so the stacked sections stay aligned. */
 .navbar-sidebar .megamenu-dropdown [class*="px-6"] {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+}
+
+/* Give stacked sub-sections (every column after the first) a little breathing
+   room above their heading, since they no longer sit in their own column. */
+.navbar-sidebar .megamenu-dropdown [class*="border-l"] > h3 {
+    margin-top: 1rem;
 }
 
 /* Stack the "Get Help" cards row and let each card use the full width. */
