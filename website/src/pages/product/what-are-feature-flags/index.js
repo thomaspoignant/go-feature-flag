@@ -75,10 +75,10 @@ const client = OpenFeature.getClient("my-app");
 const ctx = {targetingKey: "1", admin: true};
 const show = await client.getBooleanValue("show-email-contact", false, ctx);`;
 
-const DOCKER_SNIPPET = `docker run \\
-  -p 1031:1031 \\
-  -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \\
-  -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \\
+const DOCKER_SNIPPET = String.raw`docker run \
+  -p 1031:1031 \
+  -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \
+  -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
   gofeatureflag/go-feature-flag:latest`;
 
 const sectionHeading =

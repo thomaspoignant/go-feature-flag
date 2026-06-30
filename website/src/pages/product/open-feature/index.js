@@ -230,7 +230,8 @@ export default function OpenFeatureSupportPage() {
             not to build any proprietary SDKs and to rely entirely on
             OpenFeature
           </strong>
-          . Instead of a client library you would have to learn and get tied to,
+          {'. '}
+          Instead of a client library you would have to learn and get tied to,
           we maintain native OpenFeature <strong>providers</strong> in many
           languages.
         </p>

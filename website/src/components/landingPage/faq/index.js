@@ -7,8 +7,7 @@ function toPlainText(node) {
   if (node == null || node === false || node === true) return '';
   if (typeof node === 'string' || typeof node === 'number') return String(node);
   if (Array.isArray(node)) return node.map(toPlainText).join('');
-  if (node.props && node.props.children)
-    return toPlainText(node.props.children);
+  if (node.props?.children) return toPlainText(node.props.children);
   return '';
 }
 

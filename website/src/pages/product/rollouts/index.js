@@ -260,7 +260,8 @@ export default function RolloutsPage() {
         <p className={prose}>
           A rollout is how you take a feature from nobody to everybody -
           deciding <strong>which users</strong> get it and <strong>when</strong>
-          , separately from when you deploy the code.
+          {', '}
+          separately from when you deploy the code.
         </p>
         <p className="mb-0">
           With a <Link to="/product/what-are-feature-flags">feature flag</Link>{' '}

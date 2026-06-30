@@ -306,7 +306,8 @@ export default function WhyGoFeatureFlagPage() {
         <p className="mb-4">
           Merge and deploy whenever you&rsquo;re ready, then decide separately
           who sees the feature and when. The code goes out <strong>dark</strong>
-          , gated behind a flag, so releasing is a configuration change — not
+          {', '}
+          gated behind a flag, so releasing is a configuration change — not
           another deploy.
         </p>
         <p className="mb-0">
