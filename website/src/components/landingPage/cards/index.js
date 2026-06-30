@@ -15,7 +15,7 @@ function CardBody({icon, title, description, link, linkLabel}) {
   return (
     <>
       {icon && (
-        <div className="mb-6 flex h-12 w-12 items-center justify-center text-4xl text-[color:var(--ifm-color-primary)] [&>svg]:h-full [&>svg]:w-full">
+        <div className="mb-6 flex h-12 w-12 items-center justify-center text-4xl text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)] [&>svg]:h-full [&>svg]:w-full">
           {icon}
         </div>
       )}
@@ -28,7 +28,7 @@ function CardBody({icon, title, description, link, linkLabel}) {
         </p>
       )}
       {link && (
-        <span className="mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-[color:var(--ifm-color-primary)]">
+        <span className="mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]">
           {linkLabel} <span aria-hidden="true">→</span>
         </span>
       )}

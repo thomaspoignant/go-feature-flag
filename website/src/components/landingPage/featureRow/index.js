@@ -73,7 +73,7 @@ export default function FeatureRow({
                 <Link
                   key={action.href}
                   to={action.href}
-                  className="inline-flex items-center gap-1 font-semibold text-[color:var(--ifm-color-primary)] no-underline hover:no-underline hover:opacity-80">
+                  className="inline-flex items-center gap-1 font-semibold text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)] no-underline hover:no-underline hover:opacity-80">
                   {action.label} <span aria-hidden="true">→</span>
                 </Link>
               ))}

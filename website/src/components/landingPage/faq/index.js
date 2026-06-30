@@ -44,7 +44,7 @@ export default function Faq({title, items, withJsonLd}) {
               {item.question}
               <span
                 aria-hidden="true"
-                className="shrink-0 text-2xl leading-none text-[color:var(--ifm-color-primary)] transition-transform duration-200 group-open:rotate-45">
+                className="shrink-0 text-2xl leading-none text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)] transition-transform duration-200 group-open:rotate-45">
                 +
               </span>
             </summary>
