@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.1.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.1.0...openfeature/providers/python-provider/v1.1.1) (2026-07-01)
+
+
+### 🐛 Bug Fixes
+
+* **python-provider:** use logger.exception in refresh error handler ([#5522](https://github.com/thomaspoignant/go-feature-flag/issues/5522)) ([8bf2c4d](https://github.com/thomaspoignant/go-feature-flag/commit/8bf2c4d45c32119f5f84780e473b1710a8e5340e))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.10 to 1.41.11 ([#5409](https://github.com/thomaspoignant/go-feature-flag/issues/5409)) ([1badd80](https://github.com/thomaspoignant/go-feature-flag/commit/1badd804bb4232b034ccc59d15aee1cdee02e34d))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5360](https://github.com/thomaspoignant/go-feature-flag/issues/5360)) ([9752a72](https://github.com/thomaspoignant/go-feature-flag/commit/9752a726b9e252e6262bfcf75066b0e32e4ec0ed))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5410](https://github.com/thomaspoignant/go-feature-flag/issues/5410)) ([e9bf102](https://github.com/thomaspoignant/go-feature-flag/commit/e9bf102189c0708b72ee0487b05af8f32148681f))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5490](https://github.com/thomaspoignant/go-feature-flag/issues/5490)) ([52994bd](https://github.com/thomaspoignant/go-feature-flag/commit/52994bdc6c85926a90eeb3dbc5d96e83c59a0476))
+* Bump github.com/testcontainers/testcontainers-go ([#5511](https://github.com/thomaspoignant/go-feature-flag/issues/5511)) ([a772730](https://github.com/thomaspoignant/go-feature-flag/commit/a7727302bcf6f1dacc67c9014a15a9f4397c4ef5))
+* Update openfeature-sdk requirement ([#5427](https://github.com/thomaspoignant/go-feature-flag/issues/5427)) ([11be657](https://github.com/thomaspoignant/go-feature-flag/commit/11be6572746ed85474624a377523274188f52ea1))
+
+
+### 📚 Documentation
+
+* Cleanup CHANGELOGS ([#5333](https://github.com/thomaspoignant/go-feature-flag/issues/5333)) ([7d6c5a3](https://github.com/thomaspoignant/go-feature-flag/commit/7d6c5a3341c1a0e028163c0fd8e2ad99b27d67ef))
+
 ## [1.1.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.0.1...openfeature/providers/python-provider/v1.1.0) (2026-05-26)
 
 
