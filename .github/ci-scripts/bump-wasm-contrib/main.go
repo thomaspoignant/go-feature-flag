@@ -42,6 +42,18 @@ func main() {
 		fmt.Sprintf(`const TARGET_WASM_VERSION = '%s';`, wasmVersion),
 		"const TARGET_WASM_VERSION",
 	)
+
+	// Python: Bump the wasm version in the pyproject.toml file.
+	// The Python provider lives in the go-feature-flag repository, which is checked
+	// out alongside the other contrib repositories. The WASM release artifacts have
+	// no leading "v" (e.g. gofeatureflag-evaluation_0.2.2.wasi), so we strip it
+	// before writing the version.
+	pythonVersion := strings.TrimPrefix(wasmVersion, "v")
+	replaceLine(
+		fmt.Sprintf("%s/go-feature-flag/openfeature/providers/python-provider/pyproject.toml", outDir),
+		fmt.Sprintf(`wasm_version = "%s"`, pythonVersion),
+		"wasm_version",
+	)
 }
 
 // replaceLine finds a line in a file matching a prefix and replaces the entire line.

@@ -80,7 +80,8 @@ class GoFeatureFlagOptions(BaseModel):
 
     # wasm_file_path (optional) is the path to the GO Feature Flag evaluation WASI binary.
     # Used only when evaluation_type is INPROCESS.
-    # If not set, the bundled wasm-releases/evaluation/gofeatureflag-evaluation_0.2.0.wasi is used.
+    # If not set, the bundled WASI binary for the wasm_version pinned in pyproject.toml is used
+    # (wasm-releases/evaluation/gofeatureflag-evaluation_<wasm_version>.wasi).
     wasm_file_path: typing.Optional[str] = None
 
     # wasm_pool_size (optional) number of WASM Store instances for concurrent in-process evaluation.
