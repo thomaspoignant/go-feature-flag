@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.1...modules/core/v0.7.2) (2026-07-01)
+
+
+### 🐛 Bug Fixes
+
+* apply scheduled rollout steps in chronological order ([#5534](https://github.com/thomaspoignant/go-feature-flag/issues/5534)) ([0fd2e8e](https://github.com/thomaspoignant/go-feature-flag/commit/0fd2e8e9d40eed456a0c68527bfa3233f4582cbc))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.10 to 1.41.11 ([#5409](https://github.com/thomaspoignant/go-feature-flag/issues/5409)) ([1badd80](https://github.com/thomaspoignant/go-feature-flag/commit/1badd804bb4232b034ccc59d15aee1cdee02e34d))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5360](https://github.com/thomaspoignant/go-feature-flag/issues/5360)) ([9752a72](https://github.com/thomaspoignant/go-feature-flag/commit/9752a726b9e252e6262bfcf75066b0e32e4ec0ed))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5410](https://github.com/thomaspoignant/go-feature-flag/issues/5410)) ([e9bf102](https://github.com/thomaspoignant/go-feature-flag/commit/e9bf102189c0708b72ee0487b05af8f32148681f))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5490](https://github.com/thomaspoignant/go-feature-flag/issues/5490)) ([52994bd](https://github.com/thomaspoignant/go-feature-flag/commit/52994bdc6c85926a90eeb3dbc5d96e83c59a0476))
+* Bump github.com/testcontainers/testcontainers-go ([#5511](https://github.com/thomaspoignant/go-feature-flag/issues/5511)) ([a772730](https://github.com/thomaspoignant/go-feature-flag/commit/a7727302bcf6f1dacc67c9014a15a9f4397c4ef5))
+* Bump golang.org/x/net from 0.53.0 to 0.54.0 ([#5296](https://github.com/thomaspoignant/go-feature-flag/issues/5296)) ([b31655a](https://github.com/thomaspoignant/go-feature-flag/commit/b31655ac1ab8e12d6f9284b2f725d1cd74b80c3b))
+* **dependencies:** Bump github.com/diegoholiveira/jsonlogic/v3 ([#5475](https://github.com/thomaspoignant/go-feature-flag/issues/5475)) ([ffb36b2](https://github.com/thomaspoignant/go-feature-flag/commit/ffb36b2d1420a31c321af9378dd3eadd224389d5))
+* **dependencies:** Bump github.com/diegoholiveira/jsonlogic/v3 ([#5492](https://github.com/thomaspoignant/go-feature-flag/issues/5492)) ([0415c4e](https://github.com/thomaspoignant/go-feature-flag/commit/0415c4ec8782d9ac04b084e7a6ae9dae72586d56))
+
 ## [0.7.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.0...modules/core/v0.7.1) (2026-05-15)
 
 
