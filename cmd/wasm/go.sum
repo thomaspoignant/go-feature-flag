@@ -5,8 +5,8 @@ github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2y
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/diegoholiveira/jsonlogic/v3 v3.9.1 h1:BMZ4DxiZyIHVxoip29bc9alMg4cBvZ0lDzBC+/osOtQ=
-github.com/diegoholiveira/jsonlogic/v3 v3.9.1/go.mod h1:807lvTWhwOX6yHwkr42unn3VpC2eMLkvT/WsGGqWDfE=
+github.com/diegoholiveira/jsonlogic/v3 v3.10.1 h1:LfEloCfkty+LOkYbLRTw7FrrQGqX+BYuKtPqizmoQ7k=
+github.com/diegoholiveira/jsonlogic/v3 v3.10.1/go.mod h1:mJcE63oWAS86KovXNXxyiBvJk8bvOaeGG7psnkzn9ms=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc h1:Lf2F57nHEebTz1Z1WVB/bt6k8LvRgk1hWdDGM+Y3TgQ=
@@ -21,8 +21,8 @@ github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0t
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.7.1 h1:KtX9Af4GYv7yzAbegZAyWeg1M7RXQZ+I3n39oWqIedU=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.7.1/go.mod h1:K+lEVMDdKaXAyIfN9DeO0CtejpCqPS4F4RRCNL0ZO7U=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.7.2 h1:XHESq+gDYiQxBsw7JWGKXS7N2Pbnz91PcrIVb23s2Ss=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.7.2/go.mod h1:QvY8vxq4KXB3ss9np6nOSk1cOX6b7l/96cBzxpzg1Zk=
 golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 h1:2dVuKD2vS7b0QIHQbpyTISPd0LeHDbnYEryqj5Q1ug8=
 golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56/go.mod h1:M4RDyNAINzryxdtnbRXRL/OHtkFuWGRjvuhBJpk2IlY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
