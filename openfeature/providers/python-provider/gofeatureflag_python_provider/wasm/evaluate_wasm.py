@@ -14,7 +14,6 @@ Memory protocol:
 """
 
 import logging
-import re
 from pathlib import Path
 from queue import Queue
 from typing import Any, Optional
@@ -25,29 +24,19 @@ from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse, Wa
 
 logger = logging.getLogger(__name__)
 
-
-def _package_root() -> Path:
-    """Return the python-provider package root (parent of this file's grandparent)."""
-    return Path(__file__).parent.parent.parent
+# Directory that ships (inside the wheel) the bundled WASI binary and its
+# version marker, both located next to this module.
+_WASM_DIR = Path(__file__).parent
 
 
 def _read_wasm_version() -> str:
-    """Read the ``wasm_version`` pinned in pyproject.toml (single source of truth)."""
-    text = (_package_root() / "pyproject.toml").read_text(encoding="utf-8")
-    match = re.search(r'^wasm_version\s*=\s*"([^"]+)"', text, re.MULTILINE)
-    if not match:
-        raise WasmNotLoadedError("wasm_version not found in pyproject.toml")
-    return match.group(1)
+    """Read the bundled WASI version from the co-located ``_wasi_version.txt``."""
+    return (_WASM_DIR / "_wasi_version.txt").read_text(encoding="utf-8").strip()
 
 
 def _default_wasi_path() -> Path:
-    """Path (relative to the package root) of the bundled WASI binary for the pinned version."""
-    version = _read_wasm_version()
-    return (
-        Path("wasm-releases")
-        / "evaluation"
-        / f"gofeatureflag-evaluation_{version}.wasi"
-    )
+    """Absolute path of the bundled WASI binary shipped alongside this module."""
+    return _WASM_DIR / f"gofeatureflag-evaluation_{_read_wasm_version()}.wasi"
 
 
 class WasmNotLoadedError(RuntimeError):
@@ -130,7 +119,7 @@ class EvaluateWasm:
         if wasm_path:
             self._wasm_path = Path(wasm_path)
         else:
-            self._wasm_path = _package_root() / _default_wasi_path()
+            self._wasm_path = _default_wasi_path()
         self._pool_size = 1 if pool_size is None or pool_size < 1 else pool_size
         self._engine: Optional[wasmtime.Engine] = None
         self._module: Optional[wasmtime.Module] = None
