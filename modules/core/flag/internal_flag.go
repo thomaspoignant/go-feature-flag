@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"sort"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -219,43 +220,56 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 		return &InternalFlag{}, err
 	}
 
+	// We only keep the steps that are already active (date in the past or now).
+	dueSteps := make([]ScheduledStep, 0, len(*f.Scheduled))
+	for _, step := range *f.Scheduled {
+		if step.Date != nil &&
+			(step.Date.Before(evaluationDate) || step.Date.Equal(evaluationDate)) {
+			dueSteps = append(dueSteps, step)
+		}
+	}
+
+	// We apply the steps in chronological order (oldest first) so that, when
+	// several steps edit the same rule/field, the most recent step always wins
+	// regardless of the order they are declared in the configuration.
+	// The sort is stable so that steps sharing the exact same date keep their
+	// declaration order (the last one declared is applied last, and wins).
+	sort.SliceStable(dueSteps, func(i, j int) bool {
+		return dueSteps[i].Date.Before(*dueSteps[j].Date)
+	})
+
 	// We apply the scheduled rollout
-	for _, steps := range *f.Scheduled {
-		if steps.Date != nil &&
-			(steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
-			flagCopy.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
-			if steps.Disable != nil {
-				flagCopy.Disable = steps.Disable
-			}
+	for _, steps := range dueSteps {
+		flagCopy.Rules = MergeSetOfRules(flagCopy.GetRules(), steps.GetRules())
+		if steps.Disable != nil {
+			flagCopy.Disable = steps.Disable
+		}
 
-			if steps.TrackEvents != nil {
-				flagCopy.TrackEvents = steps.TrackEvents
-			}
+		if steps.TrackEvents != nil {
+			flagCopy.TrackEvents = steps.TrackEvents
+		}
 
-			if steps.DefaultRule != nil {
-				flagCopy.DefaultRule.MergeRules(*steps.DefaultRule)
-			}
+		if steps.DefaultRule != nil {
+			flagCopy.DefaultRule.MergeRules(*steps.DefaultRule)
+		}
 
-			if steps.Variations != nil {
-				for key, value := range steps.GetVariations() {
-					flagCopy.GetVariations()[key] = value
-				}
-			}
+		if steps.Variations != nil {
+			maps.Copy(flagCopy.GetVariations(), steps.GetVariations())
+		}
 
-			if steps.Version != nil {
-				flagCopy.Version = steps.Version
-			}
+		if steps.Version != nil {
+			flagCopy.Version = steps.Version
+		}
 
-			if steps.Experimentation != nil {
-				if flagCopy.Experimentation == nil {
-					flagCopy.Experimentation = &ExperimentationRollout{}
-				}
-				if steps.Experimentation.Start != nil {
-					flagCopy.Experimentation.Start = steps.Experimentation.Start
-				}
-				if steps.Experimentation.End != nil {
-					flagCopy.Experimentation.End = steps.Experimentation.End
-				}
+		if steps.Experimentation != nil {
+			if flagCopy.Experimentation == nil {
+				flagCopy.Experimentation = &ExperimentationRollout{}
+			}
+			if steps.Experimentation.Start != nil {
+				flagCopy.Experimentation.Start = steps.Experimentation.Start
+			}
+			if steps.Experimentation.End != nil {
+				flagCopy.Experimentation.End = steps.Experimentation.End
 			}
 		}
 	}
