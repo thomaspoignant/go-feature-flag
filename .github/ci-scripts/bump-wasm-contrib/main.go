@@ -42,6 +42,23 @@ func main() {
 		fmt.Sprintf(`const TARGET_WASM_VERSION = '%s';`, wasmVersion),
 		"const TARGET_WASM_VERSION",
 	)
+
+	// Python: Bump the wasm version in the _wasi_version.txt file (single source of truth).
+	// The Python provider lives in this repo, checked out at out/contrib/go-feature-flag.
+	// The .wasi artifacts are named without a leading "v", so strip it if present.
+	pythonVersion := strings.TrimPrefix(wasmVersion, "v")
+	writeFile(
+		fmt.Sprintf("%s/go-feature-flag/openfeature/providers/python-provider/gofeatureflag_python_provider/wasm/_wasi_version.txt", outDir),
+		pythonVersion+"\n",
+	)
+}
+
+// writeFile overwrites a file with the given content, replacing it entirely.
+func writeFile(inputFile, content string) {
+	if err := os.WriteFile(inputFile, []byte(content), 0644); err != nil {
+		log.Fatalf("Error writing to file %s: %v", inputFile, err)
+	}
+	fmt.Printf("%s updated successfully.\n", inputFile)
 }
 
 // replaceLine finds a line in a file matching a prefix and replaces the entire line.

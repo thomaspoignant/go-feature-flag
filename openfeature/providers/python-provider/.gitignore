@@ -157,5 +157,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-./gofeatureflag_python_provider/wasm/_wasi_version.txt
-./gofeatureflag_python_provider/wasm/gofeatureflag-evaluation_*.wasi
+# WASI evaluation binaries are copied in from the wasm-releases submodule at
+# build time (see hatch_build.py); the pinned version lives in _wasi_version.txt.
+gofeatureflag_python_provider/wasm/gofeatureflag-evaluation_*.wasi
