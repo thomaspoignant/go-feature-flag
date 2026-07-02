@@ -1,7 +1,7 @@
 {
     ".": "1.54.1",
     "cmd/wasm": "0.2.3",
-    "openfeature/providers/python-provider": "1.1.0",
+    "openfeature/providers/python-provider": "1.2.0",
     "openfeature/providers/kotlin-provider": "1.0.0",
     "modules/core": "0.7.2"
 }
