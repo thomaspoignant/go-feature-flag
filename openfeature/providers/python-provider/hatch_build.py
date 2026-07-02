@@ -26,7 +26,18 @@ class CustomBuildHook(BuildHookInterface):
         wasm_version = (
             (wasm_dir / "_wasi_version.txt").read_text(encoding="utf-8").strip()
         )
+        if not wasm_version:
+            raise ValueError(
+                f"Empty WASI version in {wasm_dir / '_wasi_version.txt'}; "
+                "it must contain the pinned version (e.g. 0.2.3)."
+            )
         filename = f"gofeatureflag-evaluation_{wasm_version}.wasi"
+
+        # Remove any stale binaries for other versions so only the pinned one is
+        # packaged (the artifacts glob would otherwise ship every *.wasi present).
+        for stale in wasm_dir.glob("gofeatureflag-evaluation_*.wasi"):
+            if stale.name != filename:
+                stale.unlink()
 
         dest = wasm_dir / filename
         if dest.exists():

@@ -152,6 +152,9 @@ jobs:
         with:
           path: out/contrib/go-feature-flag
           base: main
+          # Distinct "-python-" branch prefix on purpose: this PR targets this
+          # repo (not an external contrib repo), so it must not clash with any
+          # local bump-wasm-* branch.
           branch: bump-wasm-python-${{ steps.normalize_version.outputs.wasm_version }}
           title: "feat(python-provider): bump WASM to ${{ steps.normalize_version.outputs.wasm_version }}"
           body: |

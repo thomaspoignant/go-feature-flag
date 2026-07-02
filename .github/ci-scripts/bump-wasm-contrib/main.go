@@ -53,8 +53,14 @@ func main() {
 	)
 }
 
-// writeFile overwrites a file with the given content, replacing it entirely.
+// writeFile overwrites an existing file with the given content, replacing it
+// entirely. It fatals if the file does not already exist, so a moved/renamed
+// target fails loudly instead of silently creating a stray file (mirroring the
+// guard replaceLine provides for the other targets).
 func writeFile(inputFile, content string) {
+	if _, err := os.Stat(inputFile); err != nil {
+		log.Fatalf("Error: file %s does not exist: %v", inputFile, err)
+	}
 	if err := os.WriteFile(inputFile, []byte(content), 0644); err != nil {
 		log.Fatalf("Error writing to file %s: %v", inputFile, err)
 	}
