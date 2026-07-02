@@ -55,6 +55,19 @@ jobs:
     secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
+  bump-module-core-in-go-sdk-contrib:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+      goModDirectoryPath: providers/go-feature-flag
+      repository: open-feature/go-sdk-contrib
+      prTitle: "feat(go-feature-flag): Bump in-process evaluation module"
+    secrets:
+      token: ${{ secrets.OPENFEATURE_PR_PAT }}
+
   python-provider-release:
     if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
     uses: ./.github/workflows/release-python-provider.yml
