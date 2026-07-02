@@ -1,7 +1,6 @@
 [project]
 name = "gofeatureflag-python-provider"
 version = "1.1.0"
-wasm_version = "0.2.2"
 description = "GO Feature Flag provider for OpenFeature"
 license = "Apache-2.0"
 authors = [{ name = "Thomas Poignant" }]
@@ -41,9 +40,20 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Custom build hook: copies the pinned WASI binary from the wasm-releases
+# submodule into the package before building (see hatch_build.py).
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
+
 [tool.hatch.build.targets.wheel]
 include = [
     "gofeatureflag_python_provider/**",
+]
+
+# The WASI binary is git-ignored (copied in by the build hook), so it must be
+# listed as an artifact to be included in the distribution.
+artifacts = [
+    "gofeatureflag_python_provider/wasm/*.wasi",
 ]
 
 exclude = [
@@ -51,6 +61,10 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.sdist]
+artifacts = [
+    "gofeatureflag_python_provider/wasm/*.wasi",
+]
+
 exclude = [
     "wasm-releases/**"
 ]

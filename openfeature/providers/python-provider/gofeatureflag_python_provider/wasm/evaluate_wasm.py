@@ -24,15 +24,23 @@ from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse, Wa
 
 logger = logging.getLogger(__name__)
 
-# Default WASI binary, located at the root of the python-provider package.
-_DEFAULT_WASI_RELATIVE_PATH = (
-    Path("wasm-releases") / "evaluation" / "gofeatureflag-evaluation_0.2.0.wasi"
-)
+# Directory holding this module and the bundled WASI binary.
+_WASM_DIR = Path(__file__).parent
 
 
-def _package_root() -> Path:
-    """Return the python-provider package root (parent of this file's grandparent)."""
-    return Path(__file__).parent.parent.parent
+def _read_wasm_version() -> str:
+    """
+    Read the pinned WASI version from the co-located ``_wasi_version.txt``.
+
+    This file is the single source of truth for the WASI version shipped with
+    the provider; the bump automation only updates this file.
+    """
+    return (_WASM_DIR / "_wasi_version.txt").read_text(encoding="utf-8").strip()
+
+
+def _default_wasi_path() -> Path:
+    """Return the path to the bundled WASI binary for the pinned version."""
+    return _WASM_DIR / f"gofeatureflag-evaluation_{_read_wasm_version()}.wasi"
 
 
 class WasmNotLoadedError(RuntimeError):
@@ -115,7 +123,7 @@ class EvaluateWasm:
         if wasm_path:
             self._wasm_path = Path(wasm_path)
         else:
-            self._wasm_path = _package_root() / _DEFAULT_WASI_RELATIVE_PATH
+            self._wasm_path = _default_wasi_path()
         self._pool_size = 1 if pool_size is None or pool_size < 1 else pool_size
         self._engine: Optional[wasmtime.Engine] = None
         self._module: Optional[wasmtime.Module] = None
