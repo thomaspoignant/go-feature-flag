@@ -9,7 +9,6 @@ import {Targeting} from '../Targeting';
 import {Rule} from '../Rule';
 import PropTypes from 'prop-types';
 import {Metadata} from '../Metadata';
-import {FlagTest} from '../FlagTest';
 
 FlagForm.propTypes = {
   label: PropTypes.string.isRequired,
@@ -79,7 +78,6 @@ export function FlagForm({label}) {
         />
       </div>
       <Metadata label={`${label}.metadata`} />
-      <FlagTest flagInfo={label} />
     </div>
   );
 }
