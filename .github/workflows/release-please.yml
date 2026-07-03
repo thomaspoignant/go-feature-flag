@@ -64,7 +64,7 @@ jobs:
       version: ${{ needs.release-please.outputs.module_core_version }}
       goModDirectoryPath: providers/go-feature-flag
       repository: open-feature/go-sdk-contrib
-      prTitle: "feat(go-feature-flag): Bump in-process evaluation module"
+      prTitle: "feat(go-feature-flag): Bump in-process evaluation module to v${{ needs.release-please.outputs.module_core_version }}"
     secrets:
       token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
