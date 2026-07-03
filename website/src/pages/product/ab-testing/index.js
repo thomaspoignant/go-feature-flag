@@ -164,6 +164,10 @@ export default function AbTestingPage() {
   const githubUrl =
     siteConfig.customFields?.github ??
     'https://github.com/thomaspoignant/go-feature-flag';
+  const imgOverview = useBaseUrl('/img/landing/ab-testing/schema-overview.svg');
+  const imgSplit = useBaseUrl('/img/landing/ab-testing/schema-split.svg');
+  const imgCollect = useBaseUrl('/img/landing/ab-testing/schema-collect.svg');
+  const imgMeasure = useBaseUrl('/img/landing/ab-testing/schema-measure.svg');
 
   return (
     <Layout
@@ -207,7 +211,7 @@ export default function AbTestingPage() {
       <FeatureRow
         eyebrow="The idea"
         title="Test two versions, let the data pick the winner"
-        imageSrc={useBaseUrl('/img/landing/ab-testing/schema-overview.svg')}
+        imageSrc={imgOverview}
         imageAlt="Users are split into variation A and variation B; every evaluation and outcome is exported to a database, where a comparison shows which variation won."
         imageWidth={800}
         imageHeight={600}
@@ -248,7 +252,7 @@ export default function AbTestingPage() {
       <FeatureRow
         eyebrow="Step 1 · Evaluation"
         title="Split your users into A and B"
-        imageSrc={useBaseUrl('/img/landing/ab-testing/schema-split.svg')}
+        imageSrc={imgSplit}
         imageAlt="A crowd of users is deterministically routed through a hashing node into two equal groups, A and B, inside a bounded time window."
         imageWidth={800}
         imageHeight={600}
@@ -292,7 +296,7 @@ export default function AbTestingPage() {
         eyebrow="Step 2 · Exporters"
         title="Capture who saw which variation"
         reverse
-        imageSrc={useBaseUrl('/img/landing/ab-testing/schema-collect.svg')}
+        imageSrc={imgCollect}
         imageAlt="Evaluation events stream through an exporter and fan out to destinations: a database, object storage, and a message queue."
         imageWidth={800}
         imageHeight={600}
@@ -330,7 +334,7 @@ export default function AbTestingPage() {
       <FeatureRow
         eyebrow="Step 3 · Tracking"
         title="Record what your users did"
-        imageSrc={useBaseUrl('/img/landing/ab-testing/schema-measure.svg')}
+        imageSrc={imgMeasure}
         imageAlt="Each variation's exposures are joined with its outcomes; a comparison chart highlights the winning variation."
         imageWidth={800}
         imageHeight={600}
