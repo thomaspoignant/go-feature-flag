@@ -16,7 +16,7 @@ export default function HomeJsonLd() {
       '@type': 'Organization',
       name: 'GO Feature Flag',
       url: siteUrl,
-      logo: `${siteUrl}/img/logo/logo.png`,
+      logo: `${siteUrl}/img/logo/x-card.png`,
       description: siteConfig.customFields.description,
       sameAs: [
         siteConfig.customFields.github,
