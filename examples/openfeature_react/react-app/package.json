@@ -12,7 +12,7 @@
   "dependencies": {
     "@openfeature/core": "^1.11.0",
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
-    "@openfeature/react-sdk": "^1.4.0",
+    "@openfeature/react-sdk": "^1.4.1",
     "@openfeature/web-sdk": "^1.8.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.7"
@@ -20,16 +20,16 @@
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.60.0",
-    "@vitejs/plugin-react": "^6.0.2",
-    "autoprefixer": "^10.5.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "autoprefixer": "^10.5.2",
     "eslint": "^10.5.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16"
+    "vite": "^8.1.0"
   }
 }
