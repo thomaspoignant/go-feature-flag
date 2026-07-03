@@ -15,6 +15,7 @@ import {
 import {UsingIt} from '../components/home/using-it';
 import {Headline} from '../components/home/headline';
 import {HowItWorks} from '../components/home/how-it-works';
+import HomeJsonLd from '../components/home/jsonld';
 
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
@@ -22,6 +23,7 @@ export default function Home() {
     <Layout
       title={`${siteConfig.tagline}`}
       description={`${siteConfig.customFields.description}`}>
+      <HomeJsonLd />
       <HomeHeader />
       <UsingIt />
       <Whatis />
