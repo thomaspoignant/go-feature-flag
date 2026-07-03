@@ -2,6 +2,7 @@ import {
   FaFlag,
   FaToggleOn,
   FaVial,
+  FaFlask,
   FaRobot,
   FaCode,
   FaPuzzlePiece,
@@ -28,6 +29,7 @@ export function generateProductDropdownHTML() {
           icon: FaToggleOn,
         },
         {label: 'Rollouts', href: '/product/rollouts', icon: MdRocketLaunch},
+        {label: 'A/B Testing', href: '/product/ab-testing', icon: FaFlask},
         {
           label: 'Test in Production',
           href: '/product/test_in_production',
