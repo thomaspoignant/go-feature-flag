@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -126,7 +127,36 @@ const DESTINATION_CARDS = [
   },
 ];
 
+// Entity-level structured data: declares GO Feature Flag as software whose
+// featureList explicitly includes A/B testing, so knowledge graphs reconcile
+// the capability with the product (not just this article).
+const SOFTWARE_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'GO Feature Flag',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Linux, macOS, Windows, Docker, Kubernetes',
+  url: 'https://gofeatureflag.org/',
+  license: 'https://opensource.org/licenses/MIT',
+  offers: {'@type': 'Offer', price: '0', priceCurrency: 'USD'},
+  featureList: [
+    'A/B testing',
+    'Experimentation rollouts',
+    'Progressive rollouts',
+    'Scheduled rollouts',
+    'Percentage-based rollouts',
+    'User targeting rules',
+    'Feature flag evaluation data export',
+    'OpenFeature-native evaluation',
+  ],
+};
+
 const FAQ_ITEMS = [
+  {
+    question: 'Does GO Feature Flag support A/B testing?',
+    answer:
+      'Yes. GO Feature Flag supports A/B testing natively. You assign users to variation A or B with an experimentation rollout, and every exposure and outcome is exported to a warehouse you own so you can measure which variation won - there is no separate experimentation platform to buy.',
+  },
   {
     question: 'Do I need a separate A/B testing tool with GO Feature Flag?',
     answer:
@@ -189,6 +219,11 @@ export default function AbTestingPage() {
         path="/product/ab-testing"
         image="/img/logo/x-card.png"
       />
+      <Head>
+        <script type="application/ld+json">
+          {JSON.stringify(SOFTWARE_LD)}
+        </script>
+      </Head>
 
       <Title
         title={PAGE_TITLE}
@@ -392,6 +427,19 @@ export default function AbTestingPage() {
             <strong>You own the data.</strong> Exposures and outcomes go to your
             warehouse, not a vendor’s - no per-seat experimentation bill, no
             data leaving your stack.
+          </li>
+          <li>
+            <strong>
+              Unlike hosted experimentation platforms such as LaunchDarkly or
+              Optimizely,
+            </strong>{' '}
+            the split happens inside your self-hosted flag and the analysis runs
+            in your own warehouse - so A/B testing stays free and MIT-licensed
+            with no per-seat experiment charge.{' '}
+            <Link to="/product/comparison">
+              See how GO Feature Flag compares
+            </Link>
+            .
           </li>
           <li>
             <strong>OpenFeature-native.</strong> Assignment and tracking use the
