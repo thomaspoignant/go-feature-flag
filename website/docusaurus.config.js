@@ -1,6 +1,21 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const fs = require('fs');
+const path = require('path');
+
+// Versions still built & served (small rolling window, kept for build speed).
+const builtVersions = require('./versions.json');
+
+// Versions that once shipped docs but are no longer built. Their /docs/vX.Y.Z/…
+// URLs would 404; we 200-redirect each page to its current-docs equivalent
+// (see createRedirects in the client-redirects plugin below).
+const removedVersions = fs
+  .readdirSync(path.join(__dirname, 'versioned_docs'))
+  .filter(name => name.startsWith('version-'))
+  .map(name => name.replace(/^version-/, ''))
+  .filter(version => !builtVersions.includes(version));
+
 const {sdk} = require('./data/sdk');
 const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 const {
@@ -205,7 +220,47 @@ const config = {
             from: '/docs/relay_proxy/install_relay_proxy',
             to: '/docs/relay-proxy/install_relay_proxy',
           },
+          // --- Removed-version documentation redirects (renamed/moved slugs) ---
+          // createRedirects (below) auto-covers removed-version URLs whose path
+          // is UNCHANGED in the current docs. The entries here handle old URLs
+          // whose slug CHANGED between versions (e.g. underscore -> hyphen), so
+          // they don't match a current path and createRedirects can't generate
+          // them. Every `to` must be a real current docs path.
+          // TODO: extend this list from the Google Search Console
+          // "Not found (404)" report.
+          {from: '/docs/v1.30.0/getting_started', to: '/docs/getting-started'},
+          {from: '/docs/v1.0.0/getting_started', to: '/docs/getting-started'},
+          {from: '/docs/v0.28.2/getting_started', to: '/docs/getting-started'},
+          {from: '/docs/v0.28.1/getting_started', to: '/docs/getting-started'},
         ],
+        // For every current-docs page, emit a redirect from the same path under
+        // each removed version, so old deep links (e.g.
+        // /docs/v1.30.0/sdk/client_providers/openfeature_javascript) 200-redirect
+        // to the current page instead of 404-ing. Only the current version is
+        // served at /docs/<path> with no version segment; built versioned paths
+        // (/docs/v1.54.1/…) and the /docs/next tree are skipped. Old URLs whose
+        // slug changed between versions won't match a current path and are
+        // handled by the 404 page (src/theme/NotFound/Content) plus the explicit
+        // entries above.
+        /** @param {string} existingPath */
+        createRedirects(existingPath) {
+          // Bare docs landing -> emit /docs/<version> for old bare version roots.
+          if (existingPath === '/docs') {
+            return removedVersions.map(version => `/docs/${version}`);
+          }
+          if (!existingPath.startsWith('/docs/')) {
+            return undefined;
+          }
+          const subPath = existingPath.slice('/docs/'.length);
+          const firstSegment = subPath.split('/')[0];
+          if (
+            firstSegment === 'next' ||
+            /^v\d+\.\d+\.\d+(?:-rc\.\d+)?$/.test(firstSegment)
+          ) {
+            return undefined;
+          }
+          return removedVersions.map(version => `/docs/${version}/${subPath}`);
+        },
       },
     ],
     require('./plugins/tailwind-plugin.cjs'),
