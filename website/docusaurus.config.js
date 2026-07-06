@@ -11,9 +11,9 @@ const builtVersions = require('./versions.json');
 // URLs would 404; we 200-redirect each page to its current-docs equivalent
 // (see createRedirects in the client-redirects plugin below).
 const removedVersions = fs
-  .readdirSync(path.join(__dirname, 'versioned_docs'))
-  .filter(name => name.startsWith('version-'))
-  .map(name => name.replace(/^version-/, ''))
+  .readdirSync(path.join(__dirname, 'versioned_docs'), {withFileTypes: true})
+  .filter(entry => entry.isDirectory() && entry.name.startsWith('version-'))
+  .map(entry => entry.name.replace(/^version-/, ''))
   .filter(version => !builtVersions.includes(version));
 
 const {sdk} = require('./data/sdk');

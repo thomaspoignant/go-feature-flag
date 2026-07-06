@@ -33,10 +33,12 @@ export default function NotFoundContent({className}) {
     // Version-strip, e.g. /docs/v1.50.0/sdk/foo -> /docs/sdk/foo
     const target = stripTrailingSlash(`/docs${match[2] || '/'}`);
 
-    // Only deep-link if that page still exists in the current docs.
-    const currentDocs = Object.values(allDocsData)
-      .flatMap(data => data.versions)
-      .find(version => version.isLast);
+    // Only deep-link if that page still exists in the current docs. Scope to the
+    // default docs instance (the one serving /docs) rather than searching every
+    // plugin instance, so a future second docs plugin can't shadow it.
+    const currentDocs = allDocsData['default']?.versions.find(
+      version => version.isLast
+    );
     const exists = currentDocs?.docs?.some(
       doc => stripTrailingSlash(doc.path) === target
     );
