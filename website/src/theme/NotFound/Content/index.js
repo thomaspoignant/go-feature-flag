@@ -1,11 +1,55 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import Translate from '@docusaurus/Translate';
 import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
+import {useAllDocsData} from '@docusaurus/plugin-content-docs/client';
+import versions from '@site/versions.json';
+
+// Captures the version token and the trailing sub-path:
+//   /docs/v1.50.0/sdk/foo -> ["…", "v1.50.0", "/sdk/foo"]
+//   /docs/v1.30.0         -> ["…", "v1.30.0", undefined]
+const OLD_VERSION_DOCS_PATH = /^\/docs\/(v\d+\.\d+\.\d+(?:-rc\.\d+)?)(\/.*)?$/;
+const stripTrailingSlash = path =>
+  path.length > 1 ? path.replace(/\/$/, '') : path;
 
 export default function NotFoundContent({className}) {
+  const allDocsData = useAllDocsData();
+
+  // Old doc versions are pruned from versions.json to keep build times down, so
+  // their previously-indexed URLs now 404. When we land on the 404 page for one
+  // of those removed-version URLs, strip the version segment and send the visitor
+  // to the equivalent page in the current docs — falling back to the docs home
+  // when that page no longer exists (e.g. the slug was renamed between versions),
+  // so we never dead-end on a second 404.
+  useEffect(() => {
+    const match = OLD_VERSION_DOCS_PATH.exec(window.location.pathname);
+    // Bail unless this is a versioned docs URL whose version is no longer built.
+    if (!match || versions.includes(match[1])) {
+      return;
+    }
+
+    // Version-strip, e.g. /docs/v1.50.0/sdk/foo -> /docs/sdk/foo
+    const target = stripTrailingSlash(`/docs${match[2] || '/'}`);
+
+    // Only deep-link if that page still exists in the current docs. Scope to the
+    // default docs instance (the one serving /docs) rather than searching every
+    // plugin instance, so a future second docs plugin can't shadow it.
+    const currentDocs = allDocsData['default']?.versions.find(
+      version => version.isLast
+    );
+    const exists = currentDocs?.docs?.some(
+      doc => stripTrailingSlash(doc.path) === target
+    );
+
+    window.location.replace(
+      (exists ? target : '/docs/') +
+        window.location.search +
+        window.location.hash
+    );
+  }, [allDocsData]);
+
   return (
     <main className={clsx('container margin-vert--xl', className)}>
       <div className="row">
