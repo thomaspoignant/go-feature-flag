@@ -320,7 +320,16 @@ const config = {
         sitemap: {
           changefreq: 'weekly',
           priority: 0.5,
-          ignorePatterns: ['/tags/**'],
+          ignorePatterns: [
+            '/tags/**',
+            '/docs/next/**',
+            '/docs/v2*',
+            '/docs/v2*/**',
+            '/docs/v1*',
+            '/docs/v1*/**',
+            '/docs/v0*',
+            '/docs/v0*/**',
+          ],
           filename: 'sitemap.xml',
         },
       }),
