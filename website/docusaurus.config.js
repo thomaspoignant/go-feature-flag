@@ -256,7 +256,7 @@ const config = {
 
   customFields: {
     description:
-      'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source. Get the full feature flag experience using OpenFeature and GO Feature Flag.',
+      'GO Feature Flag is a simple and lightweight feature flag solution, 100% Open Source. Get the full feature flag experience with OpenFeature and GO Feature Flag.',
     logo: 'img/logo/logo.png',
     github: 'https://github.com/thomaspoignant/go-feature-flag',
     sponsor: 'https://github.com/sponsors/thomaspoignant',
