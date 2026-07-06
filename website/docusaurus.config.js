@@ -220,18 +220,6 @@ const config = {
             from: '/docs/relay_proxy/install_relay_proxy',
             to: '/docs/relay-proxy/install_relay_proxy',
           },
-          // --- Removed-version documentation redirects (renamed/moved slugs) ---
-          // createRedirects (below) auto-covers removed-version URLs whose path
-          // is UNCHANGED in the current docs. The entries here handle old URLs
-          // whose slug CHANGED between versions (e.g. underscore -> hyphen), so
-          // they don't match a current path and createRedirects can't generate
-          // them. Every `to` must be a real current docs path.
-          // TODO: extend this list from the Google Search Console
-          // "Not found (404)" report.
-          {from: '/docs/v1.30.0/getting_started', to: '/docs/getting-started'},
-          {from: '/docs/v1.0.0/getting_started', to: '/docs/getting-started'},
-          {from: '/docs/v0.28.2/getting_started', to: '/docs/getting-started'},
-          {from: '/docs/v0.28.1/getting_started', to: '/docs/getting-started'},
         ],
         // For every current-docs page, emit a redirect from the same path under
         // each removed version, so old deep links (e.g.
