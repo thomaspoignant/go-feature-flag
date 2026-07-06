@@ -24,7 +24,7 @@ export default function NotFoundContent({className}) {
   // when that page no longer exists (e.g. the slug was renamed between versions),
   // so we never dead-end on a second 404.
   useEffect(() => {
-    const match = window.location.pathname.match(OLD_VERSION_DOCS_PATH);
+    const match = OLD_VERSION_DOCS_PATH.exec(window.location.pathname);
     // Bail unless this is a versioned docs URL whose version is no longer built.
     if (!match || versions.includes(match[1])) {
       return;
