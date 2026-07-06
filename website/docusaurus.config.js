@@ -307,7 +307,7 @@ const config = {
         },
         sitemap: {
           changefreq: 'weekly',
-          priority: 0.5,
+          priority: 0.5, // default fallback for pages not matched below
           ignorePatterns: [
             '/tags/**',
             '/docs/next/**',
@@ -319,6 +319,20 @@ const config = {
             '/docs/v0*/**',
           ],
           filename: 'sitemap.xml',
+          createSitemapItems: async params => {
+            const {defaultCreateSitemapItems, ...rest} = params;
+            const items = await defaultCreateSitemapItems(rest);
+            return items.map(item => {
+              const {pathname} = new URL(item.url);
+              if (pathname === '/' || pathname === '/blog') {
+                return {...item, priority: 1.0};
+              }
+              if (pathname.startsWith('/product/')) {
+                return {...item, priority: 0.8};
+              }
+              return item; // keeps default 0.5
+            });
+          },
         },
       }),
     ],
