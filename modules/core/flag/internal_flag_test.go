@@ -3228,7 +3228,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				Experimentation: tt.fields.Experimentation,
 				Needs:           tt.fields.Needs,
 			}
-			err := f.IsValid(tt.flagName)
+			err := f.IsValidWithFlagName(tt.flagName)
 			errMsg := ""
 			if err != nil {
 				errMsg = err.Error()
@@ -3238,6 +3238,31 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		})
 	}
 }
+
+func TestInternalFlag_IsValid_NoFlagName(t *testing.T) {
+	// IsValid() delegates to IsValidWithFlagName("") and therefore runs every check except the
+	// self-dependency one (which needs the flag name).
+	base := func(needs *[]flag.NeedsDependency) *flag.InternalFlag {
+		return &flag.InternalFlag{
+			Variations:  &map[string]*any{"A": testconvert.Interface("A"), "B": testconvert.Interface("B")},
+			DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+			Needs:       needs,
+		}
+	}
+
+	t.Run("valid flag passes", func(t *testing.T) {
+		assert.NoError(t, base(nil).IsValid())
+	})
+	t.Run("needs dependency without flag name still rejected", func(t *testing.T) {
+		f := base(&[]flag.NeedsDependency{{Value: testconvert.Interface(true)}})
+		assert.EqualError(t, f.IsValid(), "needs: a dependency is missing its flag name")
+	})
+	t.Run("self-dependency is not detected without a flag name", func(t *testing.T) {
+		f := base(&[]flag.NeedsDependency{{Flag: testconvert.String("self")}})
+		assert.NoError(t, f.IsValid())
+	})
+}
+
 func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 	cases := 1000
 	internalFlag := flag.InternalFlag{

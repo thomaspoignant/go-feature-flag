@@ -378,9 +378,16 @@ func (f *InternalFlag) isExperimentationOver(evaluationDate time.Time) bool {
 }
 
 // IsValid is checking if the current flag is valid.
-// flagName is the name of the flag being validated; it is used to reject a flag that would
-// depend on itself through its `needs` field.
-func (f *InternalFlag) IsValid(flagName string) error {
+// It does not validate the `needs` self-dependency rule because that requires knowing the flag's
+// own name; use IsValidWithFlagName when the flag name is available (e.g. from the config map key).
+func (f *InternalFlag) IsValid() error {
+	return f.IsValidWithFlagName("")
+}
+
+// IsValidWithFlagName is checking if the current flag is valid, including that it does not depend
+// on itself through its `needs` field. flagName is the name of the flag being validated; passing
+// an empty string skips only the self-dependency check.
+func (f *InternalFlag) IsValidWithFlagName(flagName string) error {
 	if len(f.GetVariations()) == 0 {
 		return fmt.Errorf("no variation available")
 	}
