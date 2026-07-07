@@ -45,6 +45,7 @@ const config = {
     },
     mermaid: true,
   },
+  clientModules: [require.resolve('./src/clientModules/gtagEvents.js')],
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',
