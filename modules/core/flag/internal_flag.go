@@ -58,6 +58,12 @@ type InternalFlag struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
+
+	// Needs is the list of dependencies this flag has on other flags.
+	// The flag is only evaluated normally when all the dependencies are satisfied; if any of them
+	// is unmet the flag is treated as disabled. Dependency resolution is limited to one level (the
+	// dependency flag's own `needs` field is ignored).
+	Needs *[]NeedsDependency `json:"needs,omitempty" yaml:"needs,omitempty" toml:"needs,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -65,6 +71,19 @@ func (f *InternalFlag) Value(
 	flagName string,
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
+) (any, ResolutionDetails) {
+	return f.value(flagName, evaluationCtx, flagContext, true)
+}
+
+// value evaluates the flag. When resolveNeeds is true, the flag's `needs` dependencies are
+// checked first and, if any of them is unmet, the flag is treated as disabled. Dependency flags
+// are evaluated with resolveNeeds set to false so that their own `needs` field is ignored
+// (one-level resolution, which also makes dependency cycles safe).
+func (f *InternalFlag) value(
+	flagName string,
+	evaluationCtx ffcontext.Context,
+	flagContext Context,
+	resolveNeeds bool,
 ) (any, ResolutionDetails) {
 	// if the evaluation context is nil, we create a new one with an empty key
 	// this is to avoid any nil pointer exception.
@@ -85,6 +104,24 @@ func (f *InternalFlag) Value(
 
 	if flagContext.EvaluationContextEnrichment != nil {
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
+	}
+
+	// A flag that declares dependencies through `needs` is only evaluated when all of them are
+	// satisfied. If any dependency is unmet, the flag is disabled (same behavior as disable: true).
+	// needsCacheable carries the cacheability of the dependencies so a result gated by a time-based
+	// dependency is never cached.
+	needsCacheable := true
+	if resolveNeeds {
+		unsatisfiedDependency, satisfied, dependenciesCacheable := flag.checkNeeds(evaluationCtx, flagContext)
+		needsCacheable = dependenciesCacheable
+		if !satisfied {
+			return flagContext.DefaultSdkValue, ResolutionDetails{
+				Variant:   VariationSDKDefault,
+				Reason:    ReasonDisabled,
+				Cacheable: f.isCacheable() && dependenciesCacheable,
+				Metadata:  constructNeedsMetadata(f.GetMetadata(), unsatisfiedDependency),
+			}
+		}
 	}
 
 	key, keyError := flag.GetBucketingKeyValue(evaluationCtx)
@@ -124,7 +161,7 @@ func (f *InternalFlag) Value(
 		Reason:    variationSelection.reason,
 		RuleIndex: variationSelection.ruleIndex,
 		RuleName:  variationSelection.ruleName,
-		Cacheable: variationSelection.cacheable,
+		Cacheable: variationSelection.cacheable && needsCacheable,
 		Metadata:  constructMetadata(flag.GetMetadata(), variationSelection.ruleName),
 	}
 }
@@ -155,6 +192,63 @@ func selectEvaluationReason(
 func (f *InternalFlag) isCacheable() bool {
 	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
 	return !isDynamic
+}
+
+// checkNeeds evaluates all the dependencies declared in the flag's `needs` field.
+// It returns the name of the first unsatisfied dependency and satisfied=false as soon as a
+// dependency is unmet, or an empty string and satisfied=true when all dependencies are satisfied
+// (or the flag declares none).
+//
+// The third return value, cacheable, is the AND of the cacheability of every dependency evaluated
+// so far. When a dependency is time-based (scheduled/experimentation/progressive) its result is
+// not cacheable, so the dependent flag's result must not be cached either — otherwise a client
+// would keep a stale enabled/disabled value after the dependency flips over time.
+//
+// A dependency is unmet when the dependency flag cannot be resolved (missing flag or no resolver
+// available, i.e. fail-closed) or when its resolved value does not match the expected value.
+func (f *InternalFlag) checkNeeds(
+	evaluationCtx ffcontext.Context,
+	flagContext Context,
+) (unsatisfiedDependency string, satisfied bool, cacheable bool) {
+	if f.Needs == nil {
+		return "", true, true
+	}
+
+	// Dependencies are resolved using the same evaluation context, but must not leak the dependent
+	// flag's SDK default value nor trigger a transitive `needs` resolution.
+	dependencyContext := flagContext
+	dependencyContext.DefaultSdkValue = nil
+	dependencyContext.DependencyFlagResolver = nil
+
+	cacheable = true
+	for _, need := range *f.Needs {
+		dependencyName := need.GetFlag()
+		if flagContext.DependencyFlagResolver == nil {
+			return dependencyName, false, cacheable
+		}
+		dependencyFlag, found := flagContext.DependencyFlagResolver(dependencyName)
+		if !found || dependencyFlag == nil {
+			return dependencyName, false, cacheable
+		}
+
+		var resolvedValue any
+		var resolvedDetails ResolutionDetails
+		if internalDependency, ok := dependencyFlag.(*InternalFlag); ok {
+			// Ignore the dependency's own `needs` field (one level only).
+			resolvedValue, resolvedDetails = internalDependency.value(dependencyName, evaluationCtx, dependencyContext, false)
+		} else {
+			// Fallback for any other flag.Flag implementation. InternalFlag is the only one today,
+			// so this branch is currently unreachable. A future implementation is responsible for
+			// enforcing the one-level rule itself, as we cannot skip its `needs` resolution here.
+			resolvedValue, resolvedDetails = dependencyFlag.Value(dependencyName, evaluationCtx, dependencyContext)
+		}
+		cacheable = cacheable && resolvedDetails.Cacheable
+
+		if !needsValueEqual(resolvedValue, need.GetExpectedValue()) {
+			return dependencyName, false, cacheable
+		}
+	}
+	return "", true, cacheable
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
@@ -284,7 +378,9 @@ func (f *InternalFlag) isExperimentationOver(evaluationDate time.Time) bool {
 }
 
 // IsValid is checking if the current flag is valid.
-func (f *InternalFlag) IsValid() error {
+// flagName is the name of the flag being validated; it is used to reject a flag that would
+// depend on itself through its `needs` field.
+func (f *InternalFlag) IsValid(flagName string) error {
 	if len(f.GetVariations()) == 0 {
 		return fmt.Errorf("no variation available")
 	}
@@ -334,6 +430,19 @@ func (f *InternalFlag) IsValid() error {
 			return fmt.Errorf("duplicated rule name: %s", rule.GetName())
 		} else if rule.GetName() != "" {
 			ruleNames[rule.GetName()] = nil
+		}
+	}
+
+	// Validate the `needs` dependencies.
+	if f.Needs != nil {
+		for _, need := range *f.Needs {
+			dependencyName := need.GetFlag()
+			if dependencyName == "" {
+				return fmt.Errorf("needs: a dependency is missing its flag name")
+			}
+			if dependencyName == flagName {
+				return fmt.Errorf("needs: a flag cannot depend on itself (%s)", flagName)
+			}
 		}
 	}
 
@@ -495,6 +604,14 @@ func (f *InternalFlag) GetMetadata() map[string]any {
 		return nil
 	}
 	return *f.Metadata
+}
+
+// GetNeeds is the getter for the field Needs
+func (f *InternalFlag) GetNeeds() []NeedsDependency {
+	if f.Needs == nil {
+		return nil
+	}
+	return *f.Needs
 }
 
 func DateFromContextOrDefault(ctx ffcontext.Context, defaultDate time.Time) time.Time {

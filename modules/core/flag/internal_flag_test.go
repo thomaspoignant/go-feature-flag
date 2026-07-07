@@ -2633,9 +2633,11 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		Experimentation *flag.ExperimentationRollout
 		Scheduled       *[]flag.ScheduledStep
 		Metadata        *map[string]any
+		Needs           *[]flag.NeedsDependency
 	}
 	tests := []struct {
 		name     string
+		flagName string
 		fields   fields
 		wantErr  assert.ErrorAssertionFunc
 		errorMsg string
@@ -3164,6 +3166,53 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			errorMsg: "invalid query: Invalid rule",
 			wantErr:  assert.Error,
 		},
+		{
+			name:     "should be valid with a needs on another flag",
+			flagName: "flag-a",
+			fields: fields{
+				Variations: &map[string]*any{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("other-flag")},
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:     "should error if a flag depends on itself",
+			flagName: "flag-a",
+			fields: fields{
+				Variations: &map[string]*any{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("flag-a")},
+				},
+			},
+			errorMsg: "needs: a flag cannot depend on itself (flag-a)",
+			wantErr:  assert.Error,
+		},
+		{
+			name:     "should error if a needs dependency has no flag name",
+			flagName: "flag-a",
+			fields: fields{
+				Variations: &map[string]*any{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+				Needs: &[]flag.NeedsDependency{
+					{Value: testconvert.Interface(true)},
+				},
+			},
+			errorMsg: "needs: a dependency is missing its flag name",
+			wantErr:  assert.Error,
+		},
 	}
 
 	for _, tt := range tests {
@@ -3177,8 +3226,9 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				Version:         tt.fields.Version,
 				Scheduled:       tt.fields.Scheduled,
 				Experimentation: tt.fields.Experimentation,
+				Needs:           tt.fields.Needs,
 			}
-			err := f.IsValid()
+			err := f.IsValid(tt.flagName)
 			errMsg := ""
 			if err != nil {
 				errMsg = err.Error()
