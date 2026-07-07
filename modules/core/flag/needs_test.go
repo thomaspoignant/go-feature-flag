@@ -268,6 +268,26 @@ func TestInternalFlag_Value_Needs(t *testing.T) {
 			},
 		},
 		{
+			name: "disabled dependency does not satisfy an explicit value:null need (fail closed)",
+			flag: dependentFlag([]flag.NeedsDependency{
+				{Flag: testconvert.String("payments-enabled"), Value: testconvert.Interface(nil)},
+			}),
+			siblings: map[string]*flag.InternalFlag{
+				"payments-enabled": {
+					Disable:     testconvert.Bool(true),
+					Variations:  &map[string]*any{"v": testconvert.Interface(true)},
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("v")},
+				},
+			},
+			want: nil,
+			want1: flag.ResolutionDetails{
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: true,
+				Metadata:  map[string]any{"unsatisfiedDependency": "payments-enabled"},
+			},
+		},
+		{
 			name: "numeric value is compared regardless of int/float type",
 			flag: dependentFlag([]flag.NeedsDependency{
 				{Flag: testconvert.String("level"), Value: testconvert.Interface(1)},

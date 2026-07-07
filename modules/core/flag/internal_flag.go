@@ -244,6 +244,13 @@ func (f *InternalFlag) checkNeeds(
 		}
 		cacheable = cacheable && resolvedDetails.Cacheable
 
+		// A dependency that is itself disabled or errored has no meaningful value; the need is
+		// unmet regardless of the expected value (fail closed). This also prevents a `value: null`
+		// expectation from spuriously matching a disabled dependency that resolves to nil.
+		if resolvedDetails.Reason == ReasonDisabled || resolvedDetails.Reason == ReasonError {
+			return dependencyName, false, cacheable
+		}
+
 		if !needsValueEqual(resolvedValue, need.GetExpectedValue()) {
 			return dependencyName, false, cacheable
 		}
