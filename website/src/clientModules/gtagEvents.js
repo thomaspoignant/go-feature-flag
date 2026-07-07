@@ -33,8 +33,14 @@ if (ExecutionEnvironment.canUseDOM) {
   document.addEventListener(
     'click',
     e => {
+      // Click targets are Elements in modern browsers, but guard defensively:
+      // a text-node target has no `closest`, so fall back to its parent element.
+      const target =
+        e.target instanceof Element ? e.target : e.target?.parentElement;
+      if (!target) return;
+
       // (a) Explicit markers: install CTA + relay-proxy copy button.
-      const marked = e.target.closest('[data-ga-event]');
+      const marked = target.closest('[data-ga-event]');
       if (marked) {
         sendEvent(marked.dataset.gaEvent, {
           method: marked.dataset.gaMethod,
@@ -44,7 +50,7 @@ if (ExecutionEnvironment.canUseDOM) {
       }
 
       // (b) URL-pattern links: github_click + slack_join.
-      const a = e.target.closest('a[href]');
+      const a = target.closest('a[href]');
       if (!a) return;
       let url;
       try {
