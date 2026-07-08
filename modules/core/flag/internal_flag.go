@@ -214,6 +214,11 @@ func (f *InternalFlag) checkNeeds(
 		return "", true, true
 	}
 
+	// Without a resolver we cannot evaluate any dependency: fail closed on the first one.
+	if flagContext.DependencyFlagResolver == nil && len(*f.Needs) > 0 {
+		return (*f.Needs)[0].GetFlag(), false, true
+	}
+
 	// Dependencies are resolved using the same evaluation context, but must not leak the dependent
 	// flag's SDK default value nor trigger a transitive `needs` resolution.
 	dependencyContext := flagContext
@@ -222,40 +227,50 @@ func (f *InternalFlag) checkNeeds(
 
 	cacheable = true
 	for _, need := range *f.Needs {
-		dependencyName := need.GetFlag()
-		if flagContext.DependencyFlagResolver == nil {
-			return dependencyName, false, cacheable
-		}
-		dependencyFlag, found := flagContext.DependencyFlagResolver(dependencyName)
-		if !found || dependencyFlag == nil {
-			return dependencyName, false, cacheable
-		}
-
-		var resolvedValue any
-		var resolvedDetails ResolutionDetails
-		if internalDependency, ok := dependencyFlag.(*InternalFlag); ok {
-			// Ignore the dependency's own `needs` field (one level only).
-			resolvedValue, resolvedDetails = internalDependency.value(dependencyName, evaluationCtx, dependencyContext, false)
-		} else {
-			// Fallback for any other flag.Flag implementation. InternalFlag is the only one today,
-			// so this branch is currently unreachable. A future implementation is responsible for
-			// enforcing the one-level rule itself, as we cannot skip its `needs` resolution here.
-			resolvedValue, resolvedDetails = dependencyFlag.Value(dependencyName, evaluationCtx, dependencyContext)
-		}
-		cacheable = cacheable && resolvedDetails.Cacheable
-
-		// A dependency that is itself disabled or errored has no meaningful value; the need is
-		// unmet regardless of the expected value (fail closed). This also prevents a `value: null`
-		// expectation from spuriously matching a disabled dependency that resolves to nil.
-		if resolvedDetails.Reason == ReasonDisabled || resolvedDetails.Reason == ReasonError {
-			return dependencyName, false, cacheable
-		}
-
-		if !needsValueEqual(resolvedValue, need.GetExpectedValue()) {
-			return dependencyName, false, cacheable
+		needSatisfied, needCacheable := checkNeed(need, evaluationCtx, dependencyContext, flagContext.DependencyFlagResolver)
+		cacheable = cacheable && needCacheable
+		if !needSatisfied {
+			return need.GetFlag(), false, cacheable
 		}
 	}
 	return "", true, cacheable
+}
+
+// checkNeed evaluates a single `needs` dependency and returns whether it is satisfied and whether
+// its result is cacheable.
+//
+// The dependency is unmet when it cannot be resolved, when it resolves with reason DISABLED or
+// ERROR (its value is meaningless, so we fail closed — this also prevents a `value: null`
+// expectation from spuriously matching a disabled dependency that resolves to nil), or when its
+// resolved value does not match the expected value.
+func checkNeed(
+	need NeedsDependency,
+	evaluationCtx ffcontext.Context,
+	dependencyContext Context,
+	resolver func(flagName string) (Flag, bool),
+) (satisfied bool, cacheable bool) {
+	dependencyName := need.GetFlag()
+	dependencyFlag, found := resolver(dependencyName)
+	if !found || dependencyFlag == nil {
+		return false, true
+	}
+
+	var resolvedValue any
+	var resolvedDetails ResolutionDetails
+	if internalDependency, ok := dependencyFlag.(*InternalFlag); ok {
+		// Ignore the dependency's own `needs` field (one level only).
+		resolvedValue, resolvedDetails = internalDependency.value(dependencyName, evaluationCtx, dependencyContext, false)
+	} else {
+		// Fallback for any other flag.Flag implementation. InternalFlag is the only one today,
+		// so this branch is currently unreachable. A future implementation is responsible for
+		// enforcing the one-level rule itself, as we cannot skip its `needs` resolution here.
+		resolvedValue, resolvedDetails = dependencyFlag.Value(dependencyName, evaluationCtx, dependencyContext)
+	}
+
+	if resolvedDetails.Reason == ReasonDisabled || resolvedDetails.Reason == ReasonError {
+		return false, resolvedDetails.Cacheable
+	}
+	return needsValueEqual(resolvedValue, need.GetExpectedValue()), resolvedDetails.Cacheable
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
@@ -395,40 +410,50 @@ func (f *InternalFlag) IsValid() error {
 // on itself through its `needs` field. flagName is the name of the flag being validated; passing
 // an empty string skips only the self-dependency check.
 func (f *InternalFlag) IsValidWithFlagName(flagName string) error {
+	if err := f.validateVariations(); err != nil {
+		return err
+	}
+	if err := f.validateRules(); err != nil {
+		return err
+	}
+	return f.validateNeeds(flagName)
+}
+
+// validateVariations checks that the flag has at least one variation and that all the variations
+// have the same type.
+func (f *InternalFlag) validateVariations() error {
 	if len(f.GetVariations()) == 0 {
 		return fmt.Errorf("no variation available")
 	}
 
-	// Check that all variation has the same types
 	expectedVarType := ""
 	for name, value := range f.GetVariations() {
 		if value == nil {
 			return fmt.Errorf("nil value for variation: %s", name)
 		}
-		if expectedVarType != "" {
-			currentType, err := utils.JSONTypeExtractor(*value)
-			if err != nil {
-				return err
-			}
-			if currentType != expectedVarType {
-				return fmt.Errorf("all variations should have the same type")
-			}
-		} else {
-			var err error
-			expectedVarType, err = utils.JSONTypeExtractor(*value)
-			if err != nil {
-				return err
-			}
+		currentType, err := utils.JSONTypeExtractor(*value)
+		if err != nil {
+			return err
+		}
+		if expectedVarType == "" {
+			expectedVarType = currentType
+			continue
+		}
+		if currentType != expectedVarType {
+			return fmt.Errorf("all variations should have the same type")
 		}
 	}
+	return nil
+}
 
-	// Validate that we have a default Rule
+// validateRules checks that the flag has a valid default rule and that all the targeting rules
+// are valid with no duplicated names.
+func (f *InternalFlag) validateRules() error {
 	if f.GetDefaultRule() == nil {
 		return fmt.Errorf("missing default rule")
 	}
 
 	const isDefaultRule = true
-	// Validate rules
 	if err := f.GetDefaultRule().IsValid(isDefaultRule, f.GetVariations()); err != nil {
 		return err
 	}
@@ -446,20 +471,24 @@ func (f *InternalFlag) IsValidWithFlagName(flagName string) error {
 			ruleNames[rule.GetName()] = nil
 		}
 	}
+	return nil
+}
 
-	// Validate the `needs` dependencies.
-	if f.Needs != nil {
-		for _, need := range *f.Needs {
-			dependencyName := need.GetFlag()
-			if dependencyName == "" {
-				return fmt.Errorf("needs: a dependency is missing its flag name")
-			}
-			if dependencyName == flagName {
-				return fmt.Errorf("needs: a flag cannot depend on itself (%s)", flagName)
-			}
+// validateNeeds checks that every `needs` dependency declares a flag name and that the flag does
+// not depend on itself. The self-dependency check is skipped when flagName is empty.
+func (f *InternalFlag) validateNeeds(flagName string) error {
+	if f.Needs == nil {
+		return nil
+	}
+	for _, need := range *f.Needs {
+		dependencyName := need.GetFlag()
+		if dependencyName == "" {
+			return fmt.Errorf("needs: a dependency is missing its flag name")
+		}
+		if dependencyName == flagName {
+			return fmt.Errorf("needs: a flag cannot depend on itself (%s)", flagName)
 		}
 	}
-
 	return nil
 }
 
