@@ -55,13 +55,13 @@ type RetrieverConf struct {
 	Database   string            `mapstructure:"database"       koanf:"database"`
 	Collection string            `mapstructure:"collection"     koanf:"collection"`
 
-	// MaxOpenConns, MaxIdleConns, ConnMaxLifetime and ConnMaxIdleTime are
+	// MaxConns, MinConns, MaxConnLifetime and MaxConnIdleTime are
 	// optional connection pool settings used by the postgresql retriever.
 	// When left unset, the driver defaults are used and behavior is unchanged.
-	MaxOpenConns    int    `mapstructure:"maxOpenConns"    koanf:"maxopenconns"    json:",omitempty"`
-	MaxIdleConns    int    `mapstructure:"maxIdleConns"    koanf:"maxidleconns"    json:",omitempty"`
-	ConnMaxLifetime string `mapstructure:"connMaxLifetime" koanf:"connmaxlifetime" json:",omitempty"`
-	ConnMaxIdleTime string `mapstructure:"connMaxIdleTime" koanf:"connmaxidletime" json:",omitempty"`
+	MaxConns        int    `mapstructure:"maxConns"        koanf:"maxconns"        json:"maxConns,omitempty"`
+	MinConns        int    `mapstructure:"minConns"        koanf:"minconns"        json:"minConns,omitempty"`
+	MaxConnLifetime string `mapstructure:"maxConnLifetime" koanf:"maxconnlifetime" json:"maxConnLifetime,omitempty"`
+	MaxConnIdleTime string `mapstructure:"maxConnIdleTime" koanf:"maxconnidletime" json:"maxConnIdleTime,omitempty"`
 
 	// RedisOptions is the serializable redis configuration that can be used in JSON/YAML files
 	RedisOptions *SerializableRedisOptions `mapstructure:"redisOptions"   koanf:"redisOptions"`
@@ -122,28 +122,28 @@ func (c *RetrieverConf) validatePostgreSQLRetriever() error {
 	if c.Table == "" {
 		return err.NewRetrieverConfError("table", string(c.Kind))
 	}
-	if c.MaxOpenConns < 0 {
+	if c.MaxConns < 0 {
 		return fmt.Errorf("invalid retriever configuration, "+
-			"\"maxOpenConns\" must not be negative for kind \"%s\"", c.Kind)
+			"\"maxConns\" must not be negative for kind \"%s\"", c.Kind)
 	}
-	if c.MaxIdleConns < 0 {
+	if c.MinConns < 0 {
 		return fmt.Errorf("invalid retriever configuration, "+
-			"\"maxIdleConns\" must not be negative for kind \"%s\"", c.Kind)
+			"\"minConns\" must not be negative for kind \"%s\"", c.Kind)
 	}
-	if c.MaxOpenConns > 0 && c.MaxIdleConns > c.MaxOpenConns {
+	if c.MaxConns > 0 && c.MinConns > c.MaxConns {
 		return fmt.Errorf("invalid retriever configuration, "+
-			"\"maxIdleConns\" must not be greater than \"maxOpenConns\" for kind \"%s\"", c.Kind)
+			"\"minConns\" must not be greater than \"maxConns\" for kind \"%s\"", c.Kind)
 	}
-	if c.ConnMaxLifetime != "" {
-		if _, errParse := time.ParseDuration(c.ConnMaxLifetime); errParse != nil {
+	if c.MaxConnLifetime != "" {
+		if _, errParse := time.ParseDuration(c.MaxConnLifetime); errParse != nil {
 			return fmt.Errorf("invalid retriever configuration, "+
-				"\"connMaxLifetime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
+				"\"maxConnLifetime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
 		}
 	}
-	if c.ConnMaxIdleTime != "" {
-		if _, errParse := time.ParseDuration(c.ConnMaxIdleTime); errParse != nil {
+	if c.MaxConnIdleTime != "" {
+		if _, errParse := time.ParseDuration(c.MaxConnIdleTime); errParse != nil {
 			return fmt.Errorf("invalid retriever configuration, "+
-				"\"connMaxIdleTime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
+				"\"maxConnIdleTime\" is not a valid duration for kind \"%s\": %w", c.Kind, errParse)
 		}
 	}
 	return nil

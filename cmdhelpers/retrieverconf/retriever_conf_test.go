@@ -382,73 +382,73 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind:            "postgresql",
 				URI:             "xxx",
 				Table:           "xxx",
-				MaxOpenConns:    20,
-				MaxIdleConns:    5,
-				ConnMaxLifetime: "1h",
-				ConnMaxIdleTime: "30m",
+				MaxConns:        20,
+				MinConns:        5,
+				MaxConnLifetime: "1h",
+				MaxConnIdleTime: "30m",
 			},
 		},
 		{
-			name: "kind postgresql invalid negative maxOpenConns",
+			name: "kind postgresql invalid negative maxConns",
 			fields: retrieverconf.RetrieverConf{
-				Kind:         "postgresql",
-				URI:          "xxx",
-				Table:        "xxx",
-				MaxOpenConns: -1,
+				Kind:     "postgresql",
+				URI:      "xxx",
+				Table:    "xxx",
+				MaxConns: -1,
 			},
 			wantErr: true,
 			errValue: "invalid retriever configuration, " +
-				"\"maxOpenConns\" must not be negative for kind \"postgresql\"",
+				"\"maxConns\" must not be negative for kind \"postgresql\"",
 		},
 		{
-			name: "kind postgresql invalid negative maxIdleConns",
+			name: "kind postgresql invalid negative minConns",
 			fields: retrieverconf.RetrieverConf{
-				Kind:         "postgresql",
-				URI:          "xxx",
-				Table:        "xxx",
-				MaxIdleConns: -2,
+				Kind:     "postgresql",
+				URI:      "xxx",
+				Table:    "xxx",
+				MinConns: -2,
 			},
 			wantErr: true,
 			errValue: "invalid retriever configuration, " +
-				"\"maxIdleConns\" must not be negative for kind \"postgresql\"",
+				"\"minConns\" must not be negative for kind \"postgresql\"",
 		},
 		{
-			name: "kind postgresql invalid maxIdleConns greater than maxOpenConns",
+			name: "kind postgresql invalid minConns greater than maxConns",
 			fields: retrieverconf.RetrieverConf{
-				Kind:         "postgresql",
-				URI:          "xxx",
-				Table:        "xxx",
-				MaxOpenConns: 5,
-				MaxIdleConns: 10,
+				Kind:     "postgresql",
+				URI:      "xxx",
+				Table:    "xxx",
+				MaxConns: 5,
+				MinConns: 10,
 			},
 			wantErr: true,
 			errValue: "invalid retriever configuration, " +
-				"\"maxIdleConns\" must not be greater than \"maxOpenConns\" for kind \"postgresql\"",
+				"\"minConns\" must not be greater than \"maxConns\" for kind \"postgresql\"",
 		},
 		{
-			name: "kind postgresql invalid connMaxLifetime duration",
+			name: "kind postgresql invalid maxConnLifetime duration",
 			fields: retrieverconf.RetrieverConf{
 				Kind:            "postgresql",
 				URI:             "xxx",
 				Table:           "xxx",
-				ConnMaxLifetime: "not-a-duration",
+				MaxConnLifetime: "not-a-duration",
 			},
 			wantErr: true,
 			errValue: "invalid retriever configuration, " +
-				"\"connMaxLifetime\" is not a valid duration for kind \"postgresql\": " +
+				"\"maxConnLifetime\" is not a valid duration for kind \"postgresql\": " +
 				"time: invalid duration \"not-a-duration\"",
 		},
 		{
-			name: "kind postgresql invalid connMaxIdleTime duration",
+			name: "kind postgresql invalid maxConnIdleTime duration",
 			fields: retrieverconf.RetrieverConf{
 				Kind:            "postgresql",
 				URI:             "xxx",
 				Table:           "xxx",
-				ConnMaxIdleTime: "xyz",
+				MaxConnIdleTime: "xyz",
 			},
 			wantErr: true,
 			errValue: "invalid retriever configuration, " +
-				"\"connMaxIdleTime\" is not a valid duration for kind \"postgresql\": " +
+				"\"maxConnIdleTime\" is not a valid duration for kind \"postgresql\": " +
 				"time: invalid duration \"xyz\"",
 		},
 	}

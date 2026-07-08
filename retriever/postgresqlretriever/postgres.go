@@ -14,30 +14,26 @@ import (
 // the corresponding pgxpool default (or the value already encoded in the
 // connection URI) is used, so existing configurations are unaffected.
 type PoolConfig struct {
-	// MaxOpenConns maps to pgxpool's MaxConns: the maximum number of
-	// connections in the pool.
-	MaxOpenConns int32
-	// MaxIdleConns maps to pgxpool's MinConns: the minimum number of
-	// connections the pool keeps open. pgxpool has no direct cap on idle
-	// connections (idle connections are bounded by MaxConns), so this controls
-	// the pool floor rather than an idle ceiling. It must not exceed
-	// MaxOpenConns.
-	MaxIdleConns int32
-	// ConnMaxLifetime maps to pgxpool's MaxConnLifetime: the duration since
-	// creation after which a connection is automatically closed.
-	ConnMaxLifetime time.Duration
-	// ConnMaxIdleTime maps to pgxpool's MaxConnIdleTime: the duration after
-	// which an idle connection is automatically closed by the health check.
-	ConnMaxIdleTime time.Duration
+	// MaxConns is the maximum number of connections in the pool.
+	MaxConns int32
+	// MinConns is the minimum number of connections the pool keeps open. It
+	// must not exceed MaxConns when both are configured.
+	MinConns int32
+	// MaxConnLifetime is the duration since creation after which a connection
+	// is automatically closed.
+	MaxConnLifetime time.Duration
+	// MaxConnIdleTime is the duration after which an idle connection is
+	// automatically closed by the health check.
+	MaxConnIdleTime time.Duration
 }
 
 // IsZero reports whether no pool setting has been configured. When true,
 // GetPool builds the pool exactly as it did before pool settings existed.
 func (p PoolConfig) IsZero() bool {
-	return p.MaxOpenConns == 0 &&
-		p.MaxIdleConns == 0 &&
-		p.ConnMaxLifetime == 0 &&
-		p.ConnMaxIdleTime == 0
+	return p.MaxConns == 0 &&
+		p.MinConns == 0 &&
+		p.MaxConnLifetime == 0 &&
+		p.MaxConnIdleTime == 0
 }
 
 // cacheKey returns a stable cache key for a URI + pool config combination.
@@ -47,8 +43,8 @@ func cacheKey(uri string, p PoolConfig) string {
 	if p.IsZero() {
 		return uri
 	}
-	return fmt.Sprintf("%s|%d|%d|%d|%d",
-		uri, p.MaxOpenConns, p.MaxIdleConns, p.ConnMaxLifetime, p.ConnMaxIdleTime)
+	return fmt.Sprintf("%s|maxConns=%d|minConns=%d|maxConnLifetime=%d|maxConnIdleTime=%d",
+		uri, p.MaxConns, p.MinConns, p.MaxConnLifetime, p.MaxConnIdleTime)
 }
 
 type poolEntry struct {
@@ -109,17 +105,21 @@ func newPool(ctx context.Context, uri string, poolCfg PoolConfig) (*pgxpool.Pool
 	if err != nil {
 		return nil, err
 	}
-	if poolCfg.MaxOpenConns > 0 {
-		config.MaxConns = poolCfg.MaxOpenConns
+	if poolCfg.MaxConns > 0 {
+		config.MaxConns = poolCfg.MaxConns
 	}
-	if poolCfg.MaxIdleConns > 0 {
-		config.MinConns = poolCfg.MaxIdleConns
+	if poolCfg.MinConns > 0 {
+		config.MinConns = poolCfg.MinConns
 	}
-	if poolCfg.ConnMaxLifetime > 0 {
-		config.MaxConnLifetime = poolCfg.ConnMaxLifetime
+	if poolCfg.MaxConnLifetime > 0 {
+		config.MaxConnLifetime = poolCfg.MaxConnLifetime
 	}
-	if poolCfg.ConnMaxIdleTime > 0 {
-		config.MaxConnIdleTime = poolCfg.ConnMaxIdleTime
+	if poolCfg.MaxConnIdleTime > 0 {
+		config.MaxConnIdleTime = poolCfg.MaxConnIdleTime
+	}
+	if config.MinConns > 0 && config.MaxConns > 0 && config.MinConns > config.MaxConns {
+		return nil, fmt.Errorf("invalid pool configuration: minConns (%d) must not exceed maxConns (%d)",
+			config.MinConns, config.MaxConns)
 	}
 
 	return pgxpool.NewWithConfig(ctx, config)

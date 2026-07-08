@@ -20,23 +20,23 @@ func TestPoolConfig_IsZero(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "max open conns set",
-			cfg:  PoolConfig{MaxOpenConns: 10},
+			name: "max conns set",
+			cfg:  PoolConfig{MaxConns: 10},
 			want: false,
 		},
 		{
-			name: "max idle conns set",
-			cfg:  PoolConfig{MaxIdleConns: 2},
+			name: "min conns set",
+			cfg:  PoolConfig{MinConns: 2},
 			want: false,
 		},
 		{
-			name: "conn max lifetime set",
-			cfg:  PoolConfig{ConnMaxLifetime: time.Hour},
+			name: "max conn lifetime set",
+			cfg:  PoolConfig{MaxConnLifetime: time.Hour},
 			want: false,
 		},
 		{
-			name: "conn max idle time set",
-			cfg:  PoolConfig{ConnMaxIdleTime: 5 * time.Minute},
+			name: "max conn idle time set",
+			cfg:  PoolConfig{MaxConnIdleTime: 5 * time.Minute},
 			want: false,
 		},
 	}
@@ -56,10 +56,10 @@ func TestNewPool_AppliesConfig(t *testing.T) {
 	uri := "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
 
 	cfg := PoolConfig{
-		MaxOpenConns:    25,
-		MaxIdleConns:    5,
-		ConnMaxLifetime: 90 * time.Minute,
-		ConnMaxIdleTime: 10 * time.Minute,
+		MaxConns:        25,
+		MinConns:        5,
+		MaxConnLifetime: 90 * time.Minute,
+		MaxConnIdleTime: 10 * time.Minute,
 	}
 
 	pool, err := newPool(ctx, uri, cfg)
@@ -74,13 +74,21 @@ func TestNewPool_AppliesConfig(t *testing.T) {
 	assert.Equal(t, 10*time.Minute, applied.MaxConnIdleTime)
 }
 
+func TestNewPool_InvalidMinConnsGreaterThanMaxConns(t *testing.T) {
+	ctx := context.Background()
+	uri := "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+
+	_, err := newPool(ctx, uri, PoolConfig{MaxConns: 5, MinConns: 10})
+	assert.EqualError(t, err, "invalid pool configuration: minConns (10) must not exceed maxConns (5)")
+}
+
 // TestNewPool_PartialConfig verifies that only the explicitly set fields are
 // overridden and the rest keep the pgxpool/URI defaults.
 func TestNewPool_PartialConfig(t *testing.T) {
 	ctx := context.Background()
 	uri := "postgres://postgres:password@localhost:5432/postgres?sslmode=disable&pool_max_conns=8"
 
-	pool, err := newPool(ctx, uri, PoolConfig{ConnMaxLifetime: 2 * time.Hour})
+	pool, err := newPool(ctx, uri, PoolConfig{MaxConnLifetime: 2 * time.Hour})
 	assert.NoError(t, err)
 	assert.NotNil(t, pool)
 	defer pool.Close()
@@ -95,7 +103,7 @@ func TestNewPool_PartialConfig(t *testing.T) {
 // configured against an unparseable URI.
 func TestNewPool_InvalidURI(t *testing.T) {
 	ctx := context.Background()
-	_, err := newPool(ctx, "://not-a-valid-uri", PoolConfig{MaxOpenConns: 4})
+	_, err := newPool(ctx, "://not-a-valid-uri", PoolConfig{MaxConns: 4})
 	assert.Error(t, err)
 }
 
@@ -107,13 +115,13 @@ func TestCacheKey(t *testing.T) {
 	assert.Equal(t, uri, cacheKey(uri, PoolConfig{}),
 		"zero config should key on the URI alone for backward compatibility")
 
-	a := cacheKey(uri, PoolConfig{MaxOpenConns: 10})
-	b := cacheKey(uri, PoolConfig{MaxOpenConns: 20})
+	a := cacheKey(uri, PoolConfig{MaxConns: 10})
+	b := cacheKey(uri, PoolConfig{MaxConns: 20})
 	assert.NotEqual(t, a, b, "different settings must produce different keys")
 	assert.NotEqual(t, uri, a, "a configured pool must not collide with the default key")
 
 	// Same settings yield the same key (stable).
 	assert.Equal(t,
-		cacheKey(uri, PoolConfig{MaxOpenConns: 10, ConnMaxLifetime: time.Hour}),
-		cacheKey(uri, PoolConfig{MaxOpenConns: 10, ConnMaxLifetime: time.Hour}))
+		cacheKey(uri, PoolConfig{MaxConns: 10, MaxConnLifetime: time.Hour}),
+		cacheKey(uri, PoolConfig{MaxConns: 10, MaxConnLifetime: time.Hour}))
 }

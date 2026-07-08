@@ -178,29 +178,29 @@ func createAzBlobStorageRetriever(
 
 func createPostgreSQLRetriever(
 	c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
-	if c.MaxOpenConns < 0 || c.MaxOpenConns > math.MaxInt32 {
-		return nil, fmt.Errorf("maxOpenConns out of range for postgresql retriever: %d", c.MaxOpenConns)
+	if c.MaxConns < 0 || c.MaxConns > math.MaxInt32 {
+		return nil, fmt.Errorf("maxConns out of range for postgresql retriever: %d", c.MaxConns)
 	}
-	if c.MaxIdleConns < 0 || c.MaxIdleConns > math.MaxInt32 {
-		return nil, fmt.Errorf("maxIdleConns out of range for postgresql retriever: %d", c.MaxIdleConns)
+	if c.MinConns < 0 || c.MinConns > math.MaxInt32 {
+		return nil, fmt.Errorf("minConns out of range for postgresql retriever: %d", c.MinConns)
 	}
 	poolCfg := postgresqlretriever.PoolConfig{
-		MaxOpenConns: int32(c.MaxOpenConns),
-		MaxIdleConns: int32(c.MaxIdleConns),
+		MaxConns: int32(c.MaxConns),
+		MinConns: int32(c.MinConns),
 	}
-	if c.ConnMaxLifetime != "" {
-		d, err := time.ParseDuration(c.ConnMaxLifetime)
+	if c.MaxConnLifetime != "" {
+		d, err := time.ParseDuration(c.MaxConnLifetime)
 		if err != nil {
-			return nil, fmt.Errorf("invalid connMaxLifetime for postgresql retriever: %w", err)
+			return nil, fmt.Errorf("invalid maxConnLifetime for postgresql retriever: %w", err)
 		}
-		poolCfg.ConnMaxLifetime = d
+		poolCfg.MaxConnLifetime = d
 	}
-	if c.ConnMaxIdleTime != "" {
-		d, err := time.ParseDuration(c.ConnMaxIdleTime)
+	if c.MaxConnIdleTime != "" {
+		d, err := time.ParseDuration(c.MaxConnIdleTime)
 		if err != nil {
-			return nil, fmt.Errorf("invalid connMaxIdleTime for postgresql retriever: %w", err)
+			return nil, fmt.Errorf("invalid maxConnIdleTime for postgresql retriever: %w", err)
 		}
-		poolCfg.ConnMaxIdleTime = d
+		poolCfg.MaxConnIdleTime = d
 	}
 	return &postgresqlretriever.Retriever{
 		URI:     c.URI,

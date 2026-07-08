@@ -1,6 +1,7 @@
 package init
 
 import (
+	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -273,20 +274,42 @@ func Test_InitRetriever(t *testing.T) {
 				Kind:            "postgresql",
 				URI:             "postgresql://user:password@localhost:5432/database",
 				Table:           "flags",
-				MaxOpenConns:    25,
-				MaxIdleConns:    5,
-				ConnMaxLifetime: "1h",
-				ConnMaxIdleTime: "30m",
+				MaxConns:        25,
+				MinConns:        5,
+				MaxConnLifetime: "1h",
+				MaxConnIdleTime: "30m",
 			},
 			want: &postgresqlretriever.Retriever{
 				URI:   "postgresql://user:password@localhost:5432/database",
 				Table: "flags",
 				Pool: postgresqlretriever.PoolConfig{
-					MaxOpenConns:    25,
-					MaxIdleConns:    5,
-					ConnMaxLifetime: time.Hour,
-					ConnMaxIdleTime: 30 * time.Minute,
+					MaxConns:        25,
+					MinConns:        5,
+					MaxConnLifetime: time.Hour,
+					MaxConnIdleTime: 30 * time.Minute,
 				},
+			},
+			wantType: &postgresqlretriever.Retriever{},
+		},
+		{
+			name:    "Convert Postgres Retriever with maxConns out of range",
+			wantErr: assert.Error,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:     "postgresql",
+				URI:      "postgresql://user:password@localhost:5432/database",
+				Table:    "flags",
+				MaxConns: math.MaxInt32 + 1,
+			},
+			wantType: &postgresqlretriever.Retriever{},
+		},
+		{
+			name:    "Convert Postgres Retriever with minConns out of range",
+			wantErr: assert.Error,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:     "postgresql",
+				URI:      "postgresql://user:password@localhost:5432/database",
+				Table:    "flags",
+				MinConns: math.MaxInt32 + 1,
 			},
 			wantType: &postgresqlretriever.Retriever{},
 		},
@@ -297,7 +320,7 @@ func Test_InitRetriever(t *testing.T) {
 				Kind:            "postgresql",
 				URI:             "postgresql://user:password@localhost:5432/database",
 				Table:           "flags",
-				ConnMaxLifetime: "not-a-duration",
+				MaxConnLifetime: "not-a-duration",
 			},
 			wantType: &postgresqlretriever.Retriever{},
 		},
