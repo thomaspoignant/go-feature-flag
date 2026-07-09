@@ -14,7 +14,7 @@ require (
 	github.com/IBM/sarama v1.50.3
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.54.0
-	github.com/aws/aws-sdk-go-v2 v1.42.0
+	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.26
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.25
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.12
