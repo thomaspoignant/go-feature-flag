@@ -238,8 +238,8 @@ github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.3/go.mod h1:uk1vhHHERfSVCUnq
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.30 h1:/hi1JADLEW9YYryEz1w4GQu0EtP23pP553Cf9KgsDV4=
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.30/go.mod h1:/3AOgy4K17Dm4ucMZVC/MJkzy5kmfKUcINRHZyo0koQ=
 github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.3/go.mod h1:0dHuD2HZZSiwfJSy1FO5bX1hQ1TxVV1QXXjpn3XUE44=
-github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.12 h1:0jSSxdkgDH6ShgraXXk//B/UGi73aRgoE5PTVCM26wM=
-github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.12/go.mod h1:rdg/WbW8wInpiUA/6qzLDwn97IPD8d3pvfMbCBWslMA=
+github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.13 h1:zHi0z+ZT207/QPyaCmTr4JksQ0Ty0DM+WXW0xsfckXQ=
+github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.13/go.mod h1:ycxBs1ztF7RbxNWiJoIegPCvsfuO7dCvtyyloQvRgNs=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.9/go.mod h1:AnVH5pvai0pAF4lXRq0bmhbes1u9R8wTE+g+183bZNM=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.30 h1:xM/Is9cKMHa8Jj8zkvWhvrFkZsXJV9E+BB4g0HW0duQ=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.30/go.mod h1:WueJeNDZvK1fMYEWJIkcivBfEzUkTpBhzlrUKKY8EuA=
