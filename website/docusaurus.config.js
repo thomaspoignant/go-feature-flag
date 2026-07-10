@@ -45,6 +45,7 @@ const config = {
     },
     mermaid: true,
   },
+  clientModules: [require.resolve('./src/clientModules/gtagEvents.js')],
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',
@@ -306,6 +307,7 @@ const config = {
           customCss: [require.resolve('./src/css/custom.css')],
         },
         sitemap: {
+          lastmod: 'datetime',
           changefreq: 'weekly',
           priority: 0.5, // default fallback for pages not matched below
           ignorePatterns: [

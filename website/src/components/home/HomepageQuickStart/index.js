@@ -159,6 +159,8 @@ export function QuickStart() {
             filename="Terminal"
             language="shell"
             code={dockerSnippet}
+            analyticsEvent="relay_proxy_download"
+            analyticsMethod="docker"
             callout={
               <>
                 Relay proxy listening on{' '}

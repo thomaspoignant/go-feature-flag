@@ -71,7 +71,7 @@ CheckIcon.propTypes = {
   className: PropTypes.string,
 };
 
-function CopyButton({code}) {
+function CopyButton({code, analyticsEvent, analyticsMethod}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -89,6 +89,8 @@ function CopyButton({code}) {
       type="button"
       onClick={handleCopy}
       aria-label="Copy code to clipboard"
+      {...(analyticsEvent && {'data-ga-event': analyticsEvent})}
+      {...(analyticsMethod && {'data-ga-method': analyticsMethod})}
       className={clsx(
         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-poppins font-medium',
         'text-gray-700 dark:text-gray-200',
@@ -107,6 +109,8 @@ function CopyButton({code}) {
 
 CopyButton.propTypes = {
   code: PropTypes.string.isRequired,
+  analyticsEvent: PropTypes.string,
+  analyticsMethod: PropTypes.string,
 };
 
 function CodeBody({code, language}) {
@@ -156,7 +160,16 @@ CodeBody.propTypes = {
   language: PropTypes.string.isRequired,
 };
 
-export function CodeCard({filename, language, code, tabs, callout, moreLink}) {
+export function CodeCard({
+  filename,
+  language,
+  code,
+  tabs,
+  callout,
+  moreLink,
+  analyticsEvent,
+  analyticsMethod,
+}) {
   const isTabbed = Array.isArray(tabs) && tabs.length > 0;
   const [activeValue, setActiveValue] = useState(
     isTabbed ? tabs[0].value : null
@@ -254,7 +267,11 @@ export function CodeCard({filename, language, code, tabs, callout, moreLink}) {
               : currentName}
           </span>
         </div>
-        <CopyButton code={currentCode} />
+        <CopyButton
+          code={currentCode}
+          analyticsEvent={analyticsEvent}
+          analyticsMethod={analyticsMethod}
+        />
       </div>
       <CodeBody code={currentCode} language={currentLang} />
       {callout && (
@@ -291,4 +308,6 @@ CodeCard.propTypes = {
     label: PropTypes.string,
     ariaLabel: PropTypes.string,
   }),
+  analyticsEvent: PropTypes.string,
+  analyticsMethod: PropTypes.string,
 };
