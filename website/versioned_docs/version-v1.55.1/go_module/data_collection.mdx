@@ -1,0 +1,21 @@
+---
+sidebar_position: 40
+description: Where to export evaluation data
+---
+import {integrations} from "@site/data/integrations";
+
+# 🚚 Export evaluation data
+The module supports different ways of exporting evaluation data.
+
+To retrieve a file you need to provide an [exporter](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/exporter/) in your `ffclient.Config{}` during the initialization.
+
+## Available exporters:
+<ul>
+  { integrations.exporters.filter(item => item.docLink !== undefined).map((r) => (
+    <li key={r.name}><a href={`../integrations/export-evaluation-data/${r.docLink}`}>{r.name}</a></li>
+  )) }
+</ul>
+
+:::info
+In each exporter documentation, you will find the configuration needed to set up the exporter.
+:::

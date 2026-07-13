@@ -1,0 +1,10 @@
+{
+  "position": 40,
+  "collapsible": true,
+  "collapsed": true,
+  "label": "🔧 Configure your flags",
+  "link": {
+    "title": "🔧 Configure your feature flags",
+    "slug": "category/configure-your-feature-flags"
+  }
+}
