@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/thomaspoignant/go-feature-flag,296,190
+/thomaspoignant/go-feature-flag/issues,41,19
+/thomaspoignant/go-feature-flag/releases,38,18
+/thomaspoignant/go-feature-flag/discussions,33,12
+/thomaspoignant/go-feature-flag/pulls,26,13
+/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy,12,10
+/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy/helm-charts/relay-proxy,9,3
+/thomaspoignant/go-feature-flag/blob/main/ADOPTERS.md,8,7
+/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/helm-charts/relay-proxy/values.yaml,8,6
+/thomaspoignant/go-feature-flag/tree/main/.github,8,4
