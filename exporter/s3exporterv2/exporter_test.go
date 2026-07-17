@@ -1,6 +1,7 @@
 package s3exporterv2
 
 import (
+	"bytes"
 	"context"
 	"log/slog"
 	"os"
@@ -273,6 +274,41 @@ func Test_errSDK(t *testing.T) {
 		[]exporter.ExportableEvent{},
 	)
 	assert.Error(t, err, "Empty AWS config should failed")
+}
+
+// TestS3_Export_LogsThroughParameterLogger ensures the exporter logs through the
+// logger passed to Export() and not through an always-nil internal field.
+// See https://github.com/thomaspoignant/go-feature-flag/issues/5637.
+func TestS3_Export_LogsThroughParameterLogger(t *testing.T) {
+	var buf bytes.Buffer
+	logger := &fflog.FFLogger{
+		LeveledLogger: slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelInfo})),
+	}
+
+	s3ManagerMock := testutils.S3ManagerV2Mock{}
+	f := &Exporter{
+		Bucket:     "test",
+		s3Uploader: &s3ManagerMock,
+	}
+
+	err := f.Export(
+		context.TODO(),
+		logger,
+		[]exporter.ExportableEvent{
+			exporter.FeatureEvent{
+				Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+				Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+			},
+		},
+	)
+
+	assert.NoError(t, err, "Export should not error")
+	assert.Contains(
+		t,
+		buf.String(),
+		"[S3Exporter] file uploaded.",
+		"the upload log line should be emitted through the logger passed to Export()",
+	)
 }
 
 func TestS3_IsBulk(t *testing.T) {
