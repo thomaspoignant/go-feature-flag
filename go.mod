@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	cloud.google.com/go/bigquery v1.78.0
-	cloud.google.com/go/pubsub v1.50.3
+	cloud.google.com/go/pubsub v1.50.4
 	cloud.google.com/go/pubsub/v2 v2.6.1
 	cloud.google.com/go/storage v1.63.0
 	dario.cat/mergo v1.0.2
