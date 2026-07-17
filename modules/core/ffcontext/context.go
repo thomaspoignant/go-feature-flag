@@ -1,6 +1,9 @@
 package ffcontext
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"maps"
+)
 
 var _ Context = (*EvaluationContext)(nil)
 
@@ -92,7 +95,8 @@ func (u EvaluationContext) AddCustomAttribute(name string, value any) {
 }
 
 func (u EvaluationContext) ToMap() map[string]any {
-	resMap := u.attributes
+	resMap := make(map[string]any, len(u.attributes)+1)
+	maps.Copy(resMap, u.attributes)
 	resMap["targetingKey"] = u.targetingKey
 	return resMap
 }
