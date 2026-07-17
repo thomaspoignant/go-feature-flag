@@ -134,7 +134,12 @@ func (f *Exporter) uploadFile(
 
 	wc := client.Bucket(f.Bucket).Object(source).NewWriter(ctx)
 	_, err := io.Copy(wc, of)
-	_ = wc.Close()
+	// The GCS writer buffers the payload and flushes it on Close, so upload
+	// failures surface from Close rather than from io.Copy. Capture both so a
+	// failed upload is reported instead of silently swallowed.
+	if closeErr := wc.Close(); closeErr != nil && err == nil {
+		err = closeErr
+	}
 	if err != nil {
 		return fmt.Errorf(
 			"error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
