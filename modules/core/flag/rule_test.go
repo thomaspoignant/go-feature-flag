@@ -265,12 +265,15 @@ func TestRuleEvaluate(t *testing.T) {
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("variation_B"),
 						Percentage: testconvert.Float64(0),
-						Date:       testconvert.Time(time.Now().Add(0 * time.Second)),
+						// Far-future dates so evaluation always lands before the
+						// ramp and deterministically serves the initial variation
+						// (avoids a timing race on loaded CI runners).
+						Date: testconvert.Time(time.Now().Add(1 * time.Hour)),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("variation_C"),
 						Percentage: testconvert.Float64(100),
-						Date:       testconvert.Time(time.Now().Add(3 * time.Second)),
+						Date:       testconvert.Time(time.Now().Add(2 * time.Hour)),
 					},
 				},
 			},
