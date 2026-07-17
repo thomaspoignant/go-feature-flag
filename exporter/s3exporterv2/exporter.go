@@ -103,7 +103,7 @@ func (f *Exporter) Export(
 	if err != nil {
 		return err
 	}
-	defer func() { _ = os.Remove(outputDir) }()
+	defer func() { _ = os.RemoveAll(outputDir) }()
 
 	// We call the File data exporter to get the file in the right format.
 	// Files will be put in the temp directory, so we will be able to upload them to export from there.
@@ -134,23 +134,38 @@ func (f *Exporter) Export(
 			)
 			continue
 		}
-
-		result, err := f.s3Uploader.UploadObject(ctx, &transfermanager.UploadObjectInput{
-			Bucket: aws.String(f.Bucket),
-			Key:    aws.String(f.S3Path + "/" + file.Name()),
-			Body:   of,
-		})
-
-		if err != nil {
+		if err := f.uploadFile(ctx, logger, of, file.Name()); err != nil {
 			return err
 		}
-
-		location := ""
-		if result.Location != nil {
-			location = *result.Location
-		}
-		logger.Info("[S3Exporter] file uploaded.", slog.String("location", location))
 	}
+	return nil
+}
+
+// uploadFile uploads a single file to S3 and closes the file handle before
+// returning. Keeping the defer here (instead of in the calling loop) ensures at
+// most one file descriptor is open at a time, regardless of batch size.
+func (f *Exporter) uploadFile(
+	ctx context.Context,
+	logger *fflog.FFLogger,
+	of *os.File,
+	fileName string,
+) error {
+	defer func() { _ = of.Close() }()
+
+	result, err := f.s3Uploader.UploadObject(ctx, &transfermanager.UploadObjectInput{
+		Bucket: aws.String(f.Bucket),
+		Key:    aws.String(f.S3Path + "/" + fileName),
+		Body:   of,
+	})
+	if err != nil {
+		return err
+	}
+
+	location := ""
+	if result.Location != nil {
+		location = *result.Location
+	}
+	logger.Info("[S3Exporter] file uploaded.", slog.String("location", location))
 	return nil
 }
 
