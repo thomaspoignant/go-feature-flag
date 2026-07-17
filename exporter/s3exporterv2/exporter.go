@@ -62,7 +62,6 @@ type Exporter struct {
 
 	s3Uploader UploaderAPI
 	init       sync.Once
-	ffLogger   *fflog.FFLogger
 }
 
 func (f *Exporter) initializeUploader(ctx context.Context) error {
@@ -129,7 +128,7 @@ func (f *Exporter) Export(
 		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			f.ffLogger.Error(
+			logger.Error(
 				"[S3Exporter] impossible to open the file",
 				slog.String("path", outputDir+"/"+file.Name()),
 			)
@@ -150,7 +149,7 @@ func (f *Exporter) Export(
 		if result.Location != nil {
 			location = *result.Location
 		}
-		f.ffLogger.Info("[S3Exporter] file uploaded.", slog.String("location", location))
+		logger.Info("[S3Exporter] file uploaded.", slog.String("location", location))
 	}
 	return nil
 }
