@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -308,6 +309,38 @@ func TestS3_Export_LogsThroughParameterLogger(t *testing.T) {
 		buf.String(),
 		"[S3Exporter] file uploaded.",
 		"the upload log line should be emitted through the logger passed to Export()",
+	)
+}
+
+// TestS3_Export_RemovesTempDir ensures Export() fully removes the temporary
+// directory it creates. It guards against the os.Remove -> os.RemoveAll fix:
+// os.Remove only deletes empty directories, so with the exported files still
+// inside the temp dir would leak on every export cycle.
+// See https://github.com/thomaspoignant/go-feature-flag/issues/5636.
+func TestS3_Export_RemovesTempDir(t *testing.T) {
+	tempPattern := filepath.Join(os.TempDir(), "go_feature_flag_s3_export*")
+	before, _ := filepath.Glob(tempPattern)
+
+	f := &Exporter{Bucket: "test", s3Uploader: &testutils.S3ManagerV2Mock{}}
+	err := f.Export(
+		context.TODO(),
+		&fflog.FFLogger{LeveledLogger: slog.Default()},
+		[]exporter.ExportableEvent{
+			exporter.FeatureEvent{
+				Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD",
+				CreationDate: 1617970547, Key: "random-key", Variation: "Default",
+				Value: "YO", Default: false, Source: "SERVER",
+			},
+		},
+	)
+	assert.NoError(t, err, "Export should not error")
+
+	after, _ := filepath.Glob(tempPattern)
+	assert.Equal(
+		t,
+		len(before),
+		len(after),
+		"Export() must remove its temp directory (os.RemoveAll)",
 	)
 }
 

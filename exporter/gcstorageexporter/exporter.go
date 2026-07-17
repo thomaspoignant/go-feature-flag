@@ -67,6 +67,7 @@ func (f *Exporter) Export(
 	if err != nil {
 		return err
 	}
+	defer func() { _ = client.Close() }()
 
 	if f.Bucket == "" {
 		return fmt.Errorf("you should specify a bucket. %v is invalid", f.Bucket)
@@ -77,7 +78,7 @@ func (f *Exporter) Export(
 	if err != nil {
 		return err
 	}
-	defer func() { _ = os.Remove(outputDir) }()
+	defer func() { _ = os.RemoveAll(outputDir) }()
 
 	// We call the File data exporter to get the file in the right format.
 	// Files will be put in the temp directory, so we will be able to upload them to S3 from there.
@@ -106,26 +107,41 @@ func (f *Exporter) Export(
 				slog.String("path", outputDir+"/"+file.Name()))
 			continue
 		}
-		defer func() { _ = of.Close() }()
-
-		// prepend the path
-		source := file.Name()
-		if f.Path != "" {
-			source = path.Clean(f.Path + "/" + file.Name())
-		}
-
-		wc := client.Bucket(f.Bucket).Object(source).NewWriter(ctx)
-		_, err = io.Copy(wc, of)
-		_ = wc.Close()
-		if err != nil {
-			return fmt.Errorf(
-				"error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
-				source,
-				f.Bucket,
-				err,
-			)
+		if err := f.uploadFile(ctx, client, of, file.Name()); err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+// uploadFile uploads a single file to Google Cloud Storage and closes the file
+// handle before returning. Keeping the defer here (instead of in the calling loop)
+// ensures at most one file descriptor is open at a time, regardless of batch size.
+func (f *Exporter) uploadFile(
+	ctx context.Context,
+	client *storage.Client,
+	of *os.File,
+	fileName string,
+) error {
+	defer func() { _ = of.Close() }()
+
+	// prepend the path
+	source := fileName
+	if f.Path != "" {
+		source = path.Clean(f.Path + "/" + fileName)
+	}
+
+	wc := client.Bucket(f.Bucket).Object(source).NewWriter(ctx)
+	_, err := io.Copy(wc, of)
+	_ = wc.Close()
+	if err != nil {
+		return fmt.Errorf(
+			"error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
+			source,
+			f.Bucket,
+			err,
+		)
+	}
 	return nil
 }
