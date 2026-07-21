@@ -213,7 +213,7 @@ wheels = [
 
 [[package]]
 name = "gofeatureflag-python-provider"
-version = "1.0.0"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "openfeature-provider-ofrep" },
@@ -235,7 +235,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "openfeature-provider-ofrep", specifier = ">=0.2.0" },
-    { name = "openfeature-sdk", specifier = ">=0.8.4,<0.9.0" },
+    { name = "openfeature-sdk", specifier = ">=0.8.4,<0.11.0" },
     { name = "pydantic", specifier = ">=2.5.2" },
     { name = "urllib3", specifier = ">=2.1.0" },
     { name = "wasmtime", specifier = ">=41.0.0" },

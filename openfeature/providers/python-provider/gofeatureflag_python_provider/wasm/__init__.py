@@ -1,6 +1,13 @@
 """WASM evaluator package for the GO Feature Flag Python provider."""
 
-from gofeatureflag_python_provider.wasm.evaluate_wasm import EvaluateWasm
+from gofeatureflag_python_provider.wasm.evaluate_wasm import (
+    EvaluateWasm,
+    WasmEvaluationTrapError,
+    WasmInputTooDeepError,
+    WasmInvalidResultError,
+    WasmNotLoadedError,
+    WasmPoolTimeoutError,
+)
 from gofeatureflag_python_provider.wasm.models import (
     WasmEvaluationResponse,
     WasmFlagContext,
@@ -12,4 +19,9 @@ __all__ = [
     "WasmInput",
     "WasmFlagContext",
     "WasmEvaluationResponse",
+    "WasmEvaluationTrapError",
+    "WasmInputTooDeepError",
+    "WasmInvalidResultError",
+    "WasmNotLoadedError",
+    "WasmPoolTimeoutError",
 ]
