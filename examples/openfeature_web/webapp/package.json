@@ -35,8 +35,6 @@
     "@babel/preset-env": "^8.0.2",
     "autoprefixer": "^10.5.2",
     "babel-loader": "^10.1.1",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.4",
     "eslint": "^10.6.0",
     "eslint-webpack-plugin": "^6.0.0",
