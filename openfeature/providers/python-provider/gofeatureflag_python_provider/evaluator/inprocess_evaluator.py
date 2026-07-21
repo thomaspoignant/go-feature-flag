@@ -21,7 +21,16 @@ from openfeature.flag_evaluation import FlagResolutionDetails, Reason
 from gofeatureflag_python_provider.evaluator.abstract_evaluator import AbstractEvaluator
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
-from gofeatureflag_python_provider.wasm import EvaluateWasm, WasmFlagContext, WasmInput
+from gofeatureflag_python_provider.wasm import (
+    EvaluateWasm,
+    WasmEvaluationTrapError,
+    WasmFlagContext,
+    WasmInput,
+    WasmInputTooDeepError,
+    WasmInvalidResultError,
+    WasmNotLoadedError,
+    WasmPoolTimeoutError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +187,21 @@ class InProcessEvaluator(AbstractEvaluator):
             ),
         )
 
-        response = self._wasm.evaluate(wasm_input)
+        try:
+            response = self._wasm.evaluate(wasm_input)
+        except (
+            WasmEvaluationTrapError,
+            WasmInputTooDeepError,
+            WasmInvalidResultError,
+            WasmNotLoadedError,
+            WasmPoolTimeoutError,
+        ) as exc:
+            # Degrade per the OpenFeature spec: the SDK catches GeneralError
+            # and returns the default value with reason ERROR instead of
+            # surfacing a raw WASM runtime failure to the application.
+            raise GeneralError(
+                f"WASM evaluation failed for flag '{flag_key}': {exc}"
+            ) from exc
 
         if response.errorCode:
             self._raise_for_error_code(

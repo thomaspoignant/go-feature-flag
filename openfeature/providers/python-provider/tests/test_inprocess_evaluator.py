@@ -566,3 +566,47 @@ def test_is_flag_trackable_returns_true_for_unknown_flag():
     evaluator, _ = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)
     assert evaluator.is_flag_trackable("unknown-flag") is True
     evaluator.shutdown()
+
+
+# ---------------------------------------------------------------------------
+# WASM runtime failures degrade to GeneralError (issue #5651)
+# ---------------------------------------------------------------------------
+
+
+def test_wasm_trap_degrades_to_general_error():
+    """
+    A WASM trap surfaces as GeneralError so the OpenFeature SDK returns the
+    default value with reason ERROR instead of a raw wasmtime exception.
+    """
+    from gofeatureflag_python_provider.wasm import WasmEvaluationTrapError
+
+    evaluator, mock_wasm = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)
+    mock_wasm.evaluate.side_effect = WasmEvaluationTrapError("stack overflow trap")
+
+    with pytest.raises(GeneralError, match="WASM evaluation failed"):
+        evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
+    evaluator.shutdown()
+
+
+def test_wasm_input_too_deep_degrades_to_general_error():
+    """A rejected too-deep payload surfaces as GeneralError, not a raw error."""
+    from gofeatureflag_python_provider.wasm import WasmInputTooDeepError
+
+    evaluator, mock_wasm = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)
+    mock_wasm.evaluate.side_effect = WasmInputTooDeepError("too deep")
+
+    with pytest.raises(GeneralError, match="WASM evaluation failed"):
+        evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
+    evaluator.shutdown()
+
+
+def test_wasm_pool_timeout_degrades_to_general_error():
+    """An exhausted, unhealable pool surfaces as GeneralError, not a hang/raw error."""
+    from gofeatureflag_python_provider.wasm import WasmPoolTimeoutError
+
+    evaluator, mock_wasm = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)
+    mock_wasm.evaluate.side_effect = WasmPoolTimeoutError("no slot available")
+
+    with pytest.raises(GeneralError, match="WASM evaluation failed"):
+        evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
+    evaluator.shutdown()
