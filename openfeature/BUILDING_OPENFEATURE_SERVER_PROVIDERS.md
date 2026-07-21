@@ -216,7 +216,9 @@ Required WASM memory access:
    lowerBits = result & 0xFFFFFFFF  // Output length
    ```
 
-3. **Output Processing**:
+3. **Output Processing** (must happen **before** cleanup — the output buffer
+   belongs to the module's garbage collector and is only guaranteed to stay
+   valid until the next call into the instance, including `free`):
    ```
    outputJson = wasm.memory.readString(upperBits, lowerBits)
    response = deserialize(outputJson)
@@ -228,7 +230,30 @@ Required WASM memory access:
    // Note: WASM module manages output memory internally
    ```
 
-#### 6. Error Handling
+#### 6. Trap Handling (critical)
+
+A WASM trap (stack overflow, unrecoverable panic, out-of-memory) does **not**
+unwind the module's shadow stack pointer: an instance that trapped once is
+permanently poisoned, and every later call on it is likely to fault inside
+`malloc` at a wrapped `~0xffffXXXX` address (see
+[#5651](https://github.com/thomaspoignant/go-feature-flag/issues/5651)).
+After **any** trap the host MUST:
+
+1. Discard the instance (and its store/memory) — never return it to a pool.
+2. Skip the `free(inputPtr)` cleanup call — running more code on a trapped
+   instance faults and masks the original error.
+3. Instantiate a fresh replacement and surface the failed evaluation as an
+   error so the SDK returns the default value (reason `ERROR`).
+
+Hardened binaries (releases after 0.2.3) make traps much rarer: they carry a
+1MB shadow stack instead of 64KB and return structured `PARSE_ERROR` results
+for over-deep or over-broad targeting queries (input JSON > 128 nesting
+levels, > 64 nested brackets in a nikunjy query, > 1,000 items in a nikunjy
+`in` list) instead of trapping. Hosts MUST still implement the trap handling
+above: older bundled binaries stay in the field, and residual overflow paths
+(e.g. `and`/`or` chains of thousands of conditions) are not guarded.
+
+#### 7. Error Handling
 
 Handle these WASM-specific exceptions:
 - `WasmNotLoadedException`: Module failed to load
@@ -237,10 +262,11 @@ Handle these WASM-specific exceptions:
 
 ### Implementation Guidelines
 
-1. **Thread Safety**: WASM evaluation should be thread-safe or protected by synchronization
+1. **Thread Safety**: WASM evaluation should be thread-safe or protected by synchronization; never run two calls concurrently on the same instance (the module is built with `-scheduler=none` and is not reentrant)
 2. **Performance**: Cache WASM instances when possible; module initialization is expensive
 3. **Memory**: Monitor WASM memory usage; implement cleanup strategies for long-running applications
 4. **Validation**: Validate WASM output before converting to OpenFeature types
+5. **Traps**: Follow the trap-handling rules above; also check `malloc` results for `0` before writing to memory
 
 ## Remote Evaluation Implementation
 
