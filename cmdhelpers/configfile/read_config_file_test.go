@@ -222,6 +222,9 @@ func TestLoadConfigFile(t *testing.T) {
 			if tt.useDefaultLocation {
 				file, err := os.CreateTemp("", "flags.goff.yaml")
 				assert.NoError(t, err)
+				// close the handle before writing/renaming: Windows cannot rename a file
+				// that is still open by another handle
+				assert.NoError(t, file.Close())
 				// copy the file to the default location
 				content, err := os.ReadFile(tt.inputFilePath)
 				assert.NoError(t, err)
