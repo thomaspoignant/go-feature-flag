@@ -1,0 +1,40 @@
+# GO Feature Flag
+
+> GO Feature Flag (GOFF) is a simple, complete, and lightweight self-hosted,
+> cloud-native feature flag solution that is 100% open source (MIT license).
+> It is OpenFeature-native: it runs on infrastructure you already have — no
+> database to operate, no vendor lock-in, and no per-seat bill.
+
+Key facts:
+- License: MIT — 100% open source, free to self-host.
+- Two ways to use it: the **relay proxy** (a Docker/Kubernetes-deployable API
+  server that enables multi-language support via OpenFeature) or the **Go module**
+  (embedded evaluation for Go-only projects).
+- Built on the **OpenFeature** standard — official providers for Go, Java/Kotlin,
+  JavaScript/TypeScript, Python, .NET, Ruby, Swift, PHP, and Rust (via OFREP).
+- Flags are stored as YAML / JSON / TOML in the location you choose: GitHub,
+  GitLab, HTTP, AWS S3, Google Cloud Storage, Kubernetes ConfigMaps, MongoDB,
+  Redis, Bitbucket, Azure Blob Storage, PostgreSQL, or a local file.
+- Rollout strategies: percentage, progressive, scheduled, and experimentation
+  (A/B testing).
+- Exports flag-usage data to S3, GCS, Kafka, Kinesis, SQS, Pub/Sub, BigQuery,
+  Azure Blob Storage, Webhook, OpenTelemetry, log, and local file.
+- Change notifications via Slack, Discord, Microsoft Teams, Webhook, and log.
+
+## Documentation
+- [Documentation home](https://gofeatureflag.org/docs): Full docs for GO Feature Flag.
+- [SDKs & supported languages](https://gofeatureflag.org/docs/sdk): OpenFeature providers per language.
+- [Install the relay proxy](https://gofeatureflag.org/docs/relay-proxy/install_relay_proxy): Self-host the API server.
+- [Create a flag](https://gofeatureflag.org/docs/configure_flag/create-flags): Flag configuration fields.
+- [Flag file format](https://gofeatureflag.org/docs/configure_flag/flag_format): YAML / JSON / TOML formats.
+- [Store your flags](https://gofeatureflag.org/docs/configure_flag/store_your_flags): Available retrievers.
+- [Target users](https://gofeatureflag.org/docs/configure_flag/target-with-flags): Targeting rules.
+- [Experimentation / A/B testing](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/experimentation): A/B test rollout.
+- [Progressive rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/progressive): Gradual rollout over time.
+- [Scheduled rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/scheduled): Time-based flag updates.
+- [Export evaluation data](https://gofeatureflag.org/docs/integrations/export-evaluation-data): Export destinations.
+
+## Tools & resources
+- [Flag editor](https://editor.gofeatureflag.org): Web editor to build flag config files.
+- [GitHub repository](https://github.com/thomaspoignant/go-feature-flag): Source code (MIT).
+- [OpenFeature](https://openfeature.dev): The open standard GOFF is built on.

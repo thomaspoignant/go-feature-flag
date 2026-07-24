@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <marker id="split-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- time-window brackets -->
+  <path d="M70 90 L45 90 L45 510 L70 510" stroke="#64748b" stroke-width="5"/>
+  <path d="M730 90 L755 90 L755 510 L730 510" stroke="#64748b" stroke-width="5"/>
+
+  <!-- connectors: users -> router -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M205 240 L345 295" marker-end="url(#split-arrow)"/>
+    <path d="M215 300 L345 300" marker-end="url(#split-arrow)"/>
+    <path d="M205 380 L345 310" marker-end="url(#split-arrow)"/>
+  </g>
+
+  <!-- connectors: router -> groups -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M505 280 L585 215" marker-end="url(#split-arrow)"/>
+    <path d="M505 320 L585 390" marker-end="url(#split-arrow)"/>
+  </g>
+
+  <!-- incoming users -->
+  <g fill="#9fbeb3" stroke="#64748b" stroke-width="3">
+    <circle cx="130" cy="215" r="20"/>
+    <circle cx="185" cy="255" r="20"/>
+    <circle cx="120" cy="300" r="20"/>
+    <circle cx="180" cy="345" r="20"/>
+    <circle cx="135" cy="385" r="20"/>
+    <circle cx="160" cy="435" r="20"/>
+  </g>
+
+  <!-- deterministic router / hashing node -->
+  <path d="M430 235 L500 300 L430 365 L360 300 Z" fill="#ffffff" stroke="#64748b" stroke-width="4"/>
+  <g stroke="#64748b" stroke-width="4">
+    <path d="M400 285 L460 285"/>
+    <path d="M395 300 L465 300"/>
+    <path d="M400 315 L460 315"/>
+  </g>
+
+  <!-- variation A group (mint) -->
+  <g fill="#cdf7e7" stroke="#64748b" stroke-width="3">
+    <circle cx="630" cy="175" r="20"/>
+    <circle cx="685" cy="210" r="20"/>
+    <circle cx="600" cy="235" r="20"/>
+    <circle cx="660" cy="250" r="20"/>
+  </g>
+
+  <!-- variation B group (coral) -->
+  <g fill="#f4845f" stroke="#64748b" stroke-width="3">
+    <circle cx="600" cy="360" r="20"/>
+    <circle cx="660" cy="345" r="20"/>
+    <circle cx="630" cy="415" r="20"/>
+    <circle cx="688" cy="400" r="20"/>
+  </g>
+</svg>
