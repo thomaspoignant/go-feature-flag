@@ -74,14 +74,15 @@ function Caption({children}) {
   );
 }
 
+// Gradient tint presets for the outer Frame, keyed by the `tint` prop.
+const FRAME_TINTS = {
+  good: 'from-[#18b192]/[0.08]',
+  warn: 'from-amber-400/[0.08]',
+};
+
 // Outer card wrapper shared by all three diagrams.
 function Frame({tint = 'titles', children}) {
-  const from =
-    tint === 'good'
-      ? 'from-[#18b192]/[0.08]'
-      : tint === 'warn'
-        ? 'from-amber-400/[0.08]'
-        : 'from-titles-500/[0.07]';
+  const from = FRAME_TINTS[tint] || 'from-titles-500/[0.07]';
   return (
     <div
       className={
