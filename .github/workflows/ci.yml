@@ -63,6 +63,27 @@ jobs:
           cache: false
       - run: make test
 
+  Test-Windows:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Setup go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: false
+      # `make test` is not portable to Windows (bash loops, tput, -race/CGO,
+      # and -tags=docker testcontainers), so run the root module unit tests
+      # directly. This surfaces Windows-specific failures in CI.
+      - run: go test ./...
+
   Coverage:
     runs-on: ubuntu-latest
     permissions:
