@@ -24,6 +24,10 @@ type Retriever struct {
 	Table   string
 	Columns map[string]string
 
+	// Pool holds the optional connection pool settings. When left at its zero
+	// value, the pool is created with pgxpool defaults exactly as before.
+	Pool PoolConfig
+
 	logger  *fflog.FFLogger
 	status  retriever.Status
 	columns map[string]string
@@ -45,7 +49,7 @@ func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger, flagset *s
 		r.logger.Info("Initializing PostgreSQL retriever")
 		r.logger.Debug("Using columns", "columns", r.columns)
 
-		pool, err := GetPool(ctx, r.URI)
+		pool, err := GetPool(ctx, r.URI, r.Pool)
 		if err != nil {
 			r.status = retriever.RetrieverError
 			return err
@@ -69,7 +73,7 @@ func (r *Retriever) Status() retriever.Status {
 // Shutdown closes the database connection.
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	if r.pool != nil {
-		ReleasePool(ctx, r.URI)
+		ReleasePool(ctx, r.URI, r.Pool)
 		r.pool = nil
 	}
 	return nil
