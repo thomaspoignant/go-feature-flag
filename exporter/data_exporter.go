@@ -100,7 +100,7 @@ func (d *dataExporterImpl[T]) Stop() {
 
 // Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
-	store := *d.eventStore
+	store := d.eventStore
 	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {
 		if d != nil && d.logger != nil {
