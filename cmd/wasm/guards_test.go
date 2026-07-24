@@ -10,7 +10,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
-func Test_jsonNestingDepth(t *testing.T) {
+func Test_scanJSONDepth(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
@@ -25,12 +25,12 @@ func Test_jsonNestingDepth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, jsonNestingDepth(tt.input))
+			assert.Equal(t, tt.want, scanJSONDepth(tt.input))
 		})
 	}
 }
 
-func Test_queryNestingDepth(t *testing.T) {
+func Test_scanNikunjyQuery_depth(t *testing.T) {
 	tests := []struct {
 		name  string
 		query string
@@ -44,31 +44,31 @@ func Test_queryNestingDepth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, queryNestingDepth(tt.query))
+			assert.Equal(t, tt.want, scanNikunjyQuery(tt.query).maxDepth)
 		})
 	}
 }
 
-func Test_queryNestingLimit(t *testing.T) {
+func Test_isJSONLogicQuery(t *testing.T) {
 	tests := []struct {
 		name  string
 		query string
-		want  int
+		want  bool
 	}{
-		{name: "nikunjy expression", query: `targetingKey eq "a"`, want: maxQueryNestingDepth},
-		{name: "empty query", query: ``, want: maxQueryNestingDepth},
-		{name: "jsonlogic object", query: `{"==":[{"var":"a"},1]}`, want: maxJSONLogicQueryNestingDepth},
-		{name: "jsonlogic with leading whitespace", query: "\n  {\"==\":[1,1]}", want: maxJSONLogicQueryNestingDepth},
-		{name: "jsonlogic array", query: `[{"var":"a"}]`, want: maxJSONLogicQueryNestingDepth},
+		{name: "nikunjy expression", query: `targetingKey eq "a"`, want: false},
+		{name: "empty query", query: ``, want: false},
+		{name: "jsonlogic object", query: `{"==":[{"var":"a"},1]}`, want: true},
+		{name: "jsonlogic with leading whitespace", query: "\n  {\"==\":[1,1]}", want: true},
+		{name: "jsonlogic array", query: `[{"var":"a"}]`, want: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, queryNestingLimit(tt.query))
+			assert.Equal(t, tt.want, isJSONLogicQuery(tt.query))
 		})
 	}
 }
 
-func Test_maxListItemCount(t *testing.T) {
+func Test_scanNikunjyQuery_listItems(t *testing.T) {
 	tests := []struct {
 		name  string
 		query string
@@ -88,7 +88,7 @@ func Test_maxListItemCount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, maxListItemCount(tt.query))
+			assert.Equal(t, tt.want, scanNikunjyQuery(tt.query).maxListItems)
 		})
 	}
 }
@@ -109,7 +109,7 @@ func orChainQuery(n int) string {
 	return strings.Join(conditions, " or ")
 }
 
-func Test_conditionCount(t *testing.T) {
+func Test_scanNikunjyQuery_conditionCount(t *testing.T) {
 	tests := []struct {
 		name  string
 		query string
@@ -130,87 +130,20 @@ func Test_conditionCount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, conditionCount(tt.query))
+			assert.Equal(t, tt.want, scanNikunjyQuery(tt.query).conditionCount)
 		})
 	}
 }
 
-func Test_firstQueryOverConditionCount(t *testing.T) {
-	chain := func(n int) *string {
-		q := orChainQuery(n)
+func Test_firstQueryViolation(t *testing.T) {
+	parenQuery := func(depth int) *string {
+		q := strings.Repeat("(", depth) + `a eq "b"` + strings.Repeat(")", depth)
 		return &q
 	}
-	jsonlogicChain := func(n int) *string {
-		clauses := make([]string, n)
-		for i := range clauses {
-			clauses[i] = fmt.Sprintf(`{"==":[{"var":"age"},%d]}`, i+1)
-		}
-		q := `{"or":[` + strings.Join(clauses, ",") + `]}`
+	jsonlogicQuery := func(depth int) *string {
+		q := strings.Repeat(`{"and":[`, depth) + `{"==":[1,1]}` + strings.Repeat(`]}`, depth)
 		return &q
 	}
-	tests := []struct {
-		name     string
-		flag     *flag.InternalFlag
-		wantOver bool
-	}{
-		{name: "nil flag", flag: nil, wantOver: false},
-		{name: "no rules", flag: &flag.InternalFlag{}, wantOver: false},
-		{
-			name: "chain at the limit",
-			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: chain(maxQueryConditions)}},
-			},
-			wantOver: false,
-		},
-		{
-			name: "chain over the limit",
-			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: chain(maxQueryConditions + 1)}},
-			},
-			wantOver: true,
-		},
-		{
-			name: "offending chain on the default rule",
-			flag: &flag.InternalFlag{
-				DefaultRule: &flag.Rule{Query: chain(maxQueryConditions + 1)},
-			},
-			wantOver: true,
-		},
-		{
-			name: "jsonlogic operand lists are exempt",
-			flag: &flag.InternalFlag{
-				// A flat JSONLogic or-list is decoded iteratively; its length
-				// does not become recursion depth.
-				Rules: &[]flag.Rule{{Query: jsonlogicChain(maxQueryConditions * 2)}},
-			},
-			wantOver: false,
-		},
-		{
-			name: "scheduled step carries the offending chain",
-			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: chain(3)}},
-				Scheduled: &[]flag.ScheduledStep{
-					{InternalFlag: flag.InternalFlag{
-						Rules: &[]flag.Rule{{Query: chain(maxQueryConditions + 1)}},
-					}},
-				},
-			},
-			wantOver: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			conditions, limit, over := firstQueryOverConditionCount(tt.flag)
-			assert.Equal(t, tt.wantOver, over)
-			if tt.wantOver {
-				assert.Equal(t, maxQueryConditions, limit)
-				assert.Greater(t, conditions, limit)
-			}
-		})
-	}
-}
-
-func Test_firstQueryOverBreadth(t *testing.T) {
 	nikunjyList := func(n int) *string {
 		q := intListQuery(n)
 		return &q
@@ -223,13 +156,71 @@ func Test_firstQueryOverBreadth(t *testing.T) {
 		q := `{"in":[{"var":"age"},[` + strings.Join(items, ",") + `]]}`
 		return &q
 	}
+	chain := func(n int) *string {
+		q := orChainQuery(n)
+		return &q
+	}
+	jsonlogicChain := func(n int) *string {
+		clauses := make([]string, n)
+		for i := range clauses {
+			clauses[i] = fmt.Sprintf(`{"==":[{"var":"age"},%d]}`, i+1)
+		}
+		q := `{"or":[` + strings.Join(clauses, ",") + `]}`
+		return &q
+	}
+
 	tests := []struct {
-		name     string
-		flag     *flag.InternalFlag
-		wantOver bool
+		name             string
+		flag             *flag.InternalFlag
+		wantOver         bool
+		wantDetailsMatch string
 	}{
 		{name: "nil flag", flag: nil, wantOver: false},
 		{name: "no rules", flag: &flag.InternalFlag{}, wantOver: false},
+		{
+			name: "nikunjy queries under the limit",
+			flag: &flag.InternalFlag{
+				Rules:       &[]flag.Rule{{Query: parenQuery(3)}, {Query: parenQuery(7)}},
+				DefaultRule: &flag.Rule{},
+			},
+			wantOver: false,
+		},
+		{
+			name: "nikunjy query over the nesting limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: parenQuery(maxQueryNestingDepth + 1)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum nesting depth",
+		},
+		{
+			name: "jsonlogic gets the larger nesting budget",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicQuery(50)}},
+			},
+			wantOver: false,
+		},
+		{
+			name: "jsonlogic over its own nesting budget",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicQuery(150)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum nesting depth",
+		},
+		{
+			name: "scheduled step carries the offending nesting query",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: parenQuery(2)}},
+				Scheduled: &[]flag.ScheduledStep{
+					{InternalFlag: flag.InternalFlag{
+						Rules: &[]flag.Rule{{Query: parenQuery(maxQueryNestingDepth + 5)}},
+					}},
+				},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum nesting depth",
+		},
 		{
 			name: "list under the limit",
 			flag: &flag.InternalFlag{
@@ -242,20 +233,20 @@ func Test_firstQueryOverBreadth(t *testing.T) {
 			flag: &flag.InternalFlag{
 				Rules: &[]flag.Rule{{Query: nikunjyList(maxQueryListItems + 1)}},
 			},
-			wantOver: true,
+			wantOver:         true,
+			wantDetailsMatch: "maximum item count",
 		},
 		{
 			name: "offending list on the default rule",
 			flag: &flag.InternalFlag{
 				DefaultRule: &flag.Rule{Query: nikunjyList(maxQueryListItems + 1)},
 			},
-			wantOver: true,
+			wantOver:         true,
+			wantDetailsMatch: "maximum item count",
 		},
 		{
-			name: "jsonlogic arrays are exempt",
+			name: "jsonlogic arrays are exempt from list limit",
 			flag: &flag.InternalFlag{
-				// encoding/json decodes arrays iteratively: length does not
-				// become recursion depth, so no breadth limit applies.
 				Rules: &[]flag.Rule{{Query: jsonlogicList(maxQueryListItems * 2)}},
 			},
 			wantOver: false,
@@ -270,92 +261,59 @@ func Test_firstQueryOverBreadth(t *testing.T) {
 					}},
 				},
 			},
-			wantOver: true,
+			wantOver:         true,
+			wantDetailsMatch: "maximum item count",
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			items, limit, over := firstQueryOverBreadth(tt.flag)
-			assert.Equal(t, tt.wantOver, over)
-			if tt.wantOver {
-				assert.Equal(t, maxQueryListItems, limit)
-				assert.Greater(t, items, limit)
-			}
-		})
-	}
-}
-
-func Test_firstQueryOverLimit(t *testing.T) {
-	parenQuery := func(depth int) *string {
-		q := strings.Repeat("(", depth) + `a eq "b"` + strings.Repeat(")", depth)
-		return &q
-	}
-	jsonlogicQuery := func(depth int) *string {
-		q := strings.Repeat(`{"and":[`, depth) + `{"==":[1,1]}` + strings.Repeat(`]}`, depth)
-		return &q
-	}
-	tests := []struct {
-		name      string
-		flag      *flag.InternalFlag
-		wantOver  bool
-		wantLimit int
-	}{
-		{name: "nil flag", flag: nil, wantOver: false},
-		{name: "no rules", flag: &flag.InternalFlag{}, wantOver: false},
 		{
-			name: "nikunjy queries under the limit",
+			name: "chain at the condition limit",
 			flag: &flag.InternalFlag{
-				Rules:       &[]flag.Rule{{Query: parenQuery(3)}, {Query: parenQuery(7)}},
-				DefaultRule: &flag.Rule{},
+				Rules: &[]flag.Rule{{Query: chain(maxQueryConditions)}},
 			},
 			wantOver: false,
 		},
 		{
-			name: "nikunjy query over the limit",
+			name: "chain over the condition limit",
 			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: parenQuery(maxQueryNestingDepth + 1)}},
+				Rules: &[]flag.Rule{{Query: chain(maxQueryConditions + 1)}},
 			},
-			wantOver:  true,
-			wantLimit: maxQueryNestingDepth,
+			wantOver:         true,
+			wantDetailsMatch: "maximum condition count",
 		},
 		{
-			name: "jsonlogic gets the larger budget",
+			name: "offending chain on the default rule",
 			flag: &flag.InternalFlag{
-				// 50 nested and-operators = bracket depth 100: over the
-				// nikunjy limit but fine for JSONLogic.
-				Rules: &[]flag.Rule{{Query: jsonlogicQuery(50)}},
+				DefaultRule: &flag.Rule{Query: chain(maxQueryConditions + 1)},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum condition count",
+		},
+		{
+			name: "jsonlogic operand lists are exempt from condition limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicChain(maxQueryConditions * 2)}},
 			},
 			wantOver: false,
 		},
 		{
-			name: "jsonlogic over its own budget",
+			name: "scheduled step carries the offending chain",
 			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: jsonlogicQuery(150)}},
-			},
-			wantOver:  true,
-			wantLimit: maxJSONLogicQueryNestingDepth,
-		},
-		{
-			name: "scheduled step carries the offending query",
-			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: parenQuery(2)}},
+				Rules: &[]flag.Rule{{Query: chain(3)}},
 				Scheduled: &[]flag.ScheduledStep{
 					{InternalFlag: flag.InternalFlag{
-						Rules: &[]flag.Rule{{Query: parenQuery(maxQueryNestingDepth + 5)}},
+						Rules: &[]flag.Rule{{Query: chain(maxQueryConditions + 1)}},
 					}},
 				},
 			},
-			wantOver:  true,
-			wantLimit: maxQueryNestingDepth,
+			wantOver:         true,
+			wantDetailsMatch: "maximum condition count",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			depth, limit, over := firstQueryOverLimit(tt.flag)
+			detail, over := firstQueryViolation(tt.flag)
 			assert.Equal(t, tt.wantOver, over)
-			if tt.wantOver {
-				assert.Equal(t, tt.wantLimit, limit)
-				assert.Greater(t, depth, limit)
+			if tt.wantDetailsMatch != "" {
+				assert.Contains(t, detail, tt.wantDetailsMatch)
 			}
 		})
 	}

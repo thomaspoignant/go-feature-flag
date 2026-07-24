@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
@@ -48,60 +50,146 @@ const (
 	maxQueryConditions = 1000
 )
 
-// maxBracketDepth returns the maximum nesting depth of brackets in s,
-// ignoring characters inside double-quoted string literals.
-// It counts {} and []; parentheses are included when countParens is true.
-func maxBracketDepth(s string, countParens bool) int {
-	depth, deepest := 0, 0
-	inString, escaped := false, false
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if inString {
+// nikunjyQueryScan holds complexity metrics collected in a single pass over a
+// nikunjy targeting query.
+type nikunjyQueryScan struct {
+	maxDepth       int
+	maxListItems   int
+	conditionCount int
+}
+
+// unquotedScanner iterates over bytes outside double-quoted string literals.
+// It returns the opening quote so callers can treat it as a token boundary.
+type unquotedScanner struct {
+	input    string
+	offset   int
+	inString bool
+	escaped  bool
+}
+
+func (s *unquotedScanner) next() (index int, c byte, ok bool) {
+	for s.offset < len(s.input) {
+		index = s.offset
+		c = s.input[s.offset]
+		s.offset++
+
+		if s.inString {
 			switch {
-			case escaped:
-				escaped = false
+			case s.escaped:
+				s.escaped = false
 			case c == '\\':
-				escaped = true
+				s.escaped = true
 			case c == '"':
-				inString = false
+				s.inString = false
 			}
 			continue
 		}
+		if c == '"' {
+			s.inString = true
+		}
+		return index, c, true
+	}
+	return 0, 0, false
+}
+
+// scanJSONDepth returns the maximum {} / [] nesting depth of a JSON document.
+func scanJSONDepth(input string) int {
+	depth, maxDepth := 0, 0
+	scanner := unquotedScanner{input: input}
+	for _, c, ok := scanner.next(); ok; _, c, ok = scanner.next() {
 		switch c {
-		case '"':
-			inString = true
 		case '{', '[':
 			depth++
-			if depth > deepest {
-				deepest = depth
+			if depth > maxDepth {
+				maxDepth = depth
 			}
 		case '}', ']':
 			depth--
+		}
+	}
+	return maxDepth
+}
+
+// scanNikunjyQuery collects nesting depth, largest list size, and condition
+// count in one pass over a nikunjy targeting query.
+func scanNikunjyQuery(query string) nikunjyQueryScan {
+	var result nikunjyQueryScan
+	depth := 0
+	var listCounts []int
+	largestList := 0
+	operators := 0
+	wordStart := -1
+
+	foldList := func() {
+		n := listCounts[len(listCounts)-1] + 1 // items = commas + 1
+		listCounts = listCounts[:len(listCounts)-1]
+		if n > largestList {
+			largestList = n
+		}
+	}
+	endWord := func(end int) {
+		if wordStart >= 0 {
+			if w := query[wordStart:end]; w == "and" || w == "or" {
+				operators++
+			}
+			wordStart = -1
+		}
+	}
+
+	scanner := unquotedScanner{input: query}
+	for i, c, ok := scanner.next(); ok; i, c, ok = scanner.next() {
+		switch c {
+		case '"':
+			endWord(i)
+		case '{', '[':
+			depth++
+			if depth > result.maxDepth {
+				result.maxDepth = depth
+			}
+			if c == '[' {
+				listCounts = append(listCounts, 0)
+			}
+		case '}', ']':
+			depth--
+			if c == ']' && len(listCounts) > 0 {
+				foldList()
+			}
 		case '(':
-			if countParens {
-				depth++
-				if depth > deepest {
-					deepest = depth
-				}
+			depth++
+			if depth > result.maxDepth {
+				result.maxDepth = depth
 			}
 		case ')':
-			if countParens {
-				depth--
+			depth--
+		case ',':
+			if len(listCounts) > 0 {
+				listCounts[len(listCounts)-1]++
+			}
+		default:
+			if isQueryWordChar(c) {
+				if wordStart < 0 {
+					wordStart = i
+				}
+			} else {
+				endWord(i)
 			}
 		}
 	}
-	return deepest
+	for len(listCounts) > 0 {
+		foldList()
+	}
+	endWord(len(query))
+	result.maxListItems = largestList
+	result.conditionCount = operators + 1
+	return result
 }
 
-// jsonNestingDepth returns the maximum {} / [] nesting depth of a JSON document.
-func jsonNestingDepth(input string) int {
-	return maxBracketDepth(input, false)
-}
-
-// queryNestingDepth returns the maximum bracket nesting depth of a targeting
-// query (nikunjy expression or JSONLogic document).
-func queryNestingDepth(query string) int {
-	return maxBracketDepth(query, true)
+// isQueryWordChar reports whether c can be part of an identifier-like token
+// of a nikunjy query (ATTRNAME chars plus the '.' of attribute paths). Used
+// to detect word boundaries around logical operators.
+func isQueryWordChar(c byte) bool {
+	return c == '-' || c == '_' || c == ':' || c == '.' ||
+		(c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 }
 
 // isJSONLogicQuery reports whether the query is a JSONLogic document (first
@@ -119,120 +207,6 @@ func isJSONLogicQuery(query string) bool {
 		}
 	}
 	return false
-}
-
-// queryNestingLimit returns the nesting budget for one targeting query.
-// JSONLogic queries get a larger budget than nikunjy expressions; see the
-// constants above.
-func queryNestingLimit(query string) int {
-	if isJSONLogicQuery(query) {
-		return maxJSONLogicQueryNestingDepth
-	}
-	return maxQueryNestingDepth
-}
-
-// maxListItemCount returns the item count of the largest [...] list in a
-// query, ignoring characters inside double-quoted string literals. Unclosed
-// groups (malformed queries) are still counted so a truncated giant list is
-// not waved through.
-func maxListItemCount(s string) int {
-	var counts []int // one comma counter per open [ group
-	largest := 0
-	fold := func() {
-		n := counts[len(counts)-1] + 1 // items = commas + 1
-		counts = counts[:len(counts)-1]
-		if n > largest {
-			largest = n
-		}
-	}
-	inString, escaped := false, false
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if inString {
-			switch {
-			case escaped:
-				escaped = false
-			case c == '\\':
-				escaped = true
-			case c == '"':
-				inString = false
-			}
-			continue
-		}
-		switch c {
-		case '"':
-			inString = true
-		case '[':
-			counts = append(counts, 0)
-		case ',':
-			if len(counts) > 0 {
-				counts[len(counts)-1]++
-			}
-		case ']':
-			if len(counts) > 0 {
-				fold()
-			}
-		}
-	}
-	for len(counts) > 0 {
-		fold()
-	}
-	return largest
-}
-
-// isQueryWordChar reports whether c can be part of an identifier-like token
-// of a nikunjy query (ATTRNAME chars plus the '.' of attribute paths). Used
-// to detect word boundaries around logical operators.
-func isQueryWordChar(c byte) bool {
-	return c == '-' || c == '_' || c == ':' || c == '.' ||
-		(c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-}
-
-// conditionCount returns the number of and/or-joined conditions of a nikunjy
-// query: one more than the number of word-boundary `and` / `or` tokens
-// outside double-quoted string literals. The grammar only accepts the
-// lowercase forms, always space-delimited, and an attribute can never be
-// named `and`/`or` (the lexer claims those tokens first), so every such word
-// is a logical operator.
-func conditionCount(s string) int {
-	operators := 0
-	inString, escaped := false, false
-	wordStart := -1 // start of the current identifier-like run, -1 when outside one
-	endWord := func(end int) {
-		if wordStart >= 0 {
-			if w := s[wordStart:end]; w == "and" || w == "or" {
-				operators++
-			}
-			wordStart = -1
-		}
-	}
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if inString {
-			switch {
-			case escaped:
-				escaped = false
-			case c == '\\':
-				escaped = true
-			case c == '"':
-				inString = false
-			}
-			continue
-		}
-		switch {
-		case c == '"':
-			endWord(i)
-			inString = true
-		case isQueryWordChar(c):
-			if wordStart < 0 {
-				wordStart = i
-			}
-		default:
-			endWord(i)
-		}
-	}
-	endWord(len(s))
-	return operators + 1
 }
 
 // walkRuleQueries calls visit for every targeting query of the flag
@@ -267,52 +241,44 @@ func walkRuleQueries(f *flag.InternalFlag, visit func(query string) bool) bool {
 	return false
 }
 
-// firstQueryOverLimit reports the first query of the flag whose bracket
-// nesting exceeds its format-specific budget.
-func firstQueryOverLimit(f *flag.InternalFlag) (depth int, limit int, over bool) {
-	walkRuleQueries(f, func(q string) bool {
-		if d := queryNestingDepth(q); d > queryNestingLimit(q) {
-			depth, limit, over = d, queryNestingLimit(q), true
-			return true
-		}
-		return false
-	})
-	return depth, limit, over
-}
-
-// firstQueryOverBreadth reports the first nikunjy query of the flag with a
-// [...] list of more than maxQueryListItems items. JSONLogic queries are
-// exempt: encoding/json decodes arrays iteratively, so their length does not
-// translate into recursion depth, and JSON documents are comma-heavy by
-// nature.
-func firstQueryOverBreadth(f *flag.InternalFlag) (items int, limit int, over bool) {
+// firstQueryViolation reports the first targeting query of the flag that
+// exceeds a complexity budget, with a formatted error detail string.
+func firstQueryViolation(f *flag.InternalFlag) (detail string, over bool) {
 	walkRuleQueries(f, func(q string) bool {
 		if isJSONLogicQuery(q) {
+			if depth := scanJSONDepth(q); depth > maxJSONLogicQueryNestingDepth {
+				detail = fmt.Sprintf(
+					"targeting query exceeds the maximum nesting depth (%d > %d)",
+					depth, maxJSONLogicQueryNestingDepth)
+				over = true
+				return true
+			}
 			return false
 		}
-		if n := maxListItemCount(q); n > maxQueryListItems {
-			items, limit, over = n, maxQueryListItems, true
-			return true
-		}
-		return false
-	})
-	return items, limit, over
-}
 
-// firstQueryOverConditionCount reports the first nikunjy query of the flag
-// with more than maxQueryConditions and/or-joined conditions. JSONLogic
-// queries are exempt: their operator names live inside JSON string literals
-// and their operands in arrays, which encoding/json decodes iteratively.
-func firstQueryOverConditionCount(f *flag.InternalFlag) (conditions int, limit int, over bool) {
-	walkRuleQueries(f, func(q string) bool {
-		if isJSONLogicQuery(q) {
-			return false
+		scan := scanNikunjyQuery(q)
+		if scan.maxDepth > maxQueryNestingDepth {
+			detail = fmt.Sprintf(
+				"targeting query exceeds the maximum nesting depth (%d > %d)",
+				scan.maxDepth, maxQueryNestingDepth)
+			over = true
+			return true
 		}
-		if n := conditionCount(q); n > maxQueryConditions {
-			conditions, limit, over = n, maxQueryConditions, true
+		if scan.maxListItems > maxQueryListItems {
+			detail = fmt.Sprintf(
+				"targeting query list exceeds the maximum item count (%d > %d)",
+				scan.maxListItems, maxQueryListItems)
+			over = true
+			return true
+		}
+		if scan.conditionCount > maxQueryConditions {
+			detail = fmt.Sprintf(
+				"targeting query exceeds the maximum condition count (%d > %d)",
+				scan.conditionCount, maxQueryConditions)
+			over = true
 			return true
 		}
 		return false
 	})
-	return conditions, limit, over
+	return detail, over
 }

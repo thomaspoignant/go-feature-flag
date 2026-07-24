@@ -71,7 +71,7 @@ func safeEvaluation(valuePosition *uint32, length uint32) (result string) {
 // localEvaluation is the function that will be called from the evaluate function.
 // It will unmarshal the input, call the evaluation function and return the result.
 func localEvaluation(input string) string {
-	if depth := jsonNestingDepth(input); depth > maxInputNestingDepth {
+	if depth := scanJSONDepth(input); depth > maxInputNestingDepth {
 		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
 			"input JSON exceeds the maximum nesting depth (%d)", maxInputNestingDepth))
 	}
@@ -82,19 +82,8 @@ func localEvaluation(input string) string {
 		return errorResult(flag.ErrorCodeParseError, err.Error())
 	}
 
-	if depth, limit, over := firstQueryOverLimit(&evaluateInput.Flag); over {
-		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
-			"targeting query exceeds the maximum nesting depth (%d > %d)", depth, limit))
-	}
-
-	if items, limit, over := firstQueryOverBreadth(&evaluateInput.Flag); over {
-		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
-			"targeting query list exceeds the maximum item count (%d > %d)", items, limit))
-	}
-
-	if conditions, limit, over := firstQueryOverConditionCount(&evaluateInput.Flag); over {
-		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
-			"targeting query exceeds the maximum condition count (%d > %d)", conditions, limit))
+	if detail, over := firstQueryViolation(&evaluateInput.Flag); over {
+		return errorResult(flag.ErrorCodeParseError, detail)
 	}
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
