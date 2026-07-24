@@ -4,11 +4,13 @@ import {
   FaStar,
   FaLaptopCode,
   FaBalanceScale,
+  FaCloud,
 } from 'react-icons/fa';
 import {
   generateMenuColumn,
-  generateFeaturedCard,
+  // generateFeaturedCard,
   generateMegaMenu,
+  generateHelpSection,
 } from './menu.js';
 
 // Generate the HTML string for the "Resources" mega-menu (3 columns, the last
@@ -50,11 +52,24 @@ export function generateResourcesDropdownHTML() {
     )
     .join('');
 
-  /*const featuredHtml = generateFeaturedCard({
-    columnTitle: 'Explore',
-    title: 'How to migrate <br />from Launch Darkly <br />to GO Feature Flag',
-    href: '/resources/migrate-from-launchdarkly',
-  });*/
+  const helpHtml = generateHelpSection({
+    title: 'Case studies',
+    cards: [
+      {
+        title: 'DataGalaxy',
+        description:
+          'How OpenFeature and GO Feature Flag Rebuilt Trust Between Teams.',
+        href: '/blog/datagalaxy-go-feature-flag-case-study',
+        icon: FaCloud,
+      },
+    ],
+  });
 
-  return generateMegaMenu(columnsHtml /*+ featuredHtml*/);
+  // const featuredHtml = generateFeaturedCard({
+  //   columnTitle: 'Explore',
+  //   title: 'How to migrate <br />from Launch Darkly <br />to GO Feature Flag',
+  //   href: '/resources/migrate-from-launchdarkly',
+  // });
+
+  return generateMegaMenu(columnsHtml /*+ featuredHtml*/, helpHtml);
 }
