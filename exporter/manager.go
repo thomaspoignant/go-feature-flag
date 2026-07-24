@@ -32,7 +32,7 @@ func NewManager[T ExportableEvent](exporters []Config,
 	consumers := make([]DataExporter[T], len(exporters))
 	for index, exporter := range exporters {
 		consumerID := uuid.New().String()
-		exp := NewDataExporter(exporter, consumerID, &evStore, logger)
+		exp := NewDataExporter(exporter, consumerID, evStore, logger)
 		consumers[index] = exp
 		evStore.AddConsumer(consumerID)
 	}

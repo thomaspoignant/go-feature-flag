@@ -37,7 +37,7 @@ type Config struct {
 
 type dataExporterImpl[T ExportableEvent] struct {
 	consumerID string
-	eventStore *EventStore[T]
+	eventStore EventStore[T]
 	logger     *fflog.FFLogger
 	exporter   Config
 
@@ -48,7 +48,7 @@ type dataExporterImpl[T ExportableEvent] struct {
 // NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
 // from the shared event store.
 func NewDataExporter[T ExportableEvent](exporter Config, consumerID string,
-	eventStore *EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
+	eventStore EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
 	if exporter.FlushInterval == 0 {
 		exporter.FlushInterval = defaultFlushInterval
 	}
