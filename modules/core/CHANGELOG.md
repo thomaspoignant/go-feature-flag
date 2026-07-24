@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.2...modules/core/v0.7.3) (2026-07-24)
+
+
+### 🐛 Bug Fixes
+
+* **ffcontext:** ToMap() no longer mutates the evaluation context ([#5654](https://github.com/thomaspoignant/go-feature-flag/issues/5654)) ([b1553c7](https://github.com/thomaspoignant/go-feature-flag/commit/b1553c7e90cde960ef9e7adce2d4117af94a5447))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5577](https://github.com/thomaspoignant/go-feature-flag/issues/5577)) ([02d42d7](https://github.com/thomaspoignant/go-feature-flag/commit/02d42d7ca089071c263fe5283ad3d01ce6365025))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5594](https://github.com/thomaspoignant/go-feature-flag/issues/5594)) ([4784dba](https://github.com/thomaspoignant/go-feature-flag/commit/4784dba83fd00f8472cd4bf87ec94264df7c0bfa))
+
 ## [0.7.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.1...modules/core/v0.7.2) (2026-07-01)
 
 
