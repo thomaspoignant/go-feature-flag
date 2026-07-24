@@ -644,6 +644,8 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	gffClient.Close()
 	configFile2, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, configFile2.Close())
 	err = os.Remove(configFile2.Name())
 	assert.NoError(t, err)
 
