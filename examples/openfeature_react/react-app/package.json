@@ -30,6 +30,6 @@
     "postcss": "^8.5.16",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.1.4"
+    "vite": "^8.1.5"
   }
 }
