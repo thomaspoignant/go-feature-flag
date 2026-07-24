@@ -86,7 +86,7 @@ func Test_Evaluate(t *testing.T) {
 					Path: "testdata/invalid.yaml",
 				}, "test-flag", `{"targetingKey": "user-123"}`, nil)
 			},
-			wantErr:     assert.Error,
+			wantErr: assert.Error,
 			// OS-specific suffix ("no such file or directory" / "The system cannot
 			// find the file specified.") is intentionally omitted; asserted via Contains.
 			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml:",
