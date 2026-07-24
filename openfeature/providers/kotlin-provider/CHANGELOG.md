@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.1) (2026-07-24)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.41.10 to 1.41.11 ([#5409](https://github.com/thomaspoignant/go-feature-flag/issues/5409)) ([1badd80](https://github.com/thomaspoignant/go-feature-flag/commit/1badd804bb4232b034ccc59d15aee1cdee02e34d))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5360](https://github.com/thomaspoignant/go-feature-flag/issues/5360)) ([9752a72](https://github.com/thomaspoignant/go-feature-flag/commit/9752a726b9e252e6262bfcf75066b0e32e4ec0ed))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5410](https://github.com/thomaspoignant/go-feature-flag/issues/5410)) ([e9bf102](https://github.com/thomaspoignant/go-feature-flag/commit/e9bf102189c0708b72ee0487b05af8f32148681f))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5490](https://github.com/thomaspoignant/go-feature-flag/issues/5490)) ([52994bd](https://github.com/thomaspoignant/go-feature-flag/commit/52994bdc6c85926a90eeb3dbc5d96e83c59a0476))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5577](https://github.com/thomaspoignant/go-feature-flag/issues/5577)) ([02d42d7](https://github.com/thomaspoignant/go-feature-flag/commit/02d42d7ca089071c263fe5283ad3d01ce6365025))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5594](https://github.com/thomaspoignant/go-feature-flag/issues/5594)) ([4784dba](https://github.com/thomaspoignant/go-feature-flag/commit/4784dba83fd00f8472cd4bf87ec94264df7c0bfa))
+* Bump github.com/testcontainers/testcontainers-go ([#5511](https://github.com/thomaspoignant/go-feature-flag/issues/5511)) ([a772730](https://github.com/thomaspoignant/go-feature-flag/commit/a7727302bcf6f1dacc67c9014a15a9f4397c4ef5))
+* Bump golang.org/x/net from 0.53.0 to 0.54.0 ([#5296](https://github.com/thomaspoignant/go-feature-flag/issues/5296)) ([b31655a](https://github.com/thomaspoignant/go-feature-flag/commit/b31655ac1ab8e12d6f9284b2f725d1cd74b80c3b))
+
+
+### 📚 Documentation
+
+* Cleanup CHANGELOGS ([#5333](https://github.com/thomaspoignant/go-feature-flag/issues/5333)) ([7d6c5a3](https://github.com/thomaspoignant/go-feature-flag/commit/7d6c5a3341c1a0e028163c0fd8e2ad99b27d67ef))
+
 ## [1.0.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.0) (2026-02-05)
 
 
