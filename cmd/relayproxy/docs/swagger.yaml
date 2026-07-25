@@ -36,6 +36,79 @@ definitions:
       refreshed:
         type: boolean
     type: object
+  dto.DTO:
+    properties:
+      bucketingKey:
+        description: BucketingKey defines a source for a dynamic targeting key
+        type: string
+      converter:
+        description: |-
+          Converter (optional) is the name of converter to use, if no converter specified we try to determine
+          which converter to use based on the fields we receive for the flag
+        type: string
+      defaultRule:
+        allOf:
+        - $ref: '#/definitions/flag.Rule'
+        description: |-
+          DefaultRule is the rule applied after checking that any other rules
+          matched the user.
+      disable:
+        description: Disable is true if the flag is disabled.
+        type: boolean
+      experimentation:
+        allOf:
+        - $ref: '#/definitions/dto.ExperimentationDto'
+        description: |-
+          Experimentation is your struct to configure an experimentation.
+          It will allow you to configure a start date and an end date for your flag.
+          When the experimentation is not running, the flag will serve the default value.
+      metadata:
+        additionalProperties: {}
+        description: Metadata is a field containing information about your flag such
+          as an issue tracker link, a description, etc ...
+        type: object
+      scheduledRollout:
+        description: |-
+          Scheduled is your struct to configure an update on some fields of your flag over time.
+          You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+          in your flag.
+        items:
+          $ref: '#/definitions/flag.ScheduledStep'
+        type: array
+      targeting:
+        description: |-
+          Rules is the list of Rule for this flag.
+          This an optional field.
+        items:
+          $ref: '#/definitions/flag.Rule'
+        type: array
+      trackEvents:
+        description: |-
+          TrackEvents is false if you don't want to export the data in your data exporter.
+          Default value is true
+        type: boolean
+      variations:
+        additionalProperties: {}
+        description: |-
+          Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
+          limit except if the variationValue is a bool, the max is 2.
+        type: object
+      version:
+        description: |-
+          Version (optional) This field contains the version of the flag.
+          The version is manually managed when you configure your flags and, it is used to display the information
+          in the notifications and data collection.
+        type: string
+    type: object
+  dto.ExperimentationDto:
+    properties:
+      end:
+        description: End is the ending time of the experimentation
+        type: string
+      start:
+        description: Start is the starting time of the experimentation
+        type: string
+    type: object
   exporter.FeatureEventMetadata:
     additionalProperties: {}
     type: object
@@ -59,6 +132,15 @@ definitions:
     - ErrorCodeInvalidContext
     - ErrorCodeTargetingKeyMissing
     - ErrorFlagConfiguration
+  flag.ExperimentationRollout:
+    properties:
+      end:
+        description: End is the ending time of the experimentation
+        type: string
+      start:
+        description: Start is the starting time of the experimentation
+        type: string
+    type: object
   flag.Flag:
     properties:
       defValue:
@@ -73,6 +155,154 @@ definitions:
       value:
         description: value as set
     type: object
+  flag.ProgressiveRollout:
+    properties:
+      end:
+        allOf:
+        - $ref: '#/definitions/flag.ProgressiveRolloutStep'
+        description: End contains what describes the end status of the rollout.
+      initial:
+        allOf:
+        - $ref: '#/definitions/flag.ProgressiveRolloutStep'
+        description: Initial contains a description of the initial state of the rollout.
+    type: object
+  flag.ProgressiveRolloutStep:
+    properties:
+      date:
+        description: Date is the time it starts or ends.
+        type: string
+      percentage:
+        description: Percentage is the percentage (initial or end) for the progressive
+          rollout
+        type: number
+      variation:
+        description: Variation - name of the variation for this step
+        type: string
+    type: object
+  flag.Rule:
+    properties:
+      disable:
+        description: Disable indicates that this rule is disabled.
+        type: boolean
+      name:
+        description: |-
+          Name is the name of the rule, this field is mandatory if you want
+          to update the rule during scheduled rollout
+        type: string
+      percentage:
+        additionalProperties:
+          format: float64
+          type: number
+        description: |-
+          Percentages represents the percentage we should give to each variation.
+          example: variationA = 10%, variationB = 80%, variationC = 10%
+        type: object
+      progressiveRollout:
+        allOf:
+        - $ref: '#/definitions/flag.ProgressiveRollout'
+        description: |-
+          ProgressiveRollout is your struct to configure a progressive rollout deployment of your flag.
+          It will allow you to ramp up the percentage of your flag over time.
+          You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
+          Before the start date we will serve the initial percentage and, after we will serve the end percentage.
+      query:
+        description: Query represents the query used to target the audience of the
+          flag.
+        type: string
+      variation:
+        description: |-
+          VariationResult represents the variation name to use if the rule apply for the user.
+          In case we have a percentage field in the config VariationResult is ignored
+        type: string
+    type: object
+  flag.ScheduledStep:
+    properties:
+      bucketingKey:
+        description: BucketingKey defines a source for a dynamic targeting key
+        type: string
+      date:
+        type: string
+      defaultRule:
+        allOf:
+        - $ref: '#/definitions/flag.Rule'
+        description: |-
+          DefaultRule is the originalRule applied after checking that any other rules
+          matched the user.
+      disable:
+        description: Disable is true if the flag is disabled.
+        type: boolean
+      experimentation:
+        allOf:
+        - $ref: '#/definitions/flag.ExperimentationRollout'
+        description: |-
+          Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and
+          an end date for your flag.
+          When the experimentation is not running, the flag will serve the default value.
+      metadata:
+        additionalProperties: {}
+        description: Metadata is a field containing information about your flag such
+          as an issue tracker link, a description, etc ...
+        type: object
+      scheduledRollout:
+        description: |-
+          Scheduled is your struct to configure an update on some fields of your flag over time.
+          You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+          in your flag.
+        items:
+          $ref: '#/definitions/flag.ScheduledStep'
+        type: array
+      targeting:
+        description: |-
+          Rules is the list of Rule for this flag.
+          This an optional field.
+        items:
+          $ref: '#/definitions/flag.Rule'
+        type: array
+      trackEvents:
+        description: |-
+          TrackEvents is false if you don't want to export the data in your data exporter.
+          Default value is true
+        type: boolean
+      variations:
+        additionalProperties: {}
+        description: Variations are all the variations available for this flag. You
+          can have as many variation as needed.
+        type: object
+      version:
+        description: |-
+          Version (optional) This field contains the version of the flag.
+          The version is manually managed when you configure your flags, and it is used to display the information
+          in the notifications and data collection.
+        type: string
+    type: object
+  github_com_thomaspoignant_go-feature-flag_cmd_relayproxy_model.FlagType:
+    enum:
+    - boolean
+    - string
+    - integer
+    - float
+    - object
+    type: string
+    x-enum-varnames:
+    - FlagTypeBoolean
+    - FlagTypeString
+    - FlagTypeInteger
+    - FlagTypeFloat
+    - FlagTypeObject
+  github_com_thomaspoignant_go-feature-flag_cmdhelpers_manifest_model.FlagType:
+    enum:
+    - boolean
+    - string
+    - integer
+    - float
+    - object
+    type: string
+    x-enum-varnames:
+    - FlagTypeBoolean
+    - FlagTypeString
+    - FlagTypeInteger
+    - FlagTypeFloat
+    - FlagTypeObject
   model.AllFlagRequest:
     properties:
       evaluationContext:
@@ -103,6 +333,20 @@ definitions:
           been sent to the data exporter
         type: integer
     type: object
+  model.CreateFlagRequest:
+    properties:
+      definition:
+        $ref: '#/definitions/dto.DTO'
+      key:
+        type: string
+    type: object
+  model.ErrorResponse:
+    properties:
+      errorCode:
+        $ref: '#/definitions/flag.ErrorCode'
+      errorDetails:
+        type: string
+    type: object
   model.EvalFlagRequest:
     properties:
       defaultValue:
@@ -131,20 +375,44 @@ definitions:
         example: 08b5ffb7-7109-42f4-a6f2-b85560fbd20f
         type: string
     type: object
-  model.FlagType:
-    enum:
-    - boolean
-    - string
-    - integer
-    - float
-    - object
-    type: string
-    x-enum-varnames:
-    - FlagTypeBoolean
-    - FlagTypeString
-    - FlagTypeInteger
-    - FlagTypeFloat
-    - FlagTypeObject
+  model.FlagListMeta:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  model.FlagListResponse:
+    properties:
+      flags:
+        items:
+          $ref: '#/definitions/model.FlagResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/model.FlagListMeta'
+    type: object
+  model.FlagResponse:
+    properties:
+      definition:
+        $ref: '#/definitions/dto.DTO'
+      editable:
+        description: Editable is false when the owning retriever/flagset doesn't support
+          writes.
+        type: boolean
+      etag:
+        description: ETag is the current revision; echo it back as If-Match on the
+          next write.
+        type: string
+      key:
+        type: string
+      source:
+        description: Source is the retriever owning this flag, e.g. "postgresql:go_feature_flag".
+        type: string
+      type:
+        $ref: '#/definitions/github_com_thomaspoignant_go-feature-flag_cmd_relayproxy_model.FlagType'
+    type: object
   model.HealthResponse:
     properties:
       initialized:
@@ -179,7 +447,7 @@ definitions:
       key:
         type: string
       type:
-        $ref: '#/definitions/model.FlagType'
+        $ref: '#/definitions/github_com_thomaspoignant_go-feature-flag_cmdhelpers_manifest_model.FlagType'
     type: object
   model.ManifestError:
     properties:
@@ -266,6 +534,11 @@ definitions:
       value: {}
       variant:
         type: string
+    type: object
+  model.SetFlagStateRequest:
+    properties:
+      disable:
+        type: boolean
     type: object
   modeldocs.AllFlags:
     description: AllFlags contains the full list of all the flags available for the
@@ -369,10 +642,10 @@ info:
     email: contact@gofeatureflag.org
     name: GO feature flag relay proxy
     url: https://gofeatureflag.org
-  description: "# Introduction\n\nThis API is documented in **OpenAPI format** and
-    describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy
-    is a component to evaluate your feature flags remotely when using **GO Feature
-    Flag**.  \nThis API is mostly used by all the OpenFeature providers."
+  description: "# Introduction\r\n\r\nThis API is documented in **OpenAPI format**
+    and describe the REST API of the **GO Feature Flag relay proxy**.\r\n\r\nThe relay
+    proxy is a component to evaluate your feature flags remotely when using **GO Feature
+    Flag**.  \r\nThis API is mostly used by all the OpenFeature providers."
   license:
     name: MIT
     url: https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
@@ -868,6 +1141,310 @@ paths:
       summary: Endpoint to poll if you want to get the configuration of the flags.
       tags:
       - GO Feature Flag Evaluation API
+  /v1/flags:
+    get:
+      description: Returns every flag definition known to the relay proxy for the
+        caller's flagset.
+      parameters:
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (max 500)
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by flag type
+        in: query
+        name: type
+        type: string
+      - description: Case-insensitive substring match on flag key
+        in: query
+        name: q
+        type: string
+      - description: Filter by disabled state
+        in: query
+        name: disabled
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.FlagListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List feature flags
+      tags:
+      - Flag Management API
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Only available when the caller's flagset is backed by exactly one writable
+        (PostgreSQL) retriever with an explicit flagset configured.
+      parameters:
+      - description: The flag to create
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateFlagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a feature flag
+      tags:
+      - Flag Management API
+  /v1/flags/{flag_key}:
+    delete:
+      parameters:
+      - description: The flag key
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      - description: Optimistic-concurrency guard
+        in: header
+        name: If-Match
+        type: string
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a feature flag
+      tags:
+      - Flag Management API
+    get:
+      parameters:
+      - description: The flag key
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a feature flag
+      tags:
+      - Flag Management API
+    patch:
+      consumes:
+      - application/merge-patch+json
+      description: |-
+        RFC 7386 merge-patch of the flag definition. Only the fields present in the
+        body are changed; a JSON null deletes a field.
+      parameters:
+      - description: The flag key
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      - description: Optimistic-concurrency guard
+        in: header
+        name: If-Match
+        type: string
+      - description: Merge-patch document
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update parts of a feature flag
+      tags:
+      - Flag Management API
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Full replacement of the flag definition. Creates the flag (upsert) if it
+        does not exist yet.
+      parameters:
+      - description: The flag key
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      - description: Optimistic-concurrency guard
+        in: header
+        name: If-Match
+        type: string
+      - description: The full flag definition
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Replaced
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "201":
+          description: Created via upsert
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Replace a feature flag
+      tags:
+      - Flag Management API
+  /v1/flags/{flag_key}/state:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Convenience endpoint that sets the disable field without touching the rest
+        of the flag definition.
+      parameters:
+      - description: The flag key
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      - description: Optimistic-concurrency guard
+        in: header
+        name: If-Match
+        type: string
+      - description: The new state
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.SetFlagStateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: State changed
+          schema:
+            $ref: '#/definitions/model.FlagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Enable or disable a flag
+      tags:
+      - Flag Management API
   /ws/v1/flag/change:
     get:
       consumes:

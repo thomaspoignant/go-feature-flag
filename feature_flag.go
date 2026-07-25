@@ -216,6 +216,24 @@ func (g *GoFeatureFlag) GetPollingInterval() int64 {
 	return g.config.PollingInterval.Milliseconds()
 }
 
+// GetWritableRetriever returns the single writable retriever backing this GoFeatureFlag
+// instance, if any. It returns (nil, false) unless exactly one retriever is configured and
+// that retriever implements retriever.WritableRetriever: with more than one retriever the
+// write target would be ambiguous, so writes are intentionally not supported in that case.
+func (g *GoFeatureFlag) GetWritableRetriever() (retriever.WritableRetriever, bool) {
+	if g.IsOffline() || g.retrieverManager == nil {
+		return nil, false
+	}
+	if g.retrieverManager.RetrieverCount() != 1 {
+		return nil, false
+	}
+	writable := g.retrieverManager.GetWritableRetrievers()
+	if len(writable) != 1 {
+		return nil, false
+	}
+	return writable[0], true
+}
+
 // SetOffline updates the config Offline parameter
 func SetOffline(control bool) {
 	SetOfflineWithContext(context.Background(), control)

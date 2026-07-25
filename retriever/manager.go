@@ -259,6 +259,24 @@ func (m *Manager) GetFlagsFromCache(_ context.Context) (map[string]flag.Flag, er
 	return m.cacheManager.AllFlags()
 }
 
+// GetWritableRetrievers returns every configured retriever that implements WritableRetriever
+// (currently only the PostgreSQL retriever). Used by the relay-proxy flag-management API to
+// determine whether writes are supported for a given flagset.
+func (m *Manager) GetWritableRetrievers() []WritableRetriever {
+	writableRetrievers := make([]WritableRetriever, 0)
+	for _, writableRetriever := range m.retrievers {
+		if currentWritableRetriever, ok := writableRetriever.(WritableRetriever); ok {
+			writableRetrievers = append(writableRetrievers, currentWritableRetriever)
+		}
+	}
+	return writableRetrievers
+}
+
+// RetrieverCount returns the number of retrievers configured on this manager.
+func (m *Manager) RetrieverCount() int {
+	return len(m.retrievers)
+}
+
 func (m *Manager) ForceRefresh(ctx context.Context) bool {
 	err := m.retrieveFlagsAndUpdateCache(ctx, false)
 	if err != nil {
