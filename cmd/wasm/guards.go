@@ -119,78 +119,115 @@ func scanJSONDepth(input string) int {
 	return maxDepth
 }
 
+// nikunjyScanState accumulates the metrics of a nikunjy query while it is
+// walked byte by byte. The per-byte work lives in methods so that the scan
+// loop itself stays flat and each rule is testable in isolation.
+type nikunjyScanState struct {
+	query       string
+	depth       int
+	maxDepth    int
+	listCounts  []int
+	largestList int
+	operators   int
+	wordStart   int
+}
+
+// pushDepth records entering a ( / [ / { nesting level.
+func (s *nikunjyScanState) pushDepth() {
+	s.depth++
+	if s.depth > s.maxDepth {
+		s.maxDepth = s.depth
+	}
+}
+
+// popDepth records leaving a ) / ] / } nesting level.
+func (s *nikunjyScanState) popDepth() {
+	s.depth--
+}
+
+// openList starts counting the items of a new [...] list.
+func (s *nikunjyScanState) openList() {
+	s.listCounts = append(s.listCounts, 0)
+}
+
+// closeList folds the innermost open list into the running maximum. It is a
+// no-op when no list is open, so a stray ']' cannot underflow the stack.
+func (s *nikunjyScanState) closeList() {
+	if len(s.listCounts) == 0 {
+		return
+	}
+	n := s.listCounts[len(s.listCounts)-1] + 1 // items = commas + 1
+	s.listCounts = s.listCounts[:len(s.listCounts)-1]
+	if n > s.largestList {
+		s.largestList = n
+	}
+}
+
+// countItem attributes a comma to the innermost open list.
+func (s *nikunjyScanState) countItem() {
+	if len(s.listCounts) > 0 {
+		s.listCounts[len(s.listCounts)-1]++
+	}
+}
+
+// startWord marks the beginning of an identifier-like token.
+func (s *nikunjyScanState) startWord(i int) {
+	if s.wordStart < 0 {
+		s.wordStart = i
+	}
+}
+
+// endWord closes the token opened by startWord and counts it when it is a
+// logical operator.
+func (s *nikunjyScanState) endWord(end int) {
+	if s.wordStart < 0 {
+		return
+	}
+	if w := s.query[s.wordStart:end]; w == "and" || w == "or" {
+		s.operators++
+	}
+	s.wordStart = -1
+}
+
 // scanNikunjyQuery collects nesting depth, largest list size, and condition
 // count in one pass over a nikunjy targeting query.
 func scanNikunjyQuery(query string) nikunjyQueryScan {
-	var result nikunjyQueryScan
-	depth := 0
-	var listCounts []int
-	largestList := 0
-	operators := 0
-	wordStart := -1
-
-	foldList := func() {
-		n := listCounts[len(listCounts)-1] + 1 // items = commas + 1
-		listCounts = listCounts[:len(listCounts)-1]
-		if n > largestList {
-			largestList = n
-		}
-	}
-	endWord := func(end int) {
-		if wordStart >= 0 {
-			if w := query[wordStart:end]; w == "and" || w == "or" {
-				operators++
-			}
-			wordStart = -1
-		}
-	}
-
+	state := nikunjyScanState{query: query, wordStart: -1}
 	scanner := unquotedScanner{input: query}
 	for i, c, ok := scanner.next(); ok; i, c, ok = scanner.next() {
 		switch c {
 		case '"':
-			endWord(i)
-		case '{', '[':
-			depth++
-			if depth > result.maxDepth {
-				result.maxDepth = depth
-			}
-			if c == '[' {
-				listCounts = append(listCounts, 0)
-			}
-		case '}', ']':
-			depth--
-			if c == ']' && len(listCounts) > 0 {
-				foldList()
-			}
-		case '(':
-			depth++
-			if depth > result.maxDepth {
-				result.maxDepth = depth
-			}
-		case ')':
-			depth--
+			state.endWord(i)
+		case '{', '(':
+			state.pushDepth()
+		case '[':
+			state.pushDepth()
+			state.openList()
+		case '}', ')':
+			state.popDepth()
+		case ']':
+			state.popDepth()
+			state.closeList()
 		case ',':
-			if len(listCounts) > 0 {
-				listCounts[len(listCounts)-1]++
-			}
+			state.countItem()
 		default:
 			if isQueryWordChar(c) {
-				if wordStart < 0 {
-					wordStart = i
-				}
+				state.startWord(i)
 			} else {
-				endWord(i)
+				state.endWord(i)
 			}
 		}
 	}
-	for len(listCounts) > 0 {
-		foldList()
+	// Fold any list left open by an unbalanced query so its width still counts.
+	for len(state.listCounts) > 0 {
+		state.closeList()
 	}
-	endWord(len(query))
-	result.maxListItems = largestList
-	result.conditionCount = operators + 1
-	return result
+	state.endWord(len(query))
+	return nikunjyQueryScan{
+		maxDepth:       state.maxDepth,
+		maxListItems:   state.largestList,
+		conditionCount: state.operators + 1,
+	}
 }
 
 // isQueryWordChar reports whether c can be part of an identifier-like token

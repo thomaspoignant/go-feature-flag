@@ -71,7 +71,7 @@ func safeEvaluation(valuePosition *uint32, length uint32) (result string) {
 // localEvaluation is the function that will be called from the evaluate function.
 // It will unmarshal the input, call the evaluation function and return the result.
 func localEvaluation(input string) string {
-	if depth := scanJSONDepth(input); depth > maxInputNestingDepth {
+	if scanJSONDepth(input) > maxInputNestingDepth {
 		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
 			"input JSON exceeds the maximum nesting depth (%d)", maxInputNestingDepth))
 	}
