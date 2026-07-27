@@ -25,7 +25,7 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         working-directory: ./website
-        run: npm install
+        run: npm ci --ignore-scripts
       - name: Build website
         working-directory: ./website
         run: npm run build
