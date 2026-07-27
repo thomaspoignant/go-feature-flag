@@ -249,9 +249,10 @@ Hardened binaries (releases after 0.2.3) make traps much rarer: they carry a
 1MB shadow stack instead of 64KB and return structured `PARSE_ERROR` results
 for over-deep or over-broad targeting queries (input JSON > 128 nesting
 levels, > 64 nested brackets in a nikunjy query, > 1,000 items in a nikunjy
-`in` list) instead of trapping. Hosts MUST still implement the trap handling
-above: older bundled binaries stay in the field, and residual overflow paths
-(e.g. `and`/`or` chains of thousands of conditions) are not guarded.
+`in` list, > 1,000 `and`/`or` conditions in a nikunjy query) instead of
+trapping. Hosts MUST still implement the trap handling above: older bundled
+binaries stay in the field carrying none of these guards, and recursion
+inside the module cannot be enumerated exhaustively.
 
 #### 7. Error Handling
 

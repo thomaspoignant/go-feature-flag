@@ -1,3 +1,12 @@
+// The scanners below are hand-rolled on purpose. No maintained Go module
+// implements non-recursive JSON depth limiting: encoding/json's decode stage is
+// itself recursive so it cannot guard itself, json/v2's WithDepthLimit is still
+// unimplemented (golang/go#56733) and unreachable from TinyGo anyway, and
+// fastjson's MaxDepth is hard-coded inside a recursive-descent parser. The ANTLR
+// lexer that nikunjy/rules exports would tokenize a query iteratively, but it
+// would run on every evaluation while the parse it guards is memoized per unique
+// query — the guard would cost more than what it protects.
+
 package main
 
 import (

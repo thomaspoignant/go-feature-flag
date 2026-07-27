@@ -96,11 +96,11 @@ Call sequence for one evaluation:
 **Behavior change vs binaries <= 0.2.3:** inputs or queries beyond these
 limits previously either evaluated by accident or trapped (permanently
 poisoning the instance); they now deterministically return a structured
-error, and the host falls back to the default value. The Python host applies
-its own pre-flight nesting guard (also 128) before calling the module; the
-two guards measure nesting slightly differently (Python object depth vs
-serialized bracket depth) and are each intentionally conservative — they are
-not guaranteed to reject the exact same set of inputs.
+error, and the host falls back to the default value. Hosts may also apply
+their own pre-flight nesting guard before calling the module; a host-side
+guard and this module's guard are not guaranteed to reject the exact same
+set of inputs, because they measure nesting differently (language object
+depth vs serialized bracket depth) and are each intentionally conservative.
 
 These guards cover every known overflow trigger (input nesting, query
 nesting, `in`-list breadth, `and`/`or` chain length), but recursion inside
