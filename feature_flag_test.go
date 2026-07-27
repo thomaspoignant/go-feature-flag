@@ -561,6 +561,9 @@ func Test_GetPollingInterval(t *testing.T) {
 func Test_ForceRefreshCache(t *testing.T) {
 	tempFile, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before reusing/removing it: Windows cannot write to or
+	// delete a file that is still open by another handle
+	assert.NoError(t, tempFile.Close())
 	defer func() { _ = os.Remove(tempFile.Name()) }()
 	content, err := os.ReadFile("testdata/flag-config.yaml")
 	assert.NoError(t, err)
