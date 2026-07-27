@@ -22,10 +22,13 @@ production traps of issue
 [#5651](https://github.com/thomaspoignant/go-feature-flag/issues/5651) —
 or a ~340-condition `and`/`or` chain) overflow the stack and trap the
 instance.
-The build asserts the resulting binary carries that stack size
-(`.github/ci-scripts/verify-wasm-stack.py`), so a TinyGo upgrade that stops
-honoring the target-JSON `ldflags` fails the build instead of silently
-shipping a 64KB binary again.
+CI and the release script run `make verify-wasm-stack`
+(`.github/ci-scripts/verify-wasm-stack.py`) against the built binaries, so a
+TinyGo upgrade that stops honoring the target-JSON `ldflags` fails the build
+instead of silently shipping a 64KB binary again. It is a separate target
+rather than part of `make build-wasm`/`build-wasi` so that a local build does
+not require python3; run it yourself with `make verify-wasm-stack` after
+building if you are changing the target files.
 
 ## ABI
 

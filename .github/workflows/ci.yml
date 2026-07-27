@@ -341,3 +341,5 @@ jobs:
           tinygo-version: "0.40.1"
       - run: make build-wasm
       - run: make build-wasi
+      - name: Verify the binaries carry the expected shadow stack size
+        run: make verify-wasm-stack
