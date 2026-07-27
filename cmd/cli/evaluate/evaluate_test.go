@@ -66,7 +66,10 @@ func assertEvaluate(t *testing.T, tt evaluateTestCase) {
 	tt.wantErr(t, err)
 
 	if tt.expectedErr != "" {
-		assert.Equal(t, tt.expectedErr, err.Error())
+		// Contains (not Equal) so the assertion stays valid across platforms: the
+		// underlying OS error text differs (e.g. "no such file or directory" on
+		// Unix vs "The system cannot find the file specified." on Windows).
+		assert.Contains(t, err.Error(), tt.expectedErr)
 	}
 	if tt.expectedResult != nil {
 		assert.Equal(t, tt.expectedResult, m)
@@ -83,8 +86,10 @@ func Test_Evaluate(t *testing.T) {
 					Path: "testdata/invalid.yaml",
 				}, "test-flag", `{"targetingKey": "user-123"}`, nil)
 			},
-			wantErr:     assert.Error,
-			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
+			wantErr: assert.Error,
+			// OS-specific suffix ("no such file or directory" / "The system cannot
+			// find the file specified.") is intentionally omitted; asserted via Contains.
+			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml:",
 		},
 		{
 			name: "Should error if no evaluation context provided with flag containing percentage rules",

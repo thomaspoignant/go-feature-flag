@@ -421,6 +421,8 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
 	f, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, f.Close())
 	// we delete the fileTemp to be sure that the retriever will have to create the file
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
@@ -442,6 +444,8 @@ func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
 func TestInitializableRetrieverWithRetrieverNotReady(t *testing.T) {
 	f, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, f.Close())
 	// we delete the fileTemp to be sure that the retriever will have to create the file
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
@@ -592,9 +596,13 @@ func Test_ForceRefreshCache(t *testing.T) {
 func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	configFile1, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handles before reusing/removing them: Windows cannot write to or
+	// delete a file that is still open by another handle
+	assert.NoError(t, configFile1.Close())
 
 	persistFile, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	assert.NoError(t, persistFile.Close())
 	defer func() {
 		_ = os.Remove(configFile1.Name())
 		_ = os.Remove(persistFile.Name())
@@ -636,6 +644,8 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	gffClient.Close()
 	configFile2, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, configFile2.Close())
 	err = os.Remove(configFile2.Name())
 	assert.NoError(t, err)
 

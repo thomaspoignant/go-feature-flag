@@ -220,16 +220,14 @@ func TestLoadConfigFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.useDefaultLocation {
-				file, err := os.CreateTemp("", "flags.goff.yaml")
-				assert.NoError(t, err)
-				// copy the file to the default location
+				// write the config into an isolated per-test dir (auto-removed by the
+				// test framework). Using t.TempDir() instead of a fixed name in the
+				// shared system temp dir avoids leftovers/collisions between runs and
+				// the Windows "file in use" errors from renaming an open handle.
+				dir := t.TempDir()
 				content, err := os.ReadFile(tt.inputFilePath)
 				assert.NoError(t, err)
-				err = os.WriteFile(file.Name(), content, 0600)
-				assert.NoError(t, err)
-				dir := filepath.Dir(file.Name())
-				assert.NoError(t, err)
-				err = os.Rename(file.Name(), dir+"/flags.goff.yaml")
+				err = os.WriteFile(filepath.Join(dir, "flags.goff.yaml"), content, 0600)
 				assert.NoError(t, err)
 				tt.inputFilePath = ""
 				tt.defaultLocations = []string{dir + "/"}

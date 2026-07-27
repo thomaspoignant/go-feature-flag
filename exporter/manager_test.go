@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 	"testing"
 	"time"
 
@@ -332,6 +333,10 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 }
 
 func TestDataExporterManager_multipleExporters(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("timing-sensitive: Windows timer granularity (~15ms) breaks the sub-millisecond " +
+			"AddEvent/flush-interval assumptions this test relies on")
+	}
 	mockExporter1 := mock.Exporter{Bulk: false}
 	mockExporter2 := mock.Exporter{Bulk: true}
 	dataExporterMock := []exporter.Config{
@@ -373,6 +378,10 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 }
 
 func TestDataExporterManagerMultipleExportersWithDifferentFlushInterval(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("timing-sensitive: Windows timer granularity (~15ms) breaks the sub-millisecond " +
+			"AddEvent/flush-interval assumptions this test relies on")
+	}
 	mockExporter1 := mock.Exporter{Bulk: true}
 	mockExporter2 := mock.Exporter{Bulk: true}
 	dataExporterMock := []exporter.Config{
