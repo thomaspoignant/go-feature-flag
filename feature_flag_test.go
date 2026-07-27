@@ -585,6 +585,11 @@ func Test_ForceRefreshCache(t *testing.T) {
 	// checking that the cache has not been refreshed
 	assert.Equal(t, refreshTime, gffClient.GetCacheRefreshDate())
 
+	// Ensure the forced refresh lands on a strictly later timestamp even on
+	// platforms with a coarse monotonic clock (Windows timer granularity ~15ms),
+	// otherwise the initial load and the forced refresh can share the same instant.
+	time.Sleep(50 * time.Millisecond)
+
 	// checking that the cache has been refreshed
 	gffClient.ForceRefresh()
 	assert.NotEqual(t, refreshTime, gffClient.GetCacheRefreshDate())
