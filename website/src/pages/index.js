@@ -6,6 +6,7 @@ import {QuickStart} from '../components/home/HomepageQuickStart';
 import {HomeHeader} from '../components/home/HomeHeader';
 import {Benefit} from '../components/home/benefit';
 import {WhyGoff} from '../components/home/why-goff';
+import {Testimonial} from '../components/home/testimonial';
 import {
   Integration,
   OpenFeatureEcosystem,
@@ -38,6 +39,7 @@ export default function Home() {
       <Rollout />
       <HowItWorks />
       <Benefit />
+      <Testimonial />
     </Layout>
   );
 }
