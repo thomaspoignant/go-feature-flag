@@ -1,3 +1,21 @@
+# Normalize line endings: store as LF in the repo and check out as LF on every
+# platform. Without this, Git for Windows (core.autocrlf=true) rewrites text
+# files to CRLF on checkout, which breaks golden-file comparisons, byte-offset
+# assertions and YAML/JSON parsing of testdata files in the test suite.
+* text=auto eol=lf
+
+# Windows batch scripts must keep CRLF endings.
+*.bat text eol=crlf
+
+# Binary files: never normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.xcuserstate binary
+
 website/docs/** linguist-documentation
 website/versioned_docs/** linguist-documentation
 website/versioned_sidebars/** linguist-documentation

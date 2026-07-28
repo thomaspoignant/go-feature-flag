@@ -1,3 +1,5 @@
+//go:build docker
+
 package postgresqlretriever_test
 
 import (

@@ -421,6 +421,8 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
 	f, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, f.Close())
 	// we delete the fileTemp to be sure that the retriever will have to create the file
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
@@ -442,6 +444,8 @@ func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
 func TestInitializableRetrieverWithRetrieverNotReady(t *testing.T) {
 	f, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, f.Close())
 	// we delete the fileTemp to be sure that the retriever will have to create the file
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
@@ -557,6 +561,9 @@ func Test_GetPollingInterval(t *testing.T) {
 func Test_ForceRefreshCache(t *testing.T) {
 	tempFile, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before reusing/removing it: Windows cannot write to or
+	// delete a file that is still open by another handle
+	assert.NoError(t, tempFile.Close())
 	defer func() { _ = os.Remove(tempFile.Name()) }()
 	content, err := os.ReadFile("testdata/flag-config.yaml")
 	assert.NoError(t, err)
@@ -581,6 +588,11 @@ func Test_ForceRefreshCache(t *testing.T) {
 	// checking that the cache has not been refreshed
 	assert.Equal(t, refreshTime, gffClient.GetCacheRefreshDate())
 
+	// Ensure the forced refresh lands on a strictly later timestamp even on
+	// platforms with a coarse monotonic clock (Windows timer granularity ~15ms),
+	// otherwise the initial load and the forced refresh can share the same instant.
+	time.Sleep(50 * time.Millisecond)
+
 	// checking that the cache has been refreshed
 	gffClient.ForceRefresh()
 	assert.NotEqual(t, refreshTime, gffClient.GetCacheRefreshDate())
@@ -592,9 +604,13 @@ func Test_ForceRefreshCache(t *testing.T) {
 func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	configFile1, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handles before reusing/removing them: Windows cannot write to or
+	// delete a file that is still open by another handle
+	assert.NoError(t, configFile1.Close())
 
 	persistFile, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	assert.NoError(t, persistFile.Close())
 	defer func() {
 		_ = os.Remove(configFile1.Name())
 		_ = os.Remove(persistFile.Name())
@@ -636,6 +652,8 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	gffClient.Close()
 	configFile2, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
+	// close the handle before removing: Windows cannot delete a file that is still open
+	assert.NoError(t, configFile2.Close())
 	err = os.Remove(configFile2.Name())
 	assert.NoError(t, err)
 
