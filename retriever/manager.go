@@ -34,6 +34,11 @@ type Manager struct {
 	cacheManager     cache.Manager
 	config           ManagerConfig
 	bgUpdater        backgroundUpdater
+	// pollingWg is done when the polling goroutine started by Init has returned.
+	pollingWg sync.WaitGroup
+	// stopPollingOnce guarantees that we close the background updater only once,
+	// StopPolling is reachable both from SetOffline() and from Shutdown().
+	stopPollingOnce sync.Once
 }
 
 // NewManager create a new Manager.
@@ -62,13 +67,17 @@ func (m *Manager) Init(ctx context.Context) error {
 
 	if m.config.PollingInterval > 0 {
 		m.bgUpdater = newBackgroundUpdater(m.config.PollingInterval, m.config.EnablePollingJitter)
-		go m.StartPolling(ctx)
+		m.pollingWg.Go(func() { m.StartPolling(ctx) })
 	}
 	return nil
 }
 
 // StartPolling is the daemon that refreshes the cache every X seconds.
 func (m *Manager) StartPolling(ctx context.Context) {
+	if m.bgUpdater.ticker == nil {
+		// polling is disabled (PollingInterval <= 0), there is nothing to poll.
+		return
+	}
 	for {
 		select {
 		case <-m.bgUpdater.ticker.C:
@@ -85,9 +94,16 @@ func (m *Manager) StartPolling(ctx context.Context) {
 	}
 }
 
-// StopPolling is the function to stop the background updater.
+// StopPolling stops the background updater and waits for the polling goroutine to return.
+// It is safe to call it several times: the underlying channel is closed only once, since
+// StopPolling is called both by SetOffline() and by Shutdown().
 func (m *Manager) StopPolling() {
-	m.bgUpdater.close()
+	m.stopPollingOnce.Do(func() {
+		m.bgUpdater.close()
+		// Wait for the polling goroutine to return, so that no retrieve, no cache update and
+		// no write of the persistent flag configuration file can happen afterwards.
+		m.pollingWg.Wait()
+	})
 }
 
 // initRetrievers is a helper function to initialize the retrievers.
@@ -148,6 +164,11 @@ func (m *Manager) checkInitializationErrors() error {
 // Shutdown the retrievers.
 // This function will call the Shutdown function of the retrievers that implements the InitializableRetriever interface.
 func (m *Manager) Shutdown(ctx context.Context) error {
+	// Stop the background updater before shutting the retrievers down, otherwise the polling
+	// goroutine could use a retriever that is already shut down, and could keep writing the
+	// persistent flag configuration file after Close() returned.
+	m.StopPolling()
+
 	onErrorRetriever := make([]Retriever, 0)
 	for _, retriever := range m.retrievers {
 		if r, ok := retriever.(CommonInitializableRetriever); ok {
