@@ -195,7 +195,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}

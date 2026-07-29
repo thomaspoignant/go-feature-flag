@@ -21,7 +21,7 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         working-directory: ./openfeature/ci_scripts
-        run: npm install
+        run: npm ci --ignore-scripts
       - name: Check PRs
         working-directory: ./openfeature/ci_scripts
         run: npm run ci:check_prs_and_open_issue
