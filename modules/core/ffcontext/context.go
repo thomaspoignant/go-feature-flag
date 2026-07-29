@@ -7,6 +7,8 @@ import (
 
 var _ Context = (*EvaluationContext)(nil)
 
+const anonymousAttribute = "anonymous"
+
 type Context interface {
 	// GetKey return the unique targetingKey for the context.
 	GetKey() string
@@ -35,7 +37,7 @@ func NewEvaluationContext(key string) EvaluationContext {
 // ctx.AddCustomAttribute("anonymous", true)
 func NewAnonymousEvaluationContext(key string) EvaluationContext {
 	return EvaluationContext{targetingKey: key, attributes: map[string]any{
-		"anonymous": true,
+		anonymousAttribute: true,
 	}}
 }
 
@@ -73,7 +75,7 @@ func (u EvaluationContext) GetKey() string {
 
 // IsAnonymous return if the user is anonymous or not.
 func (u EvaluationContext) IsAnonymous() bool {
-	anonymous := u.attributes["anonymous"]
+	anonymous := u.attributes[anonymousAttribute]
 	switch v := anonymous.(type) {
 	case bool:
 		return v
