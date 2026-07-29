@@ -2,9 +2,12 @@ package retriever_test
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -259,4 +262,89 @@ variation = "A"
 			_ = manager.Shutdown(ctx)
 		})
 	}
+}
+
+// countingRetriever counts how many times Retrieve was called. It is read from the test
+// goroutine while the background updater writes to it, hence the mutex.
+type countingRetriever struct {
+	mu    sync.Mutex
+	calls int
+}
+
+func (r *countingRetriever) Retrieve(_ context.Context) ([]byte, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.calls++
+	return []byte(`{"test-flag":{"variations":{"A":true,"B":false},` +
+		`"defaultRule":{"variation":"A"}}}`), nil
+}
+
+func (r *countingRetriever) Calls() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.calls
+}
+
+func newPollingManager(t *testing.T, r retriever.Retriever) *retriever.Manager {
+	t.Helper()
+	logger := fflog.FFLogger{}
+	cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
+	// ManagerConfig.PollingInterval is not clamped, the 1s floor lives in ffclient.Config.
+	return retriever.NewManager(retriever.ManagerConfig{
+		FileFormat:      "json",
+		PollingInterval: 10 * time.Millisecond,
+	}, []retriever.Retriever{r}, cacheManager, &logger)
+}
+
+// TestManagerShutdownStopsThePolling makes sure that Shutdown stops the background updater.
+// Before this was fixed, the polling goroutine outlived Close() forever and kept retrieving
+// flags, updating the cache and rewriting the persistent flag configuration file.
+func TestManagerShutdownStopsThePolling(t *testing.T) {
+	ctx := context.Background()
+	r := &countingRetriever{}
+	manager := newPollingManager(t, r)
+	require.NoError(t, manager.Init(ctx))
+
+	require.Eventually(t, func() bool { return r.Calls() > 1 },
+		time.Second, 10*time.Millisecond, "the polling never started")
+
+	require.NoError(t, manager.Shutdown(ctx))
+	callsAtShutdown := r.Calls()
+
+	require.Never(t, func() bool { return r.Calls() > callsAtShutdown },
+		200*time.Millisecond, 10*time.Millisecond,
+		"the background updater is still polling after Shutdown")
+}
+
+// TestManagerStopPollingIsIdempotent guards against a "close of closed channel" panic:
+// SetOffline() calls StopPolling, and Shutdown() calls it again.
+func TestManagerStopPollingIsIdempotent(t *testing.T) {
+	ctx := context.Background()
+	manager := newPollingManager(t, &countingRetriever{})
+	require.NoError(t, manager.Init(ctx))
+
+	assert.NotPanics(t, func() {
+		manager.StopPolling()
+		manager.StopPolling()
+		_ = manager.Shutdown(ctx)
+	})
+}
+
+// TestManagerStopPollingWithPollingDisabled makes sure that stopping a manager that never
+// started a background updater is a no-op instead of a nil-pointer dereference.
+func TestManagerStopPollingWithPollingDisabled(t *testing.T) {
+	ctx := context.Background()
+	logger := fflog.FFLogger{}
+	cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
+	manager := retriever.NewManager(retriever.ManagerConfig{
+		FileFormat:      "json",
+		PollingInterval: -1 * time.Second,
+	}, []retriever.Retriever{&countingRetriever{}}, cacheManager, &logger)
+	require.NoError(t, manager.Init(ctx))
+
+	assert.NotPanics(t, func() {
+		manager.StartPolling(ctx)
+		manager.StopPolling()
+		_ = manager.Shutdown(ctx)
+	})
 }
