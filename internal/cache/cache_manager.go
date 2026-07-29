@@ -35,6 +35,8 @@ type cacheManagerImpl struct {
 	latestUpdate                    time.Time
 	logger                          *fflog.FFLogger
 	persistentFlagConfigurationFile string
+	// persistWg tracks the in-flight PersistCache goroutines.
+	persistWg sync.WaitGroup
 }
 
 func New(
@@ -100,6 +102,12 @@ func (c *cacheManagerImpl) UpdateCache(
 }
 
 func (c *cacheManagerImpl) Close() {
+	// Wait for the in-flight persistence goroutines: nothing must write the persistent flag
+	// configuration file after Close() returned. This cannot deadlock nor race with a new
+	// PersistCache because the retriever manager stops the polling before calling Close(),
+	// so no new persistence can be started at this point.
+	c.persistWg.Wait()
+
 	// Clear the cache
 	c.mutex.Lock()
 	c.inMemoryCache = nil
@@ -138,7 +146,7 @@ func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
 //
 // The persistence is done in a goroutine to not block the main thread.
 func (c *cacheManagerImpl) PersistCache(oldCache, newCache map[string]flag.Flag) {
-	go func() {
+	c.persistWg.Go(func() {
 		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) &&
 			cmp.Equal(oldCache, newCache) {
 			c.logger.Debug("No change in the cache, skipping the persist")
@@ -159,5 +167,5 @@ func (c *cacheManagerImpl) PersistCache(oldCache, newCache map[string]flag.Flag)
 			"Flags cache persisted to file",
 			slog.String("file", c.persistentFlagConfigurationFile),
 		)
-	}()
+	})
 }
