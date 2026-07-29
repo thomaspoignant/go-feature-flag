@@ -50,7 +50,9 @@ Call sequence for one evaluation:
 3. `result = evaluate(ptr, len)` (`len` excludes the NUL terminator).
 4. Unpack `outputPtr = result >> 32` and `outputLen = result & 0xFFFFFFFF`,
    then read `outputLen` bytes at `outputPtr` and JSON-parse them
-   (`model.VariationResult`). A `result` of `0` means no output was produced.
+   (`model.VariationResult`). A `result` of `0` means no output was produced
+   (this should not happen on current binaries: panics during output packing
+   return a pre-serialized `GENERAL` error instead).
 5. `free(ptr)`.
 
 ### Rules hosts MUST follow
@@ -78,23 +80,37 @@ Call sequence for one evaluation:
   brackets/parentheses for nikunjy expressions, 256 for JSONLogic documents
   (which spend ~5 bracket levels per logical operator). Exceeding it returns
   a structured `PARSE_ERROR`.
-- nikunjy `[...]` lists are capped at 1,000 items per list; larger lists
-  return a structured `PARSE_ERROR`. List parsing is right-recursive (one
-  parser stack frame of ~356 bytes per item), so item count — not bracket
-  nesting — drives stack use for flat lists: measured first-trap is 154 items
-  on a 64KB stack and 2,947 on the 1MB stack, identical for int, double and
-  string lists. JSONLogic arrays are exempt (decoded iteratively). Very
-  large allow-lists should be split into `or`-joined `in` chunks or moved to
-  JSONLogic.
+- nikunjy `[...]` lists and JSONLogic operand arrays are capped at 1,000
+  items per array; larger lists return a structured `PARSE_ERROR`. nikunjy
+  list parsing is right-recursive (one parser stack frame of ~356 bytes per
+  item), so item count — not bracket nesting — drives stack use for flat
+  lists: measured first-trap is 154 items on a 64KB stack and 2,947 on the
+  1MB stack, identical for int, double and string lists. JSONLogic `in`
+  lists and `and`/`or` operand arrays are checked by the same array-length
+  scan (flat JSON arrays). Very large allow-lists should be split into
+  `or`-joined `in` chunks.
 - nikunjy `and`/`or` chains are capped at 1,000 conditions per query; larger
   chains return a structured `PARSE_ERROR`. Logical expressions are binary
   and recursive, so a flat bracket-less chain consumes parser stack per
   operator while being invisible to the nesting and list guards: measured
   first-trap is 341 conditions on a 64KB stack and 3,266 on the 1MB stack.
-  JSONLogic documents are exempt (their operands live in iteratively-decoded
-  arrays).
+  JSONLogic `and`/`or` operand arrays are subject to the same 1,000-item
+  array-length cap.
+- nikunjy attribute paths are capped at 128 `.`-separated segments
+  (`a.b.c...`); longer paths return a structured `PARSE_ERROR`. The grammar
+  is indirectly right-recursive (`attrPath : ATTRNAME subAttr?`,
+  `subAttr : '.' attrPath`) and ANTLR only flattens *direct left* recursion,
+  so the parser recurses once per segment. A long path carries no bracket,
+  comma or logical operator, so it is invisible to all three guards above:
+  measured first-trap is 602 segments on the 1MB stack, the lowest threshold
+  of any guarded construct. JSONLogic `{"var": "a.b.c"}` paths are exempt
+  (resolved iteratively).
 - Any Go panic during evaluation is recovered and returned as a `GENERAL`
   error result.
+
+Guards are applied to the query *after* the module's own `\n` trimming, i.e.
+to the exact string the evaluator parses, so a query cannot slip past a limit
+by splitting its operators across lines.
 
 **Behavior change vs binaries <= 0.2.3:** inputs or queries beyond these
 limits previously either evaluated by accident or trapped (permanently
@@ -105,8 +121,10 @@ guard and this module's guard are not guaranteed to reject the exact same
 set of inputs, because they measure nesting differently (language object
 depth vs serialized bracket depth) and are each intentionally conservative.
 
-These guards cover every known overflow trigger (input nesting, query
-nesting, `in`-list breadth, `and`/`or` chain length), but recursion inside
-the module cannot be enumerated exhaustively, and older binaries in the
-field carry none of these guards. The trap-handling rule above therefore
-remains mandatory for hosts.
+These guards cover the overflow triggers found so far (input nesting, query
+nesting, `in`-list breadth, `and`/`or` chain length, attribute-path length),
+but the grammar has several recursive productions and they cannot be
+enumerated exhaustively — the attribute-path trigger was itself found only
+after the first four guards were in place. Older binaries in the field carry
+none of these guards. The trap-handling rule above therefore remains
+mandatory for hosts.

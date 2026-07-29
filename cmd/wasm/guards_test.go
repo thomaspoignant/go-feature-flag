@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
@@ -26,6 +28,28 @@ func Test_scanJSONDepth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, scanJSONDepth(tt.input))
+		})
+	}
+}
+
+func Test_scanJSONMaxArrayLength(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  int
+	}{
+		{name: "empty input", input: ``, want: 0},
+		{name: "flat object", input: `{"a": 1}`, want: 0},
+		{name: "comparison operand array", input: `{"==":[{"var":"a"},1]}`, want: 2},
+		{name: "in list", input: `{"in":[{"var":"age"},[1,2,3]]}`, want: 3},
+		{name: "or operand array", input: `{"or":[{"==":[1,1]},{"==":[2,2]}]}`, want: 2},
+		{name: "largest array wins", input: `{"or":[{"in":[{"var":"a"},[1,2]]},{"in":[{"var":"b"},[1,2,3,4]]}]}`, want: 4},
+		{name: "brackets inside strings ignored", input: `{"a": "[1,2,3,4,5]"}`, want: 0},
+		{name: "empty array over-approximates to one item", input: `{"in":[{"var":"a"},[]]}`, want: 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, scanJSONMaxArrayLength(tt.input))
 		})
 	}
 }
@@ -109,6 +133,27 @@ func orChainQuery(n int) string {
 	return strings.Join(conditions, " or ")
 }
 
+// splitOperatorChainQuery builds an or-chain whose operators are cut in half by
+// a line break. StrTrim rejoins the lines with the empty string, so the
+// evaluator parses a real n-condition chain out of it.
+func splitOperatorChainQuery(n int) string {
+	conditions := make([]string, n)
+	for i := range conditions {
+		conditions[i] = fmt.Sprintf("age eq %d", i+1)
+	}
+	return strings.Join(conditions, " o\nr ")
+}
+
+// attrPathQuery builds a query whose left-hand side is a single attribute path
+// of n '.'-separated segments.
+func attrPathQuery(n int) string {
+	segments := make([]string, n)
+	for i := range segments {
+		segments[i] = fmt.Sprintf("s%d", i)
+	}
+	return strings.Join(segments, ".") + ` eq "x"`
+}
+
 func Test_scanNikunjyQuery_conditionCount(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -135,6 +180,44 @@ func Test_scanNikunjyQuery_conditionCount(t *testing.T) {
 	}
 }
 
+func Test_scanNikunjyQuery_pathSegments(t *testing.T) {
+	tests := []struct {
+		name  string
+		query string
+		want  int
+	}{
+		{name: "empty query", query: ``, want: 0},
+		{name: "single segment", query: `targetingKey eq "user-1"`, want: 1},
+		{name: "dotted attribute path", query: `user.profile.country eq "FR"`, want: 3},
+		{name: "longest path of several wins", query: `a.b eq 1 and c.d.e.f eq 2`, want: 4},
+		{name: "dots inside string literals ignored", query: `a eq "x.y.z.w.v"`, want: 1},
+		{name: "float literal counts as two segments", query: `score gt 1.5`, want: 2},
+		{name: "trailing dot still counted", query: `a.b. eq 1`, want: 3},
+		{name: "generated path", query: attrPathQuery(64), want: 64},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, scanNikunjyQuery(tt.query).maxPathSegments)
+		})
+	}
+}
+
+// The guard must scan the same string the evaluator parses. StrTrim splits on
+// '\n' and rejoins with the empty string, which glues tokens back together
+// across line breaks — scanning the raw query would miss the operators.
+func Test_firstQueryViolation_scansTheTrimmedQuery(t *testing.T) {
+	raw := splitOperatorChainQuery(maxQueryConditions + 1)
+	rule := flag.Rule{Query: &raw}
+
+	require.Equal(t, 1, scanNikunjyQuery(raw).conditionCount,
+		"raw query hides the operators, so this test would be vacuous otherwise")
+	require.Equal(t, maxQueryConditions+1, scanNikunjyQuery(rule.GetTrimmedQuery()).conditionCount)
+
+	detail, over := firstQueryViolation(&flag.InternalFlag{Rules: &[]flag.Rule{rule}})
+	assert.True(t, over)
+	assert.Contains(t, detail, "maximum condition count")
+}
+
 func Test_firstQueryViolation(t *testing.T) {
 	parenQuery := func(depth int) *string {
 		q := strings.Repeat("(", depth) + `a eq "b"` + strings.Repeat(")", depth)
@@ -158,6 +241,18 @@ func Test_firstQueryViolation(t *testing.T) {
 	}
 	chain := func(n int) *string {
 		q := orChainQuery(n)
+		return &q
+	}
+	attrPath := func(n int) *string {
+		q := attrPathQuery(n)
+		return &q
+	}
+	jsonlogicVarPath := func(n int) *string {
+		segments := make([]string, n)
+		for i := range segments {
+			segments[i] = fmt.Sprintf("s%d", i)
+		}
+		q := `{"==":[{"var":"` + strings.Join(segments, ".") + `"},"x"]}`
 		return &q
 	}
 	jsonlogicChain := func(n int) *string {
@@ -245,9 +340,17 @@ func Test_firstQueryViolation(t *testing.T) {
 			wantDetailsMatch: "maximum item count",
 		},
 		{
-			name: "jsonlogic arrays are exempt from list limit",
+			name: "jsonlogic list over the item limit",
 			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: jsonlogicList(maxQueryListItems * 2)}},
+				Rules: &[]flag.Rule{{Query: jsonlogicList(maxQueryListItems + 1)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum item count",
+		},
+		{
+			name: "jsonlogic list under the item limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicList(maxQueryListItems)}},
 			},
 			wantOver: false,
 		},
@@ -288,9 +391,17 @@ func Test_firstQueryViolation(t *testing.T) {
 			wantDetailsMatch: "maximum condition count",
 		},
 		{
-			name: "jsonlogic operand lists are exempt from condition limit",
+			name: "jsonlogic or-chain over the condition limit",
 			flag: &flag.InternalFlag{
-				Rules: &[]flag.Rule{{Query: jsonlogicChain(maxQueryConditions * 2)}},
+				Rules: &[]flag.Rule{{Query: jsonlogicChain(maxQueryConditions + 1)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum item count",
+		},
+		{
+			name: "jsonlogic or-chain under the condition limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicChain(maxQueryConditions)}},
 			},
 			wantOver: false,
 		},
@@ -306,6 +417,66 @@ func Test_firstQueryViolation(t *testing.T) {
 			},
 			wantOver:         true,
 			wantDetailsMatch: "maximum condition count",
+		},
+		{
+			name: "realistic attribute path",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: attrPath(6)}},
+			},
+			wantOver: false,
+		},
+		{
+			name: "attribute path at the segment limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: attrPath(maxQueryAttrPathSegments)}},
+			},
+			wantOver: false,
+		},
+		{
+			name: "attribute path over the segment limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: attrPath(maxQueryAttrPathSegments + 1)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum segment count",
+		},
+		{
+			// The path that traps the module carries no bracket, comma or
+			// logical operator, so every other guard reports it as trivial.
+			name: "attribute path at the measured trap threshold",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: attrPath(602)}},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum segment count",
+		},
+		{
+			name: "offending attribute path on the default rule",
+			flag: &flag.InternalFlag{
+				DefaultRule: &flag.Rule{Query: attrPath(maxQueryAttrPathSegments + 1)},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum segment count",
+		},
+		{
+			name: "jsonlogic var paths are exempt from the segment limit",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: jsonlogicVarPath(maxQueryAttrPathSegments * 2)}},
+			},
+			wantOver: false,
+		},
+		{
+			name: "scheduled step carries the offending attribute path",
+			flag: &flag.InternalFlag{
+				Rules: &[]flag.Rule{{Query: attrPath(3)}},
+				Scheduled: &[]flag.ScheduledStep{
+					{InternalFlag: flag.InternalFlag{
+						Rules: &[]flag.Rule{{Query: attrPath(maxQueryAttrPathSegments + 1)}},
+					}},
+				},
+			},
+			wantOver:         true,
+			wantDetailsMatch: "maximum segment count",
 		},
 	}
 	for _, tt := range tests {
@@ -351,6 +522,14 @@ func Test_localEvaluation_guards(t *testing.T) {
 	}
 	chainQuery := func(n int) string {
 		q, _ := json.Marshal(orChainQuery(n))
+		return queryPayload(string(q))
+	}
+	attrPathQ := func(n int) string {
+		q, _ := json.Marshal(attrPathQuery(n))
+		return queryPayload(string(q))
+	}
+	splitOperatorQuery := func(n int) string {
+		q, _ := json.Marshal(splitOperatorChainQuery(n))
 		return queryPayload(string(q))
 	}
 	splitListQuery := func(count, chunk int) string {
@@ -411,8 +590,14 @@ func Test_localEvaluation_guards(t *testing.T) {
 			wantErrorCode: "",
 		},
 		{
-			name:          "large jsonlogic array is exempt from the item limit",
-			input:         jsonlogicListQuery(maxQueryListItems * 2),
+			name:             "jsonlogic list over the item limit returns PARSE_ERROR",
+			input:            jsonlogicListQuery(maxQueryListItems + 1),
+			wantErrorCode:    "PARSE_ERROR",
+			wantDetailsMatch: "maximum item count",
+		},
+		{
+			name:          "jsonlogic list under the item limit evaluates normally",
+			input:         jsonlogicListQuery(200),
 			wantErrorCode: "",
 		},
 		{
@@ -433,6 +618,33 @@ func Test_localEvaluation_guards(t *testing.T) {
 			input:         splitListQuery(20_000, 50),
 			wantErrorCode: "",
 		},
+		{
+			name:             "attribute path over the segment limit returns PARSE_ERROR",
+			input:            attrPathQ(maxQueryAttrPathSegments + 1),
+			wantErrorCode:    "PARSE_ERROR",
+			wantDetailsMatch: "maximum segment count",
+		},
+		{
+			// 602 segments trap the built module; every other guard reads this
+			// query as trivial (no bracket, comma or logical operator).
+			name:             "attribute path at the measured trap threshold returns PARSE_ERROR",
+			input:            attrPathQ(602),
+			wantErrorCode:    "PARSE_ERROR",
+			wantDetailsMatch: "maximum segment count",
+		},
+		{
+			name:          "realistic dotted attribute path evaluates normally",
+			input:         attrPathQ(6),
+			wantErrorCode: "",
+		},
+		{
+			// StrTrim glues "o\nr" back into "or", so this parses as a real
+			// chain. The guard has to see it the same way.
+			name:             "line-split operators are counted after trimming",
+			input:            splitOperatorQuery(maxQueryConditions + 1),
+			wantErrorCode:    "PARSE_ERROR",
+			wantDetailsMatch: "maximum condition count",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -447,6 +659,26 @@ func Test_localEvaluation_guards(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_evaluatePanicOutput_isStructuredError(t *testing.T) {
+	assert.NotZero(t, evaluatePanicOutput)
+
+	outputPtr := uint32(evaluatePanicOutput >> 32)
+	outputLen := uint32(evaluatePanicOutput & 0xFFFFFFFF)
+	assert.NotZero(t, outputPtr)
+	assert.Equal(t, uint32(len(evaluatePanicBuffer)), outputLen)
+
+	var result map[string]any
+	assert.NoError(t, json.Unmarshal(evaluatePanicBuffer, &result))
+	assert.Equal(t, "GENERAL", result["errorCode"])
+	assert.Contains(t, result["errorDetails"], "recovered from panic during evaluation")
+
+	// The panic buffer must be rooted by its own variable, not by
+	// helpers.lastOutput, which every successful evaluation overwrites.
+	// Re-packing it after an intervening output must yield the same pointer.
+	helpers.WasmCopyBufferToMemory([]byte(`{"value":true}`))
+	assert.Equal(t, evaluatePanicOutput, helpers.WasmCopyBufferToMemory(evaluatePanicBuffer))
 }
 
 func Test_safeEvaluation_recovers_from_panic(t *testing.T) {

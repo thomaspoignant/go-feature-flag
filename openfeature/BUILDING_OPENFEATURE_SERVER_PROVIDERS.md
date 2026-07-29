@@ -247,12 +247,20 @@ After **any** trap the host MUST:
 
 Hardened binaries (releases after 0.2.3) make traps much rarer: they carry a
 1MB shadow stack instead of 64KB and return structured `PARSE_ERROR` results
-for over-deep or over-broad targeting queries (input JSON > 128 nesting
-levels, > 64 nested brackets in a nikunjy query, > 1,000 items in a nikunjy
-`in` list, > 1,000 `and`/`or` conditions in a nikunjy query) instead of
-trapping. Hosts MUST still implement the trap handling above: older bundled
-binaries stay in the field carrying none of these guards, and recursion
-inside the module cannot be enumerated exhaustively.
+for over-deep or over-broad targeting queries instead of trapping. The limits
+are: input JSON > 128 nesting levels; and, for a nikunjy query, > 64 nested
+brackets, > 1,000 items in an `in` list, > 1,000 `and`/`or` conditions, or an
+attribute path of more than 128 `.`-separated segments. JSONLogic documents
+get their own nesting budget (> 256 levels) and the same 1,000-item cap on
+operand arrays (`in` lists and `and`/`or` operands). JSONLogic `var` paths
+remain exempt from the nikunjy attribute-path cap because they are resolved
+iteratively.
+
+Hosts MUST still implement the trap handling above: older bundled binaries
+stay in the field carrying none of these guards, and the query grammar has
+several recursive productions that cannot be enumerated exhaustively — the
+attribute-path limit was itself added only after the other four guards
+shipped.
 
 #### 7. Error Handling
 

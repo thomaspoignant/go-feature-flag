@@ -19,6 +19,24 @@ func main() {
 	// We keep this main empty because it is required by the tinygo when building wasm.
 }
 
+// evaluatePanicBuffer holds the pre-serialized GENERAL error that evaluate
+// returns when the output-copy path panics, so that path allocates nothing and
+// never calls back into helpers that might panic again.
+//
+// It has to be its own package-level variable: helpers.lastOutput is a single
+// slot that every successful evaluation overwrites, so it cannot keep this
+// buffer reachable. Without a root here the bytes behind evaluatePanicOutput
+// could be collected, and a bare uint64 is not a reference the GC can follow.
+var evaluatePanicBuffer = []byte(errorResult(
+	flag.ErrorCodeGeneral,
+	"recovered from panic during evaluation",
+))
+
+// evaluatePanicOutput is the packed pointer/length of evaluatePanicBuffer.
+// WasmCopyBufferToMemory points at the slice it is given rather than copying,
+// so this stays valid for the lifetime of the instance.
+var evaluatePanicOutput = helpers.WasmCopyBufferToMemory(evaluatePanicBuffer)
+
 // nolint: unused
 // evaluate is the entry point for the wasm module.
 // what it does is:
@@ -29,11 +47,11 @@ func main() {
 //export evaluate
 func evaluate(valuePosition *uint32, length uint32) (result uint64) {
 	// The copy into module memory runs outside safeEvaluation's recover; a
-	// panic here must not trap either (a trap poisons the instance), so
-	// return 0, which hosts treat as "no output produced".
+	// panic here must not trap either (a trap poisons the instance), so return
+	// the pre-serialized GENERAL error instead of 0.
 	defer func() {
 		if recover() != nil {
-			result = 0
+			result = evaluatePanicOutput
 		}
 	}()
 	return helpers.WasmCopyBufferToMemory([]byte(safeEvaluation(valuePosition, length)))
