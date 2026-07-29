@@ -160,10 +160,10 @@ bench: ## Launch the benchmark test
 	 $(GOWORK_ENV) $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
 
 ## Lint:
-lint: ## Use golintci-lint on your project
+lint: ## Use golintci-lint on all the modules of the project
 	mkdir -p ./bin
 	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b ./bin
-	./bin/golangci-lint run --timeout=5m ./... # Run linters
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Linting $(module)"; cd $(module) && $(CURDIR)/bin/golangci-lint run --timeout=5m --config $(CURDIR)/.golangci.yml ./...) &&) true
 
 vuln-check: ## Run govulncheck on all modules in the workspace
 	@which govulncheck > /dev/null 2>&1 || $(GOCMD) install golang.org/x/vuln/cmd/govulncheck@latest
