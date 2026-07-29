@@ -1,6 +1,7 @@
 package ffclient_test
 
 import (
+	"bytes"
 	"errors"
 	"log/slog"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
@@ -17,6 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock/mockretriever"
+	"gopkg.in/yaml.v3"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
@@ -476,33 +479,49 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 	}{
 		{
 			name:       "Should be refreshed",
-			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 1 * time.Second},
+			fields:     fields{waitingDuration: 5 * time.Second, pollingInterval: 1 * time.Second},
 			hasRefresh: true,
 		},
 		{
+			// The polling interval is far longer than the waiting duration, so a single tick
+			// can never happen during the wait, even if time.Sleep overshoots (which it does
+			// more on Windows, where the timer granularity is ~15ms).
 			name:       "Should not be refreshed",
-			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 3 * time.Second},
+			fields:     fields{waitingDuration: 500 * time.Millisecond, pollingInterval: 30 * time.Second},
 			hasRefresh: false,
 		},
 		{
 			name:       "Should not crash in offline mode",
-			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 3 * time.Second},
+			fields:     fields{waitingDuration: 500 * time.Millisecond, pollingInterval: 30 * time.Second},
 			hasRefresh: false,
 			offline:    true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gff, _ := ffclient.New(ffclient.Config{
+			gff, err := ffclient.New(ffclient.Config{
 				PollingInterval: tt.fields.pollingInterval,
 				Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
 				Offline:         tt.offline,
 			})
+			require.NoError(t, err)
+			defer gff.Close()
 
 			date1 := gff.GetCacheRefreshDate()
-			time.Sleep(tt.fields.waitingDuration)
-			date2 := gff.GetCacheRefreshDate()
 
+			if tt.hasRefresh {
+				// Waiting exactly one polling interval leaves no margin for the scheduler,
+				// so we poll for the refresh instead of sleeping for a fixed duration.
+				require.Eventually(t, func() bool { return date1.Before(gff.GetCacheRefreshDate()) },
+					tt.fields.waitingDuration, 50*time.Millisecond,
+					"the cache was never refreshed by the background updater")
+			} else {
+				require.Never(t, func() bool { return date1.Before(gff.GetCacheRefreshDate()) },
+					tt.fields.waitingDuration, 50*time.Millisecond,
+					"the cache was refreshed even though the polling interval had not elapsed")
+			}
+
+			date2 := gff.GetCacheRefreshDate()
 			if !tt.offline {
 				assert.NotEqual(t, time.Time{}, date1)
 				assert.NotEqual(t, time.Time{}, date2)
@@ -601,74 +620,120 @@ func Test_ForceRefreshCache(t *testing.T) {
 	assert.Equal(t, time.Time{}, gffClient.GetCacheRefreshDate())
 }
 
+// readPersistedFlags returns the content of the persistent flag configuration file and the
+// flags it contains. The library writes this file from a goroutine, so a read can catch a
+// partial write: in that case ok is false and the caller (a require.Eventually) just retries.
+func readPersistedFlags(path string) (content []byte, flags map[string]any, ok bool) {
+	content, err := os.ReadFile(path)
+	if err != nil || len(content) == 0 {
+		return nil, nil, false
+	}
+	if err := yaml.Unmarshal(content, &flags); err != nil || len(flags) == 0 {
+		return nil, nil, false
+	}
+	return content, flags, true
+}
+
 func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
+	// Note: Config.Initialize() raises any polling interval below 1s to 1s (see
+	// adjustPollingInterval in config.go), so both clients below really poll once per second.
+	// Waiting exactly one polling interval with time.Sleep leaves no margin for the OS
+	// scheduler (the Windows timer granularity alone is ~15ms), which is why every "wait
+	// until something happened" below is a require.Eventually.
+	const (
+		pollingInterval   = 1 * time.Second
+		eventuallyTimeout = 10 * pollingInterval
+		eventuallyTick    = 20 * time.Millisecond
+	)
+
 	configFile1, err := os.CreateTemp("", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// close the handles before reusing/removing them: Windows cannot write to or
 	// delete a file that is still open by another handle
-	assert.NoError(t, configFile1.Close())
+	require.NoError(t, configFile1.Close())
 
 	persistFile, err := os.CreateTemp("", "")
-	assert.NoError(t, err)
-	assert.NoError(t, persistFile.Close())
-	defer func() {
+	require.NoError(t, err)
+	require.NoError(t, persistFile.Close())
+	// t.Cleanup runs after the deferred Close() calls below, so no handle is still open on
+	// these files when Windows deletes them.
+	t.Cleanup(func() {
 		_ = os.Remove(configFile1.Name())
 		_ = os.Remove(persistFile.Name())
-	}()
+	})
+
 	content, err := os.ReadFile("testdata/flag-config.yaml")
-	assert.NoError(t, err)
-	err = os.WriteFile(configFile1.Name(), content, os.ModePerm)
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(configFile1.Name(), content, os.ModePerm))
 
 	gffClient, err := ffclient.New(ffclient.Config{
-		PollingInterval:                 1 * time.Second,
+		PollingInterval:                 pollingInterval,
 		Retriever:                       &fileretriever.Retriever{Path: configFile1.Name()},
 		LeveledLogger:                   slog.Default(),
 		Offline:                         false,
 		PersistentFlagConfigurationFile: persistFile.Name(),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	time.Sleep(100 * time.Millisecond) // Waiting for the go routine to write the persistent file
-	// 1. Checking that the persistence happened
-	contentP, err := os.ReadFile(persistFile.Name())
-	assert.NoError(t, err)
-	assert.NotEqual(t, 0, len(contentP))
+	// 1. Checking that the persistence happened (the file is written by a goroutine).
+	var contentP []byte
+	require.Eventually(t, func() bool {
+		c, flags, ok := readPersistedFlags(persistFile.Name())
+		if !ok || len(flags) != 2 { // testdata/flag-config.yaml contains 2 flags
+			return false
+		}
+		contentP = c
+		return true
+	}, eventuallyTimeout, eventuallyTick,
+		"the initial flag configuration was never persisted on disk")
 
 	// 2. Modifying the configuration file
 	content2, err := os.ReadFile("testdata/flag-config-2nd-file.yaml")
-	assert.NoError(t, err)
-	err = os.WriteFile(configFile1.Name(), content2, os.ModePerm)
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(configFile1.Name(), content2, os.ModePerm))
 
-	time.Sleep(1 * time.Second) // Waiting for the go routine to write the persistent file
-	// 3. Checking that the persistence happened and that the content is different
-	contentP2, err := os.ReadFile(persistFile.Name())
-	assert.NoError(t, err)
-	assert.NotEqual(t, 0, len(contentP2))
+	// 3. Checking that the persistence happened again and that the content is different.
+	// We wait for a flag of the 2nd file instead of only comparing the raw bytes, so that a
+	// partially written file can never satisfy the condition.
+	var contentP2 []byte
+	require.Eventually(t, func() bool {
+		c, flags, ok := readPersistedFlags(persistFile.Name())
+		if !ok || len(flags) != 2 {
+			return false
+		}
+		if _, hasFooFlag := flags["foo-flag"]; !hasFooFlag {
+			return false
+		}
+		contentP2 = c
+		return true
+	}, eventuallyTimeout, eventuallyTick,
+		"the updated flag configuration was never persisted on disk")
 	assert.NotEqual(t, contentP, contentP2)
 
-	// 4. Stopping GO Feature Flag and restart with a retriever that will fail
+	// 4. Stopping GO Feature Flag and restart with a retriever that will fail.
+	// Close() stops the polling: without it the background updater of gffClient would keep
+	// rewriting persistFile behind the back of gffClient2.
 	gffClient.Close()
+
 	configFile2, err := os.CreateTemp("", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// close the handle before removing: Windows cannot delete a file that is still open
-	assert.NoError(t, configFile2.Close())
-	err = os.Remove(configFile2.Name())
-	assert.NoError(t, err)
+	require.NoError(t, configFile2.Close())
+	require.NoError(t, os.Remove(configFile2.Name()))
+	t.Cleanup(func() { _ = os.Remove(configFile2.Name()) })
 
 	gffClient2, err := ffclient.New(ffclient.Config{
-		PollingInterval:                 500 * time.Millisecond,
+		PollingInterval:                 pollingInterval,
 		Retriever:                       &fileretriever.Retriever{Path: configFile2.Name()},
 		LeveledLogger:                   slog.Default(),
 		Offline:                         false,
 		PersistentFlagConfigurationFile: persistFile.Name(),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gffClient2.Close()
 
-	time.Sleep(100 * time.Millisecond) // Waiting for the go routine to write the persistent file
-	// 5. Checking that the flags have been loaded from the persistent file
+	// 5. Checking that the flags have been loaded from the persistent file. The fallback is
+	// done synchronously by ffclient.New (retrievePersistentLocalDisk), nothing to wait for.
 	details, _ := gffClient2.BoolVariationDetails(
 		"foo-flag",
 		ffcontext.NewEvaluationContext("random-key"),
@@ -676,25 +741,35 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	)
 	assert.NotEqual(t, "ERROR", details.Reason)
 
-	time.Sleep(2 * time.Second) // Waiting to be sure that it continue to check updates
-	flags, err := gffClient2.GetFlagsFromCache()
-	assert.NoError(t, err)
+	// 5b. The retriever keeps failing: checking that the flags coming from the persistent file
+	// survive the failing polls. This is the only assertion that needs a fixed duration,
+	// because we assert that something does NOT happen.
+	require.Never(t, func() bool {
+		flags, errCache := gffClient2.GetFlagsFromCache()
+		return errCache != nil || len(flags) != 2
+	}, 2*pollingInterval, eventuallyTick,
+		"the flags loaded from the persistent file were lost on a failing poll")
 
-	// 6. Modifying the failed configuration file
+	// 6. Making the configuration file of the failing retriever available
 	content3, err := os.ReadFile("testdata/flag-config-3rd-file.yaml")
-	assert.NoError(t, err)
-	err = os.WriteFile(configFile2.Name(), content3, os.ModePerm)
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(configFile2.Name(), content3, os.ModePerm))
 
-	// 7. Checking that the flags have been updated
-	time.Sleep(1000 * time.Millisecond) // Waiting to be sure that it continue to check updates
-	flags2, err := gffClient2.GetFlagsFromCache()
-	assert.NoError(t, err)
-	assert.NotEqual(t, len(flags), len(flags2))
-	// 8. Checking that the persistence happened and that the file is different from the previous one
-	contentP3, err := os.ReadFile(persistFile.Name())
-	assert.NoError(t, err)
-	assert.NotEqual(t, contentP2, contentP3)
+	// 7. Checking that the polling goes on after a retriever error, and that the flags of the
+	// 3rd file are now served (testdata/flag-config-3rd-file.yaml contains 7 flags).
+	require.Eventually(t, func() bool {
+		flags2, errCache := gffClient2.GetFlagsFromCache()
+		return errCache == nil && len(flags2) == 7
+	}, eventuallyTimeout, eventuallyTick,
+		"the retriever did not recover after the configuration file was restored")
+
+	// 8. Checking that the persistence happened and that the file is different from the
+	// previous one.
+	require.Eventually(t, func() bool {
+		c, flags3, ok := readPersistedFlags(persistFile.Name())
+		return ok && len(flags3) == 7 && !bytes.Equal(contentP2, c)
+	}, eventuallyTimeout, eventuallyTick,
+		"the new flag configuration was never persisted on disk")
 }
 
 func TestUseCustomBucketingKey(t *testing.T) {

@@ -57,19 +57,24 @@ func (c *cacheMock) AllFlags() (map[string]flag.Flag, error) { return nil, nil }
 // assertExpectedLog waits for the async logger to flush and asserts that a log
 // message containing expectedLog was emitted. It is a no-op when expectedLog is
 // empty.
-func assertExpectedLog(handler *slogassert.Handler, expectedLog string) {
+//
+// The log is emitted from a goroutine, so we poll instead of sleeping for a fixed
+// duration: a flat wait is a race on a loaded machine (the Windows timer granularity
+// alone is ~15ms). handler.Assert is mutex-protected, returns the number of matches
+// without failing, and only consumes the messages it matched, so it is safe to call
+// repeatedly from the require.Eventually goroutine. handler.Fail must NOT be called
+// from there: it calls t.Fatalf, which is illegal outside the test goroutine.
+func assertExpectedLog(t *testing.T, handler *slogassert.Handler, expectedLog string) {
+	t.Helper()
 	if expectedLog == "" {
 		return
 	}
-	// since the log is async, we are waiting to be sure it's written
-	time.Sleep(40 * time.Millisecond)
-	handler.Assert(func(message slogassert.LogMessage) bool {
-		if !strings.Contains(message.Message, expectedLog) {
-			handler.Fail("impossible to find %s in %s", expectedLog, message.Message)
-			return false
-		}
-		return true
-	})
+	require.Eventually(t, func() bool {
+		return handler.Assert(func(message slogassert.LogMessage) bool {
+			return strings.Contains(message.Message, expectedLog)
+		}) > 0
+	}, 2*time.Second, 20*time.Millisecond,
+		"no log message containing %q was emitted", expectedLog)
 }
 
 func TestBoolVariation(t *testing.T) {
@@ -373,7 +378,7 @@ func TestBoolVariation(t *testing.T) {
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "BoolVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -835,7 +840,7 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(
@@ -1153,7 +1158,7 @@ func TestFloat64Variation(t *testing.T) {
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -1474,7 +1479,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -1776,7 +1781,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 			// clean logger
 			ff = nil
 		})
@@ -2090,7 +2095,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 			// clean logger
 			ff = nil
 		})
@@ -2362,7 +2367,7 @@ func TestJSONVariation(t *testing.T) {
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -2596,7 +2601,7 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -2906,7 +2911,7 @@ func TestStringVariation(t *testing.T) {
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3138,7 +3143,7 @@ func TestStringVariationDetails(t *testing.T) {
 			}
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3448,7 +3453,7 @@ func TestIntVariation(t *testing.T) {
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -3722,7 +3727,7 @@ func TestIntVariationDetails(t *testing.T) {
 			}
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -4094,7 +4099,7 @@ func TestRawVariation(t *testing.T) {
 
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
-			assertExpectedLog(handler, tt.expectedLog)
+			assertExpectedLog(t, handler, tt.expectedLog)
 
 			if tt.wantErr {
 				assert.Error(t, err, "RawVariation() error = %v, wantErr %v", err, tt.wantErr)

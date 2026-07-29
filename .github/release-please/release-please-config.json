@@ -83,7 +83,12 @@
             "changelog-path": "CHANGELOG.md",
             "extra-files": [
                 "pyproject.toml",
-                "README.md"
+                "README.md",
+                {
+                    "path": "uv.lock",
+                    "type": "toml",
+                    "jsonpath": "$.package[?(@.name.value=='gofeatureflag-python-provider')].version"
+                }
             ]
         }
     }
