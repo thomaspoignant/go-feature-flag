@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -43,6 +44,9 @@ type dataExporterImpl[T ExportableEvent] struct {
 
 	daemonChan chan struct{}
 	ticker     *time.Ticker
+	// stopOnce guarantees that we stop the daemon only once: Close() can be called several times
+	// on a GO Feature Flag client, and closing an already closed channel panics.
+	stopOnce sync.Once
 }
 
 // NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
@@ -87,14 +91,17 @@ func (d *dataExporterImpl[T]) Start() {
 }
 
 // Stop is flushing the data and stopping the ticker
+// It is safe to call it several times.
 func (d *dataExporterImpl[T]) Stop() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
 		d.Flush()
 		return
 	}
-	d.ticker.Stop()
-	close(d.daemonChan)
+	d.stopOnce.Do(func() {
+		d.ticker.Stop()
+		close(d.daemonChan)
+	})
 	d.Flush()
 }
 

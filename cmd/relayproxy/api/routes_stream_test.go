@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +48,7 @@ func TestDeprecatedAliasHeaders(t *testing.T) {
 
 	go apiServer.StartWithContext(context.Background())
 	defer apiServer.Stop(context.Background())
-	time.Sleep(1 * time.Second)
+	waitForServer(t, fmt.Sprintf("http://localhost:%d", c.ServerPort(z)))
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/ws/v1/flag/change", c.ServerPort(z)))
 	require.NoError(t, err)
