@@ -21,6 +21,9 @@ type eventStoreImpl[T ExportableEvent] struct {
 	lastOffset int64
 	// stopPeriodicCleaning is a channel to stop the periodic cleaning goroutine
 	stopPeriodicCleaning chan struct{}
+	// stopOnce guarantees that we close stopPeriodicCleaning only once, Stop() is reachable
+	// from the exporter manager and directly from the tests.
+	stopOnce sync.Once
 	// cleanQueueInterval is the duration between each cleaning
 	cleanQueueInterval time.Duration
 }
@@ -230,6 +233,9 @@ func (e *eventStoreImpl[T]) periodicCleanQueue() {
 }
 
 // Stop is closing the Event store and stop the periodic cleaning.
+// It is safe to call it several times.
 func (e *eventStoreImpl[T]) Stop() {
-	close(e.stopPeriodicCleaning)
+	e.stopOnce.Do(func() {
+		close(e.stopPeriodicCleaning)
+	})
 }

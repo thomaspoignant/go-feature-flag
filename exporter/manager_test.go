@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thejerf/slogassert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -313,13 +314,18 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 				},
 			}
 			goff, err := ffclient.New(config)
-			assert.NoError(t, err)
+			require.NoError(t, err)
+			defer goff.Close()
 
 			_, err = goff.BoolVariation("test-flag", tt.ctx, false)
 			assert.NoError(t, err)
 
-			time.Sleep(120 * time.Millisecond)
-			assert.Equal(t, 1, len(mockExporter.GetExportedEvents()))
+			// The event is collected in a goroutine and exported by the flush ticker, so we
+			// can't rely on a fixed sleep: a loaded CI runner can stall past the tick.
+			require.Eventually(t, func() bool {
+				return len(mockExporter.GetExportedEvents()) == 1
+			}, 10*time.Second, 10*time.Millisecond,
+				"the flush ticker never exported the evaluation event")
 
 			switch val := mockExporter.GetExportedEvents()[0].(type) {
 			case exporter.FeatureEvent:
@@ -445,7 +451,7 @@ func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
 					Exporter:         &mockExporter,
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// create users
 			user1 := ffcontext.
@@ -462,14 +468,60 @@ func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
 				user1,
 				map[string]any{"test": "toto"},
 			)
-			time.Sleep(300 * time.Millisecond)
-			assert.Equal(t, 4, len(mockExporter.GetExportedEvents()))
+			// Events are collected in a goroutine (see notifyVariation) and exported by the
+			// flush ticker. A fixed sleep only gives us one or two ticks of margin, so a CI
+			// stall (very common on the Windows runner) makes every tick fire before the
+			// events reach the event store, and we export nothing.
+			require.Eventually(t, func() bool {
+				return len(mockExporter.GetExportedEvents()) == 4
+			}, 10*time.Second, 10*time.Millisecond,
+				"the flush ticker never exported the 4 evaluation events")
 
-			// Wait 2 seconds to have a second file
+			// Close() waits for the in-flight collect goroutines and then flushes, so the last
+			// 2 events are exported synchronously and this assertion needs no waiting.
 			_, _ = ffclient.BoolVariation("test-flag", user1, false)
 			_, _ = ffclient.BoolVariation("test-flag", user2, false)
 			ffclient.Close() // a flush is triggered here
 			assert.Equal(t, 6, len(mockExporter.GetExportedEvents()))
 		})
 	}
+}
+
+// TestDataExporterManager_StopReleasesEverything checks the two things Stop() has to guarantee:
+// it is safe to call several times, since callers are free to Close() a client twice, and it
+// releases every goroutine it started, including the event store cleaner. Forgetting the store
+// leaks one goroutine and the events it retains per client, which is unbounded for the relay
+// proxy since it builds a client per flagset on every hot reload.
+func TestDataExporterManager_StopReleasesEverything(t *testing.T) {
+	const nbManagers = 50
+	goroutinesBefore := runtime.NumGoroutine()
+
+	for range nbManagers {
+		dc := exporter.NewManager[exporter.FeatureEvent](
+			[]exporter.Config{
+				{
+					FlushInterval:    10 * time.Millisecond,
+					MaxEventInMemory: 100,
+					Exporter:         &mock.Exporter{Bulk: true},
+				},
+			},
+			10*time.Millisecond,
+			nil,
+		)
+		dc.Start()
+		dc.AddEvent(exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").Build(),
+			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+		dc.Stop()
+		// ffclient.Close() can legitimately be called twice, and Stop() used to panic with
+		// "close of closed channel" on the second call.
+		assert.NotPanics(t, dc.Stop)
+	}
+
+	require.Eventually(t, func() bool {
+		// A small tolerance, other tests in this package leak goroutines of their own.
+		return runtime.NumGoroutine() <= goroutinesBefore+5
+	}, 10*time.Second, 20*time.Millisecond,
+		"Stop() leaked goroutines: %d before creating %d managers, %d after stopping them all",
+		goroutinesBefore, nbManagers, runtime.NumGoroutine())
 }
