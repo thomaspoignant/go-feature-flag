@@ -4,6 +4,18 @@ GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
 ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
 
+# The custom target files (cmd/wasm/targets/) raise the wasm shadow stack from
+# the 64KB wasm-ld default to 1MB (`-z stack-size=`). The 64KB stack could be
+# overflowed by recursive JSON decoding or targeting-query parsing on realistic
+# flag configurations, trapping and permanently poisoning the instance
+# (issue #5651). Note: TinyGo's -stack-size flag only affects goroutine stacks,
+# not the system stack used with -scheduler=none, hence the linker flag.
+# `verify-wasm-stack` asserts the produced binaries actually carry that stack
+# size, so a TinyGo upgrade that stops honoring the target-JSON ldflags fails
+# CI instead of silently regressing. It is kept out of the build targets (it
+# needs python3) and runs as a separate step in CI and in the release script.
+WASM_STACK_SIZE := 1048576
+
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
   GOWORK_ENV := GOWORK=off
@@ -48,10 +60,14 @@ build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in 
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasm -target ./targets/wasm-stack1m.json -opt=2 -opt=s --no-debug -scheduler=none
 
 build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasi -target ./targets/wasi-stack1m.json -opt=2 -opt=s --no-debug -scheduler=none
+
+verify-wasm-stack: ## Assert the built wasm/wasi binaries carry the expected shadow stack size (run by CI, needs python3)
+	python3 .github/ci-scripts/verify-wasm-stack.py out/bin/gofeatureflag-evaluation.wasm $(WASM_STACK_SIZE)
+	python3 .github/ci-scripts/verify-wasm-stack.py out/bin/gofeatureflag-evaluation.wasi $(WASM_STACK_SIZE)
 
 build-modules:  ## Run build command to build all modules in the workspace
 	@echo "Building all modules in the workspace..."
