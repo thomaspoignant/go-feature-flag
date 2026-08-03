@@ -35,6 +35,11 @@ Android, JavaScript Web) follow a different paradigm and are out of scope for ve
 
 ### Relationship to other documents
 
+- If you are **writing a new provider**, start with
+  [Implementing a GO Feature Flag Provider](/specification/implementing-a-provider). It gives
+  the component shape, build order and complete wire payloads that this document deliberately
+  omits, and links back here for the rules. This document tells you what must be true; that one
+  tells you what to build.
 - It **supersedes** `BUILDING_OPENFEATURE_SERVER_PROVIDERS.md`, which was written from the
   .NET provider and is inaccurate in several load-bearing places.
 - It **absorbs** the former Provider Cache specification, now [§17](#17-remote-cache-optional).
@@ -334,6 +339,20 @@ acquiring any lock on the configuration state.
 | `GOFF-IP-012` | Major    | A flag absent from the local configuration **MUST** yield `FLAG_NOT_FOUND` without invoking the engine.                                                          |
 | `GOFF-IP-013` | Critical | Evaluation **MUST** be panic- and exception-safe. An engine fault **MUST** degrade to a `GENERAL` error and the caller's default value; it **MUST NOT** propagate into the application. |
 | `GOFF-IP-014` | Major    | The engine input **MUST** carry `flagKey`, `flag`, `evalContext`, and `flagContext` containing `defaultSdkValue` and `evaluationContextEnrichment`.              |
+| `GOFF-IP-016` | Critical | The flag configuration object **MUST** be treated as **opaque**. It **MUST** be handed to the engine exactly as received, with no field dropped, reordered by a lossy representation, or reconstructed from a typed model. The only field a provider **MAY** read is `trackEvents`. |
+| `GOFF-IP-017` | Major    | Unknown fields anywhere in the flag configuration response **MUST** be tolerated and preserved. A provider **MUST NOT** fail, warn, or discard on encountering a field it does not recognise.                                                                                       |
+
+:::warning Why the flag object is opaque
+The evaluation engine owns the flag schema — `variations`, `targeting`, `defaultRule`,
+`percentage`, `scheduledRollout`, `experimentation`, `bucketingKey` and whatever it gains next.
+A provider that deserialises that schema into typed models silently drops any field added by a
+newer engine, then hands the truncated flag to evaluation. The result is a **wrong flag value
+with no error** — the failure mode this specification exists to prevent — and it appears the
+moment the engine ships a feature the provider predates, without either side changing.
+
+Passing the object through untouched is also considerably less code: a provider needs no flag
+model, no rollout types, no rule types, and no migration when the schema evolves.
+:::
 
 ---
 
