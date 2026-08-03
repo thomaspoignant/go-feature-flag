@@ -37,10 +37,18 @@ class FeatureEvent(BaseModel):
     # value passed to variation. If the default field is omitted, it is assumed to be false.
     default: bool
 
-    # source indicates where the event was generated.
-    # This is set to SERVER when the event was evaluated in the relay-proxy
-    # and PROVIDER_CACHE when it is evaluated from the cache.
-    source: str = Field(default="PROVIDER_CACHE")
+    # Version of the flag, taken from the evaluation result when the flag carries
+    # one. Absent when it does not.
+    version: Optional[str] = None
+
+    # source indicates where the event was generated: INPROCESS for a locally
+    # evaluated flag, PROVIDER_CACHE for a value served from a remote-mode cache.
+    # SERVER is reserved for events the relay proxy generated itself.
+    #
+    # Always set this at the call site. Every event this provider emits today is
+    # a local evaluation, but a default that nothing assigns is how this field
+    # came to label every event a cache hit.
+    source: str = Field(default="INPROCESS")
 
 
 class RequestDataCollector(BaseModel):

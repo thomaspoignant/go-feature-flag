@@ -154,3 +154,111 @@ def test_buffer_cap_with_failing_collector_requeue():
         assert mock_api.send_event_to_data_collector.call_count >= 1
     finally:
         publisher.stop()
+
+
+def test_concurrent_flushes_do_not_overlap():
+    """Publishing must be single-flight: two flushes must not post at once."""
+    in_flight = threading.Event()
+    overlapped = threading.Event()
+    concurrent = 0
+    guard = threading.Lock()
+
+    def _slow_send(events, meta):
+        nonlocal concurrent
+        with guard:
+            concurrent += 1
+            if concurrent > 1:
+                overlapped.set()
+        in_flight.set()
+        time.sleep(0.2)
+        with guard:
+            concurrent -= 1
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = _slow_send
+    options = GoFeatureFlagOptions(endpoint="http://localhost:1031")
+    publisher = EventPublisher(api=mock_api, options=options)
+
+    publisher.add_event(_make_event())
+    first = threading.Thread(target=publisher._publish_events, daemon=True)
+    first.start()
+    assert in_flight.wait(timeout=2.0), "first publish should have started"
+
+    # A second flush arriving mid-post must not start its own request.
+    publisher.add_event(_make_event(user_key="u2"))
+    publisher._publish_events()
+    first.join(timeout=2.0)
+
+    assert not overlapped.is_set()
+
+
+def test_enqueue_is_not_blocked_by_an_in_flight_publish():
+    """add_event runs inside an evaluation hook; a slow collector must not stall it."""
+    in_flight = threading.Event()
+    release = threading.Event()
+
+    def _blocking_send(events, meta):
+        in_flight.set()
+        release.wait(timeout=5.0)
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = _blocking_send
+    options = GoFeatureFlagOptions(endpoint="http://localhost:1031")
+    publisher = EventPublisher(api=mock_api, options=options)
+
+    publisher.add_event(_make_event())
+    threading.Thread(target=publisher._publish_events, daemon=True).start()
+    assert in_flight.wait(timeout=2.0)
+
+    try:
+        started = time.monotonic()
+        publisher.add_event(_make_event(user_key="u2"))
+        assert time.monotonic() - started < 1.0
+    finally:
+        release.set()
+
+
+def test_stop_is_bounded_when_the_collector_hangs():
+    """Shutdown must bound how long it waits for background work."""
+    release = threading.Event()
+
+    def _hanging_send(events, meta):
+        release.wait(timeout=10.0)
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = _hanging_send
+    options = GoFeatureFlagOptions(endpoint="http://localhost:1031")
+    publisher = EventPublisher(api=mock_api, options=options)
+    publisher.start()
+    publisher.add_event(_make_event())
+    threading.Thread(target=publisher._publish_events, daemon=True).start()
+    time.sleep(0.1)
+
+    try:
+        started = time.monotonic()
+        publisher.stop(timeout=0.5)
+        assert time.monotonic() - started < 3.0
+    finally:
+        release.set()
+
+
+def test_exporter_metadata_always_carries_the_reserved_keys():
+    """Without them, events cannot be attributed to an SDK."""
+    mock_api = Mock()
+    options = GoFeatureFlagOptions(endpoint="http://localhost:1031")
+    publisher = EventPublisher(api=mock_api, options=options)
+
+    assert publisher._exporter_metadata == {"provider": "python", "openfeature": True}
+
+    publisher_with_meta = EventPublisher(
+        api=mock_api,
+        options=GoFeatureFlagOptions(
+            endpoint="http://localhost:1031",
+            exporter_metadata={"appName": "demo"},
+        ),
+    )
+    assert publisher_with_meta._exporter_metadata == {
+        "appName": "demo",
+        "provider": "python",
+        "openfeature": True,
+    }

@@ -85,7 +85,6 @@ def _setup_provider_and_client(
         options=GoFeatureFlagOptions(
             endpoint="http://localhost:1031",
             evaluation_type=EvaluationType.INPROCESS,
-            disable_cache_invalidation=True,
             data_flush_interval=100000,
         )
     )
@@ -246,7 +245,6 @@ def test_should_error_if_flag_configuration_endpoint_returns_404(mock_urllib3_re
             options=GoFeatureFlagOptions(
                 endpoint="http://localhost:1031",
                 evaluation_type=EvaluationType.INPROCESS,
-                disable_cache_invalidation=True,
             )
         )
         api.set_provider(provider)
@@ -271,7 +269,6 @@ def test_should_error_if_endpoint_not_available(mock_urllib3_request):
             options=GoFeatureFlagOptions(
                 endpoint="http://localhost:1031",
                 evaluation_type=EvaluationType.INPROCESS,
-                disable_cache_invalidation=True,
             )
         )
         api.set_provider(provider)

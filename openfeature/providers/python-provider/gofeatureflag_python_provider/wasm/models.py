@@ -38,3 +38,7 @@ class WasmEvaluationResponse(BaseModel):
     errorDetails: Optional[str] = None
     trackEvents: bool = False
     metadata: Optional[dict[str, Any]] = None
+    # Top-level on the engine response, not inside `metadata`. A scheduled
+    # rollout step can override it at evaluation time, so this value — not the
+    # one in the stored flag configuration — is the authoritative one.
+    version: str = ""

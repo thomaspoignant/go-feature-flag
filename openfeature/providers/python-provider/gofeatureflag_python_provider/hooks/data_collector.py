@@ -10,6 +10,16 @@ from openfeature.hook import Hook, HookContext
 logger = logging.getLogger(__name__)
 default_targeting_key = "undefined-targetingKey"
 
+# Flag metadata marking a result the relay proxy produced via remote fallback.
+EVALUATED_REMOTELY_KEY = "gofeatureflag_evaluated_remotely"
+
+# Flag metadata key carrying the flag version reported by the engine.
+VERSION_KEY = "version"
+
+# Every event this hook emits is a local evaluation: remote mode produces no
+# trackable flags, and fallback results are skipped above.
+SOURCE_INPROCESS = "INPROCESS"
+
 
 class DataCollectorHook(Hook):
     _options: GoFeatureFlagOptions
@@ -38,10 +48,14 @@ class DataCollectorHook(Hook):
             or not self._evaluator.is_flag_trackable(hook_context.flag_key)
         ):
             return
+        if (details.flag_metadata or {}).get(EVALUATED_REMOTELY_KEY):
+            # The relay proxy evaluated this one and has already recorded it.
+            # Emitting here would count the same evaluation twice.
+            return
         feature_event = FeatureEvent(
             contextKind=(
                 "anonymousUser"
-                if hook_context.evaluation_context.attributes.get("anonymous", False)
+                if hook_context.evaluation_context.attributes.get("anonymous") is True
                 else "user"
             ),
             creationDate=int(datetime.datetime.now().timestamp()),
@@ -49,6 +63,8 @@ class DataCollectorHook(Hook):
             key=hook_context.flag_key,
             value=details.value,
             variation=details.variant or "SdkDefault",
+            version=(details.flag_metadata or {}).get(VERSION_KEY),
+            source=SOURCE_INPROCESS,
             userKey=hook_context.evaluation_context.targeting_key
             or default_targeting_key,
         )
@@ -63,7 +79,7 @@ class DataCollectorHook(Hook):
         feature_event = FeatureEvent(
             contextKind=(
                 "anonymousUser"
-                if hook_context.evaluation_context.attributes.get("anonymous", False)
+                if hook_context.evaluation_context.attributes.get("anonymous") is True
                 else "user"
             ),
             creationDate=int(datetime.datetime.now().timestamp()),
@@ -71,6 +87,7 @@ class DataCollectorHook(Hook):
             key=hook_context.flag_key,
             value=hook_context.default_value,
             variation="SdkDefault",
+            source=SOURCE_INPROCESS,
             userKey=hook_context.evaluation_context.targeting_key
             or default_targeting_key,
         )

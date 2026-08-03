@@ -1,9 +1,10 @@
 import logging
+import os
 import typing
 from enum import Enum
 
 import urllib3
-from pydantic import AnyHttpUrl, BaseModel as PydanticBaseModel, ConfigDict
+from pydantic import AnyHttpUrl, BaseModel as PydanticBaseModel, ConfigDict, Field
 
 
 class EvaluationType(str, Enum):
@@ -17,16 +18,24 @@ class BaseModel(PydanticBaseModel):
 
 class GoFeatureFlagOptions(BaseModel):
     # evaluation_type selects how flags are evaluated: remote (relay proxy) or inprocess (local/WASM).
-    # default: REMOTE
+    # default: INPROCESS
     evaluation_type: EvaluationType = EvaluationType.INPROCESS
 
     # endpoint is the endpoint of the relay proxy.
     # example: http://localhost:1031
     endpoint: AnyHttpUrl
 
-    # flagCacheSize (optional) is the maximum number of flag events we keep in memory to cache your flags.
+    # data_collector_base_url (optional) overrides the base URL of the data collector
+    # only; flag configuration and evaluation keep using endpoint. It replaces the
+    # whole base, including scheme, host, port and path prefix, and authentication,
+    # headers and timeout apply to it identically.
+    # default: endpoint
+    data_collector_base_url: typing.Optional[AnyHttpUrl] = None
+
+    # timeout (optional) in milliseconds, applied to every request to the relay proxy:
+    # flag configuration, remote evaluation and data collection.
     # default: 10000
-    cache_size: typing.Optional[int] = 10000
+    timeout: typing.Optional[int] = 10_000
 
     # dataFlushInterval (optional) interval time (in millisecond) we use to call the relay proxy to collect data.
     # The parameter is used only if the cache is enabled, otherwise the collection of the data is done directly
@@ -38,14 +47,23 @@ class GoFeatureFlagOptions(BaseModel):
     # default: false
     disable_data_collection: typing.Optional[bool] = False
 
-    # reconnectInterval (optional) interval time (in seconds) we use to reconnect to the server if the \
-    # connection is stopped.
-    # default: 1 minute
-    reconnect_interval: typing.Optional[int] = 60
-
     # flag_config_poll_interval_seconds (optional) interval in seconds to poll flag configuration.
-    # Used only by InProcessEvaluator. default: 10
-    flag_config_poll_interval_seconds: typing.Optional[int] = 10
+    # Used only by InProcessEvaluator.
+    # default: 120 seconds
+    flag_config_poll_interval_seconds: typing.Optional[int] = 120
+
+    # evaluation_flag_list (optional) restricts the flag configuration fetched from
+    # the relay proxy to these keys. Unset or empty means every flag.
+    # Used only when evaluation_type is INPROCESS.
+    # default: empty (all flags)
+    evaluation_flag_list: typing.Optional[typing.List[str]] = None
+
+    # custom_headers (optional) extra headers added to every request to the relay
+    # proxy, for deployments behind a gateway that needs its own authentication.
+    # They are applied before the provider's own headers, so a configured api_key
+    # always wins over a custom Authorization header.
+    # default: none
+    custom_headers: typing.Optional[dict[str, str]] = None
 
     # ADVANCED OPTIONS --- be careful when changing these options
 
@@ -56,22 +74,21 @@ class GoFeatureFlagOptions(BaseModel):
     # http_client (optional) is the http client used to call the relay proxy.
     urllib3_pool_manager: typing.Optional[urllib3.PoolManager] = None
 
-    # disable_cache_invalidation (optional) set to true if you don't want to invalidate the cache when the remote
-    # config changes.
-    # default: false
-    disable_cache_invalidation: typing.Optional[bool] = False
-
     # api_key (optional) If the relay proxy is configured to authenticate the requests, you should provide
     # an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key.
     # Default: None
     api_key: typing.Optional[str] = None
 
     # ExporterMetadata (optional) is the metadata we send to the GO Feature Flag relay proxy when we report the
-    # evaluation data usage.
+    # evaluation data usage. Values are restricted to string, boolean, integer or
+    # float; anything else is rejected here rather than failing later inside the
+    # publisher, where the batch would be re-queued and retried forever.
     #
     # ‼️Important: If you are using a GO Feature Flag relay proxy before version v1.41.0, the information of this
     # field will not be added to your feature events.
-    exporter_metadata: typing.Optional[dict] = {}
+    exporter_metadata: typing.Optional[
+        dict[str, typing.Union[str, bool, int, float]]
+    ] = {}
 
     # max_pending_events (optional) is the maximum number of events buffered in memory before an immediate
     # flush is triggered (fire-and-forget). Used by EventPublisher.
@@ -85,8 +102,29 @@ class GoFeatureFlagOptions(BaseModel):
 
     # wasm_pool_size (optional) number of WASM Store instances for concurrent in-process evaluation.
     # Used only when evaluation_type is INPROCESS. wasmtime.Store is not thread-safe; a pool
-    # allows multiple evaluations to run in parallel. default: 10
-    wasm_pool_size: typing.Optional[int] = 10
+    # allows multiple evaluations to run in parallel.
+    # default: the host's CPU core count
+    wasm_pool_size: typing.Optional[int] = Field(
+        default_factory=lambda: os.cpu_count() or 1
+    )
+
+    def get_exporter_metadata(self) -> dict:
+        """Exporter metadata plus the reserved keys identifying this SDK.
+
+        These are present whether or not any metadata was configured, so events
+        can always be attributed to a provider and a language.
+        """
+        return {
+            **(self.exporter_metadata or {}),
+            "provider": "python",
+            "openfeature": True,
+        }
+
+    def get_wasm_pool_size(self) -> int:
+        """Resolve the WASM pool size, defaulting to the host's CPU core count."""
+        if self.wasm_pool_size is not None and self.wasm_pool_size > 0:
+            return self.wasm_pool_size
+        return os.cpu_count() or 1
 
     def get_log_level_int(self) -> int:
         """Resolve log_level to a logging module level constant."""
