@@ -35,7 +35,6 @@ from gofeatureflag_python_provider.wasm import (
     WasmEvaluationTrapError,
     WasmFlagContext,
     WasmInput,
-    WasmInputTooDeepError,
 )
 from gofeatureflag_python_provider.wasm.evaluate_wasm import (
     _create_slot,
@@ -218,7 +217,9 @@ def test_hostile_payload_never_poisons_the_evaluator():
         WasmInput(
             flagKey="hostile-flag",
             flag=_BOOL_FLAG,
-            evalContext=_nested_ctx(400),
+            # 200 is the deepest context that still serializes: pydantic's own
+            # ~255-level cap rejects anything deeper before it reaches WASM.
+            evalContext=_nested_ctx(200),
             flagContext=WasmFlagContext(defaultSdkValue=False),
         ),
     ]
@@ -230,8 +231,8 @@ def test_hostile_payload_never_poisons_the_evaluator():
             for _ in range(2 * pool_size):  # hit every pool slot at least twice
                 try:
                     e.evaluate(hostile)
-                except (WasmEvaluationTrapError, WasmInputTooDeepError):
-                    pass  # typed error; a trapped store has been recycled
+                except WasmEvaluationTrapError:
+                    pass  # trap converted to a typed error, store recycled
 
         for _ in range(20):
             response = e.evaluate(_wasm_input({"targetingKey": "user-1"}))
@@ -433,6 +434,32 @@ def test_over_condition_chain_returns_structured_error(wasm_module):
     # The guard fired before any recursion: the same store keeps working.
     ok = _raw_evaluate(slot, _payload({"targetingKey": "user-1"}))
     assert b"variationType" in ok
+
+
+@pytest.mark.skipif(
+    _is_known_vulnerable_binary(),
+    reason="the input nesting guard only exists in binaries > 0.2.3",
+)
+def test_deep_context_degrades_to_structured_error_end_to_end():
+    """
+    The full evaluator path needs no host-side pre-flight depth guard: a
+    too-deep evaluation context comes back from the module as a structured
+    PARSE_ERROR response — no exception, no trap, pool untouched.
+
+    Depth 200 is over the module's 128-level budget but under pydantic's own
+    ~255-level serialization cap, which host-side rejects anything deeper
+    before it can reach the module.
+    """
+    e = EvaluateWasm(wasm_path=_WASI_OVERRIDE, pool_size=1)
+    e.initialize()
+    try:
+        response = e.evaluate(_wasm_input(_nested_ctx(200)))
+        assert response.errorCode == "PARSE_ERROR"
+        assert e._pool.qsize() == 1
+        follow_up = e.evaluate(_wasm_input({"targetingKey": "user-1"}))
+        assert follow_up.value is True
+    finally:
+        e.dispose()
 
 
 # ---------------------------------------------------------------------------

@@ -588,12 +588,16 @@ def test_wasm_trap_degrades_to_general_error():
     evaluator.shutdown()
 
 
-def test_wasm_input_too_deep_degrades_to_general_error():
-    """A rejected too-deep payload surfaces as GeneralError, not a raw error."""
-    from gofeatureflag_python_provider.wasm import WasmInputTooDeepError
+def test_wasm_serialization_failure_degrades_to_general_error():
+    """
+    An input the host cannot serialize for the module (pydantic's ~255-level
+    nesting cap, circular references) surfaces as GeneralError, not a raw
+    pydantic exception.
+    """
+    from pydantic_core import PydanticSerializationError
 
     evaluator, mock_wasm = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)
-    mock_wasm.evaluate.side_effect = WasmInputTooDeepError("too deep")
+    mock_wasm.evaluate.side_effect = PydanticSerializationError("depth exceeded")
 
     with pytest.raises(GeneralError, match="WASM evaluation failed"):
         evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
