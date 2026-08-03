@@ -74,14 +74,6 @@ class WasmEvaluationTrapError(RuntimeError):
     """
 
 
-class WasmInputTooDeepError(RuntimeError):
-    """
-    Raised before calling the WASM module when the input payload is nested too
-    deeply. The module decodes JSON recursively on a small fixed-size stack, so
-    deeply nested evaluation contexts would overflow it and trap.
-    """
-
-
 class WasmPoolTimeoutError(RuntimeError):
     """
     Raised when no evaluation slot became available within the timeout and a
@@ -94,30 +86,6 @@ class WasmPoolTimeoutError(RuntimeError):
 # How long evaluate() waits for a free slot before assuming the pool has been
 # drained (e.g. every replacement after a trap failed) and trying to self-heal.
 _POOL_GET_TIMEOUT_SECONDS = 30.0
-
-
-# Maximum {}/[] nesting depth accepted for the JSON payload sent to the WASM
-# module. The module decodes JSON recursively on a fixed-size shadow stack
-# (64KB in binaries <= 0.2.3, where ~250 levels overflow it), so deep payloads
-# are rejected host-side before they can trap the module.
-_MAX_INPUT_NESTING_DEPTH = 128
-
-
-def _exceeds_depth(value: Any, limit: int) -> bool:
-    """Return True if `value` nests dicts/lists/tuples deeper than `limit` levels."""
-    stack = [(value, 1)]
-    while stack:
-        node, depth = stack.pop()
-        if isinstance(node, dict):
-            children: Any = node.values()
-        elif isinstance(node, (list, tuple)):
-            children = node
-        else:
-            continue
-        if depth > limit:
-            return True
-        stack.extend((child, depth + 1) for child in children)
-    return False
 
 
 def _create_slot(
@@ -241,19 +209,6 @@ class EvaluateWasm:
         if self._pool is None:
             raise WasmNotLoadedError(
                 "EvaluateWasm has not been initialized. Call initialize() first."
-            )
-        if _exceeds_depth(
-            [
-                wasm_input.flag,
-                wasm_input.evalContext,
-                wasm_input.flagContext.defaultSdkValue,
-                wasm_input.flagContext.evaluationContextEnrichment,
-            ],
-            _MAX_INPUT_NESTING_DEPTH,
-        ):
-            raise WasmInputTooDeepError(
-                "evaluation input exceeds the maximum supported nesting depth "
-                f"({_MAX_INPUT_NESTING_DEPTH})"
             )
         # Capture the queue: dispose() may null out self._pool while we hold a
         # slot, and the finally below must return it to the queue it came from.

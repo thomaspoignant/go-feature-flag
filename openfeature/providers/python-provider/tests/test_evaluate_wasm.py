@@ -14,14 +14,11 @@ import gofeatureflag_python_provider.wasm.evaluate_wasm as evaluate_wasm_module
 from gofeatureflag_python_provider.wasm import EvaluateWasm, WasmFlagContext, WasmInput
 from gofeatureflag_python_provider.wasm.evaluate_wasm import (
     WasmEvaluationTrapError,
-    WasmInputTooDeepError,
     WasmInvalidResultError,
     WasmNotLoadedError,
     WasmPoolTimeoutError,
-    _exceeds_depth,
 )
 from tests.wasm_helpers import BOOL_FLAG as _BOOL_FLAG
-from tests.wasm_helpers import nested_ctx as _nested_ctx
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -497,34 +494,6 @@ def test_empty_pool_raises_typed_error_when_heal_fails(monkeypatch):
             e.evaluate(_make_input("f", _BOOL_FLAG, default=False))
     finally:
         e.dispose()
-
-
-def test_input_too_deep_raises_before_reaching_wasm():
-    """Nesting beyond the depth limit is rejected host-side; the pool is untouched."""
-    e = EvaluateWasm(pool_size=1)
-    e.initialize()
-    try:
-        with pytest.raises(WasmInputTooDeepError, match="nesting depth"):
-            e.evaluate(_make_input("deep", _BOOL_FLAG, ctx=_nested_ctx(200)))
-        assert e._pool.qsize() == 1
-        assert e.evaluate(_make_input("f", _BOOL_FLAG, default=False)).value is True
-    finally:
-        e.dispose()
-
-
-def test_exceeds_depth_boundary():
-    """_exceeds_depth flags containers nested strictly deeper than the limit."""
-
-    def nest(n: int):
-        value = 1
-        for _ in range(n):
-            value = {"a": value}
-        return value
-
-    assert not _exceeds_depth(nest(5), 5)
-    assert _exceeds_depth(nest(6), 5)
-    assert not _exceeds_depth({"a": [1, 2, {"b": "c"}]}, 5)
-    assert not _exceeds_depth("scalar", 1)
 
 
 # ---------------------------------------------------------------------------

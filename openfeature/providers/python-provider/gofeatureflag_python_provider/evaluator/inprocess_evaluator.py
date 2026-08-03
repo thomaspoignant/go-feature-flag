@@ -17,6 +17,7 @@ from openfeature.exception import (
     TypeMismatchError,
 )
 from openfeature.flag_evaluation import FlagResolutionDetails, Reason
+from pydantic_core import PydanticSerializationError
 
 from gofeatureflag_python_provider.evaluator.abstract_evaluator import AbstractEvaluator
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
@@ -26,7 +27,6 @@ from gofeatureflag_python_provider.wasm import (
     WasmEvaluationTrapError,
     WasmFlagContext,
     WasmInput,
-    WasmInputTooDeepError,
     WasmInvalidResultError,
     WasmNotLoadedError,
     WasmPoolTimeoutError,
@@ -191,14 +191,17 @@ class InProcessEvaluator(AbstractEvaluator):
             response = self._wasm.evaluate(wasm_input)
         except (
             WasmEvaluationTrapError,
-            WasmInputTooDeepError,
             WasmInvalidResultError,
             WasmNotLoadedError,
             WasmPoolTimeoutError,
+            PydanticSerializationError,
         ) as exc:
             # Degrade per the OpenFeature spec: the SDK catches GeneralError
             # and returns the default value with reason ERROR instead of
             # surfacing a raw WASM runtime failure to the application.
+            # PydanticSerializationError covers inputs the host cannot even
+            # serialize for the module (circular references, pydantic's own
+            # ~255-level nesting cap, unserializable attribute values).
             raise GeneralError(
                 f"WASM evaluation failed for flag '{flag_key}': {exc}"
             ) from exc
