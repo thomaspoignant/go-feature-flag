@@ -109,6 +109,24 @@ requirement in this document would detect, because all of them would still pass.
 | `GOFF-ENG-002`  | Major    | The pinned engine version **MUST** be recorded in a single machine-readable location in the provider repository (a version file, build property or dependency manifest). |
 | `GOFF-ENG-003`  | Minor    | The provider **SHOULD** document which specification version it targets.                                                                                                 |
 
+Evidence for `GOFF-ENG-001` is the **pinned version declaration**, not the binary itself.
+Engine artefacts are commonly fetched at build time and absent from a source checkout, so an
+audit verifies the pin and the code path that consumes it.
+
+### 1.7 Delegated behaviour
+
+A provider **MUST** be treated as accountable for the observable behaviour of any library it
+delegates to, including a generic OFREP client. Deferring to a dependency is a legitimate
+implementation choice, but it does not transfer conformance: if the delegate returns
+`TYPE_MISMATCH` where this specification requires a value, the provider is non-conformant.
+
+This does not conflict with [§1.5](#15-deferring-to-the-language-sdk). Deferring to the
+OpenFeature **SDK** for the shape of a type or the name of an error code is required.
+Inheriting a **third-party client's** behaviour where this specification is explicit is not.
+
+An audit **SHOULD** record whether the remediation for such a finding lies upstream, since
+that materially changes who can fix it and how quickly.
+
 ---
 
 ## 2. Provider identity — `GOFF-META`
@@ -134,21 +152,24 @@ consequences, and divergent defaults are how a fleet ends up behaving inconsiste
 
 ### 3.1 Canonical options
 
-| Canonical name                | Type        | Default          | Applies to  |
-| ----------------------------- | ----------- | ---------------- | ----------- |
-| `endpoint`                    | URL string  | *(required)*     | both        |
-| `evaluationType`              | enum        | in-process       | both        |
-| `apiKey`                      | string      | none             | both        |
-| `timeout`                     | duration    | `10000 ms`       | both        |
-| `flagChangePollingInterval`   | duration    | `120000 ms`      | in-process  |
-| `evaluationFlagList`          | string list | empty (all)      | in-process  |
-| `exporterMetadata`            | map         | empty            | both        |
-| `dataFlushInterval`           | duration    | `60000 ms`       | both        |
-| `maxPendingEvents`            | integer     | `10000`          | both        |
-| `disableDataCollection`       | boolean     | `false`          | both        |
-| `dataCollectorBaseURL`        | URL string  | `endpoint`       | both        |
-| `wasmEvaluatorPoolSize`       | integer     | CPU core count   | WASM        |
-| `logger`                      | SDK logger  | language default | both        |
+| Canonical name                | Type        | Default          | Applies to  | Support  |
+| ----------------------------- | ----------- | ---------------- | ----------- | -------- |
+| `endpoint`                    | URL string  | *(required)*     | both        | REQUIRED |
+| `evaluationType`              | enum        | in-process       | both        | REQUIRED |
+| `apiKey`                      | string      | none             | both        | REQUIRED |
+| `timeout`                     | duration    | `10000 ms`       | both        | REQUIRED |
+| `flagChangePollingInterval`   | duration    | `120000 ms`      | in-process  | REQUIRED |
+| `exporterMetadata`            | map         | empty            | both        | REQUIRED |
+| `dataFlushInterval`           | duration    | `60000 ms`       | both        | REQUIRED |
+| `maxPendingEvents`            | integer     | `10000`          | both        | REQUIRED |
+| `disableDataCollection`       | boolean     | `false`          | both        | REQUIRED |
+| `dataCollectorBaseURL`        | URL string  | `endpoint`       | both        | RECOMMENDED |
+| `evaluationFlagList`          | string list | empty (all)      | in-process  | RECOMMENDED |
+| `wasmEvaluatorPoolSize`       | integer     | CPU core count   | WASM        | RECOMMENDED |
+| `logger`                      | SDK logger  | language default | both        | RECOMMENDED |
+
+A **REQUIRED** option that is absent is a `GOFF-CFG-003` failure. A **RECOMMENDED** option
+that is absent is reported against its own requirement, not against `GOFF-CFG-003`.
 
 ### 3.2 Requirements
 
@@ -159,8 +180,8 @@ consequences, and divergent defaults are how a fleet ends up behaving inconsiste
 | `GOFF-CFG-003` | Major    | Every option listed in §3.1 that the provider supports **MUST** use the default value given there.                                                                                                 |
 | `GOFF-CFG-004` | Major    | The provider **MUST NOT** mutate the caller's options object or any collection it contains. Normalisation **MUST** operate on a copy.                                                               |
 | `GOFF-CFG-005` | Critical | The provider **MUST NOT** read environment variables to determine the endpoint or credentials. A feature-flag provider silently retargeting itself based on ambient environment is a security surprise. |
-| `GOFF-CFG-006` | Major    | `dataCollectorBaseURL` **MUST** override the base URL for the data-collector endpoint **only**. Flag-configuration and evaluation requests **MUST** continue to use `endpoint`. When unset it **MUST** fall back to `endpoint`. |
-| `GOFF-CFG-007` | Major    | `dataCollectorBaseURL` **MUST** replace the whole base, including scheme, host, port and path prefix, and authentication, custom headers and timeout **MUST** apply to it identically.               |
+| `GOFF-CFG-006` | Major    | `dataCollectorBaseURL` **SHOULD** be supported. Where supported it **MUST** override the base URL for the data-collector endpoint **only** — flag-configuration and evaluation requests **MUST** continue to use `endpoint` — and it **MUST** fall back to `endpoint` when unset. |
+| `GOFF-CFG-007` | Major    | Where supported, `dataCollectorBaseURL` **MUST** replace the whole base, including scheme, host, port and path prefix, and authentication, custom headers and timeout **MUST** apply to it identically. |
 | `GOFF-CFG-008` | Minor    | `evaluationFlagList` **SHOULD** be supported, and when non-empty **MUST** be transmitted as the `flags` array of the flag-configuration request.                                                    |
 | `GOFF-CFG-009` | Major    | An option that the provider declares and documents **MUST** be honoured. A declared option that is never read is a defect regardless of its default.                                                |
 | `GOFF-CFG-010` | Minor    | The provider **MUST NOT** expose options for capabilities it does not implement. Vestigial options from removed features **MUST** be deleted rather than left inert.                                |
@@ -292,7 +313,8 @@ produce identical results.
 | ID            | Sev      | Requirement                                                                                                                                                                                     |
 | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GOFF-IP-006` | Critical | The provider **MUST** poll for configuration changes on the configured interval. Polling **MUST** be active by default; it **MUST NOT** require explicit opt-in.                                 |
-| `GOFF-IP-007` | Critical | A `304 Not Modified` response **MUST** be treated as "no change". It **MUST NOT** write flags, enrichment, timestamps or the stored `ETag` — **regardless of whether the response echoed an `ETag` header**. |
+| `GOFF-IP-007` | Critical | A `304 Not Modified` response **MUST NOT** write flags, enrichment or timestamps — **regardless of whether the response echoed an `ETag` header**. The 304 path **MUST** be structurally incapable of carrying a configuration body: the transport layer **MUST** signal "not modified" by a distinct type or sentinel rather than by an empty response object, so that the distinction cannot be lost downstream. |
+| `GOFF-IP-015` | Major    | A `304 Not Modified` response **MUST NOT** write the stored `ETag`. Writing back a value-identical validator is harmless in isolation, but it means the refresh path cannot distinguish a 304 from an empty `200`, which is how `GOFF-IP-009` is violated in practice. |
 | `GOFF-IP-008` | Critical | A `200` response whose body cannot be parsed **MUST** be treated as a failed refresh: the previous configuration **MUST** be preserved and the stored `ETag` **MUST NOT** advance.               |
 | `GOFF-IP-009` | Critical | A `200` response whose decoded flag map is null or absent **MUST** likewise be treated as a failed refresh. Accepting it wipes every flag, and advancing the `ETag` makes the empty state permanent. |
 | `GOFF-IP-010` | Major    | A failed refresh **MUST NOT** terminate polling. Polling **MUST** survive any error and continue on schedule.                                                                                    |
@@ -414,12 +436,23 @@ Evaluation and tracking events are batched and posted to the relay proxy.
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GOFF-COLL-003` | Major    | `kind` **MUST** be `feature`.                                                                                                                                         |
 | `GOFF-COLL-004` | Critical | The "evaluation failed" boolean **MUST** be serialised as `default`. Any other name is silently discarded by the relay proxy, recording every failed evaluation as a success. |
-| `GOFF-COLL-005` | Major    | `contextKind` **MUST** be `user`, unless the context carries `anonymous` explicitly set to `true`, in which case it **MUST** be `anonymousUser`. An absent context **MUST** yield `user`. |
+| `GOFF-COLL-005` | Major    | `contextKind` **MUST** be derived from the `anonymous` attribute per the table below. Only a boolean `true` yields `anonymousUser`; a truthiness test is not sufficient. |
 | `GOFF-COLL-006` | Major    | `userKey` **MUST** be the targeting key, or the sentinel `undefined-targetingKey` when absent.                                                                         |
 | `GOFF-COLL-007` | Major    | `creationDate` **MUST** be Unix epoch **seconds**.                                                                                                                    |
 | `GOFF-COLL-008` | Major    | `variation` **MUST** be the resolved variant, or `SdkDefault` when none is available.                                                                                 |
 | `GOFF-COLL-009` | Minor    | `version` **MUST** be populated from flag metadata when present.                                                                                                      |
 | `GOFF-COLL-010` | Minor    | `source` **MUST** be `INPROCESS` for a locally evaluated flag, or `PROVIDER_CACHE` for a value served from a remote-mode cache. `SERVER` is reserved for the relay proxy. |
+
+`contextKind` is decided as follows. The table is normative — it exists because a truthiness
+test and an identity test agree on the common cases and diverge on the rest.
+
+| `anonymous` attribute      | `contextKind`   |
+| -------------------------- | --------------- |
+| boolean `true`             | `anonymousUser` |
+| boolean `false`            | `user`          |
+| absent                     | `user`          |
+| evaluation context absent  | `user`          |
+| any non-boolean value      | `user`          |
 
 ### 13.3 Exporter metadata
 
@@ -472,7 +505,7 @@ Evaluation and tracking events are batched and posted to the relay proxy.
 | ID              | Sev      | Requirement                                                                                                                                  |
 | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GOFF-AUTH-001` | Major    | When `apiKey` is set, the provider **MUST** send `Authorization: Bearer {apiKey}`.                                                            |
-| `GOFF-AUTH-002` | Major    | The header **MUST** be applied to every authenticated endpoint: flag configuration, evaluation and data collection.                           |
+| `GOFF-AUTH-002` | Major    | Whatever authentication header the provider sends **MUST** be applied to every authenticated endpoint: flag configuration, evaluation and data collection. This is assessed independently of `GOFF-AUTH-001` — a provider sending the wrong header consistently fails one requirement, not two, and the distinction tells a maintainer whether the fix is one line or several. |
 | `GOFF-AUTH-003` | Major    | When `apiKey` is unset or empty, no authentication header **MUST** be sent.                                                                   |
 | `GOFF-AUTH-004` | Minor    | The provider **SHOULD** allow arbitrary additional headers, for deployments behind gateways requiring their own authentication.               |
 
@@ -677,14 +710,34 @@ Each requirement is reported as **PASS**, **FAIL** or **N/A**. `N/A` is reserved
 requirements outside the provider's declared tiers, or capabilities its SDK does not offer. A
 requirement that applies but cannot be verified is **FAIL**, not `N/A`.
 
+**Vacuous satisfaction.** A requirement whose precondition cannot occur because the governing
+capability is absent **MUST** inherit the verdict of that capability's requirement. Without
+this rule a provider that implements nothing accumulates free passes: every `MUST NOT` in a
+section it has not built is trivially unviolated. For example, a provider with no fallback
+path fails `GOFF-FALLBACK-001`, and `GOFF-FALLBACK-003` and `-006` — both prohibitions —
+inherit that `FAIL` rather than passing.
+
+**Accidental satisfaction.** A requirement met by coincidence rather than by intent **MUST**
+be reported as `PASS` with a note. A provider that performs no trackability check at all
+satisfies `GOFF-COLL-020` and `-021` while failing `-022`; recording the first two as unqualified
+passes hides that the next refactor will break them.
+
 ### C.2 Report format
 
-A conformance report **MUST** open with a single verdict line, then list findings grouped by
-severity, most severe first. Every finding cites its requirement identifier and the source
-location that evidences it.
+A conformance report **MUST** contain four parts, in order:
+
+1. a header stating the specification version, the provider and version audited, and the
+   **declared tier set** — every `N/A` must trace back to it;
+2. a single verdict line;
+3. findings grouped by severity, most severe first, each citing a requirement identifier and a
+   source location;
+4. a per-requirement verdict table covering **every** identifier in the specification,
+   including passes, since `PASS` with a note is a meaningful outcome under §C.1.
 
 ```text
 GO Feature Flag Provider Specification 1.0 — <provider> <version>
+TIERS: Core, Remote, In-process, WASM  (Optional/§17: no cache → N/A;
+                                        §14: SDK has no Tracking API → N/A)
 VERDICT: NON-CONFORMANT — 2 Critical, 5 Major, 3 Minor (118 PASS, 10 FAIL, 9 N/A)
 
 CRITICAL
@@ -693,7 +746,23 @@ CRITICAL
 
 MAJOR
   ...
+
+PER-REQUIREMENT
+  GOFF-META-001  PASS   src/provider.ts:25
+  GOFF-COLL-020  PASS   (accidental — no trackability check exists at all)
+  GOFF-FALLBACK-003  FAIL  (inherited: §16 unimplemented)
+  ...
 ```
+
+Two further finding classes **MUST** be reported when present, because neither has a natural
+home in a requirement-keyed list:
+
+- **Documentation contradicting code.** Cite both locations. Where the contradiction is an
+  option that is declared but never read, report it as `GOFF-CFG-009`; otherwise report it as
+  a Minor finding with both citations and no requirement identifier.
+- **Tests that assert non-conformant behaviour.** A green suite pinning a defect raises the
+  cost of remediation and indicates the behaviour was deliberate. Name the test alongside the
+  finding it protects.
 
 ### C.3 Auditing method
 
