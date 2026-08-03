@@ -113,16 +113,27 @@ else:
 |--------|------|---------|-------------|
 | `endpoint` | `str` | _(required)_ | URL of the GO Feature Flag relay proxy |
 | `evaluation_type` | `EvaluationType` | `INPROCESS` | Evaluation mode: `INPROCESS` or `REMOTE` |
-| `cache_size` | `int` | `10000` | Maximum number of flag evaluations kept in the LRU cache _(remote mode)_ |
+| `data_collector_base_url` | `str` | `endpoint` | Base URL of the data collector only. Replaces the whole base — scheme, host, port and path prefix. Flag configuration and evaluation keep using `endpoint` |
+| `timeout` | `int` | `10000` | Timeout (ms) applied to every relay proxy request: flag configuration, remote evaluation and data collection |
 | `data_flush_interval` | `int` | `60000` | Interval (ms) to flush usage data to the relay proxy |
 | `disable_data_collection` | `bool` | `False` | Set to `True` to disable usage analytics |
-| `reconnect_interval` | `int` | `60` | WebSocket reconnect interval (seconds) _(remote mode)_ |
-| `disable_cache_invalidation` | `bool` | `False` | Disable WebSocket-based cache invalidation _(remote mode)_ |
-| `flag_config_poll_interval_seconds` | `int` | `10` | Polling interval (seconds) for flag configuration _(in-process mode)_ |
-| `api_key` | `str` | `None` | API key for authenticated relay proxy requests |
-| `exporter_metadata` | `dict` | `{}` | Static metadata attached to evaluation events |
+| `flag_config_poll_interval_seconds` | `int` | `120` | Polling interval (seconds) for flag configuration _(in-process mode)_ |
+| `api_key` | `str` | `None` | API key for authenticated relay proxy requests, sent as `Authorization: Bearer` |
+| `exporter_metadata` | `dict` | `{}` | Static metadata attached to evaluation events. Values must be `str`, `bool`, `int` or `float` |
 | `max_pending_events` | `int` | `10000` | Maximum buffered events before a forced flush |
 | `wasm_file_path` | `str` | `None` | Path to a custom WASM/WASI evaluation binary _(in-process mode, uses bundled binary by default)_ |
-| `wasm_pool_size` | `int` | `10` | Pool size for concurrent WASM evaluation instances _(in-process mode)_ |
+| `wasm_pool_size` | `int` | CPU core count | Pool size for concurrent WASM evaluation instances _(in-process mode)_ |
+| `evaluation_flag_list` | `list[str]` | `None` | Restrict the fetched flag configuration to these keys. Unset or empty means all flags _(in-process mode)_ |
+| `custom_headers` | `dict[str, str]` | `None` | Extra headers on every relay proxy request, for deployments behind a gateway with its own authentication. Applied before the provider's own headers, so a configured `api_key` wins over a custom `Authorization` |
 | `log_level` | `str\|int` | `"WARNING"` | Logging level (`"DEBUG"`, `"INFO"`, `"WARNING"`, `"ERROR"`) |
 | `urllib3_pool_manager` | `urllib3.PoolManager` | `None` | Custom HTTP client |
+
+## Conformance
+
+This provider targets version **1.0** of the
+[GO Feature Flag Provider Specification](https://gofeatureflag.org/specification/openfeature-provider),
+exposed as `gofeatureflag_python_provider.__specification_version__`.
+
+The evaluation engine it is pinned to is recorded in
+`gofeatureflag_python_provider/wasm/_wasi_version.txt`, which is the single source of truth
+for the bundled WASI binary version.

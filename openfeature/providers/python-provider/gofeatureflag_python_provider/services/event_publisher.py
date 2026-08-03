@@ -13,6 +13,8 @@ from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
 
 DEFAULT_FLUSH_INTERVAL_MS: int = 60_000
 DEFAULT_MAX_PENDING_EVENTS: int = 10_000
+# Upper bound on how long shutdown waits for background work.
+DEFAULT_SHUTDOWN_TIMEOUT_SECONDS: float = 5.0
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +51,16 @@ class EventPublisher:
 
         self._events: list[FeatureEvent] = []
         self._lock = threading.Lock()
+        # Guards the publish itself so concurrent flushes cannot overlap. It is
+        # deliberately never taken by add_event: enqueuing runs inside an
+        # evaluation hook and must not block on collector availability.
+        self._flush_lock = threading.Lock()
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
         self._running = False
         self._immediate_flush_scheduled = False
 
-        meta = dict(options.exporter_metadata or {})
-        meta["provider"] = "python"
-        meta["openfeature"] = True
-        self._exporter_metadata: dict[str, Any] = meta
+        self._exporter_metadata: dict[str, Any] = options.get_exporter_metadata()
 
     # ------------------------------------------------------------------
     # Public interface
@@ -72,16 +75,20 @@ class EventPublisher:
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
-    def stop(self) -> None:
-        """Stop the periodic runner and flush any remaining events synchronously."""
+    def stop(self, timeout: float = DEFAULT_SHUTDOWN_TIMEOUT_SECONDS) -> None:
+        """Stop the periodic runner and flush any remaining events.
+
+        Bounded: shutdown waits for an in-flight publish rather than racing it,
+        but never blocks indefinitely on an unreachable collector.
+        """
         if not self._running:
             return
         self._running = False
         self._stop_event.set()
         if self._thread is not None:
-            self._thread.join()
+            self._thread.join(timeout=timeout)
             self._thread = None
-        self._publish_events()
+        self._publish_events(wait=True, timeout=timeout)
 
     def add_event(self, event: FeatureEvent) -> None:
         """
@@ -108,7 +115,7 @@ class EventPublisher:
             )
             if should_flush:
                 self._immediate_flush_scheduled = True
-                t = threading.Thread(target=self._publish_events, daemon=True)
+                t = threading.Thread(target=self._immediate_flush, daemon=True)
                 t.start()
 
     # ------------------------------------------------------------------
@@ -124,13 +131,36 @@ class EventPublisher:
         while not self._stop_event.wait(timeout=flush_interval_sec):
             self._publish_events()
 
-    def _publish_events(self) -> None:
+    def _immediate_flush(self) -> None:
+        """Target of the fire-and-forget flush spawned by add_event."""
+        try:
+            self._publish_events()
+        finally:
+            with self._lock:
+                self._immediate_flush_scheduled = False
+
+    def _publish_events(
+        self,
+        wait: bool = False,
+        timeout: float = DEFAULT_SHUTDOWN_TIMEOUT_SECONDS,
+    ) -> None:
         """
         Atomically drain the buffer and send events to the collector.
 
-        On failure the drained batch is re-queued at the front of the buffer
-        so no events are lost. Always clears _immediate_flush_scheduled when done.
+        At most one publish is in flight at a time. A periodic flush that finds
+        one already running simply returns — the running publish drains whatever
+        was queued in the meantime. Shutdown passes wait=True so it flushes
+        after the in-flight publish instead of skipping its own final drain.
+
+        On failure the drained batch is re-queued at the front of the buffer so
+        no events are lost and chronological order is preserved.
         """
+        if wait:
+            acquired = self._flush_lock.acquire(timeout=timeout)
+        else:
+            acquired = self._flush_lock.acquire(blocking=False)
+        if not acquired:
+            return
         try:
             with self._lock:
                 if not self._events:
@@ -138,6 +168,9 @@ class EventPublisher:
                 events_to_send = list(self._events)
                 self._events.clear()
 
+            # Posted with the buffer lock released: enqueuing an event runs
+            # inside an evaluation hook, so holding it here would couple
+            # flag-evaluation latency to data-collector availability.
             try:
                 self._api.send_event_to_data_collector(
                     events_to_send,
@@ -153,5 +186,4 @@ class EventPublisher:
                 with self._lock:
                     self._events = events_to_send + self._events
         finally:
-            with self._lock:
-                self._immediate_flush_scheduled = False
+            self._flush_lock.release()

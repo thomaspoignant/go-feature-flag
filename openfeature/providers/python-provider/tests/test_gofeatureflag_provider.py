@@ -87,7 +87,6 @@ def _generic_test(
             options=GoFeatureFlagOptions(
                 endpoint="https://gofeatureflag.org/",
                 data_flush_interval=100,
-                disable_cache_invalidation=True,
                 api_key="apikey1",
                 evaluation_type=EvaluationType.REMOTE,
                 disable_data_collection=True,
@@ -138,10 +137,16 @@ def test_provider_metadata():
             endpoint="http://localhost:1031", data_flush_interval=100
         )
     )
-    assert goff_provider.get_metadata().name == "GO Feature Flag"
+    assert goff_provider.get_metadata().name == "GO Feature Flag Provider"
 
 
-def test_number_hook():
+def test_hooks_are_registered_in_order_without_exporter_metadata():
+    """Both hooks are always present, enrichment first.
+
+    Enrichment must run before the data collector so the collector sees the
+    enriched context, and it is registered even with no user metadata because
+    exporter metadata always carries the reserved keys identifying the SDK.
+    """
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(
             endpoint="http://localhost:1031",
@@ -149,7 +154,13 @@ def test_number_hook():
             evaluation_type=EvaluationType.INPROCESS,
         )
     )
-    assert len(goff_provider.get_provider_hooks()) == 1
+
+    hooks = goff_provider.get_provider_hooks()
+
+    assert [type(h).__name__ for h in hooks] == [
+        "EnrichEvaluationContextHook",
+        "DataCollectorHook",
+    ]
 
 
 def test_number_hook_with_exporter_metadata():
@@ -161,7 +172,11 @@ def test_number_hook_with_exporter_metadata():
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
         )
     )
-    assert len(goff_provider.get_provider_hooks()) == 2
+    hooks = goff_provider.get_provider_hooks()
+    assert [type(h).__name__ for h in hooks] == [
+        "EnrichEvaluationContextHook",
+        "DataCollectorHook",
+    ]
 
 
 def test_constructor_options_none():
@@ -549,7 +564,6 @@ def test_should_call_data_collector_with_exporter_metadata(
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
             evaluation_type=EvaluationType.INPROCESS,
         )
@@ -607,7 +621,6 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_post: Mock):
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=1000,
-            disable_cache_invalidation=True,
             evaluation_type=EvaluationType.REMOTE,
         )
     )
@@ -664,7 +677,6 @@ def test_url_parsing(mock_post):
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/ff/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             api_key="apikey1",
             evaluation_type=EvaluationType.REMOTE,
         ),
@@ -706,7 +718,6 @@ def test_should_call_evaluation_api_with_exporter_metadata(
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
             evaluation_type=EvaluationType.INPROCESS,
         )
