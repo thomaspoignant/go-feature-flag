@@ -74,4 +74,8 @@ func (m *managerImpl[T]) Stop() {
 	for _, consumer := range m.consumers {
 		consumer.Stop()
 	}
+	// The consumers have flushed everything they had, nobody will read from the store anymore,
+	// so we stop its periodic cleaning goroutine to avoid leaking it (and the events it retains)
+	// for the lifetime of the process.
+	(*m.eventStore).Stop()
 }

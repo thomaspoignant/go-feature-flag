@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
@@ -59,9 +60,7 @@ func Test_SingleConsumer(t *testing.T) {
 	// start producer
 	ctx, cancel := context.WithCancel(context.Background())
 	go startEventProducer(ctx, eventStore, 100, false)
-	time.Sleep(50 * time.Millisecond)
-	got, _ = eventStore.GetPendingEventCount(consumerName)
-	assert.Equal(t, int64(100), got)
+	requireEventuallyPendingCount(t, eventStore, consumerName, 100)
 	cancel() // stop producing
 
 	// Consume
@@ -78,9 +77,7 @@ func Test_SingleConsumer(t *testing.T) {
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
 	go startEventProducer(ctx2, eventStore, 91, false)
-	time.Sleep(50 * time.Millisecond)
-	got, _ = eventStore.GetPendingEventCount(consumerName)
-	assert.Equal(t, int64(91), got)
+	requireEventuallyPendingCount(t, eventStore, consumerName, 91)
 
 	err = eventStore.ProcessPendingEvents(consumerName,
 		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
@@ -89,8 +86,7 @@ func Test_SingleConsumer(t *testing.T) {
 		})
 	assert.Nil(t, err)
 
-	time.Sleep(120 * time.Millisecond) // to wait until garbage collector remove the events
-	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
+	requireEventuallyEmptyStore(t, eventStore)
 }
 
 func Test_MultipleConsumersSingleThread(t *testing.T) {
@@ -151,8 +147,7 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check garbage collector
-	time.Sleep(120 * time.Millisecond)
-	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
+	requireEventuallyEmptyStore(t, eventStore)
 }
 
 func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
@@ -274,8 +269,7 @@ func Test_WaitForEmptyClean(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.True(t, eventStore.GetTotalEventCount() > 0)
-	time.Sleep(3 * defaultTestCleanQueueDuration)
-	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
+	requireEventuallyEmptyStore(t, eventStore)
 }
 
 func Test_ProcessPendingEvents_DoesNotBlockAdd(t *testing.T) {
@@ -464,6 +458,37 @@ func Test_ProcessPendingEvents_EmptyBatchSkipsCallback(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.False(t, callbackCalled)
+}
+
+// requireEventuallyPendingCount waits until the producer goroutine has pushed the expected
+// number of events. Sleeping for a fixed duration instead makes the test depend on the producer
+// being scheduled promptly, which is not guaranteed on a loaded CI runner.
+func requireEventuallyPendingCount(
+	t *testing.T,
+	eventStore exporter.EventStore[testutils.ExportableMockEvent],
+	consumerName string,
+	want int64,
+) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		got, err := eventStore.GetPendingEventCount(consumerName)
+		return err == nil && got == want
+	}, 10*time.Second, 10*time.Millisecond,
+		"consumer %q never reached %d pending events", consumerName, want)
+}
+
+// requireEventuallyEmptyStore waits for the periodic clean queue goroutine to drop the events
+// consumed by everybody. It runs on a ticker, so a fixed sleep of one or two intervals has no
+// margin left once the runner stalls.
+func requireEventuallyEmptyStore(
+	t *testing.T,
+	eventStore exporter.EventStore[testutils.ExportableMockEvent],
+) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		return eventStore.GetTotalEventCount() == int64(0)
+	}, 10*time.Second, 10*time.Millisecond,
+		"the periodic clean queue never removed the consumed events")
 }
 
 func startEventProducer(

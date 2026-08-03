@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -26,11 +27,43 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/protobuf/encoding/protodelim"
 )
 
+// newTestLogger returns a logger whose Fatal() terminates the calling goroutine instead of the
+// whole process. server.go reports a failed bind with zapLog.Fatal, and the default zap
+// behaviour is os.Exit(1): fired from the background goroutine that runs StartWithContext, it
+// takes the test binary down and every remaining test in the package is silently skipped.
+// With this hook the server goroutine dies, the Fatal is still logged, and the test fails on
+// its own readiness assertion with a message that points at the right place.
+func newTestLogger(t *testing.T) *log.Logger {
+	t.Helper()
+	l := log.InitLogger()
+	l.ZapLogger = l.ZapLogger.WithOptions(zap.WithFatalHook(zapcore.WriteThenGoexit))
+	t.Cleanup(func() { _ = l.ZapLogger.Sync() })
+	return l
+}
+
+// waitForServer blocks until the server accepts connections on baseURL. Binding a listener is
+// asynchronous, so a fixed sleep is a coin flip: 10ms is below the Windows timer granularity and
+// a loaded runner needs far more than that.
+func waitForServer(t *testing.T, baseURL string) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		resp, err := http.Get(baseURL + "/health")
+		if err != nil {
+			return false
+		}
+		_ = resp.Body.Close()
+		return true
+	}, 10*time.Second, 20*time.Millisecond, "server never became reachable on %s", baseURL)
+}
+
 func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
+	port := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -42,11 +75,10 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode: config.ServerModeHTTP,
-			Port: 11024,
+			Port: port,
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -60,7 +92,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	}, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -73,25 +105,28 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	waitForServer(t, baseURL)
 
-	response, err := http.Get("http://localhost:11024/health")
-	assert.NoError(t, err)
+	response, err := http.Get(baseURL + "/health")
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
-	responseM, err := http.Get("http://localhost:11024/metrics")
-	assert.NoError(t, err)
+	responseM, err := http.Get(baseURL + "/metrics")
+	require.NoError(t, err)
 	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM.StatusCode)
 
-	responseI, err := http.Get("http://localhost:11024/info")
-	assert.NoError(t, err)
+	responseI, err := http.Get(baseURL + "/info")
+	require.NoError(t, err)
 	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
 func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
+	port := testutils.GetFreePort(t)
+	monitoringPort := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -103,12 +138,11 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode:           config.ServerModeHTTP,
-			Port:           11024,
-			MonitoringPort: 11025,
+			Port:           port,
+			MonitoringPort: monitoringPort,
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -122,7 +156,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	}, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -135,40 +169,44 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	monitoringURL := fmt.Sprintf("http://localhost:%d", monitoringPort)
+	waitForServer(t, baseURL)
+	waitForServer(t, monitoringURL)
 
-	response, err := http.Get("http://localhost:11024/health")
-	assert.NoError(t, err)
+	response, err := http.Get(baseURL + "/health")
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
-	responseM, err := http.Get("http://localhost:11024/metrics")
-	assert.NoError(t, err)
+	responseM, err := http.Get(baseURL + "/metrics")
+	require.NoError(t, err)
 	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, responseM.StatusCode)
 
-	responseI, err := http.Get("http://localhost:11024/info")
-	assert.NoError(t, err)
+	responseI, err := http.Get(baseURL + "/info")
+	require.NoError(t, err)
 	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, responseI.StatusCode)
 
-	responseH1, err := http.Get("http://localhost:11025/health")
-	assert.NoError(t, err)
+	responseH1, err := http.Get(monitoringURL + "/health")
+	require.NoError(t, err)
 	defer func() { _ = responseH1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseH1.StatusCode)
 
-	responseM1, err := http.Get("http://localhost:11025/metrics")
-	assert.NoError(t, err)
+	responseM1, err := http.Get(monitoringURL + "/metrics")
+	require.NoError(t, err)
 	defer func() { _ = responseM1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM1.StatusCode)
 
-	responseI1, err := http.Get("http://localhost:11025/info")
-	assert.NoError(t, err)
+	responseI1, err := http.Get(monitoringURL + "/info")
+	require.NoError(t, err)
 	defer func() { _ = responseI1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI1.StatusCode)
 }
 
 func Test_CheckOFREPAPIExists(t *testing.T) {
+	port := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -180,15 +218,14 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode: config.ServerModeHTTP,
-			Port: 11024,
+			Port: port,
 		},
 		AuthorizedKeys: config.APIKeys{
 			Admin:      nil,
 			Evaluation: []string{"test"},
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -202,7 +239,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	}, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -215,43 +252,45 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	waitForServer(t, baseURL)
 
 	req, err := http.NewRequest("POST",
-		"http://localhost:11024/ofrep/v1/evaluate/flags",
+		baseURL+"/ofrep/v1/evaluate/flags",
 		strings.NewReader(`{ "context":{"targetingKey":"some-key"}}`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	req, err = http.NewRequest("POST",
-		"http://localhost:11024/ofrep/v1/evaluate/flags/some-key",
+		baseURL+"/ofrep/v1/evaluate/flags/some-key",
 		strings.NewReader(`{ "context":{"targetingKey":"some-key"}}`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err = http.DefaultClient.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
 	req, err = http.NewRequest("POST",
-		"http://localhost:11024/ofrep/v1/evaluate/flags/test-flag",
+		baseURL+"/ofrep/v1/evaluate/flags/test-flag",
 		strings.NewReader(`{ "context":{"targetingKey":"some-key"}}`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err = http.DefaultClient.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
+	port := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -263,11 +302,10 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode: config.ServerModeHTTP,
-			Port: 11024,
+			Port: port,
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	require.NoError(t, err)
@@ -287,16 +325,18 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	waitForServer(t, baseURL)
 
-	response, err := http.Get("http://localhost:11024/health")
-	assert.NoError(t, err)
+	response, err := http.Get(baseURL + "/health")
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, proxyConf.Version, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
 }
 
 func Test_VersionHeader_Disabled(t *testing.T) {
+	port := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -308,12 +348,11 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode: config.ServerModeHTTP,
-			Port: 11024,
+			Port: port,
 		},
 		DisableVersionHeader: true,
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	require.NoError(t, err)
@@ -333,10 +372,11 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	waitForServer(t, baseURL)
 
-	response, err := http.Get("http://localhost:11024/health")
-	assert.NoError(t, err)
+	response, err := http.Get(baseURL + "/health")
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Empty(t, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
@@ -367,11 +407,14 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 			},
 		}
 
-		runAuthMiddlewareTests(t, tests, func(_ *testing.T, _ authMiddlewareTestCase) (*http.Response, error) {
-			return http.Post("http://localhost:11024/ofrep/v1/evaluate/flags/test-flag", "application/json",
-				strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
-			)
-		})
+		runAuthMiddlewareTests(
+			t,
+			tests,
+			func(_ *testing.T, _ authMiddlewareTestCase, baseURL string) (*http.Response, error) {
+				return http.Post(baseURL+"/ofrep/v1/evaluate/flags/test-flag", "application/json",
+					strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
+				)
+			})
 	})
 
 	t.Run("Admin Endpoint", func(t *testing.T) {
@@ -398,15 +441,18 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 			},
 		}
 
-		runAuthMiddlewareTests(t, tests, func(t *testing.T, tt authMiddlewareTestCase) (*http.Response, error) {
-			request, err := http.NewRequest("POST", "http://localhost:11024/admin/v1/retriever/refresh", nil)
-			assert.NoError(t, err)
-			request.Header.Add("Content-Type", "application/json")
-			if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
-				request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
-			}
-			return http.DefaultClient.Do(request)
-		})
+		runAuthMiddlewareTests(
+			t,
+			tests,
+			func(t *testing.T, tt authMiddlewareTestCase, baseURL string) (*http.Response, error) {
+				request, err := http.NewRequest("POST", baseURL+"/admin/v1/retriever/refresh", nil)
+				require.NoError(t, err)
+				request.Header.Add("Content-Type", "application/json")
+				if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
+					request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
+				}
+				return http.DefaultClient.Do(request)
+			})
 	})
 }
 
@@ -422,11 +468,12 @@ type authMiddlewareTestCase struct {
 func runAuthMiddlewareTests(
 	t *testing.T,
 	tests []authMiddlewareTestCase,
-	doRequest func(t *testing.T, tt authMiddlewareTestCase) (*http.Response, error),
+	doRequest func(t *testing.T, tt authMiddlewareTestCase, baseURL string) (*http.Response, error),
 ) {
 	t.Helper()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			port := testutils.GetFreePort(t)
 			proxyConf := &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					Retrievers: &[]retrieverconf.RetrieverConf{
@@ -438,7 +485,7 @@ func runAuthMiddlewareTests(
 				},
 				Server: config.Server{
 					Mode: config.ServerModeHTTP,
-					Port: 11024,
+					Port: port,
 				},
 				DisableVersionHeader: true,
 			}
@@ -447,8 +494,7 @@ func runAuthMiddlewareTests(
 			}
 			proxyConf.ForceReloadAPIKeys()
 
-			log := log.InitLogger()
-			defer func() { _ = log.ZapLogger.Sync() }()
+			log := newTestLogger(t)
 
 			metricsV2, err := metric.NewMetrics()
 			require.NoError(t, err)
@@ -467,13 +513,26 @@ func runAuthMiddlewareTests(
 			s := api.New(proxyConf, services, log.ZapLogger)
 			go func() { s.StartWithContext(context.Background()) }()
 			defer s.Stop(context.Background())
-			time.Sleep(10 * time.Millisecond)
 
-			response, err := doRequest(t, tt)
-			assert.NoError(t, err)
+			baseURL := fmt.Sprintf("http://localhost:%d", port)
+			waitForServer(t, baseURL)
+
+			response, err := doRequest(t, tt, baseURL)
+			require.NoError(t, err)
 			defer func() { _ = response.Body.Close() }()
 			assert.Equal(t, tt.want, response.StatusCode)
 		})
+	}
+}
+
+// skipUnixSocketOnWindows skips the unix socket tests on Windows. Binding an AF_UNIX listener
+// there intermittently fails on the CI runners with WSAENETDOWN ("a socket operation encountered
+// a dead network"), and unix socket mode is a Unix-only deployment target anyway.
+func skipUnixSocketOnWindows(t *testing.T) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		t.Skip("AF_UNIX listeners are unreliable on Windows CI (WSAENETDOWN); " +
+			"unix socket mode is a Unix-only deployment target")
 	}
 }
 
@@ -489,6 +548,7 @@ func newUnixSocketHTTPClient(socketPath string) *http.Client {
 }
 
 func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
+	skipUnixSocketOnWindows(t)
 	// Create a temporary directory for the socket
 	tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
 	require.NoError(t, err)
@@ -510,8 +570,7 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 			UnixSocketPath: socketPath,
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -546,31 +605,33 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 
 	// Verify socket file exists
 	_, err = os.Stat(socketPath)
-	assert.NoError(t, err, "Unix socket file should exist")
+	require.NoError(t, err, "Unix socket file should exist")
 
 	// Create a Unix socket HTTP client
 	client := newUnixSocketHTTPClient(socketPath)
 
 	// Test health endpoint
 	response, err := client.Get("http://unix/health")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	// Test metrics endpoint
 	responseM, err := client.Get("http://unix/metrics")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM.StatusCode)
 
 	// Test info endpoint
 	responseI, err := client.Get("http://unix/info")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
 func Test_Starting_RelayProxy_UnixSocket_MonitoringPort(t *testing.T) {
+	skipUnixSocketOnWindows(t)
+	monitoringPort := testutils.GetFreePort(t)
 	// Create a temporary directory for the socket
 	tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
 	require.NoError(t, err)
@@ -590,11 +651,10 @@ func Test_Starting_RelayProxy_UnixSocket_MonitoringPort(t *testing.T) {
 		Server: config.Server{
 			Mode:           config.ServerModeUnixSocket,
 			UnixSocketPath: socketPath,
-			MonitoringPort: 11026,
+			MonitoringPort: monitoringPort,
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -629,28 +689,32 @@ func Test_Starting_RelayProxy_UnixSocket_MonitoringPort(t *testing.T) {
 
 	// Verify socket file exists
 	_, err = os.Stat(socketPath)
-	assert.NoError(t, err, "Unix socket file should exist")
+	require.NoError(t, err, "Unix socket file should exist")
+
+	monitoringURL := fmt.Sprintf("http://localhost:%d", monitoringPort)
+	waitForServer(t, monitoringURL)
 
 	// Test health endpoint
-	responseH1, err := http.Get("http://localhost:11026/health")
-	assert.NoError(t, err)
+	responseH1, err := http.Get(monitoringURL + "/health")
+	require.NoError(t, err)
 	defer responseH1.Body.Close()
 	assert.Equal(t, http.StatusOK, responseH1.StatusCode)
 
 	// Test metrics endpoint
-	responseM1, err := http.Get("http://localhost:11026/metrics")
-	assert.NoError(t, err)
+	responseM1, err := http.Get(monitoringURL + "/metrics")
+	require.NoError(t, err)
 	defer responseM1.Body.Close()
 	assert.Equal(t, http.StatusOK, responseM1.StatusCode)
 
 	// Test info endpoint
-	responseI, err := http.Get("http://localhost:11026/info")
-	assert.NoError(t, err)
+	responseI, err := http.Get(monitoringURL + "/info")
+	require.NoError(t, err)
 	defer responseI.Body.Close()
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
 func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
+	skipUnixSocketOnWindows(t)
 	// Create a temporary directory for the socket
 	tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
 	require.NoError(t, err)
@@ -676,8 +740,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 			Evaluation: []string{"test"},
 		},
 	}
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
@@ -712,7 +775,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 
 	// Verify socket file exists
 	_, err = os.Stat(socketPath)
-	assert.NoError(t, err, "Unix socket file should exist")
+	require.NoError(t, err, "Unix socket file should exist")
 
 	// Create a Unix socket HTTP client
 	client := newUnixSocketHTTPClient(socketPath)
@@ -725,7 +788,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -737,7 +800,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err = client.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
@@ -749,12 +812,13 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
 	response, err = client.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
+	skipUnixSocketOnWindows(t)
 	tests := []struct {
 		name          string
 		configAPIKeys *config.APIKeys
@@ -835,8 +899,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			}
 			proxyConf.ForceReloadAPIKeys()
 
-			log := log.InitLogger()
-			defer func() { _ = log.ZapLogger.Sync() }()
+			log := newTestLogger(t)
 
 			metricsV2, err := metric.NewMetrics()
 			require.NoError(t, err)
@@ -882,7 +945,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			}
 
 			response, err := client.Do(req)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer func() { _ = response.Body.Close() }()
 			assert.Equal(t, tt.want, response.StatusCode)
 		})
@@ -890,6 +953,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 }
 
 func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
+	skipUnixSocketOnWindows(t)
 	tests := []struct {
 		name                 string
 		disableVersionHeader bool
@@ -933,8 +997,7 @@ func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 				Version:              "test-version-1.0.0",
 			}
 
-			log := log.InitLogger()
-			defer func() { _ = log.ZapLogger.Sync() }()
+			log := newTestLogger(t)
 
 			metricsV2, err := metric.NewMetrics()
 			require.NoError(t, err)
@@ -964,7 +1027,7 @@ func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 			client := newUnixSocketHTTPClient(socketPath)
 
 			response, err := client.Get("http://unix/health")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer func() { _ = response.Body.Close() }()
 			assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -978,9 +1041,10 @@ func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 }
 
 func Test_NativeHistograms_Enabled(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	t.Cleanup(cancel)
 
+	port := testutils.GetFreePort(t)
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
 			Retrievers: &[]retrieverconf.RetrieverConf{
@@ -992,12 +1056,11 @@ func Test_NativeHistograms_Enabled(t *testing.T) {
 		},
 		Server: config.Server{
 			Mode: config.ServerModeHTTP,
-			Port: 11024,
+			Port: port,
 		},
 	}
 
-	log := log.InitLogger()
-	defer func() { _ = log.ZapLogger.Sync() }()
+	log := newTestLogger(t)
 
 	metricsV2, err := metric.NewMetrics()
 	require.NoError(t, err)
@@ -1025,19 +1088,20 @@ func Test_NativeHistograms_Enabled(t *testing.T) {
 	go func() { s.StartWithContext(ctx) }()
 	defer s.Stop(ctx)
 
-	time.Sleep(10 * time.Millisecond)
+	baseURL := fmt.Sprintf("http://localhost:%d", port)
+	waitForServer(t, baseURL)
 
 	// Make some requests to generate histogram data
-	healthResp, err := http.Get("http://localhost:11024/health")
+	healthResp, err := http.Get(baseURL + "/health")
 	require.NoError(t, err)
 	_ = healthResp.Body.Close()
 
-	infoResp, err := http.Get("http://localhost:11024/info")
+	infoResp, err := http.Get(baseURL + "/info")
 	require.NoError(t, err)
 	_ = infoResp.Body.Close()
 
 	// Scrape /metrics with protobuf Accept header
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:11024/metrics", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/metrics", nil)
 	require.NoError(t, err)
 	req.Header.Set("Accept", "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited")
 
@@ -1110,8 +1174,7 @@ func Test_PortFreedAfterShutdown(t *testing.T) {
 		},
 	}
 
-	l := log.InitLogger()
-	defer func() { _ = l.ZapLogger.Sync() }()
+	l := newTestLogger(t)
 
 	wsService := stream.NewWebsocketService()
 
