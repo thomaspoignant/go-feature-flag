@@ -441,3 +441,35 @@ def test_event_version_is_unset_when_the_flag_has_none(mock_evaluator):
     hook.after(_make_hook_context(), _make_details(), {})
 
     assert publisher.add_event.call_args[0][0].version is None
+
+
+@pytest.mark.parametrize(
+    "raw_version,expected",
+    [(2, "2"), (1.7, "1.7"), (True, "True")],
+)
+def test_a_non_string_flag_version_does_not_break_the_evaluation(
+    mock_evaluator, raw_version, expected
+):
+    """Flag metadata is user-authored, so `version` can be any JSON type.
+
+    An event model that rejects it would raise inside this hook, and the SDK
+    turns a hook failure into an error result — so a flag carrying
+    `metadata: {version: 2}` would never resolve to its real value again.
+    """
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    details = FlagEvaluationDetails(
+        flag_key="test-flag",
+        value=True,
+        variant="on",
+        reason="TARGETING_MATCH",
+        flag_metadata={"version": raw_version},
+    )
+
+    hook.after(_make_hook_context(), details, {})
+
+    assert publisher.add_event.call_args[0][0].version == expected

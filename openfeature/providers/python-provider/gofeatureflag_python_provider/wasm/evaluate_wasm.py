@@ -69,9 +69,10 @@ class WasmInvalidResultError(RuntimeError):
 
 class WasmEvaluationTrapError(RuntimeError):
     """
-    Raised when the WASM module traps during evaluation (stack overflow,
-    unrecoverable panic, out-of-memory...). The store that trapped has been
-    discarded and replaced with a fresh one; the evaluation itself failed.
+    Raised when the WASM module died mid-call (stack overflow, unrecoverable
+    panic, out-of-memory, or an abort that exits through WASI proc_exit). The
+    store has been discarded and replaced with a fresh one; the evaluation
+    itself failed.
     """
 
 
@@ -86,6 +87,13 @@ class WasmPoolTimeoutError(RuntimeError):
 
 # How long evaluate() waits for a free slot before giving up on it.
 _POOL_GET_TIMEOUT_SECONDS = 30.0
+
+# Errors that mean the call into the module died mid-flight, leaving the store
+# poisoned. wasmtime raises Trap for a genuine trap, and ExitTrap — which is a
+# WasmtimeError, *not* a Trap subclass — when the module calls proc_exit, as
+# TinyGo's abort() does. Catching only Trap would let an abort escape with the
+# store still in the pool.
+_STORE_POISONING_ERRORS = (wasmtime.Trap, wasmtime.WasmtimeError)
 
 
 def _create_slot(
@@ -260,7 +268,7 @@ class EvaluateWasm:
                 ) from exc
         try:
             return self._evaluate_with_slot(slot, wasm_input)
-        except wasmtime.Trap as exc:
+        except _STORE_POISONING_ERRORS as exc:
             slot = None  # poisoned: never reuse a store that trapped
             raise WasmEvaluationTrapError(
                 f"WASM evaluation trapped; the store has been discarded: {exc}"
@@ -302,7 +310,7 @@ class EvaluateWasm:
             memory.write(store, input_bytes + b"\x00", ptr)
             try:
                 result = evaluate_fn(store, ptr, len(input_bytes))
-            except wasmtime.Trap:
+            except _STORE_POISONING_ERRORS:
                 trapped = True
                 raise
             if not isinstance(result, int):

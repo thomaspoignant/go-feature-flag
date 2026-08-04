@@ -1,5 +1,7 @@
 import datetime
 import logging
+from typing import Optional
+
 from gofeatureflag_python_provider.evaluator import AbstractEvaluator
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.request_data_collector import FeatureEvent
@@ -19,6 +21,20 @@ VERSION_KEY = "version"
 # Every event this hook emits is a local evaluation: remote mode produces no
 # trackable flags, and fallback results are skipped above.
 SOURCE_INPROCESS = "INPROCESS"
+
+
+def _version_from(flag_metadata: Optional[dict]) -> Optional[str]:
+    """Read the flag version out of flag metadata as a string.
+
+    Flag metadata is authored by whoever wrote the flag, so `version` can hold
+    any JSON type. FeatureEvent types it as a string, and an unconvertible value
+    would raise inside this hook — which the SDK turns into an error result, so
+    a perfectly good evaluation would start returning the default value.
+    """
+    version = (flag_metadata or {}).get(VERSION_KEY)
+    if version is None or isinstance(version, str):
+        return version
+    return str(version)
 
 
 class DataCollectorHook(Hook):
@@ -63,7 +79,7 @@ class DataCollectorHook(Hook):
             key=hook_context.flag_key,
             value=details.value,
             variation=details.variant or "SdkDefault",
-            version=(details.flag_metadata or {}).get(VERSION_KEY),
+            version=_version_from(details.flag_metadata),
             source=SOURCE_INPROCESS,
             userKey=hook_context.evaluation_context.targeting_key
             or default_targeting_key,

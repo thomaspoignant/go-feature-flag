@@ -6,6 +6,7 @@ initialization, disposal, and flag evaluation for all supported types and scenar
 from __future__ import annotations
 
 import threading
+from typing import Optional
 
 import pytest
 import wasmtime
@@ -333,6 +334,7 @@ def _make_fake_slot(
     malloc_ret: int = 8,
     trap_on_evaluate: bool = False,
     evaluate_ret: object = None,
+    evaluate_error: Optional[BaseException] = None,
 ):
     """Duck-typed (store, memory, malloc, free, evaluate) slot recording calls."""
     calls = {"free": 0, "writes": 0}
@@ -354,6 +356,8 @@ def _make_fake_slot(
         calls["free"] += 1
 
     def evaluate_fn(_store, _ptr, _length):
+        if evaluate_error is not None:
+            raise evaluate_error
         if trap_on_evaluate:
             raise wasmtime.Trap("synthetic trap")
         if evaluate_ret is not None:
@@ -378,6 +382,44 @@ def test_evaluate_with_slot_skips_free_after_trap():
     with pytest.raises(wasmtime.Trap):
         EvaluateWasm()._evaluate_with_slot(slot, _make_input("f", _BOOL_FLAG))
     assert calls["free"] == 0
+
+
+def test_evaluate_with_slot_skips_free_after_a_wasi_abort():
+    """An abort exits through proc_exit, which wasmtime reports as ExitTrap.
+
+    ExitTrap is a WasmtimeError and *not* a Trap subclass, so a handler that
+    only names Trap would run free() on a store that is just as poisoned.
+    """
+    slot, calls = _make_fake_slot(evaluate_error=wasmtime.ExitTrap("wasi proc_exit(1)"))
+    with pytest.raises(wasmtime.ExitTrap):
+        EvaluateWasm()._evaluate_with_slot(slot, _make_input("f", _BOOL_FLAG))
+    assert calls["free"] == 0
+
+
+def test_wasi_abort_discards_the_store_like_a_trap():
+    """The store is poisoned either way, so it must never go back to the pool."""
+    e = EvaluateWasm(pool_size=1)
+    e.initialize()
+    try:
+        original_store = e._pool.queue[0][0]
+        real_evaluate_with_slot = e._evaluate_with_slot
+        raised = []
+
+        def abort_once(slot, wasm_input):
+            if not raised:
+                raised.append(True)
+                raise wasmtime.ExitTrap("wasi proc_exit(1)")
+            return real_evaluate_with_slot(slot, wasm_input)
+
+        e._evaluate_with_slot = abort_once
+        with pytest.raises(WasmEvaluationTrapError):
+            e.evaluate(_make_input("f", _BOOL_FLAG, default=False))
+
+        assert e._pool.qsize() == 1
+        assert e._pool.queue[0][0] is not original_store
+        assert e.evaluate(_make_input("f", _BOOL_FLAG, default=False)).value is True
+    finally:
+        e.dispose()
 
 
 def test_evaluate_with_slot_rejects_null_malloc():

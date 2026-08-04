@@ -242,6 +242,88 @@ def test_stop_is_bounded_when_the_collector_hangs():
         release.set()
 
 
+def test_overflow_flush_waits_for_an_in_flight_publish():
+    """The flush a full buffer triggers must not be skipped.
+
+    The publish already running drained the buffer before these events arrived,
+    so skipping would leave them queued past the cap until the next periodic
+    tick — a whole flush interval away.
+    """
+    in_flight = threading.Event()
+    release = threading.Event()
+    sent_batches = []
+
+    def _send(events, meta):
+        sent_batches.append(list(events))
+        if len(sent_batches) == 1:
+            in_flight.set()
+            release.wait(timeout=5.0)
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = _send
+    publisher = EventPublisher(api=mock_api, options=_make_options(2))
+
+    # Occupy the publish lock with a slow, already-running flush.
+    publisher.add_event(_make_event(user_key="u0"))
+    threading.Thread(target=publisher._publish_events, daemon=True).start()
+    assert in_flight.wait(timeout=2.0)
+
+    # These arrive after that publish took its snapshot, and reaching the
+    # threshold spawns the overflow flush.
+    publisher.add_event(_make_event(user_key="u1"))
+    publisher.add_event(_make_event(user_key="u2"))
+    release.set()
+
+    deadline = time.monotonic() + 3.0
+    while len(sent_batches) < 2 and time.monotonic() < deadline:
+        time.sleep(0.01)
+
+    assert len(sent_batches) == 2
+    assert [event.userKey for event in sent_batches[1]] == ["u1", "u2"]
+
+
+def test_start_after_a_timed_out_stop_leaves_a_single_runner():
+    """A stop() that timed out must not leave a second runner behind.
+
+    The old runner is still alive; giving each runner its own stop event means
+    the next start() cannot revive it into publishing alongside the new one.
+    """
+    release = threading.Event()
+    in_flight = threading.Event()
+
+    def _hanging_send(events, meta):
+        in_flight.set()
+        release.wait(timeout=10.0)
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = _hanging_send
+    # Tick fast enough that the runner thread itself is the one stuck in the
+    # publish when stop() gives up waiting for it.
+    publisher = EventPublisher(api=mock_api, options=_make_options(2, 50))
+    publisher.add_event(_make_event())
+    publisher.start()
+    old_thread = publisher._thread
+    old_stopper = publisher._stop_event
+    assert in_flight.wait(timeout=2.0)
+
+    try:
+        publisher.stop(timeout=0.2)
+        assert old_thread.is_alive()  # still stuck in the hanging publish
+        assert old_stopper.is_set()
+
+        publisher.start()
+
+        assert publisher._thread is not old_thread
+        # The old runner is still waiting on the event it was started with, so
+        # it stays stopped. Sharing one event would clear it here and put that
+        # thread back to work alongside the new one.
+        assert old_stopper.is_set()
+        assert publisher._stop_event is not old_stopper
+    finally:
+        release.set()
+        publisher.stop(timeout=1.0)
+
+
 def test_exporter_metadata_always_carries_the_reserved_keys():
     """Without them, events cannot be attributed to an SDK."""
     mock_api = Mock()

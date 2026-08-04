@@ -138,7 +138,16 @@ class GoFeatureFlagApi:
                 f"Failed to parse flag configuration response: {e}"
             ) from e
 
-        result.flags = data.get("flags") or {}
+        flags = data.get("flags")
+        if not isinstance(flags, dict):
+            # A response without a flag map is malformed, and is rejected here so
+            # callers never have to guess. An *empty* map is a different thing
+            # entirely — a relay proxy that legitimately serves no flags — and is
+            # accepted as the valid configuration it is.
+            raise FlagConfigurationUnavailableError(
+                "flag configuration response does not contain a flag map"
+            )
+        result.flags = flags
         result.evaluation_context_enrichment = (
             data.get("evaluationContextEnrichment") or {}
         )

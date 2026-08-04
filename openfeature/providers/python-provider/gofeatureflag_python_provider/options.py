@@ -128,8 +128,6 @@ class GoFeatureFlagOptions(BaseModel):
 
     def get_log_level_int(self) -> int:
         """Resolve log_level to a logging module level constant."""
-        if self.log_level is None:
-            return logging.WARNING
         if isinstance(self.log_level, int):
             return self.log_level
         return getattr(logging, str(self.log_level).upper(), logging.WARNING)
