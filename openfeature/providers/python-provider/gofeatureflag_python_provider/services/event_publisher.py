@@ -13,7 +13,8 @@ from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
 
 DEFAULT_FLUSH_INTERVAL_MS: int = 60_000
 DEFAULT_MAX_PENDING_EVENTS: int = 10_000
-# Upper bound on how long shutdown waits for background work.
+# Upper bound on how long a caller waits for background work: shutdown waiting
+# for the runner thread, and any flush that queues behind an in-flight publish.
 DEFAULT_SHUTDOWN_TIMEOUT_SECONDS: float = 5.0
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,10 @@ class EventPublisher:
         # deliberately never taken by add_event: enqueuing runs inside an
         # evaluation hook and must not block on collector availability.
         self._flush_lock = threading.Lock()
+        # One event per runner rather than one shared by every runner: a runner
+        # that outlived its stop() keeps its own set event and exits, where a
+        # shared event would be cleared by the next start() and revive it,
+        # leaving two runners publishing in parallel.
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
         self._running = False
@@ -71,8 +76,10 @@ class EventPublisher:
         if self._running:
             return
         self._running = True
-        self._stop_event.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._stop_event = threading.Event()
+        self._thread = threading.Thread(
+            target=self._run, args=(self._stop_event,), daemon=True
+        )
         self._thread.start()
 
     def stop(self, timeout: float = DEFAULT_SHUTDOWN_TIMEOUT_SECONDS) -> None:
@@ -85,9 +92,19 @@ class EventPublisher:
             return
         self._running = False
         self._stop_event.set()
-        if self._thread is not None:
-            self._thread.join(timeout=timeout)
-            self._thread = None
+        thread = self._thread
+        self._thread = None
+        if thread is not None:
+            thread.join(timeout=timeout)
+            if thread.is_alive():
+                # Its stop event is set and is its own, so it exits as soon as
+                # the publish it is stuck in returns. Reported because until
+                # then a request to the collector is still outstanding.
+                self._logger.warning(
+                    "EventPublisher: flush thread still finishing a publish after "
+                    "%.1fs; it will exit on its own",
+                    timeout,
+                )
         self._publish_events(wait=True, timeout=timeout)
 
     def add_event(self, event: FeatureEvent) -> None:
@@ -122,19 +139,25 @@ class EventPublisher:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _run(self) -> None:
-        """Background thread: flush periodically until stopped."""
+    def _run(self, stopper: threading.Event) -> None:
+        """Background thread: flush periodically until its own stopper is set."""
         flush_interval_ms = (
             self._options.data_flush_interval or DEFAULT_FLUSH_INTERVAL_MS
         )
         flush_interval_sec = flush_interval_ms / 1000.0
-        while not self._stop_event.wait(timeout=flush_interval_sec):
+        while not stopper.wait(timeout=flush_interval_sec):
             self._publish_events()
 
     def _immediate_flush(self) -> None:
-        """Target of the fire-and-forget flush spawned by add_event."""
+        """Target of the fire-and-forget flush spawned by add_event.
+
+        Waits for an in-flight publish instead of skipping: this flush was
+        triggered by a full buffer, and the running publish drained the buffer
+        before those events arrived, so skipping would leave them queued until
+        the next periodic tick — a whole flush interval of growth past the cap.
+        """
         try:
-            self._publish_events()
+            self._publish_events(wait=True)
         finally:
             with self._lock:
                 self._immediate_flush_scheduled = False
@@ -148,9 +171,11 @@ class EventPublisher:
         Atomically drain the buffer and send events to the collector.
 
         At most one publish is in flight at a time. A periodic flush that finds
-        one already running simply returns — the running publish drains whatever
-        was queued in the meantime. Shutdown passes wait=True so it flushes
-        after the in-flight publish instead of skipping its own final drain.
+        one already running simply returns — the next tick comes soon enough.
+        Callers whose drain cannot wait for a tick (shutdown, and the
+        overflow-triggered flush) pass wait=True and queue behind the in-flight
+        publish instead, bounded by *timeout* so an unreachable collector never
+        blocks them indefinitely.
 
         On failure the drained batch is re-queued at the front of the buffer so
         no events are lost and chronological order is preserved.

@@ -12,8 +12,10 @@ import pytest
 
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import (
+    ErrorCode,
     FlagNotFoundError,
     GeneralError,
+    ParseError,
     ProviderFatalError,
     ProviderNotReadyError,
     TypeMismatchError,
@@ -144,7 +146,7 @@ def test_shutdown_stops_polling_and_disposes_wasm():
 
 
 def test_304_keeps_existing_flags():
-    """When refresh returns a response with empty flags (304-style), stored flags are unchanged."""
+    """A 'not modified' answer leaves the stored configuration untouched."""
     mock_api = Mock()
     mock_api.retrieve_flag_configuration.side_effect = [
         FlagConfigResponse(
@@ -152,7 +154,7 @@ def test_304_keeps_existing_flags():
             flags={"my_flag": {"defaultValue": False}},
             evaluation_context_enrichment={},
         ),
-        FlagConfigResponse(etag="v1", flags={}, evaluation_context_enrichment={}),
+        None,  # 304 Not Modified
     ]
     evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
     evaluator.initialize()
@@ -161,6 +163,31 @@ def test_304_keeps_existing_flags():
     evaluator._refresh_flag_configuration()
     with evaluator._lock:
         assert evaluator._flags == {"my_flag": {"defaultValue": False}}
+    evaluator.shutdown()
+
+
+def test_an_emptied_flag_map_is_applied_and_flags_report_as_not_found():
+    """Every flag being removed is a configuration change like any other.
+
+    The provider is ready and its configuration is current, so the answer to a
+    lookup is FLAG_NOT_FOUND — not PROVIDER_NOT_READY, which would blame the
+    infrastructure for an empty config.
+    """
+    mock_api = Mock()
+    mock_api.retrieve_flag_configuration.side_effect = [
+        FlagConfigResponse(etag='"v1"', flags={_FLAG_KEY: _BOOL_FLAG_DICT}),
+        FlagConfigResponse(etag='"v2"', flags={}),
+    ]
+    evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+    evaluator.initialize()
+
+    evaluator._refresh_flag_configuration()
+
+    with evaluator._lock:
+        assert evaluator._flags == {}
+        assert evaluator._etag == '"v2"'
+    with pytest.raises(FlagNotFoundError):
+        evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
     evaluator.shutdown()
 
 
@@ -715,17 +742,23 @@ def test_304_does_not_advance_the_stored_etag():
     evaluator.shutdown()
 
 
-def test_null_flag_map_does_not_advance_the_stored_etag():
-    """A 200 with a null/absent flag map is a failed refresh.
+def test_a_rejected_response_does_not_advance_the_stored_etag():
+    """A refresh the API rejected (e.g. a body with no flag map) changes nothing.
 
     Advancing the ETag here pins the provider to a configuration it never
     received, after which the server answers 304 forever and the stale
     configuration becomes permanent.
     """
+    from gofeatureflag_python_provider.exceptions import (
+        FlagConfigurationUnavailableError,
+    )
+
     mock_api = Mock()
     mock_api.retrieve_flag_configuration.side_effect = [
         FlagConfigResponse(etag='"v1"', flags={"f": {"defaultValue": True}}),
-        FlagConfigResponse(etag='"v2"', flags={}),
+        FlagConfigurationUnavailableError(
+            "flag configuration response does not contain a flag map"
+        ),
     ]
     evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
     evaluator.initialize()
@@ -951,7 +984,12 @@ def test_stale_after_three_consecutive_failures_then_ready_on_recovery():
     evaluator.shutdown()
 
 
-def test_an_empty_flag_map_counts_as_a_failed_refresh_for_staleness():
+def test_an_empty_flag_map_is_a_successful_refresh():
+    """A relay proxy serving no flags is a valid configuration, not a failure.
+
+    Counting it as one would drive a correctly-configured provider to STALE and
+    keep it there: the ETag never advances, so no later poll can clear it.
+    """
     mock_api = Mock()
     mock_api.retrieve_flag_configuration.side_effect = [
         FlagConfigResponse(etag='"v1"', flags={"f": {}}),
@@ -965,7 +1003,10 @@ def test_an_empty_flag_map_counts_as_a_failed_refresh_for_staleness():
     for _ in range(3):
         evaluator._refresh_flag_configuration()
 
-    assert len(events["stale"]) == 1
+    assert events["stale"] == []
+    with evaluator._lock:
+        assert evaluator._flags == {}
+        assert evaluator._etag == '"v4"'
     evaluator.shutdown()
 
 
@@ -1108,8 +1149,25 @@ def test_remote_failure_surfaces_the_original_in_process_error():
         value=None, errorCode="PARSE_ERROR", errorDetails="malformed flag"
     )
 
-    with pytest.raises(GeneralError, match="malformed flag"):
+    with pytest.raises(ParseError, match="malformed flag"):
         evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
+    evaluator.shutdown()
+
+
+def test_engine_parse_error_maps_to_parse_error():
+    """PARSE_ERROR has its own SDK exception; collapsing it into GeneralError
+    would report the wrong error code to the caller."""
+    evaluator, mock_wasm, _ = _evaluator_with_fallback(
+        remote_error=RuntimeError("relay proxy unreachable")
+    )
+    mock_wasm.evaluate.return_value = _wasm_ok_response(
+        value=None, errorCode="PARSE_ERROR", errorDetails="boom"
+    )
+
+    with pytest.raises(ParseError) as raised:
+        evaluator.resolve_boolean_details(_FLAG_KEY, False, _DEFAULT_CTX)
+
+    assert raised.value.error_code == ErrorCode.PARSE_ERROR
     evaluator.shutdown()
 
 

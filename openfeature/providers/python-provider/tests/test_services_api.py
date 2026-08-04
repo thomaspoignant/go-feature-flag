@@ -320,7 +320,7 @@ def test_retrieve_flag_configuration_invalid_last_modified_returns_none(
     mock_pool_manager_class.return_value = mock_http
     mock_http.request.return_value = _mock_response(
         HTTPStatus.OK,
-        "{}",
+        json.dumps({"flags": {}}),
         {"ETag": '"123456789"', "Last-Modified": "invalid-date"},
     )
     options = _make_options()
@@ -330,6 +330,43 @@ def test_retrieve_flag_configuration_invalid_last_modified_returns_none(
 
     # Parsing invalid date leaves last_updated as None (JS: lastUpdated?.getTime() is NaN)
     assert result.last_updated is None
+
+
+@patch("gofeatureflag_python_provider.services.api.urllib3.PoolManager")
+def test_retrieve_flag_configuration_accepts_an_empty_flag_map(
+    mock_pool_manager_class,
+):
+    """A relay proxy serving no flags returns a valid, empty configuration."""
+    mock_http = Mock()
+    mock_pool_manager_class.return_value = mock_http
+    mock_http.request.return_value = _mock_response(
+        HTTPStatus.OK, json.dumps({"flags": {}}), {"ETag": '"v1"'}
+    )
+    api = GoFeatureFlagApi(_make_options())
+
+    result = api.retrieve_flag_configuration()
+
+    assert result.flags == {}
+    assert result.etag == '"v1"'
+
+
+@patch("gofeatureflag_python_provider.services.api.urllib3.PoolManager")
+@pytest.mark.parametrize("body", ["{}", json.dumps({"flags": None})])
+def test_retrieve_flag_configuration_rejects_a_response_without_a_flag_map(
+    mock_pool_manager_class, body
+):
+    """A body with no flag map is malformed, and must not read as 'no flags'.
+
+    Silently turning it into an empty configuration would drop every flag the
+    provider is serving.
+    """
+    mock_http = Mock()
+    mock_pool_manager_class.return_value = mock_http
+    mock_http.request.return_value = _mock_response(HTTPStatus.OK, body, {})
+    api = GoFeatureFlagApi(_make_options())
+
+    with pytest.raises(FlagConfigurationUnavailableError, match="flag map"):
+        api.retrieve_flag_configuration()
 
 
 @patch("gofeatureflag_python_provider.services.api.urllib3.PoolManager")

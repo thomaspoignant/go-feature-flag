@@ -14,6 +14,7 @@ from openfeature.exception import (
     FlagNotFoundError,
     GeneralError,
     InvalidContextError,
+    ParseError,
     ProviderFatalError,
     ProviderNotReadyError,
     TargetingKeyMissingError,
@@ -52,9 +53,14 @@ _ERROR_CODE_GENERAL = "GENERAL"
 # fault. The relay proxy is authoritative and reachable, so re-evaluating there
 # turns a local failure into a correct answer.
 #
-# FLAG_CONFIG is deliberately absent: it is a deterministic misconfiguration
-# that the relay proxy would reproduce identically, so a fallback would only add
-# latency to the same wrong answer.
+# PARSE_ERROR means the module could not read the payload this provider built
+# for it, and GENERAL is the engine's catch-all — which the bundled engine also
+# returns for anything a newer relay proxy understands and it does not. Both can
+# therefore succeed remotely.
+#
+# FLAG_CONFIG is deliberately absent: it names the flag itself as invalid, a
+# verdict the relay proxy reaches from the same configuration, so a fallback
+# would only add latency to the same wrong answer.
 _FALLBACK_ERROR_CODES = frozenset({_ERROR_CODE_PARSE_ERROR, _ERROR_CODE_GENERAL})
 
 # Flag metadata marking a result that came from the relay proxy rather than the
@@ -245,15 +251,11 @@ class InProcessEvaluator(AbstractEvaluator):
             # answered, so this is a successful refresh, not a failure.
             self._record_refresh_success(changed_flags=[])
             return
-        if not response.flags:
-            # A flag map that is null, absent or empty is a failed refresh, not
-            # an instruction to drop every flag.
-            logger.warning("Ignoring flag configuration refresh with an empty flag map")
-            self._record_refresh_failure(
-                "flag configuration refresh returned an empty flag map"
-            )
-            return
-
+        # A missing flag map never reaches here: the API rejects that response as
+        # malformed, which is a failed fetch above. An empty one is a relay proxy
+        # that legitimately serves no flags, and is applied as-is — treating it
+        # as a failure would drive a correctly-configured provider to STALE and
+        # answer PROVIDER_NOT_READY instead of FLAG_NOT_FOUND, forever.
         enrichment = response.evaluation_context_enrichment or {}
         with self._lock:
             changed_flags = _changed_flag_keys(self._flags or {}, response.flags)
@@ -340,15 +342,11 @@ class InProcessEvaluator(AbstractEvaluator):
             return TargetingKeyMissingError(details or "Targeting key missing")
         if error_code == _ERROR_CODE_INVALID_CONTEXT:
             return InvalidContextError(details or "Invalid context")
+        if error_code == _ERROR_CODE_PARSE_ERROR:
+            return ParseError(details or f"Error parsing flag '{flag_key}'")
         return GeneralError(
             details or f"Error evaluating flag '{flag_key}': {error_code}"
         )
-
-    def _raise_for_error_code(
-        self, flag_key: str, error_code: str, details: Optional[str]
-    ) -> None:
-        """Translate a WASM error code into the appropriate OpenFeature exception."""
-        raise self._error_for_code(flag_key, error_code, details)
 
     def _fallback_provider(self):
         """The OFREP client used for remote fallback, built on first use.
@@ -484,7 +482,7 @@ class InProcessEvaluator(AbstractEvaluator):
                         flag_key, response.errorCode, response.errorDetails
                     ),
                 )
-            self._raise_for_error_code(
+            raise self._error_for_code(
                 flag_key, response.errorCode, response.errorDetails
             )
 
