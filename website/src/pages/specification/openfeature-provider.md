@@ -11,7 +11,7 @@ title: GO Feature Flag Provider Specification
 | **Last Update Date**        | 03/08/2026                               |
 | **Authors**                 | Thomas Poignant                          |
 | **Minimum relay proxy**     | `v1.55.0`                                |
-| **Evaluation engine**       | `modules/core v0.7.2` (WASM `0.2.3`)     |
+| **Evaluation engine**       | `modules/core v0.7.2` (WASM `0.2.4`)     |
 
 ## Overview
 
@@ -110,7 +110,7 @@ requirement in this document would detect, because all of them would still pass.
 
 | ID              | Sev      | Requirement                                                                                                                                                              |
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GOFF-ENG-001`  | Critical | The provider **MUST** evaluate using engine `modules/core v0.7.2`. A WASM-based provider satisfies this by pinning WASM module `0.2.3`, which embeds that core version.  |
+| `GOFF-ENG-001`  | Critical | The provider **MUST** evaluate using engine `modules/core v0.7.2`. A WASM-based provider satisfies this by pinning WASM module `0.2.4`, which embeds that core version.  |
 | `GOFF-ENG-002`  | Major    | The pinned engine version **MUST** be recorded in a single machine-readable location in the provider repository (a version file, build property or dependency manifest). |
 | `GOFF-ENG-003`  | Minor    | The provider **SHOULD** document which specification version it targets.                                                                                                 |
 
@@ -367,12 +367,19 @@ The module exposes one entry point. The host writes a JSON request into linear m
 1. Serialize the input to UTF-8 bytes
 2. ptr = malloc(byteLength + 1)
 3. write bytes at ptr, followed by a NUL terminator
-4. packed = evaluate(ptr, byteLength)      // note: byteLength, NOT including the terminator
-5. free(ptr)
-6. outPtr = (packed >> 32) & 0xFFFFFFFF
+4. packed = evaluate(ptr, byteLength)      // byteLength, NOT including the terminator
+5. outPtr = (packed >> 32) & 0xFFFFFFFF
    outLen =  packed        & 0xFFFFFFFF
-7. read outLen bytes at outPtr and parse as JSON
+6. read outLen bytes at outPtr and parse as JSON   ← BEFORE any further call
+7. free(ptr)
 ```
+
+:::danger Read the output before calling `free`
+The output buffer belongs to the module's garbage collector. It is pinned only until the
+**next call into the instance** — and `free` is such a call. Freeing the input before reading
+the output is a use-after-free: the read may return reclaimed memory, intermittently and
+without error.
+:::
 
 | ID              | Sev      | Requirement                                                                                                                                                                       |
 | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -380,13 +387,37 @@ The module exposes one entry point. The host writes a JSON request into linear m
 | `GOFF-WASM-002` | Major    | If `_start` is exported it **MUST** be invoked once per instance, and an exit code of `0` **MUST** be tolerated rather than treated as failure.                                    |
 | `GOFF-WASM-003` | Critical | The length passed to `evaluate` **MUST** be the **UTF-8 byte length** of the serialized input. Passing a string length measured in UTF-16 code units truncates the payload for any non-ASCII input. |
 | `GOFF-WASM-004` | Major    | The packed `i64` result **MUST** be unpacked as pointer in the high 32 bits and length in the low 32 bits, using arithmetic wide enough not to overflow.                           |
-| `GOFF-WASM-005` | Major    | The host **MUST** free the input pointer, and **MUST NOT** free the output pointer — the guest owns the output buffer.                                                             |
-| `GOFF-WASM-006` | Major    | A zero pointer or zero length **MUST** be treated as an invalid result.                                                                                                           |
-| `GOFF-WASM-007` | Critical | Concurrent evaluation **MUST** be safe. A single instance **MUST NOT** be shared across threads without serialisation; a pool of instances is the RECOMMENDED approach.            |
-| `GOFF-WASM-008` | Critical | If evaluation traps, the instance **MUST** be discarded and rebuilt. A trapped instance has undefined linear memory and **MUST NOT** be returned to a pool or reused.              |
+| `GOFF-WASM-005` | Critical | The output **MUST** be read before any further call into the instance, including `free`. The output buffer is pinned only until the next call, so freeing first is a use-after-free. |
+| `GOFF-WASM-006` | Major    | The host **MUST** free the input pointer after reading the output, and **MUST NOT** free the output pointer — the guest owns the output buffer. A packed result of `0` means no output was produced and **MUST** be treated as an invalid result. |
+| `GOFF-WASM-007` | Critical | The module is built with `-scheduler=none` and is **not reentrant**. One instance **MUST** serve one call at a time; a pool of instances is the RECOMMENDED way to get parallelism. |
+| `GOFF-WASM-008` | Critical | If evaluation traps, the instance **MUST** be discarded and rebuilt. A trap does not unwind the module's shadow-stack pointer, so a trapped instance is permanently poisoned and **MUST NOT** be returned to a pool or reused. |
+| `GOFF-WASM-012` | Critical | After a trap the host **MUST NOT** call `free` on the trapped instance. Running further code on it faults inside `malloc` at a wrapped address and masks the original error.       |
 | `GOFF-WASM-009` | Major    | The instance pool **SHOULD** default to the host's CPU core count and **SHOULD** be configurable.                                                                                 |
 | `GOFF-WASM-010` | Major    | The engine binary version **MUST** be pinned to a single, machine-readable value.                                                                                                 |
 | `GOFF-WASM-011` | Minor    | The provider **SHOULD** allow the binary path to be overridden, so that bundlers and non-standard packaging layouts remain usable.                                                 |
+
+### 10.1 Built-in safeguards
+
+Binaries after `0.2.3` carry a 1 MB shadow stack and return a structured `PARSE_ERROR`
+instead of trapping when input exceeds a guard:
+
+| Guard | Limit |
+| --- | --- |
+| Input JSON nesting depth | 128 levels |
+| nikunjy query nesting | 64 brackets/parentheses |
+| JSONLogic document nesting | 256 levels |
+| nikunjy `[...]` lists and JSONLogic operand arrays | 1,000 items |
+| nikunjy `and`/`or` conditions | 1,000 |
+| nikunjy attribute path segments | 128 |
+
+| ID              | Sev      | Requirement                                                                                                                                                              |
+| --------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GOFF-WASM-013` | Major    | The host **MUST** implement trap handling (`GOFF-WASM-008`, `-012`) regardless of which binary it bundles. The guards reduce traps but do not eliminate them, and older binaries carrying none of them remain in the field. |
+
+A guard breach surfaces as `PARSE_ERROR`, which
+[§16](#16-remote-fallback--goff-fallback) turns into a remote evaluation. That is the intended
+outcome: the relay proxy evaluates on a full stack and has no equivalent limit, so a context
+the embedded engine cannot handle still resolves correctly.
 
 Input and output shapes are given in [Appendix B.3](#b3-engine-abi-vectors).
 

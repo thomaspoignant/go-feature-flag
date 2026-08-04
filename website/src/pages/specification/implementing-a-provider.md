@@ -294,13 +294,18 @@ Output:
 An empty `errorCode` means success. Read `version` — it feeds `GOFF-COLL-009`, and most
 existing providers forget to decode it.
 
-Two things that have bitten every implementation:
+Three things that have bitten every implementation:
 
+- **Read the output before calling `free`** (`GOFF-WASM-005`). The output buffer is pinned only
+  until the next call into the instance, and `free` is such a call. Freeing first is a
+  use-after-free that fails intermittently and silently. The natural shape — allocate, call,
+  free in a `finally`, then parse — is exactly wrong; parse inside the `try`.
 - The length passed to `evaluate` is the **UTF-8 byte length**, not a string length. In
   languages with UTF-16 strings these differ, and the payload truncates on the first non-ASCII
   character (`GOFF-WASM-003`).
 - A trapped instance has undefined memory and must be **discarded and rebuilt**, never returned
-  to a pool (`GOFF-WASM-008`). Every provider audited got this wrong.
+  to a pool, and you must **not** call `free` on it (`GOFF-WASM-008`, `-012`). Every provider
+  audited got this wrong.
 
 ---
 

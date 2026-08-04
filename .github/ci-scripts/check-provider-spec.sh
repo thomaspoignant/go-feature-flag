@@ -12,7 +12,7 @@ set -euo pipefail
 
 SPEC="website/src/pages/specification/openfeature-provider.md"
 WASM_GOMOD="cmd/wasm/go.mod"
-PY_WASM_VERSION="openfeature/providers/python-provider/gofeatureflag_python_provider/wasm/_wasi_version.txt"
+RELEASE_MANIFEST=".github/release-please/.release-please-manifest.json"
 FIXTURE="openfeature/providers/python-provider/tests/mock_responses/config/valid-all-types.json"
 
 failures=0
@@ -26,7 +26,7 @@ pass() {
   echo "ok: $*"
 }
 
-for f in "$SPEC" "$WASM_GOMOD" "$PY_WASM_VERSION" "$FIXTURE"; do
+for f in "$SPEC" "$WASM_GOMOD" "$RELEASE_MANIFEST" "$FIXTURE"; do
   if [[ ! -f "$f" ]]; then
     echo "FAIL: required file not found: $f" >&2
     exit 1
@@ -54,19 +54,27 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# GOFF-ENG-001 — the WASM module version named in the specification must match
-# what the in-repo provider actually ships.
+# GOFF-ENG-001 — the WASM module version named in the specification must be the
+# one actually released. Deliberately compared against the release manifest and
+# not against any single provider's pin: a provider lagging the current release
+# is a conformance finding for that provider, not a defect in the specification.
 # ---------------------------------------------------------------------------
 
 spec_wasm="$(grep -oE 'WASM `[0-9]+\.[0-9]+\.[0-9]+`' "$SPEC" | head -1 | tr -d '`' | sed 's|WASM ||')"
-py_wasm="$(tr -d '[:space:]' < "$PY_WASM_VERSION")"
+released_wasm="$(grep -oE '"cmd/wasm": "[0-9]+\.[0-9]+\.[0-9]+"' "$RELEASE_MANIFEST" \
+  | head -1 | sed 's|.*": "||; s|"||')"
 
 if [[ -z "$spec_wasm" ]]; then
   fail "could not find a 'WASM \`X.Y.Z\`' version in $SPEC"
-elif [[ "$spec_wasm" != "$py_wasm" ]]; then
-  fail "WASM version mismatch: spec names $spec_wasm, python-provider pins $py_wasm"
+elif [[ -z "$released_wasm" ]]; then
+  fail "could not find the cmd/wasm entry in $RELEASE_MANIFEST"
+elif [[ "$spec_wasm" != "$released_wasm" ]]; then
+  fail "WASM version mismatch: spec names $spec_wasm, latest release is $released_wasm.
+      A new WASM release can change observable evaluation behaviour — 0.2.4 added
+      structured PARSE_ERROR guards where 0.2.3 trapped. Review §10 and the
+      specification version before bumping this."
 else
-  pass "WASM module version consistent ($spec_wasm)"
+  pass "WASM module version matches the latest release ($spec_wasm)"
 fi
 
 # ---------------------------------------------------------------------------
