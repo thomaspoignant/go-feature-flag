@@ -32,18 +32,20 @@ class GoFeatureFlagOptions(BaseModel):
     # default: endpoint
     data_collector_base_url: typing.Optional[AnyHttpUrl] = None
 
-    # timeout (optional) in milliseconds, applied to every request to the relay proxy:
-    # flag configuration, remote evaluation and data collection.
+    # timeout (optional) in milliseconds, applied to flag configuration, remote evaluation
+    # and data collection requests. It is carried by the HTTP client the provider builds, so
+    # supplying urllib3_pool_manager replaces it with that client's own timeout.
     # default: 10000
     timeout: typing.Optional[int] = 10_000
 
-    # dataFlushInterval (optional) interval time (in millisecond) we use to call the relay proxy to collect data.
-    # The parameter is used only if the cache is enabled, otherwise the collection of the data is done directly
-    # when calling the evaluation API.
+    # data_flush_interval (optional) interval in milliseconds between two flushes of the
+    # collected evaluation data to the relay proxy. A buffer that reaches max_pending_events
+    # flushes before the interval elapses.
     # default: 1 minute
     data_flush_interval: typing.Optional[int] = 60000
 
-    # disableDataCollection set to true if you don't want to collect the usage of flags retrieved in the cache.
+    # disable_data_collection (optional) set to true to stop reporting flag evaluations to
+    # the relay proxy's data collector.
     # default: false
     disable_data_collection: typing.Optional[bool] = False
 
@@ -65,13 +67,13 @@ class GoFeatureFlagOptions(BaseModel):
     # default: none
     custom_headers: typing.Optional[dict[str, str]] = None
 
-    # ADVANCED OPTIONS --- be careful when changing these options
-
     # log_level (optional) logging level: "DEBUG", "INFO", "WARNING", "ERROR" or int (e.g. logging.DEBUG).
     # default: "WARNING"
     log_level: typing.Union[int, str] = "WARNING"
 
-    # http_client (optional) is the http client used to call the relay proxy.
+    # urllib3_pool_manager (optional) Advanced: HTTP client used for flag configuration and
+    # data collection. Remote evaluation goes through the OFREP client, which builds its own.
+    # Supplying one also replaces the configured timeout with that client's own.
     urllib3_pool_manager: typing.Optional[urllib3.PoolManager] = None
 
     # api_key (optional) If the relay proxy is configured to authenticate the requests, you should provide
@@ -79,30 +81,32 @@ class GoFeatureFlagOptions(BaseModel):
     # Default: None
     api_key: typing.Optional[str] = None
 
-    # ExporterMetadata (optional) is the metadata we send to the GO Feature Flag relay proxy when we report the
-    # evaluation data usage. Values are restricted to string, boolean, integer or
+    # exporter_metadata (optional) is the metadata we send to the GO Feature Flag relay proxy when we
+    # report the evaluation data usage. Values are restricted to string, boolean, integer or
     # float; anything else is rejected here rather than failing later inside the
     # publisher, where the batch would be re-queued and retried forever.
     #
-    # ‼️Important: If you are using a GO Feature Flag relay proxy before version v1.41.0, the information of this
-    # field will not be added to your feature events.
+    # The reserved keys `provider` and `openfeature` are always added and win over a value
+    # set here.
     exporter_metadata: typing.Optional[
         dict[str, typing.Union[str, bool, int, float]]
     ] = {}
 
-    # max_pending_events (optional) is the maximum number of events buffered in memory before an immediate
-    # flush is triggered (fire-and-forget). Used by EventPublisher.
+    # max_pending_events (optional) number of buffered events that triggers an immediate
+    # flush (fire-and-forget). A threshold, not the ceiling: the buffer holds up to twice
+    # this many, above which the oldest events are dropped. Used by EventPublisher.
     # default: 10000
     max_pending_events: typing.Optional[int] = 10_000
 
-    # wasm_file_path (optional) is the path to the GO Feature Flag evaluation WASI binary.
+    # wasm_file_path (optional) Advanced: path to the GO Feature Flag evaluation WASI binary.
     # Used only when evaluation_type is INPROCESS.
     # If not set, the bundled WASI binary is used (version pinned in wasm/_wasi_version.txt).
     wasm_file_path: typing.Optional[str] = None
 
-    # wasm_pool_size (optional) number of WASM Store instances for concurrent in-process evaluation.
-    # Used only when evaluation_type is INPROCESS. wasmtime.Store is not thread-safe; a pool
-    # allows multiple evaluations to run in parallel.
+    # wasm_pool_size (optional) Advanced: number of WASM Store instances for concurrent
+    # in-process evaluation. Used only when evaluation_type is INPROCESS. wasmtime.Store is
+    # not thread-safe; a pool allows multiple evaluations to run in parallel.
+    # Zero or negative is treated as unset.
     # default: the host's CPU core count
     wasm_pool_size: typing.Optional[int] = Field(
         default_factory=lambda: os.cpu_count() or 1
