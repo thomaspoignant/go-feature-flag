@@ -114,19 +114,19 @@ else:
 | `endpoint` | `str` | _(required)_ | URL of the GO Feature Flag relay proxy |
 | `evaluation_type` | `EvaluationType` | `INPROCESS` | Evaluation mode: `INPROCESS` or `REMOTE` |
 | `data_collector_base_url` | `str` | `endpoint` | Base URL of the data collector only. Replaces the whole base — scheme, host, port and path prefix. Flag configuration and evaluation keep using `endpoint` |
-| `timeout` | `int` | `10000` | Timeout (ms) applied to every relay proxy request: flag configuration, remote evaluation and data collection |
+| `timeout` | `int` | `10000` | Timeout (ms) for flag configuration, remote evaluation and data collection requests. Carried by the HTTP client the provider builds, so a custom `urllib3_pool_manager` replaces it with its own |
 | `data_flush_interval` | `int` | `60000` | Interval (ms) to flush usage data to the relay proxy |
 | `disable_data_collection` | `bool` | `False` | Set to `True` to disable usage analytics |
 | `flag_config_poll_interval_seconds` | `int` | `120` | Polling interval (seconds) for flag configuration _(in-process mode)_ |
 | `api_key` | `str` | `None` | API key for authenticated relay proxy requests, sent as `Authorization: Bearer` |
-| `exporter_metadata` | `dict` | `{}` | Static metadata attached to evaluation events. Values must be `str`, `bool`, `int` or `float` |
-| `max_pending_events` | `int` | `10000` | Maximum buffered events before a forced flush |
+| `exporter_metadata` | `dict` | `{}` | Static metadata attached to evaluation events. Values must be `str`, `bool`, `int` or `float`. The reserved keys `provider` and `openfeature` are always added and win over your values |
+| `max_pending_events` | `int` | `10000` | Buffered events that trigger an immediate flush. The buffer holds up to twice this many, above which the oldest are dropped |
 | `wasm_file_path` | `str` | `None` | Path to a custom WASM/WASI evaluation binary _(in-process mode, uses bundled binary by default)_ |
 | `wasm_pool_size` | `int` | CPU core count | Pool size for concurrent WASM evaluation instances _(in-process mode)_ |
 | `evaluation_flag_list` | `list[str]` | `None` | Restrict the fetched flag configuration to these keys. Unset or empty means all flags _(in-process mode)_ |
 | `custom_headers` | `dict[str, str]` | `None` | Extra headers on every relay proxy request, for deployments behind a gateway with its own authentication. Applied before the provider's own headers, so a configured `api_key` wins over a custom `Authorization` |
 | `log_level` | `str\|int` | `"WARNING"` | Logging level (`"DEBUG"`, `"INFO"`, `"WARNING"`, `"ERROR"`) |
-| `urllib3_pool_manager` | `urllib3.PoolManager` | `None` | Custom HTTP client |
+| `urllib3_pool_manager` | `urllib3.PoolManager` | `None` | Custom HTTP client for flag configuration and data collection. Remote evaluation uses the OFREP client, which builds its own |
 
 ## Conformance
 
