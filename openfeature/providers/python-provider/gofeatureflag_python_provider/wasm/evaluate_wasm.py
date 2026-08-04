@@ -24,6 +24,7 @@ replaced, never reused, and `free` must never be called on it.
 """
 
 import logging
+import threading
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, Optional
@@ -76,15 +77,14 @@ class WasmEvaluationTrapError(RuntimeError):
 
 class WasmPoolTimeoutError(RuntimeError):
     """
-    Raised when no evaluation slot became available within the timeout and a
-    replacement slot could not be created. The pool can only stay empty that
-    long if slots were lost to irrecoverable store-creation failures or the
-    pool is badly undersized for the workload.
+    Raised when no evaluation slot became available within the timeout, either
+    because every slot is still busy (the pool is undersized for the workload)
+    or because slots were lost to irrecoverable store-creation failures and
+    rebuilding one failed again.
     """
 
 
-# How long evaluate() waits for a free slot before assuming the pool has been
-# drained (e.g. every replacement after a trap failed) and trying to self-heal.
+# How long evaluate() waits for a free slot before giving up on it.
 _POOL_GET_TIMEOUT_SECONDS = 30.0
 
 
@@ -161,6 +161,11 @@ class EvaluateWasm:
         self._engine: Optional[wasmtime.Engine] = None
         self._module: Optional[wasmtime.Module] = None
         self._pool: Optional[Queue[tuple[Any, ...]]] = None
+        # How many slots exist right now, queued or checked out. Only this
+        # tells a lost slot apart from a busy one, so rebuilding can be limited
+        # to capacity actually lost and never grows the pool past _pool_size.
+        self._live_slots = 0
+        self._live_slots_lock = threading.Lock()
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -180,6 +185,8 @@ class EvaluateWasm:
         for _ in range(self._pool_size):
             slot = _create_slot(self._engine, self._module)
             self._pool.put(slot)
+        with self._live_slots_lock:
+            self._live_slots = self._pool_size
         logger.debug(
             "WASI module initialized from %s (pool_size=%d)",
             self._wasm_path,
@@ -191,6 +198,8 @@ class EvaluateWasm:
         self._pool = None
         self._module = None
         self._engine = None
+        with self._live_slots_lock:
+            self._live_slots = 0
         logger.debug("WASI module disposed")
 
     # ------------------------------------------------------------------
@@ -216,18 +225,34 @@ class EvaluateWasm:
         try:
             slot = pool.get(timeout=_POOL_GET_TIMEOUT_SECONDS)
         except Empty:
-            # The pool drained (replacement slots failed to build after traps)
-            # or is badly undersized. Try to heal it instead of blocking the
-            # caller forever; on failure degrade to a typed error so the
+            # A timeout on its own does not mean a slot was lost: every slot may
+            # simply still be busy. Rebuild only the capacity known to be gone
+            # (slots whose post-trap replacement failed), otherwise sustained
+            # saturation would add a store per waiting caller and grow the pool
+            # without bound. Plain saturation degrades to a typed error so the
             # evaluation falls back to the default value.
+            with self._live_slots_lock:
+                lost_capacity = self._live_slots < self._pool_size
+                if lost_capacity:
+                    # Reserved before the slot exists, so concurrent callers
+                    # cannot each rebuild the same missing slot.
+                    self._live_slots += 1
+            if not lost_capacity:
+                raise WasmPoolTimeoutError(
+                    "no WASM evaluation slot available after "
+                    f"{_POOL_GET_TIMEOUT_SECONDS:.0f}s; all {self._pool_size} "
+                    "slot(s) are in use. Consider increasing wasm_pool_size."
+                )
             try:
                 slot = _create_slot(self._engine, self._module)
                 logger.warning(
                     "no WASM slot became available within %.0fs; "
-                    "created a replacement slot",
+                    "rebuilt a slot the pool had lost",
                     _POOL_GET_TIMEOUT_SECONDS,
                 )
             except Exception as exc:
+                with self._live_slots_lock:
+                    self._live_slots -= 1
                 raise WasmPoolTimeoutError(
                     "no WASM evaluation slot available after "
                     f"{_POOL_GET_TIMEOUT_SECONDS:.0f}s and creating a "
@@ -249,8 +274,11 @@ class EvaluateWasm:
                         "replaced it with a fresh one"
                     )
                 except Exception:
-                    # The pool shrinks by one slot; evaluations keep working
-                    # on the remaining slots.
+                    # The pool shrinks by one slot; evaluations keep working on
+                    # the remaining slots, and the lost capacity is recorded so
+                    # a later timeout can rebuild exactly this slot.
+                    with self._live_slots_lock:
+                        self._live_slots -= 1
                     logger.exception(
                         "failed to replace a trapped WASM store; "
                         "the evaluation pool lost one slot"
