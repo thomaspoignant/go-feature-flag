@@ -366,6 +366,11 @@ func TestFile_Export(t *testing.T) {
 				},
 			},
 			setup: func(t *testing.T, fields fields) {
+				// Unix permission bits (Chmod 0000) do not restrict directory writes
+				// on Windows, so the export would not fail there.
+				if runtime.GOOS == "windows" {
+					t.Skip("directory permissions are not enforced the same way on Windows")
+				}
 				err := os.MkdirAll(fields.OutputDir, 0755)
 				assert.NoError(t, err)
 				err = os.Chmod(fields.OutputDir, 0000) // Remove all permissions
@@ -392,6 +397,11 @@ func TestFile_Export(t *testing.T) {
 				},
 			},
 			setup: func(t *testing.T, fields fields) {
+				// Unix permission bits (Chmod 0000) do not restrict directory writes
+				// on Windows, so the export would not fail there.
+				if runtime.GOOS == "windows" {
+					t.Skip("directory permissions are not enforced the same way on Windows")
+				}
 				err := os.MkdirAll(tempDir, 0755)
 				assert.NoError(t, err)
 				err = os.Chmod(tempDir, 0000) // Remove all permissions

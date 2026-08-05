@@ -41,8 +41,8 @@ func TestNewUser(t *testing.T) {
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
 				attributes: map[string]any{
-					"test":      "attributes",
-					"anonymous": true,
+					"test":             "attributes",
+					anonymousAttribute: true,
 				},
 			},
 		},
@@ -68,7 +68,7 @@ func TestNewUser(t *testing.T) {
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
 				attributes: map[string]any{
-					"anonymous": true,
+					anonymousAttribute: true,
 				},
 			},
 		},
@@ -78,7 +78,7 @@ func TestNewUser(t *testing.T) {
 			want: EvaluationContext{
 				targetingKey: "",
 				attributes: map[string]any{
-					"anonymous": true,
+					anonymousAttribute: true,
 				},
 			},
 		},
@@ -103,7 +103,7 @@ func TestNewEvaluationContextWithoutTargetingKey(t *testing.T) {
 func TestNewEvaluationContextBuilderWithoutTargetingKey(t *testing.T) {
 	ctx := NewEvaluationContextBuilder("").
 		AddCustom("role", "admin").
-		AddCustom("anonymous", true).
+		AddCustom(anonymousAttribute, true).
 		Build()
 
 	assert.Equal(t, "", ctx.GetKey(), "Should have empty targeting key")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -37,18 +38,21 @@ type Config struct {
 
 type dataExporterImpl[T ExportableEvent] struct {
 	consumerID string
-	eventStore *EventStore[T]
+	eventStore EventStore[T]
 	logger     *fflog.FFLogger
 	exporter   Config
 
 	daemonChan chan struct{}
 	ticker     *time.Ticker
+	// stopOnce guarantees that we stop the daemon only once: Close() can be called several times
+	// on a GO Feature Flag client, and closing an already closed channel panics.
+	stopOnce sync.Once
 }
 
 // NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
 // from the shared event store.
 func NewDataExporter[T ExportableEvent](exporter Config, consumerID string,
-	eventStore *EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
+	eventStore EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
 	if exporter.FlushInterval == 0 {
 		exporter.FlushInterval = defaultFlushInterval
 	}
@@ -87,20 +91,23 @@ func (d *dataExporterImpl[T]) Start() {
 }
 
 // Stop is flushing the data and stopping the ticker
+// It is safe to call it several times.
 func (d *dataExporterImpl[T]) Stop() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
 		d.Flush()
 		return
 	}
-	d.ticker.Stop()
-	close(d.daemonChan)
+	d.stopOnce.Do(func() {
+		d.ticker.Stop()
+		close(d.daemonChan)
+	})
 	d.Flush()
 }
 
 // Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
-	store := *d.eventStore
+	store := d.eventStore
 	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {
 		if d != nil && d.logger != nil {

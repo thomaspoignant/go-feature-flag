@@ -51,7 +51,7 @@ func TestDataExporterFlush_TriggerError(t *testing.T) {
 		Exporter:         &exporterMock,
 		FlushInterval:    0,
 		MaxEventInMemory: 0,
-	}, "error", &evStore, logger)
+	}, "error", evStore, logger)
 
 	exp.Flush()
 	// flush should error and not return any event
@@ -93,7 +93,7 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 					MaxEventInMemory: 0,
 				},
 				"id-consumer",
-				&evStore,
+				evStore,
 				logger,
 			)
 
@@ -142,7 +142,7 @@ func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
 					Exporter:         exporterMock,
 					FlushInterval:    0,
 					MaxEventInMemory: 0,
-				}, "id-consumer", &evStore, logger)
+				}, "id-consumer", evStore, logger)
 
 			exp.Flush()
 			// flush should error and not return any event
@@ -167,7 +167,7 @@ func TestDataExporterFlush_ConcurrentFlushNoDuplicate(t *testing.T) {
 		Exporter:         slow,
 		FlushInterval:    10 * time.Second,
 		MaxEventInMemory: 100000,
-	}, "slow-consumer", &evStore, nil)
+	}, "slow-consumer", evStore, nil)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
