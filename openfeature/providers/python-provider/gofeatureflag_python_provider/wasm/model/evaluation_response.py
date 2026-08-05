@@ -1,29 +1,8 @@
-"""
-Pydantic models for the WASM evaluator input/output.
-"""
+"""Response deserialized from the WASM evaluate export."""
 
 from typing import Any, Optional
 
 from pydantic import BaseModel
-
-
-class WasmFlagContext(BaseModel):
-    """Context passed alongside the flag definition into the WASM evaluator."""
-
-    defaultSdkValue: Optional[Any] = None
-    evaluationContextEnrichment: dict[str, Any] = {}
-
-
-class WasmInput(BaseModel):
-    """
-    Full input payload serialized to JSON and written into WASM linear memory
-    before calling the exported `evaluate` function.
-    """
-
-    flagKey: str
-    flag: dict[str, Any]
-    evalContext: dict[str, Any]
-    flagContext: WasmFlagContext
 
 
 class WasmEvaluationResponse(BaseModel):

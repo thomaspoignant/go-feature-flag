@@ -38,7 +38,7 @@ from gofeatureflag_python_provider.wasm.errors import (
     WasmNotLoadedError,
     WasmPoolTimeoutError,
 )
-from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse, WasmInput
+from gofeatureflag_python_provider.wasm.model import WasmEvaluationResponse, WasmInput
 from gofeatureflag_python_provider.wasm.wasi_runtime import (
     _create_slot,
     _default_wasi_path,

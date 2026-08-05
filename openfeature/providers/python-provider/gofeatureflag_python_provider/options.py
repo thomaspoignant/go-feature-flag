@@ -128,7 +128,7 @@ class GoFeatureFlagOptions(BaseModel):
         """Resolve the WASM pool size, defaulting to the host's CPU core count."""
         if self.wasm_pool_size is not None and self.wasm_pool_size > 0:
             return self.wasm_pool_size
-        return os.cpu_count() or 1
+        return os.cpu_count() or 4
 
     def get_log_level_int(self) -> int:
         """Resolve log_level to a logging module level constant."""

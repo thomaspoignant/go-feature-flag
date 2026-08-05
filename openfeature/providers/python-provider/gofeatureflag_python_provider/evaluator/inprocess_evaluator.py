@@ -7,6 +7,7 @@ import asyncio
 import logging
 import random
 import threading
+from enum import Enum
 from typing import Any, Callable, Optional, Type, TypeVar, Union
 
 from openfeature.evaluation_context import EvaluationContext
@@ -24,6 +25,7 @@ from openfeature.flag_evaluation import FlagResolutionDetails, Reason
 from pydantic_core import PydanticSerializationError
 
 from gofeatureflag_python_provider.evaluator.abstract_evaluator import AbstractEvaluator
+from gofeatureflag_python_provider.evaluator.util import changed_flag_keys, matches_type
 from gofeatureflag_python_provider.exceptions import UnauthorizedError
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
@@ -42,12 +44,15 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
-_ERROR_CODE_FLAG_NOT_FOUND = "FLAG_NOT_FOUND"
-_ERROR_CODE_TYPE_MISMATCH = "TYPE_MISMATCH"
-_ERROR_CODE_TARGETING_KEY_MISSING = "TARGETING_KEY_MISSING"
-_ERROR_CODE_INVALID_CONTEXT = "INVALID_CONTEXT"
-_ERROR_CODE_PARSE_ERROR = "PARSE_ERROR"
-_ERROR_CODE_GENERAL = "GENERAL"
+
+class EngineErrorCode(str, Enum):
+    FLAG_NOT_FOUND = "FLAG_NOT_FOUND"
+    TYPE_MISMATCH = "TYPE_MISMATCH"
+    TARGETING_KEY_MISSING = "TARGETING_KEY_MISSING"
+    INVALID_CONTEXT = "INVALID_CONTEXT"
+    PARSE_ERROR = "PARSE_ERROR"
+    GENERAL = "GENERAL"
+
 
 # Raw engine codes where the provider, rather than the flag, looks to be at
 # fault. The relay proxy is authoritative and reachable, so re-evaluating there
@@ -61,7 +66,9 @@ _ERROR_CODE_GENERAL = "GENERAL"
 # FLAG_CONFIG is deliberately absent: it names the flag itself as invalid, a
 # verdict the relay proxy reaches from the same configuration, so a fallback
 # would only add latency to the same wrong answer.
-_FALLBACK_ERROR_CODES = frozenset({_ERROR_CODE_PARSE_ERROR, _ERROR_CODE_GENERAL})
+_FALLBACK_ERROR_CODES = frozenset(
+    {EngineErrorCode.PARSE_ERROR, EngineErrorCode.GENERAL}
+)
 
 # Flag metadata marking a result that came from the relay proxy rather than the
 # local engine. Also tells the data collector to skip it: the relay proxy has
@@ -81,30 +88,6 @@ _DEFAULT_POLL_INTERVAL_SECONDS = 120
 # Fraction by which each poll interval is randomly shortened or lengthened, so a
 # fleet restarted together does not poll the relay proxy in lockstep.
 _POLL_JITTER_RATIO = 0.1
-
-
-def _changed_flag_keys(
-    previous: dict[str, Any],
-    current: dict[str, Any],
-) -> list[str]:
-    """Return the keys that were added, removed or modified between two configs."""
-    return sorted(
-        key
-        for key in previous.keys() | current.keys()
-        if previous.get(key) != current.get(key)
-    )
-
-
-def _matches_type(value: Any, expected_type: Union[Type, tuple]) -> bool:
-    """isinstance(), except that a bool never satisfies a non-bool resolver.
-
-    Python makes bool a subclass of int, so isinstance(True, int) is True and a
-    boolean flag would otherwise silently satisfy the integer and float
-    resolvers instead of reporting a type mismatch.
-    """
-    if isinstance(value, bool) and expected_type is not bool:
-        return False
-    return isinstance(value, expected_type)
 
 
 class InProcessEvaluator(AbstractEvaluator):
@@ -258,7 +241,7 @@ class InProcessEvaluator(AbstractEvaluator):
         # answer PROVIDER_NOT_READY instead of FLAG_NOT_FOUND, forever.
         enrichment = response.evaluation_context_enrichment or {}
         with self._lock:
-            changed_flags = _changed_flag_keys(self._flags or {}, response.flags)
+            changed_flags = changed_flag_keys(self._flags or {}, response.flags)
             if enrichment != self._evaluation_context_enrichment:
                 # Enrichment feeds every evaluation, so a change to it changes
                 # the effective configuration even when no flag differs.
@@ -334,15 +317,15 @@ class InProcessEvaluator(AbstractEvaluator):
         An unrecognised code maps to GeneralError rather than escaping as an
         unmapped language-level exception.
         """
-        if error_code == _ERROR_CODE_FLAG_NOT_FOUND:
+        if error_code == EngineErrorCode.FLAG_NOT_FOUND:
             return FlagNotFoundError(details or f"Flag '{flag_key}' not found")
-        if error_code == _ERROR_CODE_TYPE_MISMATCH:
+        if error_code == EngineErrorCode.TYPE_MISMATCH:
             return TypeMismatchError(details or f"Type mismatch for flag '{flag_key}'")
-        if error_code == _ERROR_CODE_TARGETING_KEY_MISSING:
+        if error_code == EngineErrorCode.TARGETING_KEY_MISSING:
             return TargetingKeyMissingError(details or "Targeting key missing")
-        if error_code == _ERROR_CODE_INVALID_CONTEXT:
+        if error_code == EngineErrorCode.INVALID_CONTEXT:
             return InvalidContextError(details or "Invalid context")
-        if error_code == _ERROR_CODE_PARSE_ERROR:
+        if error_code == EngineErrorCode.PARSE_ERROR:
             return ParseError(details or f"Error parsing flag '{flag_key}'")
         return GeneralError(
             details or f"Error evaluating flag '{flag_key}': {error_code}"
@@ -457,7 +440,7 @@ class InProcessEvaluator(AbstractEvaluator):
                 default_value,
                 evaluation_context,
                 remote_resolver,
-                raw_error_code=_ERROR_CODE_GENERAL,
+                raw_error_code=EngineErrorCode.GENERAL,
                 local_error=GeneralError(
                     f"WASM evaluation failed for flag '{flag_key}': {exc}"
                 ),
@@ -483,7 +466,7 @@ class InProcessEvaluator(AbstractEvaluator):
             )
 
         value = response.value
-        if value is not None and not _matches_type(value, expected_type):
+        if value is not None and not matches_type(value, expected_type):
             raise TypeMismatchError(
                 f"Flag '{flag_key}' returned type {type(value).__name__!r}, "
                 f"expected {expected_type}"
