@@ -1,17 +1,9 @@
-"""Request/response models for the GO Feature Flag API service."""
-
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from gofeatureflag_python_provider.options import BaseModel
-
-
-class FlagConfigRequest(BaseModel):
-    """Request body for POST /v1/flag/configuration."""
-
-    flags: List[str] = []
 
 
 class FlagConfigResponse(BaseModel):

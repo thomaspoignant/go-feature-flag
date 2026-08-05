@@ -39,7 +39,7 @@ def test_remote_evaluator_passes_api_key_via_headers_factory(mock_ofrep_class):
     headers = call_kw["headers_factory"]()
     assert headers == {
         "Content-Type": "application/json",
-        "Authorization": "Bearer secret-key",
+        "X-API-Key": "secret-key",
     }
 
 
@@ -117,7 +117,7 @@ def test_custom_headers_reach_the_ofrep_client(mock_ofrep_class):
 
     assert headers["X-Gateway-Token"] == "gw-secret"
     # A configured api_key still wins, as it does on the other HTTP path.
-    assert headers["Authorization"] == "Bearer real-key"
+    assert headers["X-API-Key"] == "real-key"
 
 
 @patch("gofeatureflag_python_provider.services.ofrep.OFREPProvider")

@@ -12,11 +12,13 @@ class EnrichEvaluationContextHook(Hook):
     """
 
     def __init__(self, metadata: Optional[dict] = None):
+        """Initialize the enrich evaluation context hook."""
         self._metadata = metadata if metadata is not None else {}
 
     def before(
         self, hook_context: HookContext, hints: dict
     ) -> Optional[EvaluationContext]:
+        """Enrich the evaluation context with additional information before flag resolution."""
         ctx = hook_context.evaluation_context
         enriched = dict(ctx.attributes)
         if len(self._metadata) > 0:

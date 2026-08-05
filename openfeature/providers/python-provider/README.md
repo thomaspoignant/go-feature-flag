@@ -125,8 +125,41 @@ else:
 | `wasm_pool_size` | `int` | CPU core count | Pool size for concurrent WASM evaluation instances _(in-process mode)_ |
 | `evaluation_flag_list` | `list[str]` | `None` | Restrict the fetched flag configuration to these keys. Unset or empty means all flags _(in-process mode)_ |
 | `custom_headers` | `dict[str, str]` | `None` | Extra headers on every relay proxy request, for deployments behind a gateway with its own authentication. Applied before the provider's own headers, so a configured `api_key` wins over a custom `Authorization` |
-| `log_level` | `str\|int` | `"WARNING"` | Logging level (`"DEBUG"`, `"INFO"`, `"WARNING"`, `"ERROR"`) |
+| `log_level` | `str\|int` | `"WARNING"` | Logging level (`"DEBUG"`, `"INFO"`, `"WARNING"`, `"ERROR"`). Applied only if your application has not configured the `gofeatureflag_python_provider` logger itself — see [Logging](#logging) |
 | `urllib3_pool_manager` | `urllib3.PoolManager` | `None` | Custom HTTP client for flag configuration and data collection. Remote evaluation uses the OFREP client, which builds its own |
+
+Usage analytics are collected only while the provider is running — between `initialize()`
+(called for you by `set_provider`) and `shutdown()`. Evaluations outside that window are not
+recorded: no flush runs to deliver them, and a buffer left to fill would post to the collector
+after `shutdown()` reported it was done. Each such period logs one warning, and the number of
+events dropped is reported if the provider is started again.
+
+## Logging
+
+Every module logs through the standard library under the **`gofeatureflag_python_provider`**
+logger, with one child logger per module (`gofeatureflag_python_provider.wasm.evaluate_wasm`,
+`gofeatureflag_python_provider.services.event_publisher`, and so on). Attach your handler to the
+package logger to capture all of it:
+
+```python
+import logging
+
+logging.getLogger("gofeatureflag_python_provider").setLevel(logging.INFO)
+logging.getLogger("gofeatureflag_python_provider").addHandler(logging.StreamHandler())
+```
+
+The provider ships a `NullHandler` on that logger, so it stays silent until your application
+configures logging.
+
+Two things worth knowing:
+
+- **`log_level` yields to your configuration.** The provider applies it to the package logger only
+  when nothing has set a level there yet, because that level is process-wide state. If you
+  configure the logger yourself (directly or through `logging.config.dictConfig`), your setting
+  wins. If several providers are created with different `log_level` values, the first one applies.
+- **Exceptions raised inside hooks are logged by the OpenFeature SDK**, under its own `openfeature`
+  logger, not this one. `log_level` does not affect them — configure `logging.getLogger("openfeature")`
+  if you need to see them.
 
 ## Conformance
 

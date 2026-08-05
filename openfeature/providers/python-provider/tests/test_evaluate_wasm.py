@@ -13,7 +13,7 @@ import wasmtime
 
 import gofeatureflag_python_provider.wasm.evaluate_wasm as evaluate_wasm_module
 from gofeatureflag_python_provider.wasm import EvaluateWasm, WasmFlagContext, WasmInput
-from gofeatureflag_python_provider.wasm.evaluate_wasm import (
+from gofeatureflag_python_provider.wasm.errors import (
     WasmEvaluationTrapError,
     WasmInvalidResultError,
     WasmNotLoadedError,

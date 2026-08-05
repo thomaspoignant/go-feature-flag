@@ -349,11 +349,7 @@ class InProcessEvaluator(AbstractEvaluator):
         )
 
     def _fallback_provider(self):
-        """The OFREP client used for remote fallback, built on first use.
-
-        Built lazily so that an in-process provider which never needs a fallback
-        does not require the OFREP package to be installed.
-        """
+        """The OFREP client used for remote fallback, built on first use."""
         with self._fallback_lock:
             if self._ofrep_fallback is None:
                 self._ofrep_fallback = build_ofrep_provider(self._options)

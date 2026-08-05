@@ -32,61 +32,27 @@ from typing import Any, Optional
 import wasmtime
 from pydantic import ValidationError
 
+from gofeatureflag_python_provider.wasm.errors import (
+    WasmEvaluationTrapError,
+    WasmInvalidResultError,
+    WasmNotLoadedError,
+    WasmPoolTimeoutError,
+)
 from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse, WasmInput
+from gofeatureflag_python_provider.wasm.wasi_runtime import (
+    _create_slot,
+    _default_wasi_path,
+)
 
 logger = logging.getLogger(__name__)
 
-# Directory holding this module and the bundled WASI binary.
-_WASM_DIR = Path(__file__).parent
-
-
-def _read_wasm_version() -> str:
-    """
-    Read the pinned WASI version from the co-located ``_wasi_version.txt``.
-
-    This file is the single source of truth for the WASI version shipped with
-    the provider; the bump automation only updates this file.
-    """
-    return (_WASM_DIR / "_wasi_version.txt").read_text(encoding="utf-8").strip()
-
-
-def _default_wasi_path() -> Path:
-    """Return the path to the bundled WASI binary for the pinned version."""
-    return _WASM_DIR / f"gofeatureflag-evaluation_{_read_wasm_version()}.wasi"
-
-
-class WasmNotLoadedError(RuntimeError):
-    """Raised when evaluate() is called before initialize(), or after dispose()."""
-
-
-class WasmFunctionNotFoundError(RuntimeError):
-    """Raised when a required export (malloc / free / evaluate) is missing."""
-
-
-class WasmInvalidResultError(RuntimeError):
-    """Raised when the WASM module returns an unexpected result."""
-
-
-class WasmEvaluationTrapError(RuntimeError):
-    """
-    Raised when the WASM module died mid-call (stack overflow, unrecoverable
-    panic, out-of-memory, or an abort that exits through WASI proc_exit). The
-    store has been discarded and replaced with a fresh one; the evaluation
-    itself failed.
-    """
-
-
-class WasmPoolTimeoutError(RuntimeError):
-    """
-    Raised when no evaluation slot became available within the timeout, either
-    because every slot is still busy (the pool is undersized for the workload)
-    or because slots were lost to irrecoverable store-creation failures and
-    rebuilding one failed again.
-    """
-
-
-# How long evaluate() waits for a free slot before giving up on it.
-_POOL_GET_TIMEOUT_SECONDS = 30.0
+# How long evaluate() waits for a free slot before giving up on it. Deliberately
+# short: a slot is held only for one in-process evaluation (milliseconds), and
+# the wait ends the moment any slot is returned, so reaching this ceiling means
+# either sustained saturation or a pool with no live slots left. In both cases a
+# relay proxy round trip is the faster answer, and the lost-slot rebuild below
+# cannot even start until this elapses.
+_POOL_GET_TIMEOUT_SECONDS = 1.0
 
 # Errors that mean the call into the module died mid-flight, leaving the store
 # poisoned. wasmtime raises Trap for a genuine trap, and ExitTrap — which is a
@@ -94,50 +60,6 @@ _POOL_GET_TIMEOUT_SECONDS = 30.0
 # TinyGo's abort() does. Catching only Trap would let an abort escape with the
 # store still in the pool.
 _STORE_POISONING_ERRORS = (wasmtime.Trap, wasmtime.WasmtimeError)
-
-
-def _create_slot(
-    engine: wasmtime.Engine,
-    module: wasmtime.Module,
-) -> tuple[
-    wasmtime.Store,
-    wasmtime.Memory,
-    wasmtime.Func,
-    wasmtime.Func,
-    wasmtime.Func,
-]:
-    """Create one Store and its instance (thread-safe evaluation slot)."""
-    store = wasmtime.Store(engine)
-    wasi_cfg = wasmtime.WasiConfig()
-    wasi_cfg.inherit_stdout()
-    wasi_cfg.inherit_stderr()
-    store.set_wasi(wasi_cfg)
-    linker = wasmtime.Linker(engine)
-    linker.define_wasi()
-    instance = linker.instantiate(store, module)
-    exports = instance.exports(store)
-    memory = exports["memory"]
-    malloc_fn = exports["malloc"]
-    free_fn = exports["free"]
-    evaluate_fn = exports["evaluate"]
-    for name, fn in (
-        ("memory", memory),
-        ("malloc", malloc_fn),
-        ("free", free_fn),
-        ("evaluate", evaluate_fn),
-    ):
-        if fn is None:
-            raise WasmFunctionNotFoundError(f"WASI export '{name}' not found")
-    start_fn = exports.get("_start")
-    if start_fn is not None:
-        try:
-            start_fn(store)
-        except wasmtime.ExitTrap as exc:
-            if exc.code != 0:
-                raise WasmNotLoadedError(
-                    f"WASI _start exited with non-zero code: {exc.code}"
-                ) from exc
-    return store, memory, malloc_fn, free_fn, evaluate_fn
 
 
 class EvaluateWasm:
@@ -165,7 +87,7 @@ class EvaluateWasm:
             self._wasm_path = Path(wasm_path)
         else:
             self._wasm_path = _default_wasi_path()
-        self._pool_size = 1 if pool_size is None or pool_size < 1 else pool_size
+        self._pool_size = 4 if pool_size is None or pool_size < 1 else pool_size
         self._engine: Optional[wasmtime.Engine] = None
         self._module: Optional[wasmtime.Module] = None
         self._pool: Optional[Queue[tuple[Any, ...]]] = None
@@ -248,13 +170,13 @@ class EvaluateWasm:
             if not lost_capacity:
                 raise WasmPoolTimeoutError(
                     "no WASM evaluation slot available after "
-                    f"{_POOL_GET_TIMEOUT_SECONDS:.0f}s; all {self._pool_size} "
+                    f"{_POOL_GET_TIMEOUT_SECONDS:g}s; all {self._pool_size} "
                     "slot(s) are in use. Consider increasing wasm_pool_size."
                 )
             try:
                 slot = _create_slot(self._engine, self._module)
                 logger.warning(
-                    "no WASM slot became available within %.0fs; "
+                    "no WASM slot became available within %gs; "
                     "rebuilt a slot the pool had lost",
                     _POOL_GET_TIMEOUT_SECONDS,
                 )
@@ -263,7 +185,7 @@ class EvaluateWasm:
                     self._live_slots -= 1
                 raise WasmPoolTimeoutError(
                     "no WASM evaluation slot available after "
-                    f"{_POOL_GET_TIMEOUT_SECONDS:.0f}s and creating a "
+                    f"{_POOL_GET_TIMEOUT_SECONDS:g}s and creating a "
                     f"replacement slot failed: {exc}"
                 ) from exc
         try:

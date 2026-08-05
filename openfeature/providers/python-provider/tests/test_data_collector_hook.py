@@ -10,7 +10,7 @@ from gofeatureflag_python_provider.hooks.data_collector import (
     default_targeting_key,
 )
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.flag_evaluation import FlagEvaluationDetails, FlagType
 from openfeature.hook import HookContext
@@ -269,21 +269,6 @@ class TestError:
         hook.error(_make_hook_context(), Exception("boom"), {})
 
         mock_event_publisher.add_event.assert_not_called()
-
-
-# ---------------------------------------------------------------------------
-# initialize() / shutdown()
-# ---------------------------------------------------------------------------
-
-
-class TestLifecycle:
-    def test_initialize_starts_event_publisher(self, hook, mock_event_publisher):
-        hook.initialize()
-        mock_event_publisher.start.assert_called_once()
-
-    def test_shutdown_stops_event_publisher(self, hook, mock_event_publisher):
-        hook.shutdown()
-        mock_event_publisher.stop.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

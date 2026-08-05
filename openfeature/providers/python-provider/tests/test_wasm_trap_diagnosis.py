@@ -36,7 +36,7 @@ from gofeatureflag_python_provider.wasm import (
     WasmFlagContext,
     WasmInput,
 )
-from gofeatureflag_python_provider.wasm.evaluate_wasm import (
+from gofeatureflag_python_provider.wasm.wasi_runtime import (
     _create_slot,
     _default_wasi_path,
 )

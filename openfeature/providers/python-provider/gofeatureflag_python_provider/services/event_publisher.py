@@ -8,7 +8,7 @@ import threading
 from typing import Any, Optional
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
 from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
 
 DEFAULT_FLUSH_INTERVAL_MS: int = 60_000
@@ -33,13 +33,16 @@ class EventPublisher:
     - On send failure: events are re-queued and retried on the next flush.
     - Buffer cap: if the buffer exceeds ``max_pending_events * 2`` (e.g. collector down),
       oldest events are dropped and a warning is logged to prevent unbounded growth.
+    - Outside the running window (before ``start()``, after ``stop()``) events are
+      dropped rather than buffered: nothing would ever drain them, and a buffer
+      allowed to fill would trigger a publish — posting to the collector after
+      shutdown reported it was done.
     """
 
     def __init__(
         self,
         api: GoFeatureFlagApi,
         options: GoFeatureFlagOptions,
-        logger: Optional[logging.Logger] = None,
     ) -> None:
         if api is None:
             raise ValueError("API cannot be null")
@@ -48,7 +51,6 @@ class EventPublisher:
 
         self._api = api
         self._options = options
-        self._logger = logger or logging.getLogger(__name__)
 
         self._events: list[FeatureEvent] = []
         self._lock = threading.Lock()
@@ -64,6 +66,14 @@ class EventPublisher:
         self._thread: Optional[threading.Thread] = None
         self._running = False
         self._immediate_flush_scheduled = False
+        # Drop bookkeeping. Both counters exist to keep the logs readable: an
+        # event arriving outside the running window, or a buffer stuck above the
+        # cap, happens once per evaluation, so logging each one turns a single
+        # condition into a warning per flag evaluation.
+        self._dropped_while_not_running = 0
+        self._not_running_warned = False
+        self._dropped_overflow = 0
+        self._overflow_warned = False
 
         self._exporter_metadata: dict[str, Any] = options.get_exporter_metadata()
 
@@ -75,6 +85,19 @@ class EventPublisher:
         """Start the periodic flush runner. No-op if already running."""
         if self._running:
             return
+        with self._lock:
+            dropped = self._dropped_while_not_running
+            self._dropped_while_not_running = 0
+            self._not_running_warned = False
+        if dropped:
+            # Only reported here: while stopped there is no flush to report on,
+            # so this is the first moment the total can be attributed to the
+            # period it belongs to.
+            logger.warning(
+                "EventPublisher: starting, %d event(s) were dropped while it was "
+                "not running",
+                dropped,
+            )
         self._running = True
         self._stop_event = threading.Event()
         self._thread = threading.Thread(
@@ -100,7 +123,7 @@ class EventPublisher:
                 # Its stop event is set and is its own, so it exits as soon as
                 # the publish it is stuck in returns. Reported because until
                 # then a request to the collector is still outstanding.
-                self._logger.warning(
+                logger.warning(
                     "EventPublisher: flush thread still finishing a publish after "
                     "%.1fs; it will exit on its own",
                     timeout,
@@ -111,6 +134,11 @@ class EventPublisher:
         """
         Add an event to the buffer.
 
+        Events are only accepted while the publisher is running. Outside that
+        window the event is dropped: no runner exists to drain the buffer, so
+        holding it would grow to the cap and stay there, and the flush a full
+        buffer triggers would post to the collector after stop() returned.
+
         If the buffer reaches *max_pending_events* after the append, an immediate
         non-blocking flush is triggered (fire-and-forget daemon thread). At most
         one immediate flush runs at a time. If the buffer exceeds the cap
@@ -119,14 +147,42 @@ class EventPublisher:
         max_pending = self._options.max_pending_events or DEFAULT_MAX_PENDING_EVENTS
         cap = max_pending * 2
         with self._lock:
+            if not self._running:
+                self._dropped_while_not_running += 1
+                if self._not_running_warned:
+                    logger.debug(
+                        "EventPublisher: dropping event for flag %s, publisher is "
+                        "not running",
+                        event.key,
+                    )
+                else:
+                    self._not_running_warned = True
+                    logger.warning(
+                        "EventPublisher: dropping events, the publisher is not "
+                        "running (start() was never called, or stop() already ran). "
+                        "Further drops are logged at debug level",
+                    )
+                return
+
             self._events.append(event)
             if len(self._events) > cap:
                 dropped = len(self._events) - cap
                 self._events = self._events[-cap:]
-                self._logger.warning(
-                    "EventPublisher: buffer overflow, dropped %d oldest event(s)",
-                    dropped,
-                )
+                self._dropped_overflow += dropped
+                if self._overflow_warned:
+                    logger.debug(
+                        "EventPublisher: buffer overflow, dropped %d oldest event(s)",
+                        dropped,
+                    )
+                else:
+                    self._overflow_warned = True
+                    logger.warning(
+                        "EventPublisher: buffer full (%d events), dropped %d oldest "
+                        "event(s); the collector is not accepting batches. Further "
+                        "drops are logged at debug level until it recovers",
+                        cap,
+                        dropped,
+                    )
             should_flush = (
                 len(self._events) >= max_pending and not self._immediate_flush_scheduled
             )
@@ -161,6 +217,25 @@ class EventPublisher:
         finally:
             with self._lock:
                 self._immediate_flush_scheduled = False
+
+    def _report_overflow_recovery(self) -> None:
+        """Close the overflow report opened by add_event, once a batch got through.
+
+        Pairs one warning at the start of an outage with one at its end carrying
+        the total, so the operator learns how much was lost without a warning
+        per evaluation in between.
+        """
+        with self._lock:
+            if not self._overflow_warned:
+                return
+            dropped = self._dropped_overflow
+            self._overflow_warned = False
+            self._dropped_overflow = 0
+        logger.warning(
+            "EventPublisher: collector accepted a batch again, %d event(s) were "
+            "dropped while the buffer was full",
+            dropped,
+        )
 
     def _publish_events(
         self,
@@ -201,8 +276,9 @@ class EventPublisher:
                     events_to_send,
                     self._exporter_metadata,
                 )
+                self._report_overflow_recovery()
             except Exception as exc:
-                self._logger.error(
+                logger.error(
                     "EventPublisher: error publishing events, re-queuing %d event(s): %s",
                     len(events_to_send),
                     exc,

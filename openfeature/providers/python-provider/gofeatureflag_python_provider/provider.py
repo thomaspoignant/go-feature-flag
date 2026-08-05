@@ -75,9 +75,14 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         :param data: data coming from pydantic configuration
         """
         super().__init__(**data)
-        logging.getLogger("gofeatureflag_python_provider").setLevel(
-            self.options.get_log_level_int()
-        )
+        # Deliberately the package-root logger, not __name__: every module logs
+        # through logging.getLogger(__name__), so setting the level here reaches
+        # all of them by inheritance. Applied only when nothing has configured
+        # this logger yet — the level is process-wide, so an unconditional
+        # setLevel would overwrite what the embedding application asked for.
+        package_logger = logging.getLogger("gofeatureflag_python_provider")
+        if package_logger.level == logging.NOTSET:
+            package_logger.setLevel(self.options.get_log_level_int())
         api = GoFeatureFlagApi(self.options)
         self._event_publisher = EventPublisher(api=api, options=self.options)
         self._evaluator = self._create_evaluator(api)

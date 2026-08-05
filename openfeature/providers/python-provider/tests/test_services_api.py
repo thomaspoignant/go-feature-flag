@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
 from gofeatureflag_python_provider.services import (
     DataCollectorError,
     FlagConfigurationUnavailableError,
@@ -119,10 +119,10 @@ def test_retrieve_flag_configuration_sends_etag_header_when_provided(
 
 
 @patch("gofeatureflag_python_provider.services.api.urllib3.PoolManager")
-def test_retrieve_flag_configuration_sends_bearer_auth_when_api_key_set(
+def test_retrieve_flag_configuration_sends_api_key_header_when_api_key_set(
     mock_pool_manager_class,
 ):
-    """When api_key is set, an Authorization: Bearer header is sent."""
+    """When api_key is set, an X-API-Key header is sent."""
     mock_http = Mock()
     mock_pool_manager_class.return_value = mock_http
     mock_http.request.return_value = _mock_response(
@@ -135,8 +135,8 @@ def test_retrieve_flag_configuration_sends_bearer_auth_when_api_key_set(
     api.retrieve_flag_configuration()
 
     headers = mock_http.request.call_args.kwargs["headers"]
-    assert headers.get("Authorization") == "Bearer secret-key"
-    assert "X-API-Key" not in headers
+    assert headers.get("X-API-Key") == "secret-key"
+    assert "Authorization" not in headers
 
 
 @patch("gofeatureflag_python_provider.services.api.urllib3.PoolManager")
@@ -626,14 +626,14 @@ def test_constructor_raises_when_options_null():
 # --- authentication ---
 
 
-def test_api_key_is_sent_as_a_bearer_token():
-    """The relay proxy accepts both, but Bearer is the contracted scheme."""
+def test_api_key_is_sent_as_a_api_key_header():
+    """The relay proxy accepts both, but X-API-Key is the contracted scheme."""
     api = GoFeatureFlagApi(_make_options(api_key="secret-key"))
 
     headers = api._headers()
 
-    assert headers["Authorization"] == "Bearer secret-key"
-    assert "X-API-Key" not in headers
+    assert headers["X-API-Key"] == "secret-key"
+    assert "Authorization" not in headers
 
 
 def test_no_authentication_header_when_api_key_is_unset():
@@ -656,7 +656,7 @@ def test_bearer_header_is_applied_to_the_data_collector(mock_pool_manager_class)
     api.send_event_to_data_collector([], {"provider": "python"})
 
     headers = mock_http.request.call_args.kwargs["headers"]
-    assert headers["Authorization"] == "Bearer secret-key"
+    assert headers["X-API-Key"] == "secret-key"
 
 
 # --- timeout and data collector base URL ---
@@ -754,10 +754,11 @@ def test_configured_api_key_wins_over_a_custom_authorization_header():
         GoFeatureFlagOptions(
             endpoint="http://localhost:1031",
             api_key="real-key",
-            custom_headers={"Authorization": "Bearer gateway-key"},
+            custom_headers={"Authorization": "Bearer real-key"},
         )
     )
 
+    assert api._headers()["X-API-Key"] == "real-key"
     assert api._headers()["Authorization"] == "Bearer real-key"
 
 
@@ -765,8 +766,8 @@ def test_custom_authorization_is_used_when_no_api_key_is_set():
     api = GoFeatureFlagApi(
         GoFeatureFlagOptions(
             endpoint="http://localhost:1031",
-            custom_headers={"Authorization": "Bearer gateway-key"},
+            custom_headers={"X-API-Key": "gateway-key"},
         )
     )
 
-    assert api._headers()["Authorization"] == "Bearer gateway-key"
+    assert api._headers()["X-API-Key"] == "gateway-key"

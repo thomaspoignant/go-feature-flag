@@ -24,7 +24,6 @@ class RemoteEvaluator(AbstractEvaluator):
         :param options: Provider options (endpoint, optional api_key, timeout).
             The OFREP provider is configured with options.endpoint as base URL
             and Bearer auth when options.api_key is set.
-        :raises ImportError: If openfeature-provider-ofrep is not installed.
         """
         self._options = options
         self._ofrep_provider = build_ofrep_provider(options)
