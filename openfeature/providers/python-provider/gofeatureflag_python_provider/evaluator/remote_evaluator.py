@@ -12,11 +12,7 @@ from openfeature.flag_evaluation import FlagResolutionDetails
 
 from gofeatureflag_python_provider.evaluator.abstract_evaluator import AbstractEvaluator
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-
-try:
-    from openfeature.contrib.provider.ofrep import OFREPProvider
-except ImportError:
-    OFREPProvider = None  # type: ignore[misc, assignment]
+from gofeatureflag_python_provider.services.ofrep import build_ofrep_provider
 
 
 class RemoteEvaluator(AbstractEvaluator):
@@ -25,30 +21,12 @@ class RemoteEvaluator(AbstractEvaluator):
     def __init__(self, options: GoFeatureFlagOptions) -> None:
         """Create a remote evaluator that uses OFREP to evaluate flags.
 
-        :param options: Provider options (endpoint, optional api_key). The OFREP
-            provider is configured with options.endpoint as base URL and Bearer
-            auth when options.api_key is set.
-        :raises ImportError: If openfeature-provider-ofrep is not installed.
+        :param options: Provider options (endpoint, optional api_key, timeout).
+            The OFREP provider is configured with options.endpoint as base URL
+            and an X-API-Key header when options.api_key is set.
         """
-        if OFREPProvider is None:
-            raise ImportError(
-                "RemoteEvaluator requires openfeature-provider-ofrep. "
-                "Install it with: pip install openfeature-provider-ofrep"
-            )
         self._options = options
-        base_url = str(options.endpoint).rstrip("/")
-        headers_factory: Optional[object] = None
-        if options.api_key:
-            api_key = options.api_key
-
-            def _headers() -> dict[str, str]:
-                return {"X-API-Key": f"{api_key}", "Content-Type": "application/json"}
-
-            headers_factory = _headers
-        self._ofrep_provider = OFREPProvider(
-            base_url=base_url,
-            headers_factory=headers_factory,
-        )
+        self._ofrep_provider = build_ofrep_provider(options)
 
     def initialize(
         self, evaluation_context: Optional[EvaluationContext] = None

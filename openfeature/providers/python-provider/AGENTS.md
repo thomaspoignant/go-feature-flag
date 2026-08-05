@@ -4,66 +4,99 @@ OpenFeature Python provider for [GO Feature Flag](https://gofeatureflag.org).
 
 ## Project Overview
 
-This is a Python package that implements the OpenFeature provider interface to connect to a GO Feature Flag relay proxy. It enables Python applications to evaluate feature flags using the OpenFeature SDK.
+This package implements the OpenFeature provider interface for GO Feature Flag.
+It supports two evaluation modes, selected with `options.evaluation_type`:
+
+- **In-process** _(default)_: the provider polls the relay proxy for the flag
+  configuration and evaluates flags locally through the embedded WASM
+  evaluation engine (`wasmtime`). No network call per evaluation.
+- **Remote**: every evaluation is delegated to the relay proxy through the
+  OpenFeature Remote Evaluation Protocol (OFREP), via the
+  `openfeature-provider-ofrep` package.
+
+There is **no evaluation-result cache** in either mode (the former `pylru`
+LRU cache and WebSocket invalidation were removed with the in-process
+rewrite). The cache is an optional capability in the provider specification;
+this provider does not implement it.
 
 ## Architecture
 
 ```
 gofeatureflag_python_provider/
-├── __init__.py                 # Package exports
-├── provider.py                 # Main GoFeatureFlagProvider class (AbstractProvider implementation)
-├── options.py                  # GoFeatureFlagOptions configuration class
-├── hooks/                      # OpenFeature hooks
-│   ├── __init__.py
-│   ├── data_collector.py       # Hook for collecting flag evaluation usage data
-│   └── enrich_evaluation_context.py  # Hook that adds gofeatureflag metadata to context before evaluation
-├── metadata.py                 # Provider metadata
-├── request_data_collector.py   # Data models for usage collection
-├── request_flag_evaluation.py  # Request models for flag evaluation API calls
-└── response_flag_evaluation.py # Response models for flag evaluation API calls
-
-tests/
-├── test_gofeatureflag_python_provider.py  # Main provider tests
-├── test_enrich_evaluation_context_hook.py # EnrichEvaluationContextHook tests
-├── test_provider_graceful_exit.py         # Shutdown/cleanup tests
-├── test_websocket_cache_invalidation.py   # WebSocket cache invalidation tests
-├── mock_responses/                        # JSON mock responses for testing
-├── config.goff.yaml                       # Test flag configuration
-└── docker-compose.yml                     # Test infrastructure
+├── provider.py                 # GoFeatureFlagProvider (AbstractProvider impl), hook wiring, provider events
+├── options.py                  # GoFeatureFlagOptions configuration
+├── metadata.py                 # Provider metadata ("GO Feature Flag Provider")
+├── exceptions.py               # Provider exceptions
+├── utils.py                    # contextKind helpers etc.
+├── evaluator/
+│   ├── abstract_evaluator.py   # AbstractEvaluator interface (sync + async resolves, is_flag_trackable)
+│   ├── inprocess_evaluator.py  # Polls flag configuration, evaluates via WASM, remote fallback via OFREP
+│   ├── remote_evaluator.py     # Delegates every resolve to the OFREP provider; flags are never trackable
+│   └── util.py
+├── hooks/
+│   ├── data_collector.py       # Collects FeatureEvents for local evaluations (after/error)
+│   └── enrich_evaluation_context.py  # Adds the gofeatureflag metadata to the context before evaluation
+├── services/
+│   ├── api.py                  # HTTP client: flag configuration (ETag aware) + data collector
+│   ├── event_publisher.py      # Buffers events, bulk-flushes on interval/threshold/shutdown
+│   ├── ofrep.py                # Shared OFREP client construction (auth, headers, timeout)
+│   └── model/                  # Pydantic request/response models
+└── wasm/
+    ├── evaluate_wasm.py        # WASM evaluation entry point, instance pool, trap handling
+    ├── wasi_runtime.py         # wasmtime runtime setup
+    ├── errors/                 # Trap/pool/loading error types
+    ├── model/                  # WASM input/output models
+    └── gofeatureflag-evaluation_<version>.wasi  # Bundled engine (pinned in _wasi_version.txt)
 ```
 
 ## Key Components
 
 ### GoFeatureFlagProvider (`provider.py`)
-- Extends `AbstractProvider` from OpenFeature SDK
-- Implements all resolve methods: `resolve_boolean_details`, `resolve_string_details`, `resolve_integer_details`, `resolve_float_details`, `resolve_object_details`
-- Uses `generic_go_feature_flag_resolver` for all flag types
-- Features:
-  - LRU cache for flag evaluations (`pylru`)
-  - WebSocket connection for cache invalidation
-  - Data collection for usage analytics
+- Extends `AbstractProvider`; delegates all `resolve_*_details` (sync and
+  async) to the evaluator chosen from `options.evaluation_type`.
+- Registers two provider hooks, in order: `EnrichEvaluationContextHook`, then
+  `DataCollectorHook` (the collector must observe the enriched context).
+- Emits provider events (`configuration changed`, `stale`, `ready`) from the
+  in-process polling loop.
 
 ### GoFeatureFlagOptions (`options.py`)
-Configuration options:
-- `endpoint` (required): URL of the GO Feature Flag relay proxy
-- `cache_size`: Max cached flags (default: 10000)
-- `data_flush_interval`: Interval to flush usage data in ms (default: 60000)
-- `disable_data_collection`: Turn off usage tracking (default: false)
-- `reconnect_interval`: WebSocket reconnect interval in seconds (default: 60)
-- `disable_cache_invalidation`: Disable WebSocket cache invalidation (default: false)
-- `api_key`: API key for authenticated requests
-- `exporter_metadata`: Custom metadata for evaluation events
-- `debug`: Enable debug logging (default: false)
-- `urllib3_pool_manager`: Custom HTTP client
+- `endpoint` (required): URL of the relay proxy
+- `evaluation_type`: `INPROCESS` (default) or `REMOTE`
+- `api_key`: sent as an `X-API-Key` header when set
+- `timeout`: HTTP timeout in ms (default: 10000)
+- `flag_config_poll_interval_seconds`: in-process polling interval (default: 120)
+- `evaluation_flag_list`: restrict fetched flag configuration (in-process only)
+- `wasm_file_path`, `wasm_pool_size`: WASM binary override / instance pool size
+  (default pool size: CPU core count)
+- `data_flush_interval` (ms, default 60000), `max_pending_events`
+  (default 10000), `disable_data_collection`, `exporter_metadata`,
+  `data_collector_base_url`: data collection tuning
+- `custom_headers`, `urllib3_pool_manager`, `log_level`
 
 ### DataCollectorHook (`hooks/data_collector.py`)
-- OpenFeature Hook implementation for collecting usage data
-- Tracks flag evaluations via `after()` and `error()` hooks
-- Flushes data to `/v1/data/collector` endpoint periodically
+- Builds a `FeatureEvent` in `after()`/`error()` and enqueues it on the
+  `EventPublisher`.
+- Skips the event when data collection is disabled, when the evaluator reports
+  the flag as not trackable, or when the result carries the
+  `gofeatureflag_evaluated_remotely` metadata (the relay proxy already
+  recorded it — emitting would double count).
+- **Remote mode emits no feature events at all**: `RemoteEvaluator.
+  is_flag_trackable()` always returns `False` because every remote evaluation
+  is already recorded server-side. `source` is always `INPROCESS`.
 
-### EnrichEvaluationContextHook (`hooks/enrich_evaluation_context.py`)
-- Enriches the evaluation context with a `gofeatureflag` attribute (from `exporter_metadata`) before flag resolution
-- Used by the relay proxy for analytics or filtering; registered automatically by the provider
+### EventPublisher (`services/event_publisher.py`)
+- Buffers events and bulk-posts them to `/v1/data/collector` on a periodic
+  interval, when the buffer reaches `max_pending_events`, and on shutdown.
+- Never posts an empty batch; failed batches are re-queued in order; the
+  buffer is capped at twice `max_pending_events` (oldest dropped first).
+
+## API Reference
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/v1/flag/configuration` | POST | Fetch flag configuration (in-process; ETag/If-None-Match aware) |
+| `/ofrep/v1/evaluate/flags/{flag_key}` | POST | Remote evaluation via OFREP |
+| `/v1/data/collector` | POST | Bulk usage/evaluation data |
 
 ## Development
 
@@ -71,78 +104,38 @@ Configuration options:
 - Python 3.9+
 - uv (package manager)
 
-### Setup
+### Setup and common commands
 ```bash
-# Install dependencies
-uv sync
-
-# Run a command in the virtual environment
-uv run <command>
-```
-
-### Running Tests
-```bash
-# Run all tests
-uv run pytest
-
-# Run specific test file
-uv run pytest tests/test_gofeatureflag_python_provider.py
-
-# Run with verbose output
-uv run pytest -v
-```
-
-### Code Style
-```bash
-# Format code with black
-uv run black gofeatureflag_python_provider tests
+uv sync                  # Install dependencies
+uv run pytest            # Run all tests
+uv run pytest tests/test_inprocess_evaluator.py   # One file
+uv run black gofeatureflag_python_provider tests  # Format
 ```
 
 ## Key Patterns
 
-### Pydantic Models
-- All data classes extend Pydantic `BaseModel` for validation
-- Request/response models use `model_dump_json()` for serialization
-- Use `model_validate_json()` for deserialization
+- **Pydantic models** for options and API payloads (`model_dump_json()` /
+  `model_validate_json()`).
+- **HTTP**: `urllib3.PoolManager` for flag configuration and data collection;
+  the OFREP client (built in `services/ofrep.py`) handles remote evaluation.
+  Both paths share auth/header/timeout construction.
+- **WASM**: `wasmtime.Store` is not thread-safe — evaluation uses an instance
+  pool; a trapped instance is poisoned and recycled, never reused.
+- **Error handling**: evaluators raise OpenFeature exceptions
+  (`FlagNotFoundError`, `TypeMismatchError`, `InvalidContextError`,
+  `GeneralError`); the SDK converts them into default-value results.
 
-### HTTP Communication
-- Uses `urllib3.PoolManager` for HTTP requests
-- POST to `/v1/feature/{flag_key}/eval` for flag evaluation
-- POST to `/v1/data/collector` for usage data
-- WebSocket at `/ws/v1/flag/change` for cache invalidation
+## Tests
 
-### Caching Strategy
-- LRU cache keyed by `{flag_key}:{evaluation_context_hash()}`
-- Cache cleared on WebSocket message (flag config changed)
-- Set `cacheable` field in response determines if result is cached
+Table of the main test files (pytest):
 
-### Error Handling
-- `FlagNotFoundError`: Flag doesn't exist (404)
-- `InvalidContextError`: Invalid evaluation context (400)
-- `TypeMismatchError`: Response type doesn't match expected type
-- `GeneralError`: Other errors (500+)
-
-## API Reference
-
-The provider communicates with the GO Feature Flag relay proxy:
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/v1/feature/{flag}/eval` | POST | Evaluate a flag |
-| `/v1/data/collector` | POST | Send usage data |
-| `/ws/v1/flag/change` | WebSocket | Cache invalidation notifications |
-
-## Dependencies
-
-Core:
-- `openfeature-sdk`: OpenFeature Python SDK
-- `pydantic`: Data validation
-- `urllib3`: HTTP client
-- `pylru`: LRU cache implementation
-- `websocket-client`: WebSocket support
-- `rel`: WebSocket reconnection handling
-
-Dev:
-- `pytest`: Testing framework
-- `black`: Code formatter
-- `pytest-docker`: Docker-based integration tests
+| File | Covers |
+|------|--------|
+| `test_gofeatureflag_provider.py` | Provider end-to-end (remote mode) |
+| `test_gofeatureflag_provider_inprocess.py` | Provider end-to-end (in-process) |
+| `test_inprocess_evaluator.py` | In-process evaluator, polling, fallback |
+| `test_remote_evaluator_ofrep.py` | Remote evaluator delegation to OFREP |
+| `test_evaluate_wasm.py`, `test_wasm_trap_diagnosis.py` | WASM engine host, trap handling |
+| `test_data_collector_hook.py`, `test_event_publisher.py` | Data collection |
+| `test_options.py` | Options, including removal of the old cache options |
+| `test_services_api.py` | HTTP layer (ETag, status mapping) |

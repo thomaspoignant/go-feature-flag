@@ -87,7 +87,6 @@ def _generic_test(
             options=GoFeatureFlagOptions(
                 endpoint="https://gofeatureflag.org/",
                 data_flush_interval=100,
-                disable_cache_invalidation=True,
                 api_key="apikey1",
                 evaluation_type=EvaluationType.REMOTE,
                 disable_data_collection=True,
@@ -138,10 +137,16 @@ def test_provider_metadata():
             endpoint="http://localhost:1031", data_flush_interval=100
         )
     )
-    assert goff_provider.get_metadata().name == "GO Feature Flag"
+    assert goff_provider.get_metadata().name == "GO Feature Flag Provider"
 
 
-def test_number_hook():
+def test_hooks_are_registered_in_order_without_exporter_metadata():
+    """Both hooks are always present, enrichment first.
+
+    Enrichment must run before the data collector so the collector sees the
+    enriched context, and it is registered even with no user metadata because
+    exporter metadata always carries the reserved keys identifying the SDK.
+    """
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(
             endpoint="http://localhost:1031",
@@ -149,7 +154,13 @@ def test_number_hook():
             evaluation_type=EvaluationType.INPROCESS,
         )
     )
-    assert len(goff_provider.get_provider_hooks()) == 1
+
+    hooks = goff_provider.get_provider_hooks()
+
+    assert [type(h).__name__ for h in hooks] == [
+        "EnrichEvaluationContextHook",
+        "DataCollectorHook",
+    ]
 
 
 def test_number_hook_with_exporter_metadata():
@@ -161,7 +172,11 @@ def test_number_hook_with_exporter_metadata():
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
         )
     )
-    assert len(goff_provider.get_provider_hooks()) == 2
+    hooks = goff_provider.get_provider_hooks()
+    assert [type(h).__name__ for h in hooks] == [
+        "EnrichEvaluationContextHook",
+        "DataCollectorHook",
+    ]
 
 
 def test_constructor_options_none():
@@ -549,7 +564,6 @@ def test_should_call_data_collector_with_exporter_metadata(
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
             evaluation_type=EvaluationType.INPROCESS,
         )
@@ -607,7 +621,6 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_post: Mock):
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=1000,
-            disable_cache_invalidation=True,
             evaluation_type=EvaluationType.REMOTE,
         )
     )
@@ -622,6 +635,45 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_post: Mock):
     )
     api.shutdown()
     assert mock_post.call_count == 1
+
+
+@patch(
+    "gofeatureflag_python_provider.services.api.GoFeatureFlagApi.send_event_to_data_collector"
+)
+@patch("requests.Session.post")
+def test_remote_mode_emits_no_feature_events(mock_post: Mock, mock_collector: Mock):
+    """With no evaluation cache, remote mode must produce zero feature events:
+    the relay proxy already records every remote evaluation (GOFF-COLL-023).
+
+    Asserts on the publisher buffer and the collector API itself — the
+    collector posts through urllib3, so watching requests.Session.post (as the
+    test above does for the OFREP call count) cannot catch a regression here.
+    """
+    flag_key = "bool_targeting_match"
+    mock_post.side_effect = [
+        _mock_session_response(200, _read_mock_file(flag_key)),
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=1000,
+            evaluation_type=EvaluationType.REMOTE,
+        )
+    )
+
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=False,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    # The evaluation itself must not have buffered any event.
+    assert goff_provider._event_publisher._events == []
+    # Shutdown triggers the final flush; an empty buffer must not reach the API.
+    api.shutdown()
+    assert mock_collector.call_count == 0
 
 
 def test_hook_error():
@@ -664,7 +716,6 @@ def test_url_parsing(mock_post):
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/ff/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             api_key="apikey1",
             evaluation_type=EvaluationType.REMOTE,
         ),
@@ -706,7 +757,6 @@ def test_should_call_evaluation_api_with_exporter_metadata(
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
-            disable_cache_invalidation=True,
             exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
             evaluation_type=EvaluationType.INPROCESS,
         )
