@@ -280,11 +280,10 @@ class EventPublisher:
                 )
                 self._report_overflow_recovery()
             except Exception as exc:
-                logger.error(
+                logger.exception(
                     "EventPublisher: error publishing events, re-queuing %d event(s): %s",
                     len(events_to_send),
                     exc,
-                    exc_info=True,
                 )
                 with self._lock:
                     self._events = events_to_send + self._events

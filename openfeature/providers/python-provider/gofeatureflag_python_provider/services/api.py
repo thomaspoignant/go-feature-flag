@@ -39,8 +39,8 @@ class GoFeatureFlagApi:
     Client for the GO Feature Flag relay proxy API: flag configuration and data collector.
     """
 
-    _endpoint: str = None
-    _data_collector_endpoint: str = None
+    _endpoint: str
+    _data_collector_endpoint: Optional[str] = None
     _timeout: float = DEFAULT_TIMEOUT_SECONDS
     _api_key: Optional[str] = None
     _http: urllib3.PoolManager = None
