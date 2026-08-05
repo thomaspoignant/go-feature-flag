@@ -12,7 +12,9 @@ from unittest.mock import Mock, patch
 import pytest
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import (
+    FeatureEvent,
+)
 from gofeatureflag_python_provider.services import (
     DataCollectorError,
     FlagConfigurationUnavailableError,

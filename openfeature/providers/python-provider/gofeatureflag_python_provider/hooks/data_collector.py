@@ -4,7 +4,9 @@ from typing import Optional
 
 from gofeatureflag_python_provider.evaluator import AbstractEvaluator
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import (
+    FeatureEvent,
+)
 from gofeatureflag_python_provider.services.event_publisher import EventPublisher
 from gofeatureflag_python_provider.utils import context_kind
 from openfeature.flag_evaluation import FlagEvaluationDetails, Reason

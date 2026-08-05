@@ -10,7 +10,9 @@ from gofeatureflag_python_provider.hooks.data_collector import (
     default_targeting_key,
 )
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.services.model.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import (
+    FeatureEvent,
+)
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.flag_evaluation import FlagEvaluationDetails, FlagType
 from openfeature.hook import HookContext
