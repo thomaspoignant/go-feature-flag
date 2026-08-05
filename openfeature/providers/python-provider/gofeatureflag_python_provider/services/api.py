@@ -3,6 +3,7 @@ GO Feature Flag API client: retrieve flag configuration and send events to the d
 """
 
 import json
+import logging
 from email.utils import parsedate_to_datetime
 from http import HTTPStatus
 from typing import Any, Optional
@@ -11,7 +12,7 @@ from urllib.parse import urljoin
 import urllib3
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import (
+from gofeatureflag_python_provider.services.model.request_data_collector import (
     FeatureEvent,
     RequestDataCollector,
 )
@@ -20,7 +21,7 @@ from gofeatureflag_python_provider.exceptions import (
     FlagConfigurationUnavailableError,
     UnauthorizedError,
 )
-from gofeatureflag_python_provider.services.models import (
+from gofeatureflag_python_provider.services.model import (
     FlagConfigRequest,
     FlagConfigResponse,
 )
@@ -28,6 +29,9 @@ from gofeatureflag_python_provider.services.models import (
 # --- API client ---
 
 DEFAULT_TIMEOUT_SECONDS = 10.0
+DEFAULT_NUM_POOLS = 100
+
+logger = logging.getLogger(__name__)
 
 
 class GoFeatureFlagApi:
@@ -35,8 +39,8 @@ class GoFeatureFlagApi:
     Client for the GO Feature Flag relay proxy API: flag configuration and data collector.
     """
 
-    _endpoint: str = "http://localhost:1031"
-    _data_collector_endpoint: str = "http://localhost:1031"
+    _endpoint: str = None
+    _data_collector_endpoint: str = None
     _timeout: float = DEFAULT_TIMEOUT_SECONDS
     _api_key: Optional[str] = None
     _http: urllib3.PoolManager = None
@@ -44,7 +48,6 @@ class GoFeatureFlagApi:
     def __init__(
         self,
         options: GoFeatureFlagOptions,
-        timeout: Optional[float] = None,
     ) -> None:
         if options is None:
             raise ValueError("Options cannot be null")
@@ -58,20 +61,20 @@ class GoFeatureFlagApi:
             if options.data_collector_base_url is not None
             else self._endpoint
         )
-        if timeout is not None:
-            self._timeout = timeout
-        elif options.timeout is not None:
-            self._timeout = options.timeout / 1000.0
-        else:
-            self._timeout = DEFAULT_TIMEOUT_SECONDS
+        self._timeout = (
+            (options.timeout / 1000.0)
+            if options.timeout is not None
+            else DEFAULT_TIMEOUT_SECONDS
+        )
         self._api_key = options.api_key
         self._custom_headers = dict(options.custom_headers or {})
 
         if options.urllib3_pool_manager is not None:
             self._http = options.urllib3_pool_manager
         else:
+            # Create a default pool manager with the given timeout
             self._http = urllib3.PoolManager(
-                num_pools=100,
+                num_pools=DEFAULT_NUM_POOLS,
                 timeout=urllib3.Timeout(
                     connect=self._timeout,
                     read=self._timeout,
@@ -80,12 +83,15 @@ class GoFeatureFlagApi:
             )
 
     def _headers(self) -> dict[str, str]:
-        # Custom headers first, so an explicitly configured api_key always wins
-        # over a custom Authorization header rather than being silently dropped.
+        """
+        Return the headers for the API request.
+
+        :return: A dictionary of headers.
+        """
         out: dict[str, str] = dict(self._custom_headers)
         out["Content-Type"] = "application/json"
         if self._api_key:
-            out["Authorization"] = f"Bearer {self._api_key}"
+            out["X-API-Key"] = f"{self._api_key}"
         return out
 
     def retrieve_flag_configuration(
@@ -130,28 +136,7 @@ class GoFeatureFlagApi:
             # map or an ETag that a caller could mistake for fresh state.
             return None
 
-        result = self._parse_flag_config_response(response)
-        try:
-            data = json.loads(response.data.decode("utf-8"))
-        except (json.JSONDecodeError, UnicodeDecodeError) as e:
-            raise FlagConfigurationUnavailableError(
-                f"Failed to parse flag configuration response: {e}"
-            ) from e
-
-        flags = data.get("flags")
-        if not isinstance(flags, dict):
-            # A response without a flag map is malformed, and is rejected here so
-            # callers never have to guess. An *empty* map is a different thing
-            # entirely — a relay proxy that legitimately serves no flags — and is
-            # accepted as the valid configuration it is.
-            raise FlagConfigurationUnavailableError(
-                "flag configuration response does not contain a flag map"
-            )
-        result.flags = flags
-        result.evaluation_context_enrichment = (
-            data.get("evaluationContextEnrichment") or {}
-        )
-        return result
+        return self._parse_flag_config_response(response)
 
     def _raise_for_flag_config_status(self, status: int, data: bytes) -> None:
         """Raise appropriate exception for non-success flag config status."""
@@ -176,7 +161,22 @@ class GoFeatureFlagApi:
     def _parse_flag_config_response(
         self, response: urllib3.HTTPResponse
     ) -> FlagConfigResponse:
-        """Build FlagConfigResponse from response headers."""
+        """Build a complete FlagConfigResponse from the HTTP response."""
+        try:
+            data = json.loads(response.data.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            raise FlagConfigurationUnavailableError(
+                f"Failed to parse flag configuration response: {e}"
+            ) from e
+
+        flags = data.get("flags")
+        if not isinstance(flags, dict):
+            # A response without a flag map is malformed. An empty map is valid
+            # when the relay proxy legitimately serves no flags.
+            raise FlagConfigurationUnavailableError(
+                "flag configuration response does not contain a flag map"
+            )
+
         # Stored verbatim, surrounding quotes included. The relay proxy issues
         # strong validators, so echoing a dequoted value back as If-None-Match
         # never matches and the server would answer 200 on every poll.
@@ -191,8 +191,10 @@ class GoFeatureFlagApi:
         return FlagConfigResponse(
             etag=etag_header,
             last_updated=last_updated,
-            flags={},
-            evaluation_context_enrichment={},
+            flags=flags,
+            evaluation_context_enrichment=(
+                data.get("evaluationContextEnrichment") or {}
+            ),
         )
 
     def send_event_to_data_collector(
@@ -240,3 +242,5 @@ class GoFeatureFlagApi:
             raise DataCollectorError(
                 f"send data to the collector error: unexpected http code {status}: {body_text}"
             )
+
+        logger.info("Successfully sent %d event(s) to the data collector", len(events))

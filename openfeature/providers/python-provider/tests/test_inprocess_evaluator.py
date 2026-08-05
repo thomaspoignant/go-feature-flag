@@ -26,7 +26,7 @@ from gofeatureflag_python_provider.evaluator.inprocess_evaluator import (
     InProcessEvaluator,
 )
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.services.models import FlagConfigResponse
+from gofeatureflag_python_provider.services.model import FlagConfigResponse
 from gofeatureflag_python_provider.wasm import WasmEvaluationTrapError
 from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse
 

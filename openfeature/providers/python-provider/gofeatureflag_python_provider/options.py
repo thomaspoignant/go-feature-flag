@@ -109,7 +109,7 @@ class GoFeatureFlagOptions(BaseModel):
     # Zero or negative is treated as unset.
     # default: the host's CPU core count
     wasm_pool_size: typing.Optional[int] = Field(
-        default_factory=lambda: os.cpu_count() or 1
+        default_factory=lambda: os.cpu_count() or 4
     )
 
     def get_exporter_metadata(self) -> dict:

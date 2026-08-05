@@ -8,12 +8,9 @@ paths by construction rather than duplicated and left to drift apart.
 
 from typing import Callable, Optional
 
-from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+from openfeature.contrib.provider.ofrep import OFREPProvider
 
-try:
-    from openfeature.contrib.provider.ofrep import OFREPProvider
-except ImportError:  # pragma: no cover - only hit when the extra is not installed
-    OFREPProvider = None  # type: ignore[misc, assignment]
+from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 
 # Used when no timeout is configured. Matches the flag-configuration client.
 DEFAULT_TIMEOUT_SECONDS = 10.0
@@ -28,14 +25,7 @@ def build_ofrep_provider(options: GoFeatureFlagOptions):
 
     :param options: Provider options (endpoint, optional api_key, timeout).
     :return: A configured OFREPProvider.
-    :raises ImportError: If openfeature-provider-ofrep is not installed.
     """
-    if OFREPProvider is None:
-        raise ImportError(
-            "Remote evaluation requires openfeature-provider-ofrep. "
-            "Install it with: pip install openfeature-provider-ofrep"
-        )
-
     headers_factory: Optional[Callable[[], dict[str, str]]] = None
     if options.api_key or options.custom_headers:
         api_key = options.api_key
@@ -47,7 +37,7 @@ def build_ofrep_provider(options: GoFeatureFlagOptions):
             headers = dict(custom_headers)
             headers["Content-Type"] = "application/json"
             if api_key:
-                headers["Authorization"] = f"Bearer {api_key}"
+                headers["X-API-Key"] = api_key
             return headers
 
         headers_factory = _headers
