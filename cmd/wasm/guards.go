@@ -359,53 +359,54 @@ func walkRuleQueries(f *flag.InternalFlag, visit func(query string) bool) bool {
 func firstQueryViolation(f *flag.InternalFlag) (detail string, over bool) {
 	walkRuleQueries(f, func(q string) bool {
 		if isJSONLogicQuery(q) {
-			if depth := scanJSONDepth(q); depth > maxJSONLogicQueryNestingDepth {
-				detail = fmt.Sprintf(
-					"targeting query exceeds the maximum nesting depth (%d > %d)",
-					depth, maxJSONLogicQueryNestingDepth)
-				over = true
-				return true
-			}
-			if n := scanJSONMaxArrayLength(q); n > maxQueryListItems {
-				detail = fmt.Sprintf(
-					"targeting query list exceeds the maximum item count (%d > %d)",
-					n, maxQueryListItems)
-				over = true
-				return true
-			}
-			return false
+			detail, over = jsonLogicQueryViolation(q)
+		} else {
+			detail, over = nikunjyQueryViolation(q)
 		}
-
-		scan := scanNikunjyQuery(q)
-		if scan.maxDepth > maxQueryNestingDepth {
-			detail = fmt.Sprintf(
-				"targeting query exceeds the maximum nesting depth (%d > %d)",
-				scan.maxDepth, maxQueryNestingDepth)
-			over = true
-			return true
-		}
-		if scan.maxListItems > maxQueryListItems {
-			detail = fmt.Sprintf(
-				"targeting query list exceeds the maximum item count (%d > %d)",
-				scan.maxListItems, maxQueryListItems)
-			over = true
-			return true
-		}
-		if scan.conditionCount > maxQueryConditions {
-			detail = fmt.Sprintf(
-				"targeting query exceeds the maximum condition count (%d > %d)",
-				scan.conditionCount, maxQueryConditions)
-			over = true
-			return true
-		}
-		if scan.maxPathSegments > maxQueryAttrPathSegments {
-			detail = fmt.Sprintf(
-				"targeting query attribute path exceeds the maximum segment count (%d > %d)",
-				scan.maxPathSegments, maxQueryAttrPathSegments)
-			over = true
-			return true
-		}
-		return false
+		return over
 	})
 	return detail, over
+}
+
+// jsonLogicQueryViolation checks a JSONLogic targeting query against its
+// complexity budget, returning a formatted error detail when exceeded.
+func jsonLogicQueryViolation(q string) (detail string, over bool) {
+	if depth := scanJSONDepth(q); depth > maxJSONLogicQueryNestingDepth {
+		return fmt.Sprintf(
+			"targeting query exceeds the maximum nesting depth (%d > %d)",
+			depth, maxJSONLogicQueryNestingDepth), true
+	}
+	if n := scanJSONMaxArrayLength(q); n > maxQueryListItems {
+		return fmt.Sprintf(
+			"targeting query list exceeds the maximum item count (%d > %d)",
+			n, maxQueryListItems), true
+	}
+	return "", false
+}
+
+// nikunjyQueryViolation checks a nikunjy targeting query against its
+// complexity budget, returning a formatted error detail when exceeded.
+func nikunjyQueryViolation(q string) (detail string, over bool) {
+	scan := scanNikunjyQuery(q)
+	if scan.maxDepth > maxQueryNestingDepth {
+		return fmt.Sprintf(
+			"targeting query exceeds the maximum nesting depth (%d > %d)",
+			scan.maxDepth, maxQueryNestingDepth), true
+	}
+	if scan.maxListItems > maxQueryListItems {
+		return fmt.Sprintf(
+			"targeting query list exceeds the maximum item count (%d > %d)",
+			scan.maxListItems, maxQueryListItems), true
+	}
+	if scan.conditionCount > maxQueryConditions {
+		return fmt.Sprintf(
+			"targeting query exceeds the maximum condition count (%d > %d)",
+			scan.conditionCount, maxQueryConditions), true
+	}
+	if scan.maxPathSegments > maxQueryAttrPathSegments {
+		return fmt.Sprintf(
+			"targeting query attribute path exceeds the maximum segment count (%d > %d)",
+			scan.maxPathSegments, maxQueryAttrPathSegments), true
+	}
+	return "", false
 }
