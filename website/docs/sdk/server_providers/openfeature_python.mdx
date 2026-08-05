@@ -127,16 +127,13 @@ You can configure the provider with several options to customize its behavior:
 | **`endpoint`** | `true` | — | URL of the GO Feature Flag relay proxy _(e.g. `http://localhost:1031`)_ |
 | **`evaluation_type`** | `false` | `INPROCESS` | Evaluation mode: `EvaluationType.INPROCESS` or `EvaluationType.REMOTE` |
 | **`api_key`** | `false` | `None` | API key for authenticated relay proxy requests |
-| **`flag_config_poll_interval_seconds`** | `false` | `10` | Polling interval (seconds) to refresh flag configuration _(in-process only)_ |
+| **`flag_config_poll_interval_seconds`** | `false` | `120` | Polling interval (seconds) to refresh flag configuration _(in-process only)_ |
 | **`wasm_file_path`** | `false` | `None` | Path to a custom WASM/WASI evaluation binary _(in-process only; uses bundled binary by default)_ |
-| **`wasm_pool_size`** | `false` | `10` | Pool size for concurrent WASM evaluation instances _(in-process only)_ |
+| **`wasm_pool_size`** | `false` | CPU core count | Pool size for concurrent WASM evaluation instances _(in-process only)_ |
 | **`data_flush_interval`** | `false` | `60000` | Interval (ms) to flush usage data to the relay proxy |
 | **`max_pending_events`** | `false` | `10000` | Maximum buffered events before a forced flush |
 | **`disable_data_collection`** | `false` | `False` | Set to `True` to disable usage analytics |
 | **`exporter_metadata`** | `false` | `{}` | Static metadata attached to evaluation events |
-| **`cache_size`** | `false` | `10000` | Maximum number of flag evaluations in the LRU cache _(remote only)_ |
-| **`disable_cache_invalidation`** | `false` | `False` | Disable WebSocket-based cache invalidation _(remote only)_ |
-| **`reconnect_interval`** | `false` | `60` | WebSocket reconnect interval (seconds) _(remote only)_ |
 | **`log_level`** | `false` | `"WARNING"` | Logging level: `"DEBUG"`, `"INFO"`, `"WARNING"`, or `"ERROR"` |
 | **`urllib3_pool_manager`** | `false` | `None` | Custom `urllib3.PoolManager` HTTP client |
 
