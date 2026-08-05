@@ -69,6 +69,16 @@ def test_remote_evaluator_initialize_shutdown_no_op(mock_ofrep_class):
 
 
 @patch("gofeatureflag_python_provider.services.ofrep.OFREPProvider")
+def test_remote_evaluator_flags_are_never_trackable(mock_ofrep_class):
+    """Remote evaluations are recorded by the relay proxy; emitting a feature
+    event for them would count the same evaluation twice, so every flag is
+    untrackable in remote mode."""
+    evaluator = RemoteEvaluator(_make_options())
+    assert evaluator.is_flag_trackable("any-flag") is False
+    assert evaluator.is_flag_trackable("") is False
+
+
+@patch("gofeatureflag_python_provider.services.ofrep.OFREPProvider")
 def test_remote_evaluator_resolve_boolean_delegates(mock_ofrep_class):
     """resolve_boolean_details delegates to OFREPProvider and returns its result."""
     expected = FlagResolutionDetails(value=True, reason=Reason.TARGETING_MATCH)

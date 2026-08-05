@@ -15,6 +15,7 @@ from openfeature.exception import (
     FlagNotFoundError,
     GeneralError,
     InvalidContextError,
+    OpenFeatureError,
     ParseError,
     ProviderFatalError,
     ProviderNotReadyError,
@@ -138,25 +139,49 @@ class InProcessEvaluator(AbstractEvaluator):
         Safe to call more than once: any poller and WASM pool left behind by a
         previous initialization are torn down first, so a second call neither
         leaks a polling thread nor double-instantiates the evaluation engine.
+
+        Failing to become ready terminates abnormally, which is how a provider
+        reports it to the SDK. Only credentials are fatal; every other failure
+        stays recoverable and leaves the provider in ERROR rather than FATAL.
+        The SDK short-circuits evaluation for NOT_READY and FATAL but not for
+        ERROR, so evaluations still reach this evaluator afterwards and report
+        PROVIDER_NOT_READY off the configuration that was never loaded. Nothing
+        re-initializes on its own: polling never started.
         """
         self._stop_polling()
         self._wasm.dispose()
-        self._wasm.initialize()
 
         try:
+            self._wasm.initialize()
             response = self._api.retrieve_flag_configuration(
                 flags=self._options.evaluation_flag_list
             )
+            if response is None:
+                # No If-None-Match was sent, so 304 is a protocol violation here.
+                raise GeneralError(
+                    "relay proxy answered 304 Not Modified to an unconditional "
+                    "flag configuration request"
+                )
         except UnauthorizedError as exc:
             # Credentials cannot be repaired by retrying, so this has to be
             # fatal rather than an error the provider retries unattended.
+            self._wasm.dispose()
             raise ProviderFatalError(str(exc)) from exc
-        if response is None:
-            # No If-None-Match was sent, so 304 is a protocol violation here.
+        except WasmNotLoadedError as exc:
+            self._wasm.dispose()
+            raise ProviderFatalError(str(exc)) from exc
+        except Exception as exc:
+            # The engine is loaded before the configuration is fetched, and the
+            # SDK never calls shutdown() on a provider whose initialize() raised,
+            # so an engine left behind here outlives the provider that owns it.
+            #
+            # Everything leaving initialize() is an OpenFeatureError: the SDK
+            # reads error_code off one to choose between ERROR and FATAL, and a
+            # foreign exception only ever collapses to a bare GENERAL.
+            self._wasm.dispose()
             raise GeneralError(
-                "relay proxy answered 304 Not Modified to an unconditional "
-                "flag configuration request"
-            )
+                f"failed to initialize the in-process evaluator: {exc}"
+            ) from exc
 
         with self._lock:
             self._flags = response.flags or {}

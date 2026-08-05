@@ -637,6 +637,45 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_post: Mock):
     assert mock_post.call_count == 1
 
 
+@patch(
+    "gofeatureflag_python_provider.services.api.GoFeatureFlagApi.send_event_to_data_collector"
+)
+@patch("requests.Session.post")
+def test_remote_mode_emits_no_feature_events(mock_post: Mock, mock_collector: Mock):
+    """With no evaluation cache, remote mode must produce zero feature events:
+    the relay proxy already records every remote evaluation (GOFF-COLL-023).
+
+    Asserts on the publisher buffer and the collector API itself — the
+    collector posts through urllib3, so watching requests.Session.post (as the
+    test above does for the OFREP call count) cannot catch a regression here.
+    """
+    flag_key = "bool_targeting_match"
+    mock_post.side_effect = [
+        _mock_session_response(200, _read_mock_file(flag_key)),
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=1000,
+            evaluation_type=EvaluationType.REMOTE,
+        )
+    )
+
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=False,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    # The evaluation itself must not have buffered any event.
+    assert goff_provider._event_publisher._events == []
+    # Shutdown triggers the final flush; an empty buffer must not reach the API.
+    api.shutdown()
+    assert mock_collector.call_count == 0
+
+
 def test_hook_error():
     def _create_hook_context():
         ctx = Mock()

@@ -15,9 +15,6 @@ from gofeatureflag_python_provider.services.model.request_flag_evaluation import
 from gofeatureflag_python_provider.services.model.response_flag_configuration import (
     FlagConfigResponse,
 )
-from gofeatureflag_python_provider.services.model.response_flag_evaluation import (
-    ResponseFlagEvaluation,
-)
 
 __all__ = [
     "FeatureEvent",
@@ -26,6 +23,5 @@ __all__ = [
     "GoFeatureFlagEvaluationContext",
     "RequestDataCollector",
     "RequestFlagEvaluation",
-    "ResponseFlagEvaluation",
     "convert_evaluation_context",
 ]

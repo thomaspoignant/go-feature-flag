@@ -25,9 +25,13 @@ from openfeature.flag_evaluation import FlagResolutionDetails
 from gofeatureflag_python_provider.evaluator.inprocess_evaluator import (
     InProcessEvaluator,
 )
+from gofeatureflag_python_provider.exceptions import UnauthorizedError
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.services.model import FlagConfigResponse
-from gofeatureflag_python_provider.wasm import WasmEvaluationTrapError
+from gofeatureflag_python_provider.wasm import (
+    WasmEvaluationTrapError,
+    WasmNotLoadedError,
+)
 from gofeatureflag_python_provider.wasm.model import WasmEvaluationResponse
 
 # ---------------------------------------------------------------------------
@@ -215,24 +219,95 @@ def test_poll_error_keeps_previous_state():
 
 
 def test_initialize_raises_on_first_fetch_failure():
-    """When first retrieve_flag_configuration raises, initialize propagates the error."""
+    """When first retrieve_flag_configuration raises, initialize reports the error.
+
+    The service-level exception is translated into the SDK's taxonomy so the
+    provider registry can read an error code off it, but it stays reachable as
+    the cause.
+    """
+    from gofeatureflag_python_provider.exceptions import (
+        FlagConfigurationUnavailableError,
+    )
+
+    cause = FlagConfigurationUnavailableError("endpoint not found")
+    mock_api = Mock()
+    mock_api.retrieve_flag_configuration.side_effect = cause
+    evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+
+    with pytest.raises(GeneralError, match="endpoint not found") as exc_info:
+        evaluator.initialize()
+    assert exc_info.value.__cause__ is cause
+
+    with evaluator._lock:
+        # Never loaded, which is distinct from "loaded and empty".
+        assert evaluator._flags is None
+        assert evaluator._etag is None
+
+
+def test_initialize_releases_the_engine_when_the_first_fetch_fails():
+    """A failed initialize() must not leave a WASM pool behind.
+
+    The engine is loaded before the configuration is fetched, and the SDK never
+    calls shutdown() on a provider whose initialize() raised, so a pool left
+    loaded here would outlive the provider that owns it.
+    """
     from gofeatureflag_python_provider.exceptions import (
         FlagConfigurationUnavailableError,
     )
 
     mock_api = Mock()
     mock_api.retrieve_flag_configuration.side_effect = (
-        FlagConfigurationUnavailableError("endpoint not found")
+        FlagConfigurationUnavailableError("relay proxy unreachable")
     )
-    evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+    evaluator, mock_wasm = _make_evaluator_with_mock_wasm(mock_api=mock_api)
 
-    with pytest.raises(FlagConfigurationUnavailableError):
+    with pytest.raises(GeneralError):
         evaluator.initialize()
 
+    # Once on entry to clear any previous pool, once on the failure path.
+    assert mock_wasm.dispose.call_count == 2
+    assert evaluator._poll_thread is None
+
+
+def test_initialize_releases_the_engine_on_a_fatal_failure():
+    """The fatal path releases the engine too, not just the recoverable one."""
+    mock_api = Mock()
+    mock_api.retrieve_flag_configuration.side_effect = UnauthorizedError("bad api key")
+    evaluator, mock_wasm = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+
+    with pytest.raises(ProviderFatalError):
+        evaluator.initialize()
+
+    assert mock_wasm.dispose.call_count == 2
+
+
+def test_initialize_releases_the_engine_when_the_engine_itself_fails():
+    """A pool that cannot be built is reported through the SDK taxonomy."""
+    mock_api = Mock()
+    evaluator, mock_wasm = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+    mock_wasm.initialize.side_effect = WasmNotLoadedError("WASI binary not found")
+
+    with pytest.raises(ProviderFatalError, match="WASI binary not found"):
+        evaluator.initialize()
+
+    assert mock_wasm.dispose.call_count == 2
+    mock_api.retrieve_flag_configuration.assert_not_called()
+
+
+def test_initialize_304_is_recoverable_and_releases_the_engine():
+    """An unconditional request answered 304 is a protocol violation, not a fatal one."""
+    mock_api = Mock()
+    mock_api.retrieve_flag_configuration.return_value = None
+    evaluator, mock_wasm = _make_evaluator_with_mock_wasm(mock_api=mock_api)
+
+    with pytest.raises(GeneralError, match="304 Not Modified") as exc_info:
+        evaluator.initialize()
+    # Recoverable: the registry must land on ERROR, not FATAL.
+    assert not isinstance(exc_info.value, ProviderFatalError)
+
+    assert mock_wasm.dispose.call_count == 2
     with evaluator._lock:
-        # Never loaded, which is distinct from "loaded and empty".
         assert evaluator._flags is None
-        assert evaluator._etag is None
 
 
 # ---------------------------------------------------------------------------
@@ -798,8 +873,6 @@ def test_initialize_twice_leaves_a_single_live_poller():
 
 def test_initialize_unauthorized_is_fatal():
     """401/403 cannot be repaired by retrying, so it must not be a retryable error."""
-    from gofeatureflag_python_provider.exceptions import UnauthorizedError
-
     mock_api = Mock()
     mock_api.retrieve_flag_configuration.side_effect = UnauthorizedError("bad api key")
     evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
@@ -809,7 +882,12 @@ def test_initialize_unauthorized_is_fatal():
 
 
 def test_initialize_other_failure_is_not_fatal():
-    """Every non-auth initialization failure must stay recoverable."""
+    """Every non-auth initialization failure must stay recoverable.
+
+    Recoverable means GeneralError rather than ProviderFatalError: the registry
+    reads the error code off the exception to choose between ERROR and FATAL,
+    and only FATAL stops the SDK from evaluating against this provider again.
+    """
     from gofeatureflag_python_provider.exceptions import (
         FlagConfigurationUnavailableError,
     )
@@ -820,8 +898,10 @@ def test_initialize_other_failure_is_not_fatal():
     )
     evaluator, _ = _make_evaluator_with_mock_wasm(mock_api=mock_api)
 
-    with pytest.raises(FlagConfigurationUnavailableError):
+    with pytest.raises(GeneralError) as exc_info:
         evaluator.initialize()
+    assert not isinstance(exc_info.value, ProviderFatalError)
+    assert exc_info.value.error_code == ErrorCode.GENERAL
 
 
 # ---------------------------------------------------------------------------

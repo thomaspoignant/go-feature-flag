@@ -4,7 +4,6 @@ import pytest
 
 from gofeatureflag_python_provider.evaluator.util import changed_flag_keys, matches_type
 
-
 # ---------------------------------------------------------------------------
 # changed_flag_keys
 # ---------------------------------------------------------------------------
