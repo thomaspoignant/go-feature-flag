@@ -1,0 +1,146 @@
+name: Sonar Autofix
+
+on:
+  workflow_dispatch:
+  schedule:
+    # every morning at 06:00 UTC
+    - cron: 0 6 * * *
+
+permissions: {}
+
+jobs:
+  sonar-autofix:
+    name: Fix SonarCloud issues on main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # Step 1: is the pull request from a previous run still open?
+      # This throttles the workflow to a single open pull request at a time.
+      - name: Look for an open autofix pull request
+        id: previous_pr
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          route: GET /search/issues
+          q: repo:${{ github.repository }} is:pr is:open label:sonar-autofix
+          advanced_search: "true"
+
+      # Step 2: does SonarCloud report issues on main?
+      # The project is public so the SonarCloud API is reachable anonymously.
+      - name: Look for open SonarCloud issues on main
+        id: sonar
+        uses: fjogeleit/http-request-action@f98bb26551cd1af7d3eb2674578a80754ece88db # v2.0.1
+        with:
+          url: "https://sonarcloud.io/api/issues/search?componentKeys=thomaspoignant_go-feature-flag&branch=main&resolved=false&issueStatuses=OPEN,CONFIRMED&s=SEVERITY&asc=false&ps=100"
+          method: GET
+          timeout: 20000
+          retry: 3
+          retryWait: 5000
+          responseFile: ${{ runner.temp }}/sonar-issues.json
+
+      # Step 3: let Claude Code fix the issues. The two lookups above always run, so
+      # their outputs are always set and the guard below never evaluates fromJSON('').
+      - name: Checkout repository
+        if: >-
+          fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
+          fromJSON(steps.sonar.outputs.response).total > 0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup go
+        if: >-
+          fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
+          fromJSON(steps.sonar.outputs.response).total > 0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: false
+
+      # Sonar also reports issues in the documentation website, Claude needs node
+      # to be able to verify those changes.
+      - name: Setup node
+        if: >-
+          fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
+          fromJSON(steps.sonar.outputs.response).total > 0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          package-manager-cache: false
+
+      - name: Fix Sonar issues with Claude Code
+        if: >-
+          fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
+          fromJSON(steps.sonar.outputs.response).total > 0
+        uses: anthropics/claude-code-action@9db594c7a0e82298c121c18b7f08aa1579ce7341 # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are fixing SonarCloud issues reported on the `main` branch of the GO Feature Flag
+            monorepo. Follow the conventions documented in `AGENTS.md`.
+
+            The file `${{ runner.temp }}/sonar-issues.json` is the raw response of the SonarCloud
+            issues API, sorted by decreasing severity. Every issue has a `rule`, a `severity`, a
+            `message`, a `line` and a `component` formatted as `projectKey:path/to/file`. Use `jq`
+            to explore it rather than reading the whole file.
+
+            Your task, in order:
+
+            1. Pick your batch. Select up to 5 issues, highest severity first, that you can
+               genuinely fix. **Ignore any issue whose file matches
+               `_test\.go$`, `/testdata/`, `/tests/`, `/test/resources/`, `mock_responses` or
+               `examples/`**: those are test fixtures. Several of them (the `json:S2260` parsing
+               errors on `invalid_json_body.json` and `invalid_api_response.json`) are invalid
+               JSON *on purpose* and fixing them breaks the test suite.
+            2. Write the pull request body to `${{ runner.temp }}/pr-body.md` **before you change
+               any code**, following the structure of `.github/PULL_REQUEST_TEMPLATE.md`: a
+               `## Description` section introducing the change and listing the issues you picked
+               in a markdown table (severity, rule, `file:line`, message), each rule linking to
+               `https://sonarcloud.io/project/issues?id=thomaspoignant_go-feature-flag&open=<issue key>`,
+               then a `## Closes issue(s)` section containing `N/A`, then the `## Checklist`
+               section copied from the template.
+            3. Fix the root cause of each issue, never silence the report. Do not add `//NOSONAR`
+               or `nolint` comments, do not delete or weaken tests, and do not widen the
+               exclusions in `.sonarcloud.properties`. If an issue turns out to be a false
+               positive, leave the code untouched and report it as skipped. Never contort correct
+               code just to satisfy a linter.
+            4. Stay in scope. Only modify the files of the issues you picked. Do not touch
+               `go.mod`, `go.sum`, `go.work` or `vendor/`, and do not add dependencies.
+            5. Verify your work.
+               For Go changes: run `go build ./...` and `go vet ./...` in every module you
+               touched, run `make lint`, and run `go test ./<package>/...` for the packages you
+               changed. Do not run the full `make test`: it needs Docker and testcontainers,
+               which are not available here.
+               For changes under `website/`: run `npm ci --ignore-scripts` then `npm run lint`
+               from the `website` directory, and `npm run build` if you changed the structure of
+               a component.
+            6. Append a final `### Autofix notes` section to `${{ runner.temp }}/pr-body.md`, with
+               one bullet per issue of your batch saying either what you fixed and how, or why you
+               skipped it. A human reviews this first.
+          claude_args: |
+            --max-turns 80
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(cd:*),Bash(jq:*),Bash(go build:*),Bash(go vet:*),Bash(go test:*),Bash(gofmt:*),Bash(make lint),Bash(npm ci:*),Bash(npm run:*),Bash(git diff:*),Bash(git status:*)"
+
+      # Step 4: open the pull request. This is a no-op when Claude changed nothing.
+      - name: Create Pull Request
+        if: >-
+          fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
+          fromJSON(steps.sonar.outputs.response).total > 0
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          branch: sonar-autofix/${{ github.run_number }}
+          base: main
+          title: "fix(sonar): resolve SonarCloud issues reported on main"
+          body-path: ${{ runner.temp }}/pr-body.md
+          commit-message: "fix(sonar): resolve SonarCloud issues reported on main"
+          labels: sonar-autofix
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
