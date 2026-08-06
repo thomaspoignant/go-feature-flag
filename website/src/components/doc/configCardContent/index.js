@@ -8,14 +8,14 @@ export function ConfigCardContent(props) {
     <div className={styles.linkBox}>
       {props.relayproxyLink && (
         <Link to={props.relayproxyLink}>
-          <button className={styles.button}>
+          <button type="button" className={styles.button}>
             <i className="fa-solid fa-server"></i> Configure the Relay Proxy
           </button>
         </Link>
       )}
       {props.goModuleLink && (
         <Link to={props.goModuleLink}>
-          <button className={styles.button}>
+          <button type="button" className={styles.button}>
             <i className="devicon-go-original-wordmark"></i> Configure the GO
             Module
           </button>
