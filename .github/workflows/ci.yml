@@ -249,15 +249,15 @@ jobs:
       - name: uv sync
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: uv sync --locked
+        run: uv sync --locked --no-build
       - name: lint black
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: uv run --no-sync black . --check
+        run: uv run --no-sync --no-build black . --check
       - name: Pytest
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: uv run --no-sync pytest
+        run: uv run --no-sync --no-build pytest
   GraddleWrapperValidation:
     runs-on: ubuntu-latest
     permissions:
