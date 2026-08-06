@@ -1,7 +1,6 @@
 name: Sonar Autofix
 
 on:
-  workflow_dispatch:
   schedule:
     # every morning at 06:00 UTC
     - cron: 0 6 * * *
