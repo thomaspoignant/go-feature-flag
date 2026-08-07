@@ -38,6 +38,10 @@ AbstractProviderMetaclass = type(AbstractProvider)
 BaseModelMetaclass = type(BaseModel)
 
 
+def _empty_hooks() -> List[Hook]:
+    return []
+
+
 class CombinedMetaclass(AbstractProviderMetaclass, BaseModelMetaclass):
     """
     Metaclass combining AbstractProvider and Pydantic BaseModel so the provider
@@ -65,7 +69,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
     _evaluator: AbstractEvaluator = PrivateAttr()
     _data_collector_hook: DataCollectorHook = PrivateAttr()
     _event_publisher: EventPublisher = PrivateAttr()
-    _hooks: List[Hook] = PrivateAttr(default_factory=list)
+    _hooks: List[Hook] = PrivateAttr(default_factory=_empty_hooks)
 
     def __init__(self, **data):
         """
