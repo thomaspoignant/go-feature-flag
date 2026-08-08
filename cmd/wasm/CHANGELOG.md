@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.5](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.4...cmd/wasm/v0.2.5) (2026-08-08)
+
+
+### 🐛 Bug Fixes
+
+* **sonar:** resolve SonarCloud issues reported on main ([#5765](https://github.com/thomaspoignant/go-feature-flag/issues/5765)) ([0e45642](https://github.com/thomaspoignant/go-feature-flag/commit/0e456429962cade1544bdc791d5d1a4dc449753b))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5771](https://github.com/thomaspoignant/go-feature-flag/issues/5771)) ([e46119d](https://github.com/thomaspoignant/go-feature-flag/commit/e46119d953efe049174b5d87518824d1330fef8b))
+
 ## [0.2.4](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.3...cmd/wasm/v0.2.4) (2026-08-03)
 
 
