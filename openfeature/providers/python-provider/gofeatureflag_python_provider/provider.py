@@ -86,6 +86,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         api = GoFeatureFlagApi(self.options)
         self._event_publisher = EventPublisher(api=api, options=self.options)
         self._evaluator = self._create_evaluator(api)
+        self._hooks = []
 
         # Order matters: enrichment runs before the data collector so the
         # collector observes the enriched context. The enrichment hook is
