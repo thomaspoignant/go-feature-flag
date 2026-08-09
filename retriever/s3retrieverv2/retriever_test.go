@@ -14,7 +14,7 @@ import (
 
 func Test_s3Retriever_Retrieve(t *testing.T) {
 	type fields struct {
-		downloader      DownloaderAPI
+		downloader      Downloader
 		bucket          string
 		item            string
 		context         context.Context
