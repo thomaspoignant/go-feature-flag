@@ -68,7 +68,10 @@ function MetadataItem({type, label, remove, index, icon}) {
       </div>
       <div className="col-1-12 mobile-col-1-12">
         {
-          <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+          <button
+            type="button"
+            className={styles.buttonPlus}
+            onMouseDown={handleOnClick}>
             <span className="fa-stack fa-1x">
               <i
                 className={clsx(
