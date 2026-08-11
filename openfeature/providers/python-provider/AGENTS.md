@@ -103,6 +103,7 @@ gofeatureflag_python_provider/
 ### Prerequisites
 - Python 3.9+
 - uv (package manager)
+- Docker (optional — only for the container-backed tests, which skip without it)
 
 ### Setup and common commands
 ```bash
@@ -139,3 +140,21 @@ Table of the main test files (pytest):
 | `test_data_collector_hook.py`, `test_event_publisher.py` | Data collection |
 | `test_options.py` | Options, including removal of the old cache options |
 | `test_services_api.py` | HTTP layer (ETag, status mapping) |
+| `test_integration_relayproxy.py` | Real evaluations against a containerised relay proxy (both modes) |
+
+### Container-backed tests
+
+Every test file above this one mocks the transport, so the recordings are only
+ever checked against themselves. `test_integration_relayproxy.py` boots a real
+relay proxy with [testcontainers](https://testcontainers.com) and evaluates
+through the public OpenFeature API in both evaluation modes, asserting the same
+expectations as the mocked tests — a mock that drifts from what the relay proxy
+serves fails there.
+
+The `relay_proxy` fixture (`tests/conftest.py`) generates the proxy's
+configuration from `tests/mock_responses/config/valid-all-types.json`, the same
+fixture the mocked in-process tests replay, and mounts it at `/goff/` (one of the
+relay proxy's default config locations). It waits on `GET /health` and binds a
+random host port, so it never collides with a proxy already running on 1031.
+
+The module **skips** when no Docker daemon is reachable. CI runs it by default.
