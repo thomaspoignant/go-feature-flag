@@ -717,8 +717,8 @@ github.com/knadh/koanf/parsers/json v1.0.0 h1:1pVR1JhMwbqSg5ICzU+surJmeBbdT4bQm7
 github.com/knadh/koanf/parsers/json v1.0.0/go.mod h1:zb5WtibRdpxSoSJfXysqGbVxvbszdlroWDHGdDkkEYU=
 github.com/knadh/koanf/parsers/toml v0.1.0 h1:S2hLqS4TgWZYj4/7mI5m1CQQcWurxUz6ODgOub/6LCI=
 github.com/knadh/koanf/parsers/toml v0.1.0/go.mod h1:yUprhq6eo3GbyVXFFMdbfZSo928ksS+uo0FFqNMnO18=
-github.com/knadh/koanf/parsers/yaml v1.1.0 h1:3ltfm9ljprAHt4jxgeYLlFPmUaunuCgu1yILuTXRdM4=
-github.com/knadh/koanf/parsers/yaml v1.1.0/go.mod h1:HHmcHXUrp9cOPcuC+2wrr44GTUB0EC+PyfN3HZD9tFg=
+github.com/knadh/koanf/parsers/yaml v1.1.1 h1:u70vV5IyaM0HvONh8HoqBC97oTgO33KcpZbTLiKVinU=
+github.com/knadh/koanf/parsers/yaml v1.1.1/go.mod h1:HHmcHXUrp9cOPcuC+2wrr44GTUB0EC+PyfN3HZD9tFg=
 github.com/knadh/koanf/providers/confmap v1.0.0 h1:mHKLJTE7iXEys6deO5p6olAiZdG5zwp8Aebir+/EaRE=
 github.com/knadh/koanf/providers/confmap v1.0.0/go.mod h1:txHYHiI2hAtF0/0sCmcuol4IDcuQbKTybiB1nOcUo1A=
 github.com/knadh/koanf/providers/env v1.1.0 h1:U2VXPY0f+CsNDkvdsG8GcsnK4ah85WwWyJgef9oQMSc=
