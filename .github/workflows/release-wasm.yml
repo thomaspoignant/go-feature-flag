@@ -39,7 +39,7 @@ jobs:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
           cache: false
-      - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
+      - uses: acifani/setup-tinygo@f51bf108c9895381060398804ce6cf6f62692106 # v3.0.1
         with:
           tinygo-version: "0.40.1"
       - name: Release WASM
