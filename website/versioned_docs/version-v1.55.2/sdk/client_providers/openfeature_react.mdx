@@ -1,0 +1,99 @@
+---
+sidebar_position: 11
+title: React
+description: How to use the OpenFeature Javascript React SDK for your React application
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# React SDK usage
+[![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-web-provider)
+![NPM Downloads](https://img.shields.io/npm/d18m/%40openfeature%2Fgo-feature-flag-web-provider?style=flat-square)
+
+
+This page describes how to use the OpenFeature React SDK for your client application.
+
+## About this provider
+OpenFeature React SDK allows you to connect to your GO Feature Flag instance with the `@openfeature/react-sdk`.
+
+If you work with React the `@openfeature/react-sdk` will give you a better integration with your React application.
+To integrate it with GO Feature Flag, you need to use the `@openfeature/go-feature-flag-web-provider` provider.
+
+
+
+## Install the provider
+
+```shell
+npm install @openfeature/go-feature-flag-web-provider
+npm install @openfeature/web-sdk
+npm install @openfeature/react-sdk
+npm install @openfeature/core
+```
+
+## How to use the provider?
+
+### OpenFeatureProvider context provider
+The OpenFeatureProvider is a React context provider which represents a scope for feature flag evaluations within a React application.
+It binds an OpenFeature client to all evaluations within child components, and allows the use of evaluation hooks.
+
+```typescript
+import { EvaluationContext, OpenFeature, OpenFeatureProvider, useFlag } from "@openfeature/react-sdk";
+import { GoFeatureFlagWebProvider } from "@openfeature/go-feature-flag-web-provider";
+
+const goFeatureFlagWebProvider = new GoFeatureFlagWebProvider({
+  endpoint: "http://localhost:1031"
+});
+
+// Set the initial context for your evaluations
+OpenFeature.setContext({
+  targetingKey: "user-1",
+  admin: false
+});
+
+// Instantiate and set our provider (be sure this only happens once)!
+// Note: there's no need to await its initialization, the React SDK handles re-rendering and suspense for you!
+OpenFeature.setProvider(goFeatureFlagWebProvider);
+
+// Enclose your content in the configured provider
+function App() {
+  return (
+    <OpenFeatureProvider>
+      <Page />
+    </OpenFeatureProvider>
+  );
+}
+```
+
+### Evaluation hooks
+
+Within the provider, you can use the various evaluation hooks to evaluate flags.
+```typescript
+function Page() {
+  // Use the "query-style" flag evaluation hook, specifying a flag-key and a default value.
+  const { value: showNewMessage } = useFlag('new-message', true);
+  return (
+    <div className="App">
+      <header className="App-header">
+        {showNewMessage ? <p>Welcome to this OpenFeature-enabled React app!</p> : <p>Welcome to this React app.</p>}
+      </header>
+    </div>
+  )
+}
+```
+
+### Advanced usage
+You can check the [OpenFeature React SDK documentation](https://openfeature.dev/docs/reference/technologies/client/web/react) to see all the available hooks and how to use them.
+
+## Available options
+Check the available options for the provider in the [web provider page](./openfeature_javascript).
+
+## Example
+If you want to see some code, you can check the [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/openfeature_react) in the GO Feature Flag repository.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'react')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) repository.
