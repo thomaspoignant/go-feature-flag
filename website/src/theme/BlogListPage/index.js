@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -72,6 +72,14 @@ function BlogListPageContent({items, metadata: {blogTitle}}) {
 
   const [activeCategory, selectCategory] = useCategoryFilter(categories);
 
+  // The reveal window belongs to the category being shown, so reset it whenever
+  // the category changes. Keyed on the resulting category rather than done in
+  // the chip handler, so a change coming from the URL (an in-app link to
+  // /blog?category=…, back/forward) starts at the same 12 cards a chip does.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [activeCategory]);
+
   const filtered = activeCategory
     ? posts.filter(post => post.category === activeCategory)
     : posts;
@@ -80,11 +88,6 @@ function BlogListPageContent({items, metadata: {blogTitle}}) {
   const hero = activeCategory ? null : filtered[0];
   const gridPosts = hero ? filtered.slice(1) : filtered;
   const remaining = gridPosts.length - visibleCount;
-
-  const handleCategoryChange = category => {
-    selectCategory(category);
-    setVisibleCount(PAGE_SIZE);
-  };
 
   return (
     <Layout>
@@ -101,7 +104,7 @@ function BlogListPageContent({items, metadata: {blogTitle}}) {
           categories={categories}
           active={activeCategory}
           counts={counts}
-          onChange={handleCategoryChange}
+          onChange={selectCategory}
         />
 
         {gridPosts.length === 0 && (
