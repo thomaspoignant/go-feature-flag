@@ -3,7 +3,9 @@ title: Changes to golang OpenFeature Integration
 description: We have released 2 new golang providers for OpenFeature, let's explain all the changes.
 authors: [thomaspoignant]
 tags: [openfeature,golang]
-image: https://gofeatureflag.org/assets/images/blog_cover-551c6a50d204cc3316f7a43ae59625e3.png
+image: ./blog_cover.png
+image_alt: "Banner about the GO Feature Flag OpenFeature providers for the Go language"
+category: Product
 ---
 ![blog_cover.png](blog_cover.png)
 We're excited to announce significant improvements to the integration between GO Feature Flag and OpenFeature.
