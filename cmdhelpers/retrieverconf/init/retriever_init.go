@@ -3,6 +3,7 @@ package init
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
@@ -184,5 +185,34 @@ func createAzBlobStorageRetriever(
 
 func createPostgreSQLRetriever(
 	c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
-	return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Columns: c.Columns}, nil
+	if c.MaxConns < 0 || c.MaxConns > math.MaxInt32 {
+		return nil, fmt.Errorf("maxConns out of range for postgresql retriever: %d", c.MaxConns)
+	}
+	if c.MinConns < 0 || c.MinConns > math.MaxInt32 {
+		return nil, fmt.Errorf("minConns out of range for postgresql retriever: %d", c.MinConns)
+	}
+	poolCfg := postgresqlretriever.PoolConfig{
+		MaxConns: int32(c.MaxConns),
+		MinConns: int32(c.MinConns),
+	}
+	if c.MaxConnLifetime != "" {
+		d, err := time.ParseDuration(c.MaxConnLifetime)
+		if err != nil {
+			return nil, fmt.Errorf("invalid maxConnLifetime for postgresql retriever: %w", err)
+		}
+		poolCfg.MaxConnLifetime = d
+	}
+	if c.MaxConnIdleTime != "" {
+		d, err := time.ParseDuration(c.MaxConnIdleTime)
+		if err != nil {
+			return nil, fmt.Errorf("invalid maxConnIdleTime for postgresql retriever: %w", err)
+		}
+		poolCfg.MaxConnIdleTime = d
+	}
+	return &postgresqlretriever.Retriever{
+		URI:     c.URI,
+		Table:   c.Table,
+		Columns: c.Columns,
+		Pool:    poolCfg,
+	}, nil
 }
