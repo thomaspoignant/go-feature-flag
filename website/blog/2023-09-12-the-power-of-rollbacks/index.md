@@ -3,7 +3,12 @@ title: The Power of Rollbacks
 description: 🚨 Bug alert! No worries, feature flags have your back. Learn how to respond swiftly to issues without breaking a sweat
 authors: [thomaspoignant]
 tags: [rollback]
+image: ./banner.jpeg
+image_alt: "The Power of Rollbacks banner"
+category: Engineering
 ---
+
+![GO Feature Flag: The power of Rollbacks](banner.jpeg)
 
 As software engineers, the process of releasing new features and updates can be both exhilarating and nerve-wracking.  
 You've put in countless hours of hard work, and the moment has arrived to introduce your latest creation to the world. 
