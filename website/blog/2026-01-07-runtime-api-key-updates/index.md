@@ -8,12 +8,14 @@ tags:
     runtime updates,
     key rotation,
   ]
-image: http://gofeatureflag.org/assets/images/banner-16724c8731d5238290571fef9993bc67.png
+image: ./banner.jpg
+image_alt: "Banner about updating GO Feature Flag relay proxy API keys at runtime"
+category: Product
 ---
 
 # 🔄 Seamlessly Update API Keys at Runtime in GO Feature Flag (No Restarts Needed)
 
-![In-Process OpenFeature Providers Banner](./banner.png)
+![In-Process OpenFeature Providers Banner](./banner.jpg)
 
 We're excited to announce a new feature in GO Feature Flag that makes API key management easier and more secure: **Runtime API Key Updates**! 🎉
 

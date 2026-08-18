@@ -27,3 +27,11 @@ jobs:
       - name: Test Build website
         if: steps.changed-files-specific.outputs.changed == 'true'
         run: make build-doc
+      # Runs after the build so it can reuse the node_modules it installed.
+      # Every blog post needs a cover (the blog index is a card grid) and a
+      # known category (it drives the filter chips).
+      # `always()` so a broken build still reports the front matter problems
+      # instead of hiding them behind the build failure.
+      - name: Check blog front matter
+        if: always() && steps.changed-files-specific.outputs.changed == 'true'
+        run: npm run lint:blog --prefix website
