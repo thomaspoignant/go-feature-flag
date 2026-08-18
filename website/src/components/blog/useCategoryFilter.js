@@ -45,11 +45,11 @@ export default function useCategoryFilter(available) {
         params.delete(CATEGORY_PARAM);
       }
       const query = params.toString();
-      history.replace(
-        `${window.location.pathname}${query ? `?${query}` : ''}${
-          window.location.hash
-        }`
-      );
+      // Held in a variable rather than inlined: nesting a template literal
+      // inside another is hard to read (and sonar javascript:S4624).
+      const nextSearch = query ? `?${query}` : '';
+      const {pathname, hash} = window.location;
+      history.replace(`${pathname}${nextSearch}${hash}`);
     },
     [history]
   );

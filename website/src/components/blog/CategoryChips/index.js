@@ -20,10 +20,13 @@ export default function CategoryChips({categories, active, counts, onChange}) {
   );
 
   return (
-    <div
-      role="group"
-      aria-label="Filter articles by category"
-      className="mb-10 flex flex-wrap gap-3">
+    // <fieldset> is the native equivalent of role="group" and groups the chips
+    // under the legend for screen readers. Tailwind preflight is disabled on
+    // this site, so the browser default border/padding/margin are cleared here,
+    // and min-w-0 stops the default `min-inline-size: min-content` from
+    // blocking flex-wrap.
+    <fieldset className="mx-0 mb-10 flex min-w-0 flex-wrap gap-3 border-0 p-0">
+      <legend className="sr-only">Filter articles by category</legend>
       {chips.map(chip => {
         const isActive = chip.value === active;
         const count = chip.value === null ? counts.total : counts[chip.value];
@@ -41,7 +44,7 @@ export default function CategoryChips({categories, active, counts, onChange}) {
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }
 
