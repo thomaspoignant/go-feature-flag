@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.55.3](https://github.com/thomaspoignant/go-feature-flag/compare/v1.55.2...v1.55.3) (2026-08-19)
+
+
+### 🔧 Chores
+
+* Bump google.golang.org/api from 0.292.0 to 0.293.0 ([#5876](https://github.com/thomaspoignant/go-feature-flag/issues/5876)) ([3c7c30d](https://github.com/thomaspoignant/go-feature-flag/commit/3c7c30db87221c5a981ac5e3b9995a321f83cd99))
+
 ## [1.55.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.55.1...v1.55.2) (2026-08-18)
 
 
