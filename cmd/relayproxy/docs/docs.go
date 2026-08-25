@@ -1048,6 +1048,12 @@ const docTemplate = `{
         "model.OFREPBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
+                "eventStreams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OFREPEventStream"
+                    }
+                },
                 "flags": {
                     "type": "array",
                     "items": {
@@ -1113,6 +1119,20 @@ const docTemplate = `{
                 },
                 "value": {},
                 "variant": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPEventStream": {
+            "type": "object",
+            "properties": {
+                "inactivityDelaySec": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
