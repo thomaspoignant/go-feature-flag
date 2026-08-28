@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.26.6
 
 require (
-	cloud.google.com/go/bigquery v1.79.1
+	cloud.google.com/go/bigquery v1.81.0
 	cloud.google.com/go/pubsub v1.51.0
 	cloud.google.com/go/pubsub/v2 v2.6.1
 	cloud.google.com/go/storage v1.64.0
