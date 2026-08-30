@@ -16,6 +16,8 @@ func NewAllFlags() AllFlags {
 // AllFlags is a snapshot of the state of multiple feature flags with regard to a specific user.
 // This is the return type of ffclient.AllFlagsState().
 // Serializing this object to JSON MarshalJSON() will produce a JSON you can sent to your front-end.
+//
+//nolint:recvcheck // MarshalJSON uses a value receiver for json.Marshal when AllFlags is passed by value.
 type AllFlags struct {
 	// flags is the list of flag for the user.
 	flags map[string]FlagState
