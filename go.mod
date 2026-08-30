@@ -5,7 +5,7 @@ go 1.26.6
 require (
 	cloud.google.com/go/bigquery v1.79.1
 	cloud.google.com/go/pubsub v1.51.0
-	cloud.google.com/go/pubsub/v2 v2.6.1
+	cloud.google.com/go/pubsub/v2 v2.6.2
 	cloud.google.com/go/storage v1.64.0
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0
@@ -82,7 +82,7 @@ require (
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.36.3
-	k8s.io/apimachinery v0.36.3
+	k8s.io/apimachinery v0.36.4
 	k8s.io/client-go v0.36.3
 )
 
