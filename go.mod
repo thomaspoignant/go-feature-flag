@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.81.0
 	cloud.google.com/go/pubsub v1.51.1
 	cloud.google.com/go/pubsub/v2 v2.6.2
-	cloud.google.com/go/storage v1.64.0
+	cloud.google.com/go/storage v1.65.0
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.0
