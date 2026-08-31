@@ -76,7 +76,7 @@ paket add OpenFeature.Providers.GOFeatureFlag
 
 GO Feature Flag provider needs to be created and then set in the global OpenFeatureAPI.
 
-The only required option to create a `GoFeatureFlagProvider` is the endpoint to your GO Feature Flag relay-proxy instance.
+The only required option to create a `GOFeatureFlagProvider` is the endpoint to your GO Feature Flag relay-proxy instance.
 
 <Tabs groupId="code">
   <TabItem value="csharp" label="C#">
@@ -87,8 +87,8 @@ using OpenFeature.Providers.GOFeatureFlag;
 
 // ...
 
-var options = new GoFeatureFlagProviderOptions { Endpoint = "https://my-instance.gofeatureflag.org" };
-var provider = new GoFeatureFlagProvider(options);
+var options = new GOFeatureFlagProviderOptions { Endpoint = "https://my-instance.gofeatureflag.org" };
+var provider = new GOFeatureFlagProvider(options);
 
 // Associate the provider with the OpenFeature API
 await Api.Instance.SetProviderAsync("my-app", provider);
@@ -165,6 +165,56 @@ if (adminFlag) {
 
   </TabItem>
 </Tabs>
+
+## Use with .NET Aspire
+
+If your application is orchestrated by [.NET Aspire](https://aspire.dev), you don't have to
+configure the provider by hand. The `CommunityToolkit.Aspire.GoFeatureFlag` client integration
+registers a `GOFeatureFlagProvider` in the dependency injection container and adds a health check
+for you, and the relay proxy endpoint comes straight from your AppHost, so there is no hardcoded
+URL in your application.
+
+<Tabs groupId="code">
+  <TabItem value="netcli" label=".NET CLI">
+
+```shell
+dotnet add package CommunityToolkit.Aspire.GoFeatureFlag
+```
+
+  </TabItem>
+  <TabItem value="pr" label="Package Reference">
+
+```xml
+<PackageReference Include="CommunityToolkit.Aspire.GoFeatureFlag" />
+```
+
+  </TabItem>
+</Tabs>
+
+The `connectionName` must match the name of the GO Feature Flag resource declared in your AppHost.
+
+```csharp title="Program.cs"
+builder.AddGoFeatureFlagClient(connectionName: "goff");
+```
+
+```csharp title="ExampleService.cs"
+using OpenFeature.Providers.GOFeatureFlag;
+
+public class ExampleService(GOFeatureFlagProvider provider)
+{
+    // Use provider to evaluate feature flags...
+}
+```
+
+If you need several relay proxies, use `AddKeyedGoFeatureFlagClient` to register one provider per
+connection name and resolve them with `[FromKeyedServices("...")]`.
+
+:::note
+To learn how to model the relay proxy in your AppHost, see the
+[.NET Aspire deployment page](../../relay-proxy/deployment/aspire) and the upstream
+[Connect to GO Feature Flag](https://aspire.dev/integrations/devtools/goff/goff-connect/)
+reference.
+:::
 
 ## Breaking changes
 
