@@ -28,6 +28,24 @@ const {
   generateDevelopersDropdownHTML,
 } = require('./src/components/navbar/developers');
 
+/**
+ * Blog posts dated in the future are drafts: they stay out of production builds
+ * until their date arrives. `npm run start` keeps them visible so they can be
+ * previewed, and SHOW_FUTURE_POSTS=true forces them into a build (deploy previews).
+ *
+ * @type {import('@docusaurus/plugin-content-blog').ProcessBlogPostsFn}
+ */
+const hideFuturePosts = async ({blogPosts}) => {
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.SHOW_FUTURE_POSTS === 'true'
+  ) {
+    return undefined; // keep every post
+  }
+  const now = Date.now();
+  return blogPosts.filter(post => post.metadata.date.getTime() <= now);
+};
+
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
@@ -316,6 +334,7 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          processBlogPosts: hideFuturePosts,
           // Not rendered on the page (the card grid opens straight on the
           // hero) — this is the /blog meta description and og:description.
           // Kept because the Docusaurus default is the bare word "Blog".
