@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.46.7
 	github.com/aws/smithy-go v1.27.9
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/fsouza/fake-gcs-server v1.56.0
+	github.com/fsouza/fake-gcs-server v1.56.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/google/go-cmp v0.7.0
