@@ -94,9 +94,12 @@ jobs:
         run: |
           echo "${GHCR_TOKEN}" | helm registry login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
 
-      # The chart version is only bumped at release time, but this workflow runs on every
-      # push to main touching the chart. Re-pushing would overwrite an already published
-      # tag with a different digest (helm package embeds file mtimes), so publish once.
+      # The chart version is only bumped at release time, but chart files (templates,
+      # values, README) do change on main in between. The gh-pages publish above
+      # re-packages the chart under the same version in that case, so push here too:
+      # skipping would leave GHCR serving stale contents for a version the traditional
+      # repository has already updated. This step only runs when the chart directory
+      # actually changed, so this is never a no-op re-upload.
       - name: Push Helm chart to GHCR
         if: steps.changed-files-specific.outputs.changed == 'true' && env.HAS_GHCR_TOKEN == 'true'
         env:
@@ -104,9 +107,5 @@ jobs:
           OCI_REPO: oci://ghcr.io/go-feature-flag/charts
         run: |
           version=$(helm show chart "$CHART_DIR" | awk '/^version:/ {print $2}')
-          if helm show chart "$OCI_REPO/relay-proxy" --version "$version" >/dev/null 2>&1; then
-            echo "relay-proxy $version is already published on GHCR, nothing to push."
-            exit 0
-          fi
           helm package "$CHART_DIR" --destination /tmp/charts
           helm push "/tmp/charts/relay-proxy-$version.tgz" "$OCI_REPO"
