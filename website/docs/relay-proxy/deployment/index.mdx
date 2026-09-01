@@ -5,6 +5,7 @@ description: How to deploy GO Feature Flag relay proxy in different environments
 import { Card } from "@site/src/components/doc/cardv3";
 import helmlogo from "@site/static/docs/deployment/helm.png";
 import lambdalogo from "@site/static/docs/deployment/aws-lambda.png";
+import aspirelogo from "@site/static/docs/deployment/aspire.png";
 
 # 🚀 Deployment
 
@@ -30,5 +31,12 @@ This page provides an explanation of several methods for deploying the relay pro
   name={"AWS Lambda"}
   description={"Deploy the relay-proxy in a serverless environment using AWS Lambda."}
   link={"deployment/aws-lambda"}
+/>
+
+<Card
+  logo={aspirelogo}
+  name={".NET Aspire"}
+  description={"Run the relay-proxy from a .NET Aspire AppHost for local development."}
+  link={"deployment/aspire"}
 />
 </div>

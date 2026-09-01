@@ -1,0 +1,48 @@
+---
+title: 🏠 Home
+description:  go-feature-flag is a simple and complete feature flag solution, without any complex backend system to install. You need only a file as your backend.
+sidebar_position: 1
+---
+import {sdk} from "@site/data/sdk";
+
+<p align="center">
+  <img width="250" height="238" src="/img/logo/logo.png" alt="go-feature-flag logo" />
+</p>
+
+## What is GO Feature Flag?
+
+GO Feature Flag is a lightweight, open-source solution that provides a simple and complete feature flag implementation.
+It allows you to easily manage and control the release of new features in your applications.
+
+GO Feature Flag is designed to be simple and easy to use, one of the key element is to reduce as much as possible the
+complexity of the setup to let you experience feature flagging without any hassle.
+
+Feature Flagging is a technique that allows you to enable/disable or configure features in your application without changing the code.
+This is a complete shift in the way you can release new features to your users, by **decoupling the deployment from the release**.
+
+:::info
+If you are not familiar with feature flags, also called feature toggles, you can read this [article from Martin Fowler blog](https://www.martinfowler.com/articles/feature-toggles.html)
+where Pete Hodgson explains why this is a great pattern and how it can help you in your development process.
+:::
+
+## Why is it called GO Feature Flag?
+**GO Feature Flag** was initially developed for the GO language, but since it is rare to have only one language, it has been extended to support multiple languages.
+
+Now with the combination of [Openfeature](https://openfeature.dev/) _(a project to standardize feature flagging)_, it is possible to use the same feature flags across multiple languages.
+
+You can now use GO Feature Flag with {sdk.length} languages and we are relying only on the **Openfeature** standard to make it possible.
+GO Feature Flag is unique in this way, as it is one of the only feature flag solution that is fully built on top of the standard.
+
+## What can I do with GO Feature Flag?
+
+You do a lot of things with GO Feature Flag, and we are adding new features on every release.
+Here are some of the main things you can do:
+
+- Evaluate feature flags in your application, with multiple flag types (`Bool`, `String`, `Int`, `Double` and `JSON`).
+- Write complex targeting rules to target an audience with your flags based on the evaluation context.
+- Use complex rollout strategies to progressively roll out a feature, run A/B testing or schedule your flag updates.
+- Use GO Feature Flag in multiple languages, with the same flags configuration.
+- Store your flag configuration where it suits you the best _(K8S configmap, S3, Azure Blob Storage, Github etc ...).
+- Export evaluation data on different locations to analyze how your flags are used.
+- Get notified when a flag has been changed, to be aware of the changes in your flags configuration.
+- **And many more things you can discover in this documentation.**

@@ -192,7 +192,18 @@ div[class^="announcementBar_"] {
     width: 100%;
 }
 
-html.plugin-blog h2,
+/* Blog article typography. The list page is excluded: it is a card grid whose
+   headings size themselves with Tailwind. */
+html.plugin-blog:not(.blog-list-page) h2,
 html.plugin-blog.blog-post-page h1 {
     font-size: 2rem;
+}
+
+/* Blog list "Load more": cards outside the visible window stay in the DOM so
+   every post remains a crawlable link, and so the <noscript> override in
+   src/theme/BlogListPage can reveal them all when JavaScript is unavailable.
+   Plain CSS rather than a Tailwind class precisely because <noscript> has to be
+   able to override it. */
+.goff-blog-card--collapsed {
+    display: none;
 }

@@ -245,7 +245,7 @@ jobs:
           python-version: "3.10"
       - name: Install uv
         if: steps.changed-files-specific.outputs.changed == 'true'
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: uv sync
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
@@ -266,7 +266,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: gradle/actions/wrapper-validation@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+      - uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
   Verify:
     runs-on: ubuntu-latest
     permissions:
@@ -336,7 +336,7 @@ jobs:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
           cache: false
-      - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
+      - uses: acifani/setup-tinygo@f51bf108c9895381060398804ce6cf6f62692106 # v3.0.1
         with:
           tinygo-version: "0.40.1"
       - run: make build-wasm

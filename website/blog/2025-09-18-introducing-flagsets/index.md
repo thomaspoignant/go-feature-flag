@@ -10,7 +10,9 @@ tags:
     multi-tenant,
     team isolation,
   ]
-image: https://gofeatureflag.org/assets/images/flagsets-675cab0cd5849897717d6ae6474521fb.jpg
+image: ./flagsets.jpg
+image_alt: "Illustration of feature flags organised into separate flag sets"
+category: Product
 ---
 
 ![Flag Sets Banner](flagsets.jpg)

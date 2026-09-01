@@ -28,6 +28,24 @@ const {
   generateDevelopersDropdownHTML,
 } = require('./src/components/navbar/developers');
 
+/**
+ * Blog posts dated in the future are drafts: they stay out of production builds
+ * until their date arrives. `npm run start` keeps them visible so they can be
+ * previewed, and SHOW_FUTURE_POSTS=true forces them into a build (deploy previews).
+ *
+ * @type {import('@docusaurus/plugin-content-blog').ProcessBlogPostsFn}
+ */
+const hideFuturePosts = async ({blogPosts}) => {
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.SHOW_FUTURE_POSTS === 'true'
+  ) {
+    return undefined; // keep every post
+  }
+  const now = Date.now();
+  return blogPosts.filter(post => post.metadata.date.getTime() <= now);
+};
+
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
@@ -51,6 +69,16 @@ const config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
+          // The blog list is now a single card grid ("Load more" instead of
+          // server-side pagination), so the old paginated routes are gone.
+          {
+            from: '/blog/page/2',
+            to: '/blog',
+          },
+          {
+            from: '/blog/page/3',
+            to: '/blog',
+          },
           {
             from: '/product/open_feature_support',
             to: '/product/open-feature',
@@ -233,6 +261,14 @@ const config = {
         // entries above.
         /** @param {string} existingPath */
         createRedirects(existingPath) {
+          // `postsPerPage: 'ALL'` also removed the paginated tag pages, e.g.
+          // /blog/tags/openfeature/page/2. Point them back at the tag page.
+          if (
+            existingPath.startsWith('/blog/tags/') &&
+            !existingPath.includes('/page/')
+          ) {
+            return [`${existingPath}/page/2`];
+          }
           // Bare docs landing -> emit /docs/<version> for old bare version roots.
           if (existingPath === '/docs') {
             return removedVersions.map(version => `/docs/${version}`);
@@ -298,6 +334,26 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          processBlogPosts: hideFuturePosts,
+          // Not rendered on the page (the card grid opens straight on the
+          // hero) — this is the /blog meta description and og:description.
+          // Kept because the Docusaurus default is the bare word "Blog".
+          blogDescription:
+            'Feature flag practices, release notes and community news from the GO Feature Flag team.',
+          // The blog index renders every post as a card and reveals them 12 at a
+          // time client-side, so the whole list has to reach the page at once.
+          postsPerPage: 'ALL',
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
+          // Docusaurus defaults, plus README.md so the blog contribution guide
+          // living next to the posts is not published as one of them.
+          exclude: [
+            '**/_*.{js,jsx,ts,tsx,md,mdx}',
+            '**/_*/**',
+            '**/*.test.{js,jsx,ts,tsx}',
+            '**/__tests__/**',
+            '**/README.md',
+          ],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -312,6 +368,10 @@ const config = {
           priority: 0.5, // default fallback for pages not matched below
           ignorePatterns: [
             '/tags/**',
+            // Client-side redirect stubs left over from the paginated blog and
+            // tag lists.
+            '/blog/page/**',
+            '/blog/tags/**/page/**',
             '/docs/next/**',
             '/docs/v2*',
             '/docs/v2*/**',
