@@ -11,7 +11,7 @@ func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl, authMiddlewar
 	ofrepGroup.Use(etag.WithConfig(etag.Config{
 		Skipper: func(c echo.Context) bool {
 			switch c.Path() {
-			case "/ofrep/v1/evaluate/flags", "/ofrep/v1/configuration":
+			case "/ofrep/v1/evaluate/flags":
 				return false
 			default:
 				return true

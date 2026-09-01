@@ -1,48 +1,221 @@
 ---
 title: 🏠 Home
-description:  go-feature-flag is a simple and complete feature flag solution, without any complex backend system to install. You need only a file as your backend.
+description: GO Feature Flag documentation — describe your feature flags in a simple configuration file, serve them with the relay proxy, and evaluate them from any OpenFeature SDK.
 sidebar_position: 1
 ---
-import {sdk} from "@site/data/sdk";
 
-<p align="center">
-  <img width="250" height="238" src="/img/logo/logo.png" alt="go-feature-flag logo" />
-</p>
+import { sdk } from "@site/data/sdk";
+import { Vignette } from "@site/src/components/doc/vignette";
+import { useActiveVersion } from "@docusaurus/plugin-content-docs/client";
 
-## What is GO Feature Flag?
+export const StartHere = () => {
+  // Vignette and SectionCard render plain anchors, so they need absolute paths.
+  // useActiveVersion().path is the base path of the version being rendered
+  // ("/docs" for current, "/docs/vX.Y.Z" for an archived one), which keeps
+  // these links inside their own version instead of leaking to current docs.
+  const path = useActiveVersion(undefined)?.path ?? "/docs";
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+      <Vignette
+        color="blue"
+        icon="fa-rocket"
+        title="Get started in 5 minutes"
+        link={`${path}/getting-started`}
+        description="Create your first flag, start the relay proxy, and evaluate the flag from your application."
+      />
+      <Vignette
+        color="cyan"
+        icon="fa-code"
+        title="Pick your SDK"
+        link={`${path}/sdk`}
+        description={`${sdk.length} languages, client-side and server-side, all built on the OpenFeature standard.`}
+      />
+    </div>
+  );
+};
 
-GO Feature Flag is a lightweight, open-source solution that provides a simple and complete feature flag implementation.
-It allows you to easily manage and control the release of new features in your applications.
+export const SectionCard = ({ icon, title, link, description }) => (
 
-GO Feature Flag is designed to be simple and easy to use, one of the key element is to reduce as much as possible the
-complexity of the setup to let you experience feature flagging without any hassle.
+<a
+  href={link}
+  className="flex flex-col gap-2 p-5 rounded-lg border border-solid border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 no-underline hover:no-underline hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-lg transition-all duration-200"
+>
+  <div className="flex items-center gap-3">
+    <i className={`fa-solid ${icon} text-xl text-sky-600 dark:text-sky-400`} />
+    <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
+      {title}
+    </span>
+  </div>
+  <p className="m-0 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+    {description}
+  </p>
+</a>
+);
 
-Feature Flagging is a technique that allows you to enable/disable or configure features in your application without changing the code.
-This is a complete shift in the way you can release new features to your users, by **decoupling the deployment from the release**.
+export const DocSections = () => {
+  const path = useActiveVersion(undefined)?.path ?? "/docs";
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-8">
+      <SectionCard
+        icon="fa-lightbulb"
+        title="Concepts"
+        link={`${path}/concepts/architecture`}
+        description={
+          "Architecture, flag evaluation, evaluation context, flag sets and the SDK paradigms."
+        }
+      />
+      <SectionCard
+        icon="fa-sliders"
+        title="Configure your flags"
+        link={`${path}/configure_flag/create-flags`}
+        description={
+          "The flag format, targeting rules and custom bucketing to decide who gets what."
+        }
+      />
+      <SectionCard
+        icon="fa-chart-simple"
+        title="Rollout strategies"
+        link={`${path}/configure_flag/rollout-strategies`}
+        description={
+          "Progressive rollouts, scheduled changes, A/B testing and percentage-based releases."
+        }
+      />
+      <SectionCard
+        icon="fa-server"
+        title="Relay proxy"
+        link={`${path}/relay-proxy`}
+        description={
+          "Configure, deploy and monitor the only component you run in your infrastructure."
+        }
+      />
+      <SectionCard
+        icon="fa-code"
+        title="SDKs"
+        link={`${path}/sdk`}
+        description={`OpenFeature providers for ${sdk.length} languages, plus the OFREP standard protocol.`}
+      />
+      <SectionCard
+        icon="fa-database"
+        title="Store your configuration"
+        link={`${path}/integrations/store-flags-configuration`}
+        description={
+          "Keep your flags where it suits you: S3, GitHub, Kubernetes, MongoDB, PostgreSQL, Redis and more."
+        }
+      />
+      <SectionCard
+        icon="fa-file-export"
+        title="Export evaluation data"
+        link={`${path}/integrations/export-evaluation-data`}
+        description={
+          "Send every flag evaluation to Kafka, BigQuery, S3, OpenTelemetry, a webhook and more."
+        }
+      />
+      <SectionCard
+        icon="fa-bell"
+        title="Notify flag changes"
+        link={`${path}/integrations/notify-flags-changes`}
+        description={
+          "Get alerted in Slack, Discord, Microsoft Teams or your own webhook when a flag changes."
+        }
+      />
+      <SectionCard
+        icon="fa-chart-line"
+        title="Tracking"
+        link={`${path}/tracking/flag-usage-tracking`}
+        description={
+          "Track how your flags are used and measure the impact of your experiments."
+        }
+      />
+      <SectionCard
+        icon="fa-screwdriver-wrench"
+        title="Tools"
+        link={`${path}/tooling/cli`}
+        description={
+          "CLI, linter, editor autocomplete and AI tooling to work with your flag configuration."
+        }
+      />
+      <SectionCard
+        icon="fa-code-pull-request"
+        title="Contributing"
+        link={`${path}/contributing`}
+        description={
+          "GO Feature Flag is open source and community driven, here is how to help."
+        }
+      />
+    </div>
+  );
+};
 
-:::info
-If you are not familiar with feature flags, also called feature toggles, you can read this [article from Martin Fowler blog](https://www.martinfowler.com/articles/feature-toggles.html)
-where Pete Hodgson explains why this is a great pattern and how it can help you in your development process.
+<div className="flex justify-center">
+  <img
+    src="/img/logo/logo.png"
+    width="250"
+    height="238"
+    alt="GO Feature Flag logo"
+  />
+</div>
+
+# GO Feature Flag documentation
+
+**GO Feature Flag** is a lightweight, open-source feature flag solution with **no backend to run**.
+
+You describe your flags in a simple configuration file, serve them with a single stateless service — the
+[relay proxy](./relay-proxy/index.mdx) — and evaluate them from your applications in {sdk.length} languages through
+[OpenFeature](https://openfeature.dev), the CNCF standard for feature flagging.
+
+No database, no proprietary SDK, no vendor lock-in.
+
+:::tip New to feature flags?
+Read [**What are feature flags?**](/product/what-are-feature-flags) for a quick primer, or
+[**Why GO Feature Flag?**](/product/why_go_feature_flag) to see how it compares to other solutions.
 :::
 
-## Why is it called GO Feature Flag?
-**GO Feature Flag** was initially developed for the GO language, but since it is rare to have only one language, it has been extended to support multiple languages.
+## Start here
 
-Now with the combination of [Openfeature](https://openfeature.dev/) _(a project to standardize feature flagging)_, it is possible to use the same feature flags across multiple languages.
+<StartHere />
 
-You can now use GO Feature Flag with {sdk.length} languages and we are relying only on the **Openfeature** standard to make it possible.
-GO Feature Flag is unique in this way, as it is one of the only feature flag solution that is fully built on top of the standard.
+## How it works
 
-## What can I do with GO Feature Flag?
+**1. Describe your flags in a configuration file.** Variations are the possible values, and the rules decide
+who gets which one.
 
-You do a lot of things with GO Feature Flag, and we are adding new features on every release.
-Here are some of the main things you can do:
+```yaml title="flags.goff.yaml"
+show-email-contact:
+  variations:
+    enabled: true
+    disabled: false
+  targeting:
+    - query: company eq "monsters-inc"
+      variation: enabled
+  defaultRule:
+    variation: disabled
+```
 
-- Evaluate feature flags in your application, with multiple flag types (`Bool`, `String`, `Int`, `Double` and `JSON`).
-- Write complex targeting rules to target an audience with your flags based on the evaluation context.
-- Use complex rollout strategies to progressively roll out a feature, run A/B testing or schedule your flag updates.
-- Use GO Feature Flag in multiple languages, with the same flags configuration.
-- Store your flag configuration where it suits you the best _(K8S configmap, S3, Azure Blob Storage, Github etc ...).
-- Export evaluation data on different locations to analyze how your flags are used.
-- Get notified when a flag has been changed, to be aware of the changes in your flags configuration.
-- **And many more things you can discover in this documentation.**
+**2. Evaluate the flag in your application** through the OpenFeature SDK. You always get a value back — the
+default one if anything goes wrong.
+
+```go
+evalCtx := of.NewEvaluationContext("user-123", map[string]any{"company": "monsters-inc"})
+showContact := client.Boolean(ctx, "show-email-contact", false, evalCtx)
+```
+
+Change the configuration file and the new behaviour is live, without redeploying or restarting your
+application.
+
+:::info
+The snippet above is in Go, but the API is the same in every language.
+Check the [**SDKs**](./sdk/index.mdx) section for the one matching yours.
+:::
+
+## Explore the documentation
+
+<DocSections />
+
+Writing a Go service and prefer not to run the relay proxy? GO Feature Flag is also available as a
+[Go module](./go_module/getting-started.md) you can embed directly into your application.
+
+## Need help?
+
+- Ask your question in the [**community Slack**](/slack).
+- Found a bug or have an idea? [**Open an issue**](https://github.com/thomaspoignant/go-feature-flag/issues/new/choose).
+- Curious about what shipped? Read the [**release notes**](https://github.com/thomaspoignant/go-feature-flag/releases).
