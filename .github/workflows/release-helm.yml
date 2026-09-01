@@ -13,6 +13,9 @@ jobs:
     env:
       CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
       MAIN_BRANCH_NAME: main
+      # The `secrets` context is not available in a step-level `if`, so surface only
+      # whether the token is configured, never its value.
+      HAS_GHCR_TOKEN: ${{ secrets.GHCR_TOKEN != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -78,3 +81,32 @@ jobs:
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+      # Publish the chart as an OCI artifact too, for users who cannot reach
+      # charts.gofeatureflag.org or who prefer pulling everything from a registry.
+      # These steps come last, and are skipped when GHCR_TOKEN is not configured, so a
+      # registry problem can never strand the gh-pages publish or the README pull request.
+      - name: GHCR login
+        if: steps.changed-files-specific.outputs.changed == 'true' && env.HAS_GHCR_TOKEN == 'true'
+        env:
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | helm registry login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
+
+      # The chart version is only bumped at release time, but this workflow runs on every
+      # push to main touching the chart. Re-pushing would overwrite an already published
+      # tag with a different digest (helm package embeds file mtimes), so publish once.
+      - name: Push Helm chart to GHCR
+        if: steps.changed-files-specific.outputs.changed == 'true' && env.HAS_GHCR_TOKEN == 'true'
+        env:
+          CHART_DIR: ./cmd/relayproxy/helm-charts/relay-proxy
+          OCI_REPO: oci://ghcr.io/go-feature-flag/charts
+        run: |
+          version=$(helm show chart "$CHART_DIR" | awk '/^version:/ {print $2}')
+          if helm show chart "$OCI_REPO/relay-proxy" --version "$version" >/dev/null 2>&1; then
+            echo "relay-proxy $version is already published on GHCR, nothing to push."
+            exit 0
+          fi
+          helm package "$CHART_DIR" --destination /tmp/charts
+          helm push "/tmp/charts/relay-proxy-$version.tgz" "$OCI_REPO"
