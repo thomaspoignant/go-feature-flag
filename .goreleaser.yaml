@@ -286,6 +286,7 @@ dockers_v2:
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
     images:
       - gofeatureflag/go-feature-flag
+      - ghcr.io/go-feature-flag/go-feature-flag
     tags:
       - "latest"
       - "v{{ .RawVersion }}"
@@ -314,6 +315,7 @@ dockers_v2:
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserFips
     images:
       - gofeatureflag/go-feature-flag
+      - ghcr.io/go-feature-flag/go-feature-flag
     tags:
       - "fips"
       - "v{{ .RawVersion }}-fips"
@@ -339,6 +341,7 @@ dockers_v2:
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
     images:
       - gofeatureflag/go-feature-flag
+      - ghcr.io/go-feature-flag/go-feature-flag
     tags:
       - "bookworm"
       - "v{{ .RawVersion }}-bookworm"
@@ -365,6 +368,7 @@ dockers_v2:
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserTrixie
     images:
       - gofeatureflag/go-feature-flag
+      - ghcr.io/go-feature-flag/go-feature-flag
     tags:
       - "trixie"
       - "v{{ .RawVersion }}-trixie"
@@ -391,6 +395,7 @@ dockers_v2:
     dockerfile: ./cmd/cli/Dockerfile
     images:
       - gofeatureflag/go-feature-flag-cli
+      - ghcr.io/go-feature-flag/go-feature-flag-cli
     tags:
       - "latest"
       - "v{{ .RawVersion }}"

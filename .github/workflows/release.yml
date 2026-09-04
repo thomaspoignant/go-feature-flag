@@ -77,6 +77,17 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
 
+      # The images are mirrored to ghcr.io/go-feature-flag/*, which lives under the
+      # organisation while this repository lives under a personal account. The built-in
+      # GITHUB_TOKEN is scoped to the repository owner and cannot write there, and GHCR
+      # only accepts personal access tokens (classic), hence the dedicated GHCR_TOKEN.
+      - name: GHCR login
+        env:
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         id: import_gpg
