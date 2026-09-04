@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.7.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.2...modules/core/v0.7.3) (2026-09-04)
+
+
+### 🐛 Bug Fixes
+
+* **ffcontext:** ToMap() no longer mutates the evaluation context ([#5654](https://github.com/thomaspoignant/go-feature-flag/issues/5654)) ([b1553c7](https://github.com/thomaspoignant/go-feature-flag/commit/b1553c7e90cde960ef9e7adce2d4117af94a5447))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.3 ([#5804](https://github.com/thomaspoignant/go-feature-flag/issues/5804)) ([5cd3520](https://github.com/thomaspoignant/go-feature-flag/commit/5cd352036f7fcc22edbe34d47af85f1c675eec9f))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.5 to 1.43.7 ([#5923](https://github.com/thomaspoignant/go-feature-flag/issues/5923)) ([6e64093](https://github.com/thomaspoignant/go-feature-flag/commit/6e640937a0d8d2f107f9fc9af57386cf40672853))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5577](https://github.com/thomaspoignant/go-feature-flag/issues/5577)) ([02d42d7](https://github.com/thomaspoignant/go-feature-flag/commit/02d42d7ca089071c263fe5283ad3d01ce6365025))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5594](https://github.com/thomaspoignant/go-feature-flag/issues/5594)) ([4784dba](https://github.com/thomaspoignant/go-feature-flag/commit/4784dba83fd00f8472cd4bf87ec94264df7c0bfa))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5771](https://github.com/thomaspoignant/go-feature-flag/issues/5771)) ([e46119d](https://github.com/thomaspoignant/go-feature-flag/commit/e46119d953efe049174b5d87518824d1330fef8b))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5840](https://github.com/thomaspoignant/go-feature-flag/issues/5840)) ([b11fb03](https://github.com/thomaspoignant/go-feature-flag/commit/b11fb03abcba68ee2fc82ed98f838747fe406dca))
+* Bump github.com/aws/smithy-go from 1.27.5 to 1.27.6 ([#5807](https://github.com/thomaspoignant/go-feature-flag/issues/5807)) ([627e361](https://github.com/thomaspoignant/go-feature-flag/commit/627e3610e09f3bb48ed968d6d3d99a228a434ad8))
+* Bump github.com/aws/smithy-go from 1.27.7 to 1.27.8 ([#5895](https://github.com/thomaspoignant/go-feature-flag/issues/5895)) ([c7f9192](https://github.com/thomaspoignant/go-feature-flag/commit/c7f9192f1a3e69d6b837b8750917275d2078444e))
+* **dependencies:** Bump github.com/stretchr/testify in /modules/core ([#5865](https://github.com/thomaspoignant/go-feature-flag/issues/5865)) ([bb23e0f](https://github.com/thomaspoignant/go-feature-flag/commit/bb23e0fe1ad7a099361ca57bb3b6e859732b766b))
+* **dependencies:** Bump github.com/stretchr/testify in /modules/core ([#5900](https://github.com/thomaspoignant/go-feature-flag/issues/5900)) ([177d3d6](https://github.com/thomaspoignant/go-feature-flag/commit/177d3d6c43e07fb937abef203c5246497530d207))
+
+
+### ⚙️ CI/CD
+
+* run golangci-lint on every module, not just the root ([#5719](https://github.com/thomaspoignant/go-feature-flag/issues/5719)) ([1af5bb9](https://github.com/thomaspoignant/go-feature-flag/commit/1af5bb9d3f904da7241091df75a3f38fe6f6a1dc))
+
 ## [0.7.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.1...modules/core/v0.7.2) (2026-07-01)
 
 
