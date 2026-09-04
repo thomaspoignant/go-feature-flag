@@ -105,7 +105,11 @@ func (s *Server) initRoutes() {
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.FlagsetManager, s.services.Metrics)
-	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.FlagsetManager, s.services.Metrics)
+	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(
+		s.services.FlagsetManager,
+		s.services.Metrics,
+		s.config.OfrepEventStream,
+	)
 	cManifest := manifest.NewManifest(s.services.FlagsetManager, s.services.Metrics, s.zapLog)
 	cEvalDataCollector := controller.NewCollectEvalData(
 		s.services.FlagsetManager,

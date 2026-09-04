@@ -204,6 +204,10 @@ definitions:
     type: object
   model.OFREPBulkEvaluateSuccessResponse:
     properties:
+      eventStreams:
+        items:
+          $ref: '#/definitions/model.OFREPEventStream'
+        type: array
       flags:
         items:
           $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
@@ -248,6 +252,15 @@ definitions:
         type: string
       value: {}
       variant:
+        type: string
+    type: object
+  model.OFREPEventStream:
+    properties:
+      inactivityDelaySec:
+        type: integer
+      type:
+        type: string
+      url:
         type: string
     type: object
   model.OFREPFlagBulkEvaluateSuccessResponse:
