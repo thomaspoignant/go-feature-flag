@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.1) (2026-09-04)
+
+
+### 🐛 Bug Fixes
+
+* make test suite pass on Windows (CRLF + temp-file locking) ([#5702](https://github.com/thomaspoignant/go-feature-flag/issues/5702)) ([3fe5239](https://github.com/thomaspoignant/go-feature-flag/commit/3fe5239dc7c891a71e51558f80929eebeb0aeb62))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.3 ([#5804](https://github.com/thomaspoignant/go-feature-flag/issues/5804)) ([5cd3520](https://github.com/thomaspoignant/go-feature-flag/commit/5cd352036f7fcc22edbe34d47af85f1c675eec9f))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.5 to 1.43.7 ([#5923](https://github.com/thomaspoignant/go-feature-flag/issues/5923)) ([6e64093](https://github.com/thomaspoignant/go-feature-flag/commit/6e640937a0d8d2f107f9fc9af57386cf40672853))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5577](https://github.com/thomaspoignant/go-feature-flag/issues/5577)) ([02d42d7](https://github.com/thomaspoignant/go-feature-flag/commit/02d42d7ca089071c263fe5283ad3d01ce6365025))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5594](https://github.com/thomaspoignant/go-feature-flag/issues/5594)) ([4784dba](https://github.com/thomaspoignant/go-feature-flag/commit/4784dba83fd00f8472cd4bf87ec94264df7c0bfa))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5771](https://github.com/thomaspoignant/go-feature-flag/issues/5771)) ([e46119d](https://github.com/thomaspoignant/go-feature-flag/commit/e46119d953efe049174b5d87518824d1330fef8b))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5840](https://github.com/thomaspoignant/go-feature-flag/issues/5840)) ([b11fb03](https://github.com/thomaspoignant/go-feature-flag/commit/b11fb03abcba68ee2fc82ed98f838747fe406dca))
+* Bump github.com/aws/smithy-go from 1.27.5 to 1.27.6 ([#5807](https://github.com/thomaspoignant/go-feature-flag/issues/5807)) ([627e361](https://github.com/thomaspoignant/go-feature-flag/commit/627e3610e09f3bb48ed968d6d3d99a228a434ad8))
+* Bump github.com/aws/smithy-go from 1.27.7 to 1.27.8 ([#5895](https://github.com/thomaspoignant/go-feature-flag/issues/5895)) ([c7f9192](https://github.com/thomaspoignant/go-feature-flag/commit/c7f9192f1a3e69d6b837b8750917275d2078444e))
+
 ## [1.0.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.0) (2026-02-05)
 
 
