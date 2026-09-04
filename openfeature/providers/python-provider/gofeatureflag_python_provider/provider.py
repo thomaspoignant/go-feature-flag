@@ -65,7 +65,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
     _evaluator: AbstractEvaluator = PrivateAttr()
     _data_collector_hook: DataCollectorHook = PrivateAttr()
     _event_publisher: EventPublisher = PrivateAttr()
-    _hooks: List[Hook] = PrivateAttr(default_factory=list)
+    _hooks: List[Hook] = PrivateAttr()
 
     def __init__(self, **data):
         """
