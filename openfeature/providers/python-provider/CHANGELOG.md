@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.3.0...openfeature/providers/python-provider/v1.3.1) (2026-09-04)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+
 ## [1.3.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.2.0...openfeature/providers/python-provider/v1.3.0) (2026-09-01)
 
 
