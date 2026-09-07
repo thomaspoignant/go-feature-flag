@@ -94,7 +94,7 @@ relayproxy:
 	<tbody>
 		<tr>
 			<td id="affinity">
-				<a href="./values.yaml#L136">affinity</a>
+				<a href="./values.yaml#L139">affinity</a>
             </td>
 			<td>
 object
@@ -112,7 +112,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling">
-				<a href="./values.yaml#L117">autoscaling</a>
+				<a href="./values.yaml#L120">autoscaling</a>
             </td>
 			<td>
 object
@@ -136,7 +136,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling--enabled">
-				<a href="./values.yaml#L119">autoscaling.enabled</a>
+				<a href="./values.yaml#L122">autoscaling.enabled</a>
             </td>
 			<td>
 bool
@@ -154,7 +154,7 @@ false
 		</tr>
 		<tr>
 			<td id="autoscaling--maxReplicas">
-				<a href="./values.yaml#L123">autoscaling.maxReplicas</a>
+				<a href="./values.yaml#L126">autoscaling.maxReplicas</a>
             </td>
 			<td>
 int
@@ -172,7 +172,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--minReplicas">
-				<a href="./values.yaml#L121">autoscaling.minReplicas</a>
+				<a href="./values.yaml#L124">autoscaling.minReplicas</a>
             </td>
 			<td>
 int
@@ -190,7 +190,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetCPUUtilizationPercentage">
-				<a href="./values.yaml#L125">autoscaling.targetCPUUtilizationPercentage</a>
+				<a href="./values.yaml#L128">autoscaling.targetCPUUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -208,7 +208,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetMemoryUtilizationPercentage">
-				<a href="./values.yaml#L127">autoscaling.targetMemoryUtilizationPercentage</a>
+				<a href="./values.yaml#L130">autoscaling.targetMemoryUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -226,7 +226,7 @@ int
 		</tr>
 		<tr>
 			<td id="commonLabels">
-				<a href="./values.yaml#L65">commonLabels</a>
+				<a href="./values.yaml#L68">commonLabels</a>
             </td>
 			<td>
 object
@@ -262,7 +262,7 @@ object
 		</tr>
 		<tr>
 			<td id="extraManifests">
-				<a href="./values.yaml#L139">extraManifests</a>
+				<a href="./values.yaml#L142">extraManifests</a>
             </td>
 			<td>
 list
@@ -280,7 +280,7 @@ list
 		</tr>
 		<tr>
 			<td id="fullnameOverride">
-				<a href="./values.yaml#L46">fullnameOverride</a>
+				<a href="./values.yaml#L49">fullnameOverride</a>
             </td>
 			<td>
 string
@@ -298,7 +298,7 @@ string
 		</tr>
 		<tr>
 			<td id="image--fips">
-				<a href="./values.yaml#L39">image.fips</a>
+				<a href="./values.yaml#L42">image.fips</a>
             </td>
 			<td>
 bool
@@ -316,7 +316,7 @@ false
 		</tr>
 		<tr>
 			<td id="image--pullPolicy">
-				<a href="./values.yaml#L35">image.pullPolicy</a>
+				<a href="./values.yaml#L38">image.pullPolicy</a>
             </td>
 			<td>
 string
@@ -334,7 +334,7 @@ string
 		</tr>
 		<tr>
 			<td id="image--repository">
-				<a href="./values.yaml#L33">image.repository</a>
+				<a href="./values.yaml#L36">image.repository</a>
             </td>
 			<td>
 string
@@ -347,12 +347,12 @@ string
 </div>
 			</td>
 			<td>
-				The image repository to pull from
+				The image repository to pull from. The same images are mirrored to the GitHub Container Registry, set this to `ghcr.io/go-feature-flag/go-feature-flag` to pull from there instead (mirrored images are only available for the versions released after v1.55.1).
 			</td>
 		</tr>
 		<tr>
 			<td id="image--tag">
-				<a href="./values.yaml#L37">image.tag</a>
+				<a href="./values.yaml#L40">image.tag</a>
             </td>
 			<td>
 string
@@ -370,7 +370,7 @@ string
 		</tr>
 		<tr>
 			<td id="imagePullSecrets">
-				<a href="./values.yaml#L42">imagePullSecrets</a>
+				<a href="./values.yaml#L45">imagePullSecrets</a>
             </td>
 			<td>
 list
@@ -388,7 +388,7 @@ list
 		</tr>
 		<tr>
 			<td id="ingress">
-				<a href="./values.yaml#L90">ingress</a>
+				<a href="./values.yaml#L93">ingress</a>
             </td>
 			<td>
 object
@@ -422,7 +422,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--annotations">
-				<a href="./values.yaml#L96">ingress.annotations</a>
+				<a href="./values.yaml#L99">ingress.annotations</a>
             </td>
 			<td>
 object
@@ -440,7 +440,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--className">
-				<a href="./values.yaml#L94">ingress.className</a>
+				<a href="./values.yaml#L97">ingress.className</a>
             </td>
 			<td>
 string
@@ -458,7 +458,7 @@ string
 		</tr>
 		<tr>
 			<td id="ingress--enabled">
-				<a href="./values.yaml#L92">ingress.enabled</a>
+				<a href="./values.yaml#L95">ingress.enabled</a>
             </td>
 			<td>
 bool
@@ -476,7 +476,7 @@ false
 		</tr>
 		<tr>
 			<td id="nameOverride">
-				<a href="./values.yaml#L44">nameOverride</a>
+				<a href="./values.yaml#L47">nameOverride</a>
             </td>
 			<td>
 string
@@ -494,7 +494,7 @@ string
 		</tr>
 		<tr>
 			<td id="nodeSelector">
-				<a href="./values.yaml#L130">nodeSelector</a>
+				<a href="./values.yaml#L133">nodeSelector</a>
             </td>
 			<td>
 object
@@ -512,7 +512,7 @@ object
 		</tr>
 		<tr>
 			<td id="pdb--enable">
-				<a href="./values.yaml#L58">pdb.enable</a>
+				<a href="./values.yaml#L61">pdb.enable</a>
             </td>
 			<td>
 bool
@@ -530,7 +530,7 @@ false
 		</tr>
 		<tr>
 			<td id="pdb--minAvailable">
-				<a href="./values.yaml#L59">pdb.minAvailable</a>
+				<a href="./values.yaml#L62">pdb.minAvailable</a>
             </td>
 			<td>
 int
@@ -548,7 +548,7 @@ int
 		</tr>
 		<tr>
 			<td id="podAnnotations">
-				<a href="./values.yaml#L62">podAnnotations</a>
+				<a href="./values.yaml#L65">podAnnotations</a>
             </td>
 			<td>
 object
@@ -566,7 +566,7 @@ object
 		</tr>
 		<tr>
 			<td id="podLabels">
-				<a href="./values.yaml#L68">podLabels</a>
+				<a href="./values.yaml#L71">podLabels</a>
             </td>
 			<td>
 object
@@ -584,7 +584,7 @@ object
 		</tr>
 		<tr>
 			<td id="podSecurityContext">
-				<a href="./values.yaml#L71">podSecurityContext</a>
+				<a href="./values.yaml#L74">podSecurityContext</a>
             </td>
 			<td>
 object
@@ -638,7 +638,7 @@ int
 		</tr>
 		<tr>
 			<td id="resources--requests--cpu">
-				<a href="./values.yaml#L114">resources.requests.cpu</a>
+				<a href="./values.yaml#L117">resources.requests.cpu</a>
             </td>
 			<td>
 string
@@ -656,7 +656,7 @@ string
 		</tr>
 		<tr>
 			<td id="resources--requests--memory">
-				<a href="./values.yaml#L112">resources.requests.memory</a>
+				<a href="./values.yaml#L115">resources.requests.memory</a>
             </td>
 			<td>
 string
@@ -674,7 +674,7 @@ string
 		</tr>
 		<tr>
 			<td id="securityContext">
-				<a href="./values.yaml#L75">securityContext</a>
+				<a href="./values.yaml#L78">securityContext</a>
             </td>
 			<td>
 object
@@ -692,7 +692,7 @@ object
 		</tr>
 		<tr>
 			<td id="service--port">
-				<a href="./values.yaml#L87">service.port</a>
+				<a href="./values.yaml#L90">service.port</a>
             </td>
 			<td>
 int
@@ -710,7 +710,7 @@ int
 		</tr>
 		<tr>
 			<td id="service--type">
-				<a href="./values.yaml#L85">service.type</a>
+				<a href="./values.yaml#L88">service.type</a>
             </td>
 			<td>
 string
@@ -728,7 +728,7 @@ string
 		</tr>
 		<tr>
 			<td id="serviceAccount--annotations">
-				<a href="./values.yaml#L52">serviceAccount.annotations</a>
+				<a href="./values.yaml#L55">serviceAccount.annotations</a>
             </td>
 			<td>
 object
@@ -746,7 +746,7 @@ object
 		</tr>
 		<tr>
 			<td id="serviceAccount--create">
-				<a href="./values.yaml#L50">serviceAccount.create</a>
+				<a href="./values.yaml#L53">serviceAccount.create</a>
             </td>
 			<td>
 bool
@@ -764,7 +764,7 @@ true
 		</tr>
 		<tr>
 			<td id="serviceAccount--name">
-				<a href="./values.yaml#L55">serviceAccount.name</a>
+				<a href="./values.yaml#L58">serviceAccount.name</a>
             </td>
 			<td>
 string
@@ -782,7 +782,7 @@ string
 		</tr>
 		<tr>
 			<td id="tolerations">
-				<a href="./values.yaml#L133">tolerations</a>
+				<a href="./values.yaml#L136">tolerations</a>
             </td>
 			<td>
 list
