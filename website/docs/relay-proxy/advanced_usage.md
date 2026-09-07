@@ -71,6 +71,10 @@ docker pull gofeatureflag/go-feature-flag:fips
 docker pull gofeatureflag/go-feature-flag:v1.2.3-fips
 ```
 
+These tags are mirrored to the GitHub Container Registry under
+`ghcr.io/go-feature-flag/go-feature-flag` if Docker Hub is not reachable from your
+infrastructure, for the releases after `v1.55.1`.
+
 Available platforms: `linux/amd64` and `linux/arm64`.
 
 FIPS binaries are also attached to every

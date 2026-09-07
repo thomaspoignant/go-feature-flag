@@ -18,7 +18,7 @@ func (s *Server) addMonitoringRoutes() {
 		s.monitoringEcho.HidePort = true
 		s.monitoringEcho.Debug = s.config.IsDebugEnabled()
 		s.monitoringEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
-		s.monitoringEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+		s.monitoringEcho.Use(middleware.CORS())
 		s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
 			RelayProxyConfig: s.config,
 		}))
