@@ -168,7 +168,7 @@ pre-commit install   # Install pre-commit hooks
 - **Dev:** `make watch-relayproxy`, `make watch-doc`, `make serve-doc`
 - **Test:** `make test`, `make coverage`, `make bench`, `make provider-tests`
 - **Quality:** `make lint`, `make tidy`, `make vendor`
-- **Utils:** `make clean`, `make swagger`, `make generate-helm-docs`, `make bump-helm-chart-version`, `make bump-wasm-contrib`
+- **Utils:** `make clean`, `make swagger`, `make generate-helm-docs`, `make bump-wasm-contrib`
 
 **Code Quality:**
 - Use `make lint` (golangci-lint)

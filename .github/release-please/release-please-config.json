@@ -39,6 +39,12 @@
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
             "component": "go-feature-flag",
+            "extra-files": [
+                {
+                    "type": "generic",
+                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml"
+                }
+            ],
             "exclude-paths": [
                 "modules/core",
                 "openfeature/providers/kotlin-provider",

@@ -325,48 +325,79 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-relay-proxy-helm-chart:
-    # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
-    # in the Chart.yaml file of the helm-chart.
+  release-helm-chart:
     runs-on: ubuntu-latest
-    name: Bump Relay Proxy Helm Chart appVersion
+    name: Release Relay Proxy Helm chart
     needs:
       - goreleaser
     permissions:
       contents: read
-      pull-requests: write
     env:
-      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
+      CHART_DIR: ./cmd/relayproxy/helm-charts/relay-proxy
+      HAS_GHCR_TOKEN: ${{ secrets.GHCR_TOKEN != '' }}
     steps:
       - name: Extract version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+        run: |
+          app_version="${GITHUB_REF#refs/tags/}"
+          echo "APP_VERSION=${app_version}" >> "$GITHUB_ENV"
+          echo "CHART_VERSION=${app_version#v}" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 1
           persist-credentials: false
 
-      - name: Bump chart appVersion
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: VERSION="${{ env.VERSION }}" make bump-helm-chart-version
-
-      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        env:
-          VERSION: ${{ env.VERSION }}
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          base: main
-          branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
-          title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
-          body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}
-          commit-message: Bump relay-proxy helm chart version ${{ env.VERSION }}
-          labels: automerge
-          assignees: thomaspoignant
-          draft: false
-          signoff: true
-          delete-branch: true
+          version: v3.19.0
+
+      # Both publish steps below take the version from the tag, never from Chart.yaml, so the
+      # published artifact can never disagree with the release. This check is only there to
+      # fail loudly if release-please stopped bumping the file, since users reading the
+      # repository would then see a version that does not match what was published.
+      - name: Check Chart.yaml matches the released version
+        run: |
+          chart_version=$(helm show chart "$CHART_DIR" | awk '/^version:/ {print $2}')
+          if [ "$chart_version" != "$CHART_VERSION" ]; then
+            echo "Chart.yaml says ${chart_version}, tag says ${CHART_VERSION}."
+            echo "release-please should have bumped it through the extra-files entry in"
+            echo ".github/release-please/release-please-config.json; check the"
+            echo "x-release-please-version annotations in Chart.yaml."
+            exit 1
+          fi
+
+      - name: Publish Helm chart to charts.gofeatureflag.org
+        uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
+        with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          charts_dir: ./cmd/relayproxy/helm-charts/
+          chart_version: ${{ env.CHART_VERSION }}
+          app_version: ${{ env.APP_VERSION }}
+          charts_url: https://charts.gofeatureflag.org
+          owner: go-feature-flag
+          repository: helm-charts
+          branch: gh-pages
+          target_dir: ./
+          commit_username: thomaspoignant
+          commit_email: thomaspoignant@goferatureflag.org
+
+      - name: GHCR login
+        if: env.HAS_GHCR_TOKEN == 'true'
+        env:
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | helm registry login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
+
+      - name: Push Helm chart to GHCR
+        if: env.HAS_GHCR_TOKEN == 'true'
+        env:
+          OCI_REPO: oci://ghcr.io/go-feature-flag/charts
+        run: |
+          helm package "$CHART_DIR" \
+            --version "$CHART_VERSION" \
+            --app-version "$APP_VERSION" \
+            --destination /tmp/charts
+          helm push "/tmp/charts/relay-proxy-${CHART_VERSION}.tgz" "$OCI_REPO"

@@ -11,6 +11,10 @@ Helm is an invaluable tool for configuring and deploying applications to a Kuber
 
 We provide a Helm chart to deploy the relay proxy in your Kubernetes cluster and it is available in our Helm repository (https://charts.gofeatureflag.org/).
 
+The chart is released together with the relay proxy: its version is always the version of the
+relay proxy it deploys _(chart `1.55.2` deploys relay proxy `v1.55.2`)_, and a chart version is
+never republished once released.
+
 Below are the steps for installing a Helm Chart from a **GO Feature Flag** Helm repository.
 
 ## Install GO Feature Flag relay proxy in Kubernetes using Helm
