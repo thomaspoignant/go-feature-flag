@@ -44,5 +44,5 @@ jobs:
 
       - name: Run chart-testing (install)
         working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
-        run: ct install --chart-dirs . --charts .
+        run: ct install --chart-dirs . --charts . --helm-extra-set-args "--set=image.tag=latest"
         if: steps.changed-files-specific.outputs.changed == 'true'
