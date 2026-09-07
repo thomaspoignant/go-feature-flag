@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
@@ -14,7 +14,7 @@ import (
 // 1. X-API-Key header (raw value)
 // 2. Authorization header (with "Bearer " prefix removed if present)
 // Returns an empty string if no API key is found.
-func APIKey(c echo.Context) string {
+func APIKey(c *echo.Context) string {
 	// First, check X-API-Key header (takes precedence)
 	if xAPIKey := c.Request().Header.Get(XAPIKeyHeader); xAPIKey != "" {
 		return xAPIKey

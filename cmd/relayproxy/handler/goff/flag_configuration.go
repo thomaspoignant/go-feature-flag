@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
@@ -60,7 +60,7 @@ type FlagConfigurationResponse struct {
 // @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/configuration [post]
-func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
+func (h *FlagConfigurationAPICtrl) Handler(c *echo.Context) error {
 	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "flagConfiguration")
 	defer span.End()

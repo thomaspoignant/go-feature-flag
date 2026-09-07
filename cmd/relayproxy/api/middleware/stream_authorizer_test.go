@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -61,7 +61,7 @@ func TestStreamAuthorizer(t *testing.T) {
 			}
 			conf.ForceReloadAPIKeys()
 			middleware := middleware2.StreamAuthorizer(conf)
-			handler := middleware(func(c echo.Context) error {
+			handler := middleware(func(c *echo.Context) error {
 				return c.String(http.StatusOK, "Authorized")
 			})
 

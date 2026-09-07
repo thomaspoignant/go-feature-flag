@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
@@ -60,7 +60,7 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request", // echo v5 binder returns the generic ErrBadRequest sentinel
 				errorCode:  http.StatusBadRequest,
 			},
 		},
@@ -213,7 +213,7 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request", // echo v5 binder returns the generic ErrBadRequest sentinel
 				errorCode:  http.StatusBadRequest,
 			},
 		},

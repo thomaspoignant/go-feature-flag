@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -14,7 +14,7 @@ import (
 // DefaultSkipper is what we use as a default.
 // Some endpoints are excluded from the logs to avoid flooding the logs and
 // because they are not bringing a lot of value.
-func DefaultSkipper(c echo.Context) bool {
+func DefaultSkipper(c *echo.Context) bool {
 	skipperURL := []string{"/health", "/info", "/metrics"}
 	for _, ignoredPath := range skipperURL {
 		if strings.HasPrefix(ignoredPath, c.Request().URL.String()) {
@@ -25,7 +25,7 @@ func DefaultSkipper(c echo.Context) bool {
 }
 
 // DebugSkipper is the skipper used in debug mode, we log everything.
-func DebugSkipper(_ echo.Context) bool {
+func DebugSkipper(_ *echo.Context) bool {
 	return false
 }
 
@@ -39,9 +39,21 @@ func ZapLogger(log *zap.Logger, isDebugEnabled bool) echo.MiddlewareFunc {
 
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		Skipper: skipper,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		// Opted in so RequestLoggerValues carries a usable fallback when the response
+		// writer cannot be unwrapped to an *echo.Response.
+		LogStatus:       true,
+		LogResponseSize: true,
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			req := c.Request()
-			res := c.Response()
+			rw := c.Response()
+
+			// Echo v5 returns a plain http.ResponseWriter from Context#Response, so unwrap it
+			// to reach the *echo.Response carrying the status and size counters. Middleware
+			// that swaps the writer (Etag) keeps this resolvable via its Unwrap method.
+			status, size := v.Status, v.ResponseSize
+			if res, err := echo.UnwrapResponse(rw); err == nil {
+				status, size = res.Status, res.Size
+			}
 
 			fields := make([]zapcore.Field, 0, 8)
 			fields = append(fields,
@@ -49,18 +61,18 @@ func ZapLogger(log *zap.Logger, isDebugEnabled bool) echo.MiddlewareFunc {
 				zap.String("latency", time.Since(v.StartTime).String()),
 				zap.String("host", req.Host),
 				zap.String("request", fmt.Sprintf("%s %s", req.Method, req.RequestURI)),
-				zap.Int("status", res.Status),
-				zap.Int64("size", res.Size),
+				zap.Int("status", status),
+				zap.Int64("size", size),
 				zap.String("user_agent", req.UserAgent()),
 			)
 
 			id := req.Header.Get(echo.HeaderXRequestID)
 			if id == "" {
-				id = res.Header().Get(echo.HeaderXRequestID)
+				id = rw.Header().Get(echo.HeaderXRequestID)
 			}
 			fields = append(fields, zap.String("request_id", id))
 
-			n := res.Status
+			n := status
 			switch {
 			case n >= 500:
 				log.With(zap.Error(v.Error)).Error("Server error", fields...)

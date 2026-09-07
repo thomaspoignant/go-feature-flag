@@ -1,6 +1,6 @@
 package modeldocs
 
-import "github.com/labstack/echo/v4"
+import "github.com/labstack/echo/v5"
 
 // FakeMetricsController is a fake entry point for swagger documentation
 //
@@ -10,6 +10,6 @@ import "github.com/labstack/echo/v4"
 // @Produce      plain
 // @Success      200 {object}	string
 // @Router       /metrics [get]
-func FakeMetricsController(_ echo.Context) {
+func FakeMetricsController(_ *echo.Context) {
 	// This is a fake controller, the real entry point is provided by the prometheus middleware.
 }
