@@ -141,7 +141,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
 
-			req := httptest.NewRequest(echo.POST, "/ofrep/v1/evaluate/flags", bodyReq)
+			req := httptest.NewRequest(http.MethodPost, "/ofrep/v1/evaluate/flags", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 
@@ -317,7 +317,7 @@ func Test_Evaluate(t *testing.T) {
 				assert.NoError(t, err, "request wantBody file missing %s", tt.args.bodyFile)
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
-			req := httptest.NewRequest(echo.POST, "/ofrep/v1/evaluate/flags/"+flagKey, bodyReq)
+			req := httptest.NewRequest(http.MethodPost, "/ofrep/v1/evaluate/flags/"+flagKey, bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			e.ServeHTTP(rec, req)
