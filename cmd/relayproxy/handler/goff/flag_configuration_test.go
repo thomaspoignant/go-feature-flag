@@ -89,7 +89,7 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 			requestBody, err := os.ReadFile(tt.requestBody)
 			assert.NoError(t, err)
 
-			req := httptest.NewRequest(echo.POST, "/v1/flag/configuration", strings.NewReader(string(requestBody)))
+			req := httptest.NewRequest(http.MethodPost, "/v1/flag/configuration", strings.NewReader(string(requestBody)))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 			c.SetPath("/v1/flag/configuration")
@@ -212,7 +212,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 			requestBody, err := os.ReadFile(tt.requestBody)
 			assert.NoError(t, err)
 
-			req := httptest.NewRequest(echo.POST, "/v1/flag/configuration", strings.NewReader(string(requestBody)))
+			req := httptest.NewRequest(http.MethodPost, "/v1/flag/configuration", strings.NewReader(string(requestBody)))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			// Add API key to header if provided
