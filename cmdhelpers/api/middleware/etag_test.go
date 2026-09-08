@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	etagBody     = "Hello World"
-	weakEtag     = "W/\"11-8dcfee46\""
-	strongEtag   = "\"11-0a4d55a8d778e5022fab701977c5d840bbc486d0\""
-	invalidEtag  = "invalid"
+	etagBody    = "Hello World"
+	weakEtag    = "W/\"11-8dcfee46\""
+	strongEtag  = "\"11-0a4d55a8d778e5022fab701977c5d840bbc486d0\""
+	invalidEtag = "invalid"
 )
 
 // newEtagServer builds an echo instance exposing the routes used by the Etag tests.

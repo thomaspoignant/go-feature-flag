@@ -45,7 +45,7 @@ package middleware
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // SHA-1 is used for ETag hashing, not security.
 	"encoding/hex"
 	"fmt"
 	"hash"
@@ -79,7 +79,7 @@ var (
 				crc32qTable := crc32.MakeTable(crcPol)
 				return crc32.New(crc32qTable)
 			}
-			return sha1.New()
+			return sha1.New() //nolint:gosec // SHA-1 is used for ETag hashing, not security.
 		},
 	}
 	normalizedETagName        = http.CanonicalHeaderKey("Etag")
@@ -138,7 +138,7 @@ func EtagWithConfig(config EtagConfig) echo.MiddlewareFunc {
 				hw.status == http.StatusNoContent ||
 				hw.buf.Len() == 0 {
 				writeRaw(originalWriter, hw)
-				return
+				return //nolint:nakedret // kept faithful to upstream
 			}
 
 			etag := fmt.Sprintf("\"%v-%v\"", strconv.Itoa(hw.len),
@@ -159,14 +159,14 @@ func EtagWithConfig(config EtagConfig) echo.MiddlewareFunc {
 			} else {
 				writeRaw(originalWriter, hw)
 			}
-			return
+			return //nolint:nakedret // kept faithful to upstream
 		}
 	}
 }
 
 // bufferedWriter is a wrapper around http.ResponseWriter that
 // buffers the response and calculates the hash of the response.
-type bufferedWriter struct {
+type bufferedWriter struct { //nolint:recvcheck // mixed receivers kept faithful to upstream
 	rw     http.ResponseWriter
 	hash   hash.Hash
 	buf    *bytes.Buffer
