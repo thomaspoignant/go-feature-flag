@@ -1,12 +1,18 @@
-name: Release Charts
+name: Helm chart docs
+# The relay-proxy chart README is generated from Chart.yaml and values.yaml by helm-docs, so it
+# has to be refreshed whenever the chart changes. Publishing the chart is not done here: it is
+# tied to the release version and happens in release.yml on a v* tag.
 on:
   push:
     branches:
       - main
+    paths:
+      - "cmd/relayproxy/helm-charts/**"
 
 jobs:
-  helm-release:
+  helm-docs:
     runs-on: ubuntu-latest
+    name: Update Relay Proxy Helm chart README
     permissions:
       contents: read
       pull-requests: write
@@ -19,25 +25,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Get changed files in the docs folder
-        id: changed-files-specific
-        uses: marceloprado/has-changed-path@df1b7a3161b8fb9fd8c90403c66a9e66dfde50cb # v1.0.1
-        with:
-          paths: ./cmd/relayproxy/helm-charts/
-
-      - name: Publish Helm chart
-        if: steps.changed-files-specific.outputs.changed == 'true'
-        uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
-        with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          charts_dir: ./cmd/relayproxy/helm-charts/
-          charts_url: https://charts.gofeatureflag.org
-          owner: go-feature-flag
-          repository: helm-charts
-          branch: gh-pages
-          target_dir: ./
-          commit_username: thomaspoignant
-          commit_email: thomaspoignant@goferatureflag.org
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
@@ -46,7 +33,6 @@ jobs:
           cache: false
 
       - name: Update chart README
-        if: steps.changed-files-specific.outputs.changed == 'true'
         run: make generate-helm-docs
 
       - name: Checkout main branch
@@ -65,7 +51,6 @@ jobs:
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        if: steps.changed-files-specific.outputs.changed == 'true'
         with:
           branch: update-relay-proxy-chart-readme
           title: "docs(helm): Update relay proxy helm README"

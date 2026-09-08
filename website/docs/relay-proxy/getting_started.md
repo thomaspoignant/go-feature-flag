@@ -20,6 +20,12 @@ We will use the docker image for this first installation:
 docker pull gofeatureflag/go-feature-flag:latest
 ```
 
+:::info
+The same image is also available on the GitHub Container Registry as
+`ghcr.io/go-feature-flag/go-feature-flag` if you cannot reach Docker Hub
+(for the releases after `v1.55.1`).
+:::
+
 ## Configuration
 
 Before starting your **relay proxy** you will need to create a minimal configuration file.  
