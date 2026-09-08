@@ -218,24 +218,37 @@ vendor-maintained — some providers are dated.
 
 ### Featurevisor {#featurevisor}
 
-<ToolHeader logo={featurevisorLogo} alt="Featurevisor" posture="No OpenFeature provider" postureTone="bad">
+_Updated September 2026: Featurevisor now ships official OpenFeature providers
+across all its SDKs — this section has been corrected._
+
+<ToolHeader logo={featurevisorLogo} alt="Featurevisor" posture="Official providers" postureTone="good">
 Flags as code, with no backend or database by design.
 </ToolHeader>
 
 Featurevisor takes GitOps to its logical end: flag definitions live in your Git
 repo, a CLI builds static "datafiles," and you publish them to a CDN. There's no
 server to run and no database — your existing Git review and CI flow is the control
-plane. It ships its own polyglot SDKs rather than an OpenFeature provider.
+plane. Alongside its own polyglot SDKs, every general-purpose Featurevisor SDK now
+ships an **official, project-maintained OpenFeature provider** — Node, browser, Go,
+Java, Kotlin, Swift, Python, Ruby, PHP, Rust and Elixir — each evaluating in-process
+from the datafile.
 
 <Field label="Best for" tone="good" icon="fa-circle-check">Teams that want maximal simplicity and a pure files-in-Git workflow, and don't need a management UI or hosted evaluation server.</Field>
 
-<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Minimal by intent — **no management UI** (it generates a read-only status site) and **no managed evaluation server**; you assemble more of the surrounding workflow yourself. A/B tests can be _defined_ declaratively, but there's no built-in statistical analysis.</Field>
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">Minimal by intent — **no management UI** (it generates a read-only status site) and **no managed evaluation server**; you assemble more of the surrounding workflow yourself. Evaluation is **in-process from a published datafile only**, so a change ships through build → publish → client poll rather than taking effect the moment it's merged, and there's no server-side evaluation path for clients that can't carry a datafile. A/B tests can be _defined_ declaratively, but there's no built-in statistical analysis.</Field>
 
 <Field label="License & hosting" tone="info" icon="fa-scale-balanced">**MIT, fully open.** No server, no database.</Field>
 
-Featurevisor is a useful contrast: it makes GOFF's middle ground obvious — GOFF
-keeps the no-database, config-as-code GitOps model but adds a managed evaluation
-proxy, native OpenFeature providers, exporters, and notifiers.
+Featurevisor is a useful contrast: it makes GOFF's middle ground obvious. Both share
+the same instinct — no database, flags as config in Git — but GOFF ships the
+operational surface already built on top of it: a managed evaluation proxy speaking
+**OFREP**, so any OpenFeature SDK can evaluate with no datafile to build and
+distribute and a flag change takes effect as soon as GOFF picks it up; **in-process
+evaluation** too, via the WebAssembly module embedded in the SDKs, when you'd rather
+have local latency; plus progressive and scheduled rollouts, **exporters** for usage
+analytics, **notifiers** for change alerts, and a flag <Link to="/editor">editor</Link>.
+Featurevisor is the minimal end of that philosophy; GOFF is the same philosophy with
+the rest of the workflow included.
 
 ## At a glance
 
@@ -248,7 +261,7 @@ Feature-flag tooling isn't one-size-fits-all. A few common scenarios:
 - **You want OpenFeature-native flagging you can install in minutes and that stays fully open.** This is GO Feature Flag's home turf: a single binary with no database to operate, MIT-licensed with no paid core, GitOps-friendly retrievers, native providers across many languages, and both remote and in-process evaluation. **→ GO Feature Flag.**
 - **Experimentation with real statistical analysis is the primary goal.** **GrowthBook** (warehouse-native stats) or **PostHog** (if you already run its analytics suite) will serve you better than a flag-first tool.
 - **You need enterprise governance, RBAC, SSO, and commercial support.** **Unleash** or **Flagsmith** are mature open-core platforms built for that — just budget for the paid tier and a PostgreSQL deployment.
-- **You want pure GitOps with no server at all.** **Flipt v2** (Git-native server with a UI) fit that brief.
+- **You want pure GitOps with no server at all.** **Flipt v2** (Git-native server with a UI) or **Featurevisor** (CDN datafiles, no server at all) fit that brief.
 
 The throughline: whichever you choose, write your application against **OpenFeature**.
 That's what keeps the decision reversible — and it's exactly why a tool's OpenFeature
