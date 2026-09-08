@@ -18,3 +18,5 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | Grafana Labs         | https://grafana.com                                   | GOFF relay with OpenFeature clients            |
 | Miro                 | https://www.miro.com                                  | Feature flags in general with OpenFeature      | 
 | Buzzvil              | https://www.buzzvil.com/en                            | Feature flags for backend and frontend         |
+| DataGalaxy           | https://www.datagalaxy.com/                           | Relay proxy with OpenFeature across the stack  |
+| Solaris SE           | https://www.solarisgroup.com/                         | GitOps flags via relay proxy on AWS Fargate    |
