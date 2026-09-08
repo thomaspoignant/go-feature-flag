@@ -44,7 +44,6 @@ require (
 	github.com/labstack/echo-contrib v0.50.1
 	github.com/labstack/echo/v4 v4.15.4
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
-	github.com/pablor21/echo-etag/v4 v4.0.5
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.71.0
