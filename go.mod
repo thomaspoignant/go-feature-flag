@@ -15,7 +15,7 @@ require (
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.55.0
 	github.com/aws/aws-sdk-go-v2 v1.45.1
-	github.com/aws/aws-sdk-go-v2/config v1.33.1
+	github.com/aws/aws-sdk-go-v2/config v1.33.2
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.2
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.1
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.51.0
