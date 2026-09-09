@@ -1,0 +1,163 @@
+---
+sidebar_position: 41
+description: How to store your flags' configuration in MinIO or another S3-compatible object store.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const retrieverName = 'MinIO'
+export const info = integrations.retrievers.find((r) => r.name === retrieverName)
+
+# MinIO
+
+## Overview
+{info.longDescription ?? info.description}
+
+[MinIO](https://min.io) is an S3-compatible object store you can run yourself, on-premises or in your own cloud.
+Everything below uses the [AWS S3 retriever](./aws-s3.mdx) with `kind: s3` — only the endpoint changes.
+
+The same applies the other way around, to
+[export your evaluation data to MinIO](../export-evaluation-data/minio.mdx).
+
+## Configure the relay proxy
+
+The retriever configuration is the regular `s3` one, MinIO is selected through the AWS SDK environment variables:
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: s3
+    bucket: my-featureflag-bucket
+    item: flag/flags.goff.yaml
+# ...
+```
+
+```shell
+export AWS_ENDPOINT_URL_S3=http://127.0.0.1:9000
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
+export AWS_DEFAULT_REGION=us-east-1
+```
+
+| Field name |   Mandatory   | Type   | Default  | Description                                                                                          |
+|------------|:-------------:|--------|----------|------------------------------------------------------------------------------------------------------|
+| `kind`     | <Mandatory /> | string | **none** | **Value should be `s3`**.<br/>_There is no `minio` kind, MinIO is served by the S3 retriever._        |
+| `bucket`   | <Mandatory /> | string | **none** | This is the name of your MinIO bucket _(ex: `my-featureflag-bucket`)_.                               |
+| `item`     | <Mandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                              |
+
+:::warning Use an IP address in `AWS_ENDPOINT_URL_S3`, or read below
+The AWS SDK addresses buckets as `http://{bucket}.{your-endpoint}` _(virtual-host style)_, **except** when your
+endpoint is an IP address. So `http://127.0.0.1:9000` works out of the box, but `http://minio:9000` makes the relay
+proxy call `http://my-featureflag-bucket.minio:9000` and fail.
+
+The relay proxy has no setting to force path-style addressing today, so with a hostname endpoint you must make the
+virtual-host name resolve — see [Using a hostname endpoint](#using-a-hostname-endpoint).
+:::
+
+### Using a hostname endpoint
+
+If you cannot use an IP address _(Docker Compose, Kubernetes, …)_, tell MinIO which domain it is served on with
+`MINIO_DOMAIN` **and** make `{bucket}.{host}` resolve to MinIO.
+
+In Docker Compose this means one environment variable and one network alias per bucket:
+
+```yaml title="compose.yaml"
+services:
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      # highlight-next-line
+      MINIO_DOMAIN: minio
+    networks:
+      default:
+        aliases:
+          # highlight-next-line
+          - my-featureflag-bucket.minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  relay-proxy:
+    image: gofeatureflag/go-feature-flag:latest
+    depends_on:
+      - minio
+    volumes:
+      - ./goff-proxy.yaml:/goff/goff-proxy.yaml
+    environment:
+      AWS_ENDPOINT_URL_S3: http://minio:9000
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_DEFAULT_REGION: us-east-1
+    ports:
+      - "1031:1031"
+```
+
+:::info
+The network alias is required because Docker's DNS does not resolve wildcards: without
+`my-featureflag-bucket.minio` the relay proxy cannot reach the bucket even with `MINIO_DOMAIN` set.
+
+If you use the **GO Module** instead of the relay proxy, you don't need any of this: use `S3ClientOptions` to force
+path-style addressing _(see below)_.
+:::
+
+## Configure the GO Module
+
+The GO Module exposes `S3ClientOptions`, which lets you force path-style addressing. This works with any endpoint,
+hostname or IP, and requires no MinIO-side configuration:
+
+```go title="example.go"
+awsConfig, _ := config.LoadDefaultConfig(context.Background(),
+    config.WithBaseEndpoint("http://minio:9000"))
+
+err := ffclient.Init(ffclient.Config{
+    PollingInterval: 3 * time.Second,
+    Retriever: &s3retrieverv2.Retriever{
+        Bucket:    "my-featureflag-bucket",
+        Item:      "flag/flags.goff.yaml",
+        AwsConfig: &awsConfig,
+        // highlight-start
+        S3ClientOptions: []func(*s3.Options){
+            func(o *s3.Options) { o.UsePathStyle = true },
+        },
+        // highlight-end
+    },
+})
+defer ffclient.Close()
+```
+
+| Field                 | Mandatory        | Description                                                                                                                                                    |
+|-----------------------|:----------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Bucket`**          | <Mandatory />    | The name of your bucket.                                                                                                                                       |
+| **`Item`**            | <Mandatory />    | The location of your file in the bucket.                                                                                                                       |
+| **`AwsConfig`**       | <Mandatory />    | An instance of `aws.Config`. Set your MinIO endpoint with `config.WithBaseEndpoint()` _(or the `AWS_ENDPOINT_URL_S3` environment variable)_.                    |
+| **`S3ClientOptions`** | <NotMandatory /> | Functional options passed to the S3 client. Set `o.UsePathStyle = true` to address buckets as `{endpoint}/{bucket}`, which is what MinIO expects by default.    |
+
+## Troubleshooting
+
+#### `NoSuchBucket: The specified bucket does not exist` — but the bucket does exist
+
+Your endpoint is a hostname, so the SDK is using virtual-host addressing and MinIO reads the first path segment as the
+bucket name. Use an IP endpoint, configure [`MINIO_DOMAIN` and a DNS alias](#using-a-hostname-endpoint), or set
+`UsePathStyle` if you are on the GO Module.
+
+#### `dial tcp ...: no route to host` on `http://my-featureflag-bucket.minio:9000`
+
+Same cause, but the virtual-host name doesn't resolve at all. The bucket name in the URL is the tell.
+
+#### `resolve auth scheme: resolve endpoint: endpoint rule error, Invalid region`
+
+The AWS SDK requires a region even when talking to MinIO. Any value works:
+
+```shell
+export AWS_DEFAULT_REGION=us-east-1
+```
+
+#### `WARN Response has no supported checksum. Not validating response payload.`
+
+Harmless, but if it floods your logs you can silence it with:
+
+```shell
+export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+```
