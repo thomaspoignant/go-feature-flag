@@ -19,7 +19,10 @@ func (s *Server) addMonitoringRoutes() {
 		s.monitoringEcho.Debug = s.config.IsDebugEnabled()
 		s.monitoringEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 		s.monitoringEcho.Use(middleware.CORS())
-		s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
+		s.monitoringEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
+			Skipper: func(_ echo.Context) bool {
+				return s.config.DisableVersionHeader
+			},
 			RelayProxyConfig: s.config,
 		}))
 		s.monitoringEcho.Use(middleware.Recover())
