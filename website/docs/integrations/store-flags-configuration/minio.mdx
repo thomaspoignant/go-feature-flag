@@ -131,8 +131,24 @@ defer ffclient.Close()
 |-----------------------|:----------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Bucket`**          | <Mandatory />    | The name of your bucket.                                                                                                                                       |
 | **`Item`**            | <Mandatory />    | The location of your file in the bucket.                                                                                                                       |
-| **`AwsConfig`**       | <Mandatory />    | An instance of `aws.Config`. Set your MinIO endpoint with `config.WithBaseEndpoint()` _(or the `AWS_ENDPOINT_URL_S3` environment variable)_.                    |
+| **`AwsConfig`**       | <NotMandatory /> | An instance of `aws.Config`. Set your MinIO endpoint with `config.WithBaseEndpoint()`. If you omit it, `config.LoadDefaultConfig()` is called for you, which reads `AWS_ENDPOINT_URL_S3` and the other standard AWS environment variables. |
 | **`S3ClientOptions`** | <NotMandatory /> | Functional options passed to the S3 client. Set `o.UsePathStyle = true` to address buckets as `{endpoint}/{bucket}`, which is what MinIO expects by default.    |
+
+:::info
+`AwsConfig` is optional. If you leave it out, GO Feature Flag calls `config.LoadDefaultConfig()` itself, so
+setting `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in your
+environment is enough — you only need `S3ClientOptions` to force path-style addressing:
+
+```go title="example.go"
+Retriever: &s3retrieverv2.Retriever{
+    Bucket: "my-featureflag-bucket",
+    Item:   "flag/flags.goff.yaml",
+    S3ClientOptions: []func(*s3.Options){
+        func(o *s3.Options) { o.UsePathStyle = true },
+    },
+},
+```
+:::
 
 ## Troubleshooting
 
