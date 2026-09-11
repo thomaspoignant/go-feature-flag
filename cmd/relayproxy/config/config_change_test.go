@@ -462,7 +462,7 @@ func newAPIServerWithLogger(
 	configFile *os.File,
 	logger *zap.Logger,
 	callback func(newConfig *config.Config),
-) (api.Server, *config.Config) {
+) (*api.Server, *config.Config) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	f.String("config", "", "Location of your config file")
 	err := f.Parse([]string{"--config=" + configFile.Name()})

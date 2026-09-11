@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
@@ -78,7 +78,7 @@ type WSFlagChange struct {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ws/v1/flag/change [get]
-func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
+func (f *WSFlagChange) LegacyHandler(c *echo.Context) error {
 	// This handler is deprecated and we keep it for the documentation.
 	return f.Handler(c)
 }
@@ -96,7 +96,7 @@ func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/ws/flag/change [get]
-func (f *WSFlagChange) Handler(c echo.Context) error {
+func (f *WSFlagChange) Handler(c *echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err

@@ -12,9 +12,33 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
 )
+
+const (
+	// gracefulTimeout is how long a listener waits for in-flight requests to finish
+	// before it is forcibly closed.
+	gracefulTimeout = 5 * time.Second
+
+	// readHeaderTimeout bounds how long a client may take to send its request headers.
+	// It replaces Echo v5's default ReadTimeout, which we clear below.
+	readHeaderTimeout = 30 * time.Second
+)
+
+// tuneHTTPServer relaxes the timeouts Echo v5 applies by default.
+//
+// echo.StartConfig sets ReadTimeout to 30s to satisfy gosec G112 (slowloris). That
+// deadline covers the whole request and would cut off the long-lived connections behind
+// the SSE and websocket flag-change endpoints, which Echo v4 happily kept open. We drop
+// ReadTimeout and set ReadHeaderTimeout instead, which keeps the slowloris protection
+// without bounding the lifetime of a stream.
+func tuneHTTPServer(s *http.Server) error {
+	s.ReadTimeout = 0
+	s.ReadHeaderTimeout = readHeaderTimeout
+	return nil
+}
 
 func (s *Server) StartWithContext(ctx context.Context) {
 	// start the OpenTelemetry tracing service
@@ -53,8 +77,8 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 
 	// Start a http server for monitoring if monitoringport is configured
 	if s.isMonitoringPortConfigured() {
-		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
+		go s.startMonitoringServer(ctx)
+		defer s.stopMonitoringServer(ctx)
 	}
 
 	lc := net.ListenConfig{}
@@ -64,18 +88,26 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 	}
 
 	defer func() {
-		if err := listener.Close(); err != nil {
+		if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
 			s.zapLog.Error("error closing unix socket listener", zap.Error(err))
 		}
 	}()
-	s.apiEcho.Listener = listener
 
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy as unix socket...",
 		zap.String("socket", socketPath),
 		zap.String("version", s.config.Version))
 
-	err = s.apiEcho.StartServer(new(http.Server))
+	ctx, done := s.registerAPIListener(ctx)
+	defer close(done)
+
+	err = echo.StartConfig{
+		Listener:        listener,
+		HideBanner:      true,
+		HidePort:        true,
+		GracefulTimeout: gracefulTimeout,
+		BeforeServeFunc: tuneHTTPServer,
+	}.Start(ctx, s.apiEcho)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy as unix socket", zap.Error(err))
 	}
@@ -84,8 +116,8 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 // startAsHTTPServer launch the API server
 func (s *Server) startAsHTTPServer(ctx context.Context) {
 	if s.isMonitoringPortConfigured() {
-		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
+		go s.startMonitoringServer(ctx)
+		defer s.stopMonitoringServer(ctx)
 	}
 
 	address := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.ServerPort(s.zapLog))
@@ -94,35 +126,92 @@ func (s *Server) startAsHTTPServer(ctx context.Context) {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	shutdownDone := make(chan struct{})
-	// nolint:gosec
-	go func() {
-		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
-			s.zapLog.Error("error shutting down api server", zap.Error(err))
-		}
-		close(shutdownDone)
-	}()
+	ctx, done := s.registerAPIListener(ctx)
+	defer close(done)
 
-	err := s.apiEcho.Start(address)
+	err := echo.StartConfig{
+		Address:         address,
+		HideBanner:      true,
+		HidePort:        true,
+		GracefulTimeout: gracefulTimeout,
+		BeforeServeFunc: tuneHTTPServer,
+	}.Start(ctx, s.apiEcho)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
-
-	// Wait for Shutdown to finish draining connections before returning.
-	<-shutdownDone
 }
 
-func (s *Server) startMonitoringServer() {
+func (s *Server) startMonitoringServer(ctx context.Context) {
 	addressMonitoring := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.EffectiveMonitoringPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting monitoring",
 		zap.String("address", addressMonitoring))
-	err := s.monitoringEcho.Start(addressMonitoring)
+
+	ctx, done := s.registerMonitoringListener(ctx)
+	defer close(done)
+
+	err := echo.StartConfig{
+		Address:         addressMonitoring,
+		HideBanner:      true,
+		HidePort:        true,
+		GracefulTimeout: gracefulTimeout,
+		BeforeServeFunc: tuneHTTPServer,
+	}.Start(ctx, s.monitoringEcho)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
+	}
+}
+
+// registerAPIListener derives a cancellable context for the API listener and records the
+// cancel func plus a done channel so Stop can shut it down and wait for it.
+func (s *Server) registerAPIListener(ctx context.Context) (context.Context, chan struct{}) {
+	ctx, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+
+	s.mutex.Lock()
+	s.apiCancel = cancel
+	s.apiDone = done
+	s.mutex.Unlock()
+
+	return ctx, done
+}
+
+// registerMonitoringListener is registerAPIListener for the monitoring listener.
+func (s *Server) registerMonitoringListener(ctx context.Context) (context.Context, chan struct{}) {
+	ctx, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+
+	s.mutex.Lock()
+	s.monitoringCancel = cancel
+	s.monitoringDone = done
+	s.mutex.Unlock()
+
+	return ctx, done
+}
+
+// stopMonitoringServer cancels the monitoring listener and waits for it to drain.
+func (s *Server) stopMonitoringServer(ctx context.Context) {
+	s.mutex.Lock()
+	cancel, done := s.monitoringCancel, s.monitoringDone
+	s.monitoringCancel, s.monitoringDone = nil, nil
+	s.mutex.Unlock()
+
+	waitForListener(ctx, cancel, done)
+}
+
+// waitForListener cancels a listener context and waits for the serving goroutine to
+// return, giving up if the supplied context is done first.
+func waitForListener(ctx context.Context, cancel context.CancelFunc, done chan struct{}) {
+	if cancel == nil {
+		return
+	}
+	cancel()
+	if done == nil {
+		return
+	}
+	select {
+	case <-done:
+	case <-ctx.Done():
 	}
 }
 
@@ -146,17 +235,15 @@ func (s *Server) Stop(ctx context.Context) {
 		s.zapLog.Error("impossible to stop otel", zap.Error(err))
 	}
 
-	if s.monitoringEcho != nil {
-		if err = s.monitoringEcho.Shutdown(ctx); err != nil {
-			s.zapLog.Error("error stopping monitoring", zap.Error(err))
-		}
-	}
+	s.mutex.Lock()
+	apiCancel, apiDone := s.apiCancel, s.apiDone
+	monitoringCancel, monitoringDone := s.monitoringCancel, s.monitoringDone
+	s.apiCancel, s.apiDone = nil, nil
+	s.monitoringCancel, s.monitoringDone = nil, nil
+	s.mutex.Unlock()
 
-	if s.apiEcho != nil {
-		if err = s.apiEcho.Shutdown(ctx); err != nil {
-			s.zapLog.Error("error stopping relay proxy", zap.Error(err))
-		}
-	}
+	waitForListener(ctx, monitoringCancel, monitoringDone)
+	waitForListener(ctx, apiCancel, apiDone)
 }
 
 // isMonitoringPortConfigured checks if the monitoring port is configured.

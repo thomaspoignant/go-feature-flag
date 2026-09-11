@@ -1,11 +1,14 @@
 package api
 
 import (
+	"context"
 	"strings"
+	"sync"
 
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo-contrib/v5/echoprometheus"
+	echootel "github.com/labstack/echo-opentelemetry"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
@@ -16,7 +19,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -31,8 +33,8 @@ const (
 func New(config *config.Config,
 	services service.Services,
 	zapLog *zap.Logger,
-) Server {
-	s := Server{
+) *Server {
+	s := &Server{
 		config:      config,
 		services:    services,
 		zapLog:      zapLog,
@@ -51,17 +53,26 @@ type Server struct {
 	services       service.Services
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
+
+	// Echo v5 drives shutdown through the context passed to StartConfig.Start rather than
+	// an Echo.Shutdown method, so the server keeps the cancel func and a done channel per
+	// listener in order to implement Stop.
+	mutex            sync.Mutex
+	apiCancel        context.CancelFunc
+	apiDone          chan struct{}
+	monitoringCancel context.CancelFunc
+	monitoringDone   chan struct{}
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
 func (s *Server) initRoutes() {
-	s.apiEcho.HideBanner = true
-	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.IsDebugEnabled()
-	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
+	// HideBanner/HidePort/Debug were removed from echo.Echo in v5; the first two are now
+	// set on echo.StartConfig at start time (see server_lifecycle.go) and Debug has no
+	// replacement — debug behaviour here is already driven by the zap logger level.
+	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
@@ -81,10 +92,10 @@ func (s *Server) initRoutes() {
 			},
 		}))
 	}
-	s.apiEcho.Use(middleware.CORS())
+	s.apiEcho.Use(middleware.CORS("*"))
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-		Skipper: func(_ echo.Context) bool {
+		Skipper: func(_ *echo.Context) bool {
 			return s.config.DisableVersionHeader
 		},
 		RelayProxyConfig: s.config,
@@ -130,18 +141,18 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 	switch middlewareType {
 	case AdminAuth:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeysAdminExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
 	default:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
-			Skipper: func(c echo.Context) bool {
+			Skipper: func(c *echo.Context) bool {
 				return !s.config.IsAuthenticationEnabled()
 			},
 		})

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -162,9 +162,10 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			want: want{
 				handlerErr: true,
 				httpCode:   http.StatusBadRequest,
-				errorMsg: "collectEvalData: invalid input data code=400, message=Syntax error: offset=322, " +
-					"error=invalid character '}' after array element, internal=invalid character '}' after array " +
-					"element",
+				// Echo v5 returns the generic ErrBadRequest sentinel wrapping the decode
+				// error, and HTTPError.Error() renders the cause as "err=" not "internal=".
+				errorMsg: "collectEvalData: invalid input data code=400, message=Bad Request, " +
+					"err=invalid character '}' after array element",
 				errorCode: http.StatusBadRequest,
 			},
 		},

@@ -136,6 +136,15 @@ linters:
       - path: cmd/relayproxy/modeldocs/
         linters:
           - lll
+      # Temporary in-repo copy of github.com/pablor21/echo-etag, kept deliberately
+      # faithful to upstream so it can be deleted wholesale once echo-etag ships a v5
+      # release (see the file header and pablor21/echo-etag#14). SHA-1 here is an ETag
+      # digest, not a security primitive.
+      - path: cmdhelpers/api/middleware/etag\.go
+        linters:
+          - gosec
+          - nakedret
+          - recvcheck
       - path: _test\.go
         linters:
           - gosec

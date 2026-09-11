@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -49,7 +49,7 @@ func NewFlagEval(flagsetMngr service.FlagsetManager, metrics metric.Metrics) Con
 // @Failure      400 {object}  modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
-func (h *flagEval) Handler(c echo.Context) error {
+func (h *flagEval) Handler(c *echo.Context) error {
 	flagKey := c.Param("flagKey")
 	if flagKey == "" {
 		return fmt.Errorf("impossible to find the flag key in the URL")

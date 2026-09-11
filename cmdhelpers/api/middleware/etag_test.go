@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 )
@@ -21,22 +21,22 @@ const (
 func newEtagServer() *echo.Echo {
 	e := echo.New()
 
-	e.GET("/etag", func(c echo.Context) error {
+	e.GET("/etag", func(c *echo.Context) error {
 		return c.String(http.StatusOK, etagBody)
 	}, middleware.EtagWithConfig(middleware.EtagConfig{Weak: false}))
 
-	e.GET("/etag/weak", func(c echo.Context) error {
+	e.GET("/etag/weak", func(c *echo.Context) error {
 		return c.String(http.StatusOK, etagBody)
 	}, middleware.Etag())
 
-	e.GET("/etag/nocontent", func(c echo.Context) error {
+	e.GET("/etag/nocontent", func(c *echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
 	}, middleware.Etag())
 
-	e.GET("/etag/skipped", func(c echo.Context) error {
+	e.GET("/etag/skipped", func(c *echo.Context) error {
 		return c.String(http.StatusOK, etagBody)
 	}, middleware.EtagWithConfig(middleware.EtagConfig{
-		Skipper: func(_ echo.Context) bool { return true },
+		Skipper: func(_ *echo.Context) bool { return true },
 	}))
 
 	return e

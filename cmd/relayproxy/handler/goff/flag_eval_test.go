@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
@@ -114,7 +114,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request", // echo v5 binder returns the generic ErrBadRequest sentinel
 				errorCode:  http.StatusBadRequest,
 			},
 		},
@@ -177,8 +177,8 @@ func Test_flag_eval_Handler(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 			c.SetPath("/v1/feature/:flagKey/eval")
-			c.SetParamNames("flagKey")
-			c.SetParamValues(tt.args.flagKey)
+			// Echo v5 replaced SetParamNames/SetParamValues with SetPathValues.
+			c.SetPathValues(echo.PathValues{{Name: "flagKey", Value: tt.args.flagKey}})
 			handlerErr := flagEval.Handler(c)
 
 			if tt.want.handlerErr {
