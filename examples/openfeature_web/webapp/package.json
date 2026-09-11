@@ -49,7 +49,7 @@
     "sass": "^1.103.1",
     "stylelint": "^17.14.1",
     "webpack": "^5.110.3",
-    "webpack-cli": "^7.2.2"
+    "webpack-cli": "^7.2.3"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
