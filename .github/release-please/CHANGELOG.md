@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.55.4](https://github.com/thomaspoignant/go-feature-flag/compare/v1.55.3...v1.55.4) (2026-09-11)
+
+
+### 🔧 Chores
+
+* Bump @eslint/eslintrc in /examples/openfeature_web/webapp ([#6030](https://github.com/thomaspoignant/go-feature-flag/issues/6030)) ([aa297c3](https://github.com/thomaspoignant/go-feature-flag/commit/aa297c3df5eeac1249885fd5613c15d836988ead))
+* Bump @types/react-dom in /examples/openfeature_react/react-app ([#6033](https://github.com/thomaspoignant/go-feature-flag/issues/6033)) ([93f635b](https://github.com/thomaspoignant/go-feature-flag/commit/93f635b0d679609e88cba3f2f5e475dc16656151))
+* Bump @typescript-eslint/eslint-plugin ([#6038](https://github.com/thomaspoignant/go-feature-flag/issues/6038)) ([cb07820](https://github.com/thomaspoignant/go-feature-flag/commit/cb078205a6011e2637d3ee8445871db201ade376))
+* Bump @vitejs/plugin-react ([#6040](https://github.com/thomaspoignant/go-feature-flag/issues/6040)) ([955b896](https://github.com/thomaspoignant/go-feature-flag/commit/955b896b8293557fae8a14a7867a391929d4d5d8))
+* Bump anthropics/claude-code-action from 1.0.210 to 1.0.216 ([#6042](https://github.com/thomaspoignant/go-feature-flag/issues/6042)) ([c4978ee](https://github.com/thomaspoignant/go-feature-flag/commit/c4978eee4a73020179fa02e95da3d33d6949a590))
+* Bump cloud.google.com/go/bigquery from 1.82.0 to 1.83.0 ([#6027](https://github.com/thomaspoignant/go-feature-flag/issues/6027)) ([ca9e748](https://github.com/thomaspoignant/go-feature-flag/commit/ca9e748fc05013984a25e9e25c70a2a610dd366d))
+* Bump cloud.google.com/go/storage from 1.66.0 to 1.67.0 ([#6029](https://github.com/thomaspoignant/go-feature-flag/issues/6029)) ([c93b93e](https://github.com/thomaspoignant/go-feature-flag/commit/c93b93e60e751ecb40dc3e0fcfeeffee4c0fb4fe))
+* Bump eslint-plugin-react-refresh ([#6034](https://github.com/thomaspoignant/go-feature-flag/issues/6034)) ([91e1436](https://github.com/thomaspoignant/go-feature-flag/commit/91e14365b894f53524cef60fa3f7bf2801c0f95f))
+* Bump github.com/aws/aws-sdk-go-v2/service/kinesis ([#6021](https://github.com/thomaspoignant/go-feature-flag/issues/6021)) ([e0f6a66](https://github.com/thomaspoignant/go-feature-flag/commit/e0f6a66c44f776f260b97221bb5cda7d412abc64))
+* Bump google.golang.org/api from 0.296.0 to 0.297.0 ([#6022](https://github.com/thomaspoignant/go-feature-flag/issues/6022)) ([96f6a16](https://github.com/thomaspoignant/go-feature-flag/commit/96f6a1637d6ab607e567df2471362f1cff166f79))
+* Bump htmlnano in /examples/openfeature_web/webapp ([#6035](https://github.com/thomaspoignant/go-feature-flag/issues/6035)) ([dfc5e88](https://github.com/thomaspoignant/go-feature-flag/commit/dfc5e88c1f4577446391e29898c6098b895d38f6))
+* Bump jest in /openfeature/provider_tests/js-integration-tests ([#6023](https://github.com/thomaspoignant/go-feature-flag/issues/6023)) ([f2e5484](https://github.com/thomaspoignant/go-feature-flag/commit/f2e54844299e1b5979784415c71380608da0e80e))
+* Bump postcss in /examples/openfeature_react/react-app ([#6036](https://github.com/thomaspoignant/go-feature-flag/issues/6036)) ([632aa5f](https://github.com/thomaspoignant/go-feature-flag/commit/632aa5f7aa022e1bc87ffd569fddae13400fe3cb))
+* Bump sass in /examples/openfeature_web/webapp ([#6037](https://github.com/thomaspoignant/go-feature-flag/issues/6037)) ([5b48ce2](https://github.com/thomaspoignant/go-feature-flag/commit/5b48ce255c0c9ce29e5c6ddb26455293c35e4a61))
+* Bump webpack in /examples/openfeature_web/webapp ([#6031](https://github.com/thomaspoignant/go-feature-flag/issues/6031)) ([0e43619](https://github.com/thomaspoignant/go-feature-flag/commit/0e4361975a33d0171602501ffe53e8fd4b5ad25e))
+* Bump webpack-cli in /examples/openfeature_web/webapp ([#6032](https://github.com/thomaspoignant/go-feature-flag/issues/6032)) ([f77401a](https://github.com/thomaspoignant/go-feature-flag/commit/f77401a545e009229554e839b59e8769eff5cae4))
+* Bump zizmorcore/zizmor-action from 0.6.2 to 0.6.3 ([#6041](https://github.com/thomaspoignant/go-feature-flag/issues/6041)) ([04cfa9f](https://github.com/thomaspoignant/go-feature-flag/commit/04cfa9f9791a55def64e9075165a7d277a537579))
+
+
+### 📚 Documentation
+
+* **blog:** Add Solaris SE case study to the blog ([#6018](https://github.com/thomaspoignant/go-feature-flag/issues/6018)) ([986573c](https://github.com/thomaspoignant/go-feature-flag/commit/986573c962d16664d41543a4823ef091a83dae91))
+
 ## [1.55.3](https://github.com/thomaspoignant/go-feature-flag/compare/v1.55.2...v1.55.3) (2026-09-08)
 
 
