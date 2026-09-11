@@ -48,7 +48,9 @@ oryxBuildBinary
 volume
 
 .cursor/
-.claude/
+.claude/*
+# Shared, committed agent skills (settings and local agents stay ignored above).
+!.claude/skills/
 
 go.work
 go.work.sum

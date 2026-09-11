@@ -1,0 +1,27 @@
+name: Provider specification consistency
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-provider-spec:
+    name: Check provider specification consistency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Guards the conformance specification against silent drift: a routine
+      # modules/core bump moves the evaluation engine out from under the version
+      # the specification pins, and a fixture edit invalidates the expected
+      # results in Appendix B. Neither would fail any other test.
+      - name: Check specification consistency
+        run: ./.github/ci-scripts/check-provider-spec.sh
