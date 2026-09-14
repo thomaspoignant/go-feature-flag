@@ -44,17 +44,19 @@
 package middleware
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/sha1" //nolint:gosec // SHA-1 is used for ETag hashing, not security.
 	"encoding/hex"
 	"fmt"
 	"hash"
 	"hash/crc32"
+	"net"
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 // EtagConfig defines the config for the Etag middleware.
@@ -101,7 +103,7 @@ func EtagWithConfig(config EtagConfig) echo.MiddlewareFunc {
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) (err error) {
+		return func(c *echo.Context) (err error) {
 			skipper := config.Skipper
 			if skipper == nil {
 				skipper = DefaultEtagConfig.Skipper
@@ -117,20 +119,19 @@ func EtagWithConfig(config EtagConfig) echo.MiddlewareFunc {
 				hashFn = DefaultEtagConfig.HashFn
 			}
 
-			originalWriter := c.Response().Writer
-			res := c.Response()
+			originalWriter := c.Response()
 			req := c.Request()
 			// ResponseWriter
-			hw := bufferedWriter{rw: res.Writer, hash: hashFn(config), buf: bytes.NewBuffer(nil)}
-			res.Writer = &hw
+			hw := bufferedWriter{rw: originalWriter, hash: hashFn(config), buf: bytes.NewBuffer(nil)}
+			c.SetResponse(&hw)
 			err = next(c)
 			// restore the original writer
-			res.Writer = originalWriter
+			c.SetResponse(originalWriter)
 			if err != nil {
 				return err
 			}
 
-			resHeader := res.Header()
+			resHeader := originalWriter.Header()
 
 			if hw.hash == nil ||
 				resHeader.Get(normalizedETagName) != "" ||
@@ -182,6 +183,23 @@ func (hw bufferedWriter) Header() http.Header {
 // WriteHeader sends an HTTP response header with the provided status code.
 func (hw *bufferedWriter) WriteHeader(status int) {
 	hw.status = status
+}
+
+// Unwrap returns the wrapped http.ResponseWriter. Echo requires response writers set with
+// `Context#SetResponse` to implement it so that `echo.UnwrapResponse` and
+// `http.NewResponseController` can reach the underlying *echo.Response.
+func (hw *bufferedWriter) Unwrap() http.ResponseWriter {
+	return hw.rw
+}
+
+// Flush is a no-op. The response body is buffered on purpose to compute the Etag, so flushing
+// early would commit the response before the Etag header can be set. Handlers that need to stream
+// should be excluded with the Skipper option.
+func (hw *bufferedWriter) Flush() {}
+
+// Hijack implements the http.Hijacker interface for handlers that take over the connection.
+func (hw *bufferedWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return http.NewResponseController(hw.rw).Hijack()
 }
 
 // Write writes the data to the buffer to be sent as part of an HTTP reply.

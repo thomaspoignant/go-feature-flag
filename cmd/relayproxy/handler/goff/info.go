@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
 
@@ -28,7 +28,7 @@ func NewInfo(monitoring service.Monitoring) Controller {
 // @Produce      json
 // @Success      200  {object}   model.InfoResponse
 // @Router       /info [get]
-func (h *info) Handler(c echo.Context) error {
+func (h *info) Handler(c *echo.Context) error {
 	info, err := h.monitoringService.Info()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
