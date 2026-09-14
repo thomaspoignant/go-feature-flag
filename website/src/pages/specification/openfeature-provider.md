@@ -40,8 +40,9 @@ Android, JavaScript Web) follow a different paradigm and are out of scope for ve
   the component shape, build order and complete wire payloads that this document deliberately
   omits, and links back here for the rules. This document tells you what must be true; that one
   tells you what to build.
-- It **supersedes** `BUILDING_OPENFEATURE_SERVER_PROVIDERS.md`, which was written from the
-  .NET provider and is inaccurate in several load-bearing places.
+- It **superseded** `BUILDING_OPENFEATURE_SERVER_PROVIDERS.md`, written from the .NET provider and
+  inaccurate in several load-bearing places. That document has since been removed from the
+  repository.
 - It **absorbs** the former Provider Cache specification, now [§17](#17-remote-cache-optional).
 
 ---
@@ -151,7 +152,8 @@ that materially changes who can fix it and how quickly.
 **Tier: Core**
 
 Option **names** are RECOMMENDED, not normative: a provider **SHOULD** use the canonical name
-adapted to its language's casing convention, and MAY retain an existing name as an alias.
+adapted to its language's conventions — including a unit suffix where the language favours one,
+such as `flagChangePollingIntervalMs` — and MAY retain an existing name as an alias.
 Option **semantics and default values are normative** — they have real operational
 consequences, and divergent defaults are how a fleet ends up behaving inconsistently.
 
@@ -170,11 +172,14 @@ consequences, and divergent defaults are how a fleet ends up behaving inconsiste
 | `disableDataCollection`       | boolean     | `false`          | both        | REQUIRED |
 | `dataCollectorBaseURL`        | URL string  | `endpoint`       | both        | RECOMMENDED |
 | `evaluationFlagList`          | string list | empty (all)      | in-process  | RECOMMENDED |
-| `wasmEvaluatorPoolSize`       | integer     | CPU core count   | WASM        | RECOMMENDED |
+| `wasmEvaluatorPoolSize`       | integer     | CPU core count   | WASM †      | RECOMMENDED |
 | `logger`                      | SDK logger  | language default | both        | RECOMMENDED |
 
 A **REQUIRED** option that is absent is a `GOFF-CFG-003` failure. A **RECOMMENDED** option
 that is absent is reported against its own requirement, not against `GOFF-CFG-003`.
+
+† `wasmEvaluatorPoolSize` applies only where the runtime supports parallel execution. On a
+single-threaded runtime it is **N/A**, for the reason given in `GOFF-WASM-009`.
 
 ### 3.2 Requirements
 
@@ -205,7 +210,7 @@ that is absent is reported against its own requirement, not against `GOFF-CFG-00
 | `GOFF-LIFE-004` | Major    | Shutdown **MUST** stop the polling task, **MUST** flush all buffered events, and **MUST** stop the event publisher — in **both** evaluation modes and regardless of whether data collection is enabled. |
 | `GOFF-LIFE-005` | Major    | Shutdown **MUST** bound how long it waits for background work.                                                                                                                 |
 | `GOFF-LIFE-006` | Critical | Until a flag configuration has been successfully loaded at least once, evaluations **MUST** report `PROVIDER_NOT_READY`. They **MUST NOT** report `FLAG_NOT_FOUND`, which misattributes an infrastructure failure to the caller's flag key. |
-| `GOFF-LIFE-007` | Major    | Concurrent evaluation **MUST** be safe. Shared configuration state **MUST** be guarded, and the guard **MUST NOT** be held across network or evaluation calls.                  |
+| `GOFF-LIFE-007` | Major    | Where the runtime permits concurrent evaluation, it **MUST** be safe. Shared configuration state **MUST** be guarded, and the guard **MUST NOT** be held across network or evaluation calls. A single-threaded runtime, which has no such guards to hold, is **N/A**. |
 
 ---
 
@@ -215,7 +220,7 @@ that is absent is reported against its own requirement, not against `GOFF-CFG-00
 
 | ID             | Sev      | Requirement                                                                                                                                                                              |
 | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GOFF-EVT-001` | Major    | Provider events **MUST** be emitted identically in both evaluation modes. A capability present in one mode and silently absent in the other is a defect.                                  |
+| `GOFF-EVT-001` | Major    | Provider events **MUST** be emitted identically in both evaluation modes, for every event a mode can reach. A capability present in one mode and silently absent in the other is a defect. Remote evaluation holds no configuration of its own, so `PROVIDER_CONFIGURATION_CHANGED` and `PROVIDER_STALE` — which describe a cached snapshot changing or ageing — are **N/A** there. |
 | `GOFF-EVT-002` | Major    | `PROVIDER_CONFIGURATION_CHANGED` **MUST** be emitted when a poll yields a configuration different from the one in use.                                                                    |
 | `GOFF-EVT-003` | Major    | `PROVIDER_CONFIGURATION_CHANGED` **MUST NOT** be emitted for the initial load during initialization. Consumers **MUST NOT** observe a configuration-changed event before the provider is ready. |
 | `GOFF-EVT-004` | Major    | `PROVIDER_CONFIGURATION_CHANGED` **MUST NOT** be emitted when the configuration is unchanged. A provider that cannot distinguish "changed" from "fetched" — for instance because the server sends no `ETag` — **MUST** compare content rather than emit unconditionally. |
@@ -233,16 +238,16 @@ that is absent is reported against its own requirement, not against `GOFF-CFG-00
 | ID              | Sev      | Requirement                                                                                                                                                                        |
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GOFF-EVAL-001` | Major    | The provider **MUST** implement the boolean, string, integer, float and object resolvers defined by its SDK, and **SHOULD** implement asynchronous variants where the SDK defines them. |
-| `GOFF-EVAL-002` | Critical | The object resolver **MUST** accept exactly what its SDK's canonical structure type can represent, and **MUST** report `TYPE_MISMATCH` for anything it cannot — including scalars.  |
+| `GOFF-EVAL-002` | Critical | The object resolver **MUST** report `TYPE_MISMATCH` for any value its SDK's canonical structure type cannot represent, and **MUST NOT** coerce such a value. Where that type is a JSON-value union that would otherwise admit scalars, the provider **MAY** additionally reject them. |
 | `GOFF-EVAL-003` | Critical | The float resolver **MUST** accept an integral JSON number. JSON does not distinguish `100` from `100.0`.                                                                            |
 | `GOFF-EVAL-004` | Critical | A boolean value **MUST NOT** satisfy the integer or float resolver. It **MUST** report `TYPE_MISMATCH`.                                                                              |
-| `GOFF-EVAL-005` | Major    | The integer resolver **MUST** report `TYPE_MISMATCH` for a non-integral number. It **MUST NOT** truncate, round, or raise a raw numeric-conversion error.                            |
+| `GOFF-EVAL-005` | Major    | Where the SDK defines a distinct integer resolver, it **MUST** report `TYPE_MISMATCH` for a non-integral number, and **MUST NOT** truncate, round, or raise a raw numeric-conversion error. An SDK offering a single numeric resolver is **N/A**. |
 | `GOFF-EVAL-006` | Critical | A `null` evaluation result **MUST** return the caller's default value, preserving the engine's reason, variant and metadata. It **MUST NOT** return the language's zero value.       |
 | `GOFF-EVAL-007` | Major    | The `reason` **MUST** be passed through as an opaque string. The provider **MUST NOT** parse it into a closed enumeration. The engine emits `TARGETING_MATCH_SPLIT`, `SPLIT`, `OFFLINE` and others that a naive enum lookup will reject. |
 | `GOFF-EVAL-008` | Major    | A disabled flag **MUST** return the caller's default value with reason `DISABLED` and variant `SdkDefault`.                                                                          |
 | `GOFF-EVAL-009` | Major    | Flag metadata **MUST** be passed through with its structure intact. Values **MUST NOT** be coerced to strings.                                                                       |
 | `GOFF-EVAL-010` | Major    | Metadata keys added by the relay proxy, such as `gofeatureflag_cacheable`, **MUST** be passed through verbatim. The provider **MUST NOT** strip them, and **MUST NOT** require them. |
-| `GOFF-EVAL-011` | Major    | On any evaluation error the provider **MUST** return the caller's default value together with the error code. It **MUST NOT** propagate an exception to the application.             |
+| `GOFF-EVAL-011` | Major    | On any evaluation error the application **MUST** receive the caller's default value together with the error code. The provider **MUST** report the error through its SDK's contracted mechanism — in some SDKs that is raising a typed error the SDK itself catches — and **MUST NOT** raise an unmapped language-level exception. |
 
 ---
 
@@ -255,8 +260,8 @@ that is absent is reported against its own requirement, not against `GOFF-CFG-00
 | `GOFF-CTX-001` | Major    | The targeting key **MUST** be transmitted under the key `targetingKey`.                                                                                                             |
 | `GOFF-CTX-002` | Major    | Context attributes **MUST** be flattened alongside `targetingKey`, not nested under a wrapper.                                                                                       |
 | `GOFF-CTX-003` | Critical | A missing or empty targeting key **MUST** be passed through to the evaluation engine. The provider **MUST NOT** reject it. The engine returns `TARGETING_KEY_MISSING` only for flags that actually require bucketing; rejecting client-side breaks flags that do not. |
-| `GOFF-CTX-004` | Critical | In-process evaluation **MUST** normalise attributes exactly as the engine's own entry point does, including narrowing integral floating-point values to integers. Skipping this makes targeting rules match differently between languages for identical input. |
-| `GOFF-CTX-005` | Major    | `evaluationContextEnrichment` from the flag-configuration response **MUST** be merged into the evaluation context. On key collision, **enrichment wins**.                            |
+| `GOFF-CTX-004` | Critical | In-process evaluation **MUST** normalise attributes exactly as the engine's own entry point does, including narrowing integral floating-point values to integers where the language distinguishes the two. Skipping this makes targeting rules match differently between languages for identical input. |
+| `GOFF-CTX-005` | Major    | *(Tier: In-process.)* `evaluationContextEnrichment` from the flag-configuration response **MUST** reach the evaluation, and **enrichment wins** on key collision. Handing it to the engine as `flagContext.evaluationContextEnrichment` (`GOFF-IP-014`) satisfies this — the merge itself belongs to the engine. In remote mode the relay proxy applies it and the provider is **N/A**. |
 
 ### 7.1 The `gofeatureflag` reserved namespace
 
@@ -321,9 +326,11 @@ produce identical results.
 | `GOFF-IP-007` | Critical | A `304 Not Modified` response **MUST NOT** write flags, enrichment or timestamps — **regardless of whether the response echoed an `ETag` header**. The 304 path **MUST** be structurally incapable of carrying a configuration body: the transport layer **MUST** signal "not modified" by a distinct type or sentinel rather than by an empty response object, so that the distinction cannot be lost downstream. |
 | `GOFF-IP-015` | Major    | A `304 Not Modified` response **MUST NOT** write the stored `ETag`. Writing back a value-identical validator is harmless in isolation, but it means the refresh path cannot distinguish a 304 from an empty `200`, which is how `GOFF-IP-009` is violated in practice. |
 | `GOFF-IP-008` | Critical | A `200` response whose body cannot be parsed **MUST** be treated as a failed refresh: the previous configuration **MUST** be preserved and the stored `ETag` **MUST NOT** advance.               |
-| `GOFF-IP-009` | Critical | A `200` response whose decoded flag map is null or absent **MUST** likewise be treated as a failed refresh. Accepting it wipes every flag, and advancing the `ETag` makes the empty state permanent. |
+| `GOFF-IP-009` | Critical | A `200` response whose decoded flag map is null or absent **MUST** likewise be treated as a failed refresh. Accepting it wipes every flag, and advancing the `ETag` makes the empty state permanent. A null `evaluationContextEnrichment` is **not** the same case and **MUST** be accepted as "no enrichment": the relay proxy builds that field from a Go map, and a nil map marshals to `null`. |
 | `GOFF-IP-010` | Major    | A failed refresh **MUST NOT** terminate polling. Polling **MUST** survive any error and continue on schedule.                                                                                    |
 | `GOFF-IP-011` | Minor    | The provider **SHOULD** apply jitter to the polling interval so that a restarted fleet does not poll in lockstep.                                                                                |
+| `GOFF-IP-018` | Minor    | A provider **MAY** offer an explicit opt-out from polling. Where it does, the opt-out **MUST** be distinguishable from an unset interval, so that leaving the option alone polls at the default rather than disabling refresh. This is the companion to `GOFF-IP-006`, which forbids requiring opt-*in*. |
+| `GOFF-IP-019` | Major    | A configuration response whose `Last-Modified` is older than the one currently held **MUST NOT** replace it. An intermediary serving a stale copy would otherwise roll the configuration backwards. |
 
 :::tip Recommended implementation
 Make `GOFF-IP-007` correct by construction rather than by null-checking. Have the HTTP layer
@@ -392,7 +399,7 @@ without error.
 | `GOFF-WASM-007` | Critical | The module is built with `-scheduler=none` and is **not reentrant**. One instance **MUST** serve one call at a time; a pool of instances is the RECOMMENDED way to get parallelism. |
 | `GOFF-WASM-008` | Critical | If evaluation traps, the instance **MUST** be discarded and rebuilt. A trap does not unwind the module's shadow-stack pointer, so a trapped instance is permanently poisoned and **MUST NOT** be returned to a pool or reused. |
 | `GOFF-WASM-012` | Critical | After a trap the host **MUST NOT** call `free` on the trapped instance. Running further code on it faults inside `malloc` at a wrapped address and masks the original error.       |
-| `GOFF-WASM-009` | Major    | The instance pool **SHOULD** default to the host's CPU core count and **SHOULD** be configurable.                                                                                 |
+| `GOFF-WASM-009` | Major    | Where the runtime supports parallel execution, the instance pool **SHOULD** default to the host's CPU core count and **SHOULD** be configurable. A single-threaded runtime, on which calls into one instance cannot interleave, is **N/A** — `GOFF-WASM-007` is satisfied there without a pool. |
 | `GOFF-WASM-010` | Major    | The engine binary version **MUST** be pinned to a single, machine-readable value.                                                                                                 |
 | `GOFF-WASM-011` | Minor    | The provider **SHOULD** allow the binary path to be overridden, so that bundlers and non-standard packaging layouts remain usable.                                                 |
 
@@ -486,11 +493,11 @@ Evaluation and tracking events are batched and posted to the relay proxy.
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GOFF-COLL-003` | Major    | `kind` **MUST** be `feature`.                                                                                                                                         |
 | `GOFF-COLL-004` | Critical | The "evaluation failed" boolean **MUST** be serialised as `default`. Any other name is silently discarded by the relay proxy, recording every failed evaluation as a success. |
-| `GOFF-COLL-005` | Major    | `contextKind` **MUST** be derived from the `anonymous` attribute per the table below. Only a boolean `true` yields `anonymousUser`; a truthiness test is not sufficient. |
+| `GOFF-COLL-005` | Major    | `contextKind` **MUST** be derived from the `anonymous` attribute per the table below. Where the attribute is present, only a boolean `true` yields `anonymousUser`; a truthiness test is not sufficient. |
 | `GOFF-COLL-006` | Major    | `userKey` **MUST** be the targeting key, or the sentinel `undefined-targetingKey` when absent.                                                                         |
 | `GOFF-COLL-007` | Major    | `creationDate` **MUST** be Unix epoch **seconds**.                                                                                                                    |
 | `GOFF-COLL-008` | Major    | `variation` **MUST** be the resolved variant, or `SdkDefault` when none is available.                                                                                 |
-| `GOFF-COLL-009` | Minor    | `version` **MUST** be populated from flag metadata when present.                                                                                                      |
+| `GOFF-COLL-009` | —        | **Withdrawn.** Number retired per [§1.2](#12-requirement-identifiers). `version` remains part of the event schema and a provider **MAY** populate it, but none is required to. |
 | `GOFF-COLL-010` | Minor    | `source` **MUST** be `INPROCESS` for a locally evaluated flag, or `PROVIDER_CACHE` for a value served from a remote-mode cache. `SERVER` is reserved for the relay proxy. |
 
 `contextKind` is decided as follows. The table is normative — it exists because a truthiness
@@ -501,15 +508,19 @@ test and an identity test agree on the common cases and diverge on the rest.
 | boolean `true`             | `anonymousUser` |
 | boolean `false`            | `user`          |
 | absent                     | `user`          |
-| evaluation context absent  | `user`          |
+| evaluation context absent  | `anonymousUser` |
 | any non-boolean value      | `user`          |
+
+The last-but-one row is the only one not decided by an identity test on `anonymous`, because there
+is no attribute to read: with no evaluation context there is also no targeting key, so there is
+nobody to attribute the evaluation to and `anonymousUser` is the honest bucket.
 
 ### 13.3 Exporter metadata
 
 | ID              | Sev      | Requirement                                                                                                                                                          |
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GOFF-COLL-011` | Major    | The `meta` envelope **MUST** always contain `provider` and `openfeature: true`, whether or not the user configured any metadata. Without them events cannot be attributed to an SDK. |
-| `GOFF-COLL-012` | Minor    | `provider` **MUST** be the lowercase language identifier: `python`, `java`, `dotnet`, `go`, `javascript`, `kotlin`, `php`, `ruby`, `rust`.                             |
+| `GOFF-COLL-012` | Minor    | `provider` **MUST** be a stable lowercase identifier naming the provider's runtime — `python`, `java`, `dotnet`, `go`, `nodejs`, `android`, `php`, `ruby` and `rust` are in use. The collector groups by it, so it **MUST NOT** change between releases. |
 | `GOFF-COLL-013` | Major    | `exporterMetadata` values **MUST** be restricted to string, boolean, integer or floating-point, and an invalid value **MUST** be rejected at construction time.        |
 
 ### 13.4 Buffering and flushing
@@ -554,15 +565,16 @@ test and an identity test agree on the common cases and diverge on the rest.
 
 | ID              | Sev      | Requirement                                                                                                                                  |
 | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GOFF-AUTH-001` | Major    | When `apiKey` is set, the provider **MUST** send `Authorization: Bearer {apiKey}`.                                                            |
+| `GOFF-AUTH-001` | Major    | When `apiKey` is set, the provider **MUST** send `X-API-Key: {apiKey}`.                                                                       |
 | `GOFF-AUTH-002` | Major    | Whatever authentication header the provider sends **MUST** be applied to every authenticated endpoint: flag configuration, evaluation and data collection. This is assessed independently of `GOFF-AUTH-001` — a provider sending the wrong header consistently fails one requirement, not two, and the distinction tells a maintainer whether the fix is one line or several. |
 | `GOFF-AUTH-003` | Major    | When `apiKey` is unset or empty, no authentication header **MUST** be sent.                                                                   |
 | `GOFF-AUTH-004` | Minor    | The provider **SHOULD** allow arbitrary additional headers, for deployments behind gateways requiring their own authentication.               |
 
-:::note Migrating from `X-API-Key`
+:::note Why `X-API-Key`
 The relay proxy accepts **both** `X-API-Key` and `Authorization: Bearer`, resolving `X-API-Key`
-first. A provider can therefore switch to `Authorization: Bearer` unilaterally, with no
-coordinated server release and no breaking change for users.
+first. `X-API-Key` is what the shipped providers send, so it is the one this specification
+mandates. A provider currently sending `Authorization: Bearer` can therefore switch unilaterally,
+with no coordinated server release and no breaking change for users.
 :::
 
 ---

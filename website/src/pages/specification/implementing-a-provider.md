@@ -129,7 +129,7 @@ once both modes exist, since it is just routing an in-process failure to the rem
 ```http
 POST {endpoint}/v1/flag/configuration
 Content-Type: application/json
-Authorization: Bearer {apiKey}
+X-API-Key: {apiKey}
 If-None-Match: "6c8a1f..."
 ```
 
@@ -291,8 +291,7 @@ Output:
 }
 ```
 
-An empty `errorCode` means success. Read `version` — it feeds `GOFF-COLL-009`, and most
-existing providers forget to decode it.
+An empty `errorCode` means success.
 
 Three things that have bitten every implementation:
 
@@ -322,6 +321,10 @@ Initialization, in order:
 Initialization blocks until the provider can serve or fails (`GOFF-LIFE-001`). A `401`/`403`
 must end in `PROVIDER_FATAL` (`GOFF-EVT-007`); anything else in `ERROR`, so the provider
 recovers unattended when the relay proxy returns.
+
+In remote mode there is no configuration to fetch, so it is tempting to make initialization a no-op
+— and then a rejected API key is invisible until the first evaluation, and the provider comes up
+healthy. Issue one request during initialization so `GOFF-EVT-007` is reachable in both modes.
 
 Shutdown reverses it: stop polling, flush buffered events, stop the publisher — in **both**
 modes, whether or not data collection is enabled (`GOFF-LIFE-004`).
