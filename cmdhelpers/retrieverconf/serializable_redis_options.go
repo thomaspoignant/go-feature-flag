@@ -102,12 +102,23 @@ type SerializableRedisOptions struct {
 	// DisableIndentity disables set-lib on connect.
 	DisableIndentity bool `mapstructure:"disableIndentity" koanf:"disableindentity" json:"disableIndentity,omitempty"`
 
+	// DisableIdentity disables set-lib on connect.
+	DisableIdentity bool `mapstructure:"disableIdentity" koanf:"disableidentity" json:"disableIdentity,omitempty"`
+
 	// IdentitySuffix is an optional suffix to append to the client name.
 	IdentitySuffix string `mapstructure:"identitySuffix" koanf:"identitysuffix" json:"identitySuffix,omitempty"`
 }
 
 // ToRedisOptions converts SerializableRedisOptions to redis.Options
 func (s *SerializableRedisOptions) ToRedisOptions() *redis.Options {
+	// DisableIdentity overrides DisableIndentity.
+	// This is to maintain backward compatibility with the deprecated flag and to
+	// be consistent with the non-serializable RedisOptions.
+	disableIdentity := s.DisableIndentity
+	if s.DisableIdentity {
+		disableIdentity = true
+	}
+
 	opts := &redis.Options{
 		Network:               s.Network,
 		Addr:                  s.Addr,
@@ -120,7 +131,7 @@ func (s *SerializableRedisOptions) ToRedisOptions() *redis.Options {
 		PoolSize:              s.PoolSize,
 		MinIdleConns:          s.MinIdleConns,
 		MaxIdleConns:          s.MaxIdleConns,
-		DisableIndentity:      s.DisableIndentity,
+		DisableIdentity:       disableIdentity,
 		IdentitySuffix:        s.IdentitySuffix,
 		ContextTimeoutEnabled: s.ContextTimeoutEnabled,
 	}

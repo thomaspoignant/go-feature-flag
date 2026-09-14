@@ -1,0 +1,5 @@
+{
+  "disabledLabels": ["dependencies"],
+  "ignoredBranches": ["release-please-*"],
+  "excludeAuthors": ["gofeatureflag-bot"]
+}

@@ -7,7 +7,14 @@ module.exports = {
   },
   darkMode: ['class', '[data-theme="dark"]'],
   content: {
-    files: ['./src/**/*.{js,jsx,ts,tsx,md,mdx}', './docs/**/*.{md,mdx}'],
+    // `blog/` is scanned too: posts style pull-quotes and figures with Tailwind
+    // classes inline (see the DataGalaxy and Solaris case studies), and without
+    // this glob those classes are purged and the markup renders unstyled.
+    files: [
+      './src/**/*.{js,jsx,ts,tsx,md,mdx}',
+      './docs/**/*.{md,mdx}',
+      './blog/**/*.{md,mdx}',
+    ],
     extract: {
       css: () => [], // Don't purge anything from CSS files
     },

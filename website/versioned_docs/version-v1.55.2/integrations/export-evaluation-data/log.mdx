@@ -1,0 +1,40 @@
+---
+sidebar_position: 90
+description: How to configure a Log exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'Log'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# Log
+
+## Overview
+{info.longDescription ?? info.description}
+
+## Configure the relay proxy
+:::info
+This exporter is set up by default in the relay-proxy.
+:::
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+config := ffclient.Config{
+    // ...
+   DataExporter: ffclient.DataExporter{
+        Exporter: &logsexporter.Exporter{
+            LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+        },
+    },
+    // ...
+}
+err := ffclient.Init(config)
+defer ffclient.Close()
+```
+
+| Field name  |    Mandatory     | Default                                                                             | Description                                                                                                                                                                                                                                                                    |
+|-------------|:----------------:|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `LogFormat` | <NotMandatory /> | `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"` | <p>LogFormat is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.</p><p>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represents the date with the **RFC 3339** Format.</p> |

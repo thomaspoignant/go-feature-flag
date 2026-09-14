@@ -1,0 +1,65 @@
+name: Helm chart docs
+# The relay-proxy chart README is generated from Chart.yaml and values.yaml by helm-docs, so it
+# has to be refreshed whenever the chart changes. Publishing the chart is not done here: it is
+# tied to the release version and happens in release.yml on a v* tag.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "cmd/relayproxy/helm-charts/**"
+
+jobs:
+  helm-docs:
+    runs-on: ubuntu-latest
+    name: Update Relay Proxy Helm chart README
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
+      MAIN_BRANCH_NAME: main
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: false
+
+      - name: Update chart README
+        run: make generate-helm-docs
+
+      - name: Checkout main branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.MAIN_BRANCH_NAME }}
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Copy README to main branch
+        run: cp -rf $CHART_README_LOCATION $MAIN_BRANCH_NAME/$CHART_README_LOCATION
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          branch: update-relay-proxy-chart-readme
+          title: "docs(helm): Update relay proxy helm README"
+          body: Automated pull request to update relay-proxy helm chart README
+          commit-message: Update relay proxy helm README
+          labels: automerge
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

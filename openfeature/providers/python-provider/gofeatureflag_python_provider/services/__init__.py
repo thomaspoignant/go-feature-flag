@@ -8,7 +8,7 @@ from gofeatureflag_python_provider.exceptions import (
     GoFeatureFlagServiceError,
     UnauthorizedError,
 )
-from gofeatureflag_python_provider.services.models import (
+from gofeatureflag_python_provider.services.model import (
     FlagConfigRequest,
     FlagConfigResponse,
 )

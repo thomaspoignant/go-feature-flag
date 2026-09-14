@@ -18,7 +18,7 @@ class AbstractEvaluator(ABC):
     def initialize(
         self, evaluation_context: Optional[EvaluationContext] = None
     ) -> None:
-        """Initialize the evaluator (e.g. cache, WebSocket, WASM)."""
+        """Initialize the evaluator (e.g. flag configuration polling, WASM runtime)."""
         ...
 
     @abstractmethod

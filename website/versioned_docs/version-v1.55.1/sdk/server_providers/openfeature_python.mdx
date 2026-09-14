@@ -134,9 +134,9 @@ You can configure the provider with several options to customize its behavior:
 | **`max_pending_events`** | `false` | `10000` | Maximum buffered events before a forced flush |
 | **`disable_data_collection`** | `false` | `False` | Set to `True` to disable usage analytics |
 | **`exporter_metadata`** | `false` | `{}` | Static metadata attached to evaluation events |
-| **`cache_size`** | `false` | `10000` | Maximum number of flag evaluations in the LRU cache _(remote only)_ |
-| **`disable_cache_invalidation`** | `false` | `False` | Disable WebSocket-based cache invalidation _(remote only)_ |
-| **`reconnect_interval`** | `false` | `60` | WebSocket reconnect interval (seconds) _(remote only)_ |
+| **`cache_size`** | `false` | `10000` | **Deprecated — has no effect.** The evaluation cache was removed from the provider; the option is still accepted but ignored. |
+| **`disable_cache_invalidation`** | `false` | `False` | **Deprecated — has no effect.** WebSocket cache invalidation was removed from the provider. |
+| **`reconnect_interval`** | `false` | `60` | **Deprecated — has no effect.** WebSocket cache invalidation was removed from the provider. |
 | **`log_level`** | `false` | `"WARNING"` | Logging level: `"DEBUG"`, `"INFO"`, `"WARNING"`, or `"ERROR"` |
 | **`urllib3_pool_manager`** | `false` | `None` | Custom `urllib3.PoolManager` HTTP client |
 

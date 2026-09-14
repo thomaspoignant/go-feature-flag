@@ -36,6 +36,11 @@ For now it supports the following commands:
 
 - Release notes are available [here](https://github.com/thomaspoignant/go-feature-flag/releases).
 
+- The images are also mirrored to the GitHub Container Registry as
+  [`ghcr.io/go-feature-flag/go-feature-flag-cli`](https://github.com/orgs/go-feature-flag/packages),
+  if you cannot pull from Docker Hub. Mirroring starts with the first release after
+  `v1.55.1`, earlier versions are available on Docker Hub only.
+
 
 # How to use this image
 

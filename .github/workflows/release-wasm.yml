@@ -39,7 +39,7 @@ jobs:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
           cache: false
-      - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
+      - uses: acifani/setup-tinygo@f51bf108c9895381060398804ce6cf6f62692106 # v3.0.1
         with:
           tinygo-version: "0.40.1"
       - name: Release WASM
@@ -47,12 +47,23 @@ jobs:
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasm
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.extract_version.outputs.tag_name_full }}
+          VERSION: ${{ steps.extract_version.outputs.VERSION }}
+        run: |
+          set -euo pipefail
+          TAG="${TAG_NAME#refs/tags/}"
+          # release-please publishes the GitHub release through the Releases API, and that call is
+          # what creates the tag this workflow triggers on, so the release already exists here.
+          # The fallback only covers a hand-pushed tag, which action-gh-release used to absorb.
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --title "cmd/wasm: v${VERSION}" --notes ""
+          fi
+          gh release upload "$TAG" \
+            "./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi" \
+            "./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm" \
+            --clobber
 
       - name: Checkout wasm-releases repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

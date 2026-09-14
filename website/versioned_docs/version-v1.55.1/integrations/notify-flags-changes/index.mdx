@@ -35,7 +35,7 @@ In all the details pages of the notifiers below you will have an example for bot
 Below is the full list of notifiers that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-  {getIntegrations("").notifiers.filter(item => item.docLink !== undefined).map((item) => {
+  {getIntegrations("v1.55.1").notifiers.filter(item => item.docLink !== undefined).map((item) => {
     return (
       <Card
         logo={item.logo}

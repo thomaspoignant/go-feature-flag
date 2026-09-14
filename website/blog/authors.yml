@@ -3,3 +3,15 @@ thomaspoignant:
   title: Creator of GO Feature Flag
   url: https://github.com/thomaspoignant
   image_url: https://github.com/thomaspoignant.png
+
+tomflenner:
+  name: Tom Flenner
+  title: Staff Engineer at DataGalaxy
+  url: https://www.linkedin.com/in/tom-flenner/
+  image_url: /img/blog/authors/tomflenner.png
+
+olivierlaviale:
+  name: Olivier Laviale
+  title: Principal Engineer at Solaris SE
+  url: https://www.linkedin.com/in/olvlvl/
+  image_url: /img/blog/authors/olivierlaviale.png

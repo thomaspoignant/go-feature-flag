@@ -132,15 +132,6 @@ generate-helm-docs: ## Generates helm documentation for the project
 	$(GOWORK_ENV) $(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 	helm-docs
 
-bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
-	@if [ -z "$(VERSION)" ]; then \
-		echo "$(RED)Error: VERSION is required$(RESET)"; \
-		echo "Usage: VERSION=v1.2.3 make bump-helm-chart-version"; \
-		echo "       VERSION=v1.2.3 make bump-helm-chart-version"; \
-		exit 1; \
-	fi
-	.github/ci-scripts/bump-helm-chart.sh $(VERSION)
-
 bump-wasm-contrib: create-out-dir ## Bump WASM version in the different contrib repositories (usage: make bump-wasm-contrib VERSION=v2.0.12)
 	@if [ -z "$(VERSION)" ]; then \
 		echo "$(RED)Error: VERSION is required$(RESET)"; \

@@ -1,0 +1,76 @@
+---
+sidebar_position: 80
+description: Community AI tools for working with GO Feature Flag using your favorite AI assistant.
+---
+
+# 🤖 AI Tools
+
+Community-maintained tools that improve the AI-assisted developer experience when working with GO Feature Flag.
+
+:::info Community Tools
+All tools listed on this page are community contributions and are **not officially maintained by the GO Feature Flag project**. For issues or contributions, please refer to the respective project repositories.
+:::
+
+## Skills
+
+Skills add domain knowledge about GO Feature Flag and OpenFeature directly into your favorite AI tool, enabling it to generate accurate flag configurations, deployment patterns, and SDK usage without hallucinating syntax.
+
+Skills are installed using the [playbooks](https://github.com/laurigates/claude-plugins) CLI.
+
+### GO Feature Flag Skill
+
+Teaches your AI assistant about GO Feature Flag flag formats, relay proxy configuration, targeting rules, rollout strategies, and deployment patterns.
+
+- **Source**: [laurigates/claude-plugins — go-feature-flag](https://github.com/laurigates/claude-plugins/tree/main/configure-plugin/skills/go-feature-flag)
+
+```shell
+npx playbooks add skill laurigates/claude-plugins --skill go-feature-flag
+```
+
+### OpenFeature Skill
+
+Teaches your AI assistant about the OpenFeature SDK API, providers, evaluation context, hooks, and best practices.
+
+- **Source**: [laurigates/claude-plugins — openfeature](https://github.com/laurigates/claude-plugins/tree/main/configure-plugin/skills/openfeature)
+
+```shell
+npx playbooks add skill laurigates/claude-plugins --skill openfeature
+```
+
+---
+
+## OpenFeature MCP Server
+
+The [OpenFeature MCP Server](https://openfeature.dev/docs/reference/other-technologies/mcp/) is a [Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI assistants two capabilities:
+
+- **SDK installation guidance** — get setup instructions for OpenFeature SDKs across languages and frameworks
+- **Live flag evaluation** — evaluate feature flags via OFREP against a running GO Feature Flag relay proxy
+
+### Install
+
+**Via Claude Code CLI:**
+```shell
+claude mcp add --transport stdio openfeature npx -y @openfeature/mcp
+```
+
+**Via JSON config** (Claude Code, Cursor, VS Code, and other MCP-compatible AI tools):
+```json
+{
+  "mcpServers": {
+    "OpenFeature": {
+      "command": "npx",
+      "args": ["-y", "@openfeature/mcp"]
+    }
+  }
+}
+```
+
+### Configure for Flag Evaluation
+
+To enable live flag evaluation, point the MCP server at your relay proxy using environment variables or `~/.openfeature-mcp.json`:
+
+| Variable | Description |
+|---|---|
+| `OPENFEATURE_OFREP_BASE_URL` | Your relay proxy endpoint (e.g. `http://localhost:1031`) |
+| `OPENFEATURE_OFREP_BEARER_TOKEN` | Bearer token authentication |
+| `OPENFEATURE_OFREP_API_KEY` | API key authentication |

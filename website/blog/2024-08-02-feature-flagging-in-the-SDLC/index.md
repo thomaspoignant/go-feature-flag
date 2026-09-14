@@ -3,6 +3,9 @@ title: Feature Flagging in the SDLC
 description: Feature Flagging in the Software Development Lifecycle - Follow the life of a feature flag from birth to retirement.
 authors: [thomaspoignant]
 tags: [openfeature,SDLC,Slides,Presentation]
+image: ./banner.png
+image_alt: "Title slide reading \"Feature Flagging in the SDLC — follow the life of a feature flag from birth to retirement\", with the OpenFeature logo"
+category: Engineering
 ---
 **Thomas** recently delivered a presentation on Feature Flagging in the Software Development Lifecycle (SDLC) for OpenFeature. Given the presentation's public availability, we are pleased to share the slides with you.
 

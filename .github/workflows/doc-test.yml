@@ -27,3 +27,6 @@ jobs:
       - name: Test Build website
         if: steps.changed-files-specific.outputs.changed == 'true'
         run: make build-doc
+      - name: Check blog front matter
+        if: steps.changed-files-specific.outputs.changed == 'true'
+        run: npm run lint:blog --prefix website

@@ -10,11 +10,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^30.4.2"
+    "jest": "^30.5.1"
   },
   "dependencies": {
     "@jest/globals": "^30.4.0",
     "@openfeature/go-feature-flag-provider": "^1.4.0",
-    "@openfeature/server-sdk": "^1.22.0"
+    "@openfeature/server-sdk": "^1.23.0"
   }
 }

@@ -4,11 +4,13 @@ description: A look back at our week in Amsterdam at KubeCon + CloudNativeCon Eu
 date: 2026-04-07
 authors: [thomaspoignant]
 tags: [kubecon, openfeature, cncf, community]
-image: https://gofeatureflag.org/assets/images/banner-0c3bcabe324775638421434159ec33c5.png
+image: ./banner.jpg
+image_alt: "Banner for GO Feature Flag at KubeCon EU 2026 in Amsterdam"
+category: Community
 ---
 
-<!-- ![KubeCon EU 2026 Amsterdam Banner](banner.png) -->
-![image](image.png)
+<!-- ![KubeCon EU 2026 Amsterdam Banner](banner.jpg) -->
+![Four speakers on stage at KubeCon EU 2026 in front of a full room, with a "What are feature flags?" slide projected behind them](image.jpg)
 
 KubeCon + CloudNativeCon Europe 2026 in Amsterdam is behind us, and what a week it was.
 For GO Feature Flag, it was both an opportunity to represent the project on a big stage and

@@ -1,0 +1,32 @@
+---
+sidebar_position: 10
+description: The GO Feature Flag Command Line is a CLI tool to interact with GO Feature Flag in your terminal.
+---
+
+# 💻 Command Line
+
+The GO Feature Flag Command Line is a CLI tool to interact with GO Feature Flag in your terminal.
+
+It offers a variety of commands to interact with GO Feature Flag, for now the supported commands are:
+- [`evaluate`](./evaluate) to evaluate feature flags directly in your terminal
+- [`lint`](./linter) to validate a configuration file format.
+- [`generate`](./generate) to generate the OpenFeature flag manifest for OpenFeature cli **(experimental)**.
+
+## Install the GO Feature Flag Command Line
+
+### Install using Homebrew (mac and linux)
+```shell
+brew tap thomaspoignant/homebrew-tap
+brew install go-feature-flag-cli
+```
+
+### Install using Scoop (windows)
+```shell
+scoop bucket add org https://github.com/go-feature-flag/scoop.git
+scoop install go-feature-flag-cli
+```
+
+### Install using Docker
+```shell
+docker pull gofeatureflag/go-feature-flag-cli:latest
+```

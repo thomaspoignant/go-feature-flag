@@ -29,7 +29,10 @@ env: {}
 replicaCount: 1
 
 image:
-  # -- The image repository to pull from
+  # -- The image repository to pull from.
+  # The same images are mirrored to the GitHub Container Registry, set this to
+  # `ghcr.io/go-feature-flag/go-feature-flag` to pull from there instead
+  # (mirrored images are only available for the versions released after v1.55.1).
   repository: gofeatureflag/go-feature-flag
   # -- The image is pulled only if it is not already present locally
   pullPolicy: IfNotPresent

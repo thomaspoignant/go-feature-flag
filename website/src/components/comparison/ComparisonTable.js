@@ -23,7 +23,8 @@ const COLUMNS = [
 
 // Cell builders — explicitly named for the recurring visual semantics so the
 // row data below stays a one-liner per cell. Verified against each project's
-// own docs / the OpenFeature ecosystem (June 2026). Qualitative only — no numbers.
+// own docs / the OpenFeature ecosystem (re-checked September 2026). Qualitative
+// only — no numbers.
 const cellG = text => ({text, icon: 'check', tone: 'good'}); // green check
 const cellY = text => ({text, icon: 'partial', tone: 'warn'}); // amber partial
 const cellR = text => ({text, icon: 'cross', tone: 'bad'}); // red cross
@@ -123,7 +124,7 @@ const ROWS = [
     cells: {
       license: cellTxt('MIT', 'good'),
       db: cellG('None (GitOps)'),
-      openfeature: cellR('None (own SDKs)'),
+      openfeature: cellG('Official providers'),
       ui: cellCross('None (Git/CLI)'),
       experimentation: cellY('Definition only'),
       open: cellG('Yes — fully open'),

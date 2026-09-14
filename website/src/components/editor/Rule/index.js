@@ -252,7 +252,10 @@ function RemoveAction({handleOnClick, variant}) {
   }, [variant]);
 
   return (
-    <button className={styles.removeButton} onClick={handleOnClick}>
+    <button
+      type="button"
+      className={styles.removeButton}
+      onClick={handleOnClick}>
       <span className="fa-stack fa-1x">
         <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
         <i className={`fa-solid ${getIcon()} fa-stack-1x fa-inverse`}></i>
@@ -277,6 +280,7 @@ function AddAction({handleOnClick, variant}) {
 
   return (
     <button
+      type="button"
       className="pushy__btn pushy__btn--md pushy__btn--black"
       onClick={handleOnClick}>
       {label}

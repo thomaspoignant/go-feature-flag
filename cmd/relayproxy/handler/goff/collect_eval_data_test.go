@@ -263,7 +263,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
 
-			req := httptest.NewRequest(echo.POST, "/v1/data/collector", bodyReq)
+			req := httptest.NewRequest(http.MethodPost, "/v1/data/collector", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			if tt.apiKey != "" {
 				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
@@ -474,7 +474,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 			e := echo.New()
 			rec := httptest.NewRecorder()
 
-			req := httptest.NewRequest(echo.POST, "/v1/data/collector", strings.NewReader(string(bodyReq)))
+			req := httptest.NewRequest(http.MethodPost, "/v1/data/collector", strings.NewReader(string(bodyReq)))
 			if tt.apiKey != "" {
 				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
 			}

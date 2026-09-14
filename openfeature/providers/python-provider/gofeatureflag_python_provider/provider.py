@@ -26,6 +26,7 @@ from gofeatureflag_python_provider.options import (
     GoFeatureFlagOptions,
 )
 from openfeature.evaluation_context import EvaluationContext
+from openfeature.event import ProviderEventDetails
 from openfeature.flag_evaluation import FlagResolutionDetails
 from openfeature.hook import Hook
 from openfeature.provider import AbstractProvider
@@ -74,18 +75,29 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         :param data: data coming from pydantic configuration
         """
         super().__init__(**data)
-        logging.getLogger("gofeatureflag_python_provider").setLevel(
-            self.options.get_log_level_int()
-        )
+        # Deliberately the package-root logger, not __name__: every module logs
+        # through logging.getLogger(__name__), so setting the level here reaches
+        # all of them by inheritance. Applied only when nothing has configured
+        # this logger yet — the level is process-wide, so an unconditional
+        # setLevel would overwrite what the embedding application asked for.
+        package_logger = logging.getLogger("gofeatureflag_python_provider")
+        if package_logger.level == logging.NOTSET:
+            package_logger.setLevel(self.options.get_log_level_int())
         api = GoFeatureFlagApi(self.options)
         self._event_publisher = EventPublisher(api=api, options=self.options)
+        self._evaluator = self._create_evaluator(api)
+        self._hooks = []
 
-        if self.options.evaluation_type == EvaluationType.REMOTE:
-            self._evaluator = RemoteEvaluator(self.options)
-        else:
-            self._evaluator = InProcessEvaluator(self.options, api)
-
-        # create the data collector hook if data collection is not disabled
+        # Order matters: enrichment runs before the data collector so the
+        # collector observes the enriched context. The enrichment hook is
+        # registered unconditionally — exporter metadata always carries the
+        # reserved keys identifying this SDK, so it always has something to
+        # contribute even when the user configured no metadata of their own.
+        self._hooks.append(
+            EnrichEvaluationContextHook(
+                metadata=self.options.get_exporter_metadata(),
+            )
+        )
         self._hooks.append(
             DataCollectorHook(
                 options=self.options,
@@ -94,13 +106,18 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
             )
         )
 
-        # create the enrichment hook if exporter_metadata is not empty
-        if len(self.options.exporter_metadata) > 0:
-            self._hooks.append(
-                EnrichEvaluationContextHook(
-                    metadata=self.options.exporter_metadata,
-                )
-            )
+    def _create_evaluator(self, api: GoFeatureFlagApi) -> AbstractEvaluator:
+        """Create the evaluator configured for this provider."""
+        if self.options.evaluation_type == EvaluationType.REMOTE:
+            return RemoteEvaluator(self.options)
+
+        return InProcessEvaluator(
+            self.options,
+            api,
+            on_configuration_changed=self._emit_configuration_changed,
+            on_stale=self._emit_stale,
+            on_ready=self._emit_ready,
+        )
 
     def initialize(
         self, evaluation_context: Optional[EvaluationContext] = None
@@ -113,6 +130,33 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         """Shut down the provider and release evaluator resources."""
         self._evaluator.shutdown()
         self._event_publisher.stop()
+
+    # ------------------------------------------------------------------
+    # Provider events
+    #
+    # Emitted from the in-process polling loop. The SDK stamps the provider
+    # name onto every event from the registry, so it always matches the
+    # metadata name. Emitting before the SDK attaches its listener is a no-op.
+    # ------------------------------------------------------------------
+
+    def _emit_configuration_changed(self, changed_flags: List[str]) -> None:
+        """A poll produced a configuration different from the one in use."""
+        self.emit_provider_configuration_changed(
+            ProviderEventDetails(
+                flags_changed=changed_flags,
+                message="flag configuration changed",
+            )
+        )
+
+    def _emit_stale(self, message: str) -> None:
+        """Consecutive refreshes failed; the last known-good config still serves."""
+        self.emit_provider_stale(ProviderEventDetails(message=message))
+
+    def _emit_ready(self) -> None:
+        """A refresh succeeded after the provider had gone stale."""
+        self.emit_provider_ready(
+            ProviderEventDetails(message="flag configuration refresh recovered")
+        )
 
     def get_metadata(self) -> Metadata:
         """

@@ -2,6 +2,9 @@
 title: "🔊 Feature Flags in Dev’Obs Podcast 🇫🇷"
 authors: [thomaspoignant]
 tags: [GO Feature Flag, Openfeature, Podcast]
+image: ./devobs.jpg
+image_alt: "Cover art of the Dev'Obs podcast episode about feature flags"
+category: Community
 ---
 ![](./devobs.jpg)
 

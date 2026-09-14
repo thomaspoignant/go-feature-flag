@@ -119,7 +119,7 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 					}
 					return evalConfigFile
 				}(),
-				GithubToken: githubToken,
+				GithubToken: githubToken, //nolint:staticcheck // we keep the deprecated flag for backward compatibility
 				AuthToken:   authToken,
 				BaseURL:     baseURL,
 				Bucket:      bucket,

@@ -311,7 +311,64 @@ featureFlagClient.track('user_action', context, {
 });
 ```
 
-## NextJS integration
+## Next.js
+
+### Vercel Flags SDK
+
+The [Flags SDK](https://flags-sdk.dev) is Vercel's toolkit to declare and use feature flags in Next.js.
+It works with GO Feature Flag through its **OpenFeature adapter**, which wraps any OpenFeature client, including GOFF.
+
+<Tabs groupId="code">
+  <TabItem value="yarn" label="yarn">
+
+```shell
+yarn add flags @flags-sdk/openfeature @openfeature/server-sdk @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+  <TabItem value="npm" label="npm">
+
+```shell
+npm i flags @flags-sdk/openfeature @openfeature/server-sdk @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+</Tabs>
+
+Create the adapter using the **asynchronous** form, since the GO Feature Flag provider initializes asynchronously:
+
+```typescript
+import { createOpenFeatureAdapter } from "@flags-sdk/openfeature";
+import { OpenFeature } from "@openfeature/server-sdk";
+import { GoFeatureFlagProvider } from "@openfeature/go-feature-flag-provider";
+
+export const openFeatureAdapter = createOpenFeatureAdapter(async () => {
+  await OpenFeature.setProviderAndWait(
+    new GoFeatureFlagProvider({
+      endpoint: "http://localhost:1031/", // DNS of your instance of relay proxy
+    }),
+  );
+  return OpenFeature.getClient();
+});
+```
+
+You can now declare your flags and use them anywhere in your Next.js application:
+
+```typescript
+import { flag } from "flags/next";
+import type { EvaluationContext } from "@openfeature/server-sdk";
+
+export const myFeatureFlag = flag<boolean, EvaluationContext>({
+  key: "my-feature-flag",
+  defaultValue: false,
+  adapter: openFeatureAdapter.booleanValue(),
+});
+```
+
+The adapter also exposes `stringValue()`, `numberValue()` and `objectValue()`, along with an `identify` function to build your evaluation context.
+Check the [Flags SDK OpenFeature documentation](https://flags-sdk.dev/providers/openfeature) for the full API and the [GO Feature Flag integration page](https://flags-sdk.dev/docs/providers/openfeature/go).
+
+### Loading the WASM binary
 
 :::warning
 If you're using NextJS with in-process evaluation mode, you might encounter issues loading the WASM binary.
