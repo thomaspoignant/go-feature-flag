@@ -27,9 +27,7 @@ func main() {
 	e.Use(custommiddleware.ZapLogger(logger.ZapLogger, false))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
-			"http://gofeatureflag.org",
 			"https://gofeatureflag.org",
-			"http://www.gofeatureflag.org",
 			"https://www.gofeatureflag.org",
 		},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
