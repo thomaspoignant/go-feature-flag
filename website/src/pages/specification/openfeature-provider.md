@@ -40,10 +40,6 @@ Android, JavaScript Web) follow a different paradigm and are out of scope for ve
   the component shape, build order and complete wire payloads that this document deliberately
   omits, and links back here for the rules. This document tells you what must be true; that one
   tells you what to build.
-- It **superseded** `BUILDING_OPENFEATURE_SERVER_PROVIDERS.md`, written from the .NET provider and
-  inaccurate in several load-bearing places. That document has since been removed from the
-  repository.
-- It **absorbs** the former Provider Cache specification, now [§17](#17-remote-cache-optional).
 
 ---
 
@@ -614,7 +610,7 @@ this condition is diagnosable rather than invisible.
 
 ## 17. Remote cache (optional)
 
-**Tier: Optional.** Supersedes the former Provider Cache specification.
+**Tier: Optional.**
 
 A provider **MAY** cache remote evaluation results locally. If it does, the following apply; if
 it does not, they are **N/A** and no feature events are produced in remote mode.
