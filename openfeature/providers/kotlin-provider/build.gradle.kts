@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     extra["groupId"] = "org.gofeatureflag.openfeature"
-    ext["version"] = "1.0.0" // x-release-please-version
+    ext["version"] = "1.0.1" // x-release-please-version
     extra["kotlinSdkVersion"] = "0.7.0"
     extra["ktorVersion"] = "3.0.3"
     extra["okhttpVersion"] = "5.3.2"
