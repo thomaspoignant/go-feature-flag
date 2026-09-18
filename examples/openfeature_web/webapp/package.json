@@ -32,7 +32,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
-    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-env": "^8.0.5",
     "autoprefixer": "^10.5.4",
     "babel-loader": "^10.1.1",
     "browser-sync": "^3.0.4",
