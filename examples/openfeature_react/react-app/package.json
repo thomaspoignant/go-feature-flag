@@ -14,22 +14,22 @@
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
     "@openfeature/react-sdk": "^1.4.1",
     "@openfeature/web-sdk": "^1.10.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.8"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.60.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "autoprefixer": "^10.5.4",
-    "eslint": "^10.9.1",
+    "autoprefixer": "^10.5.6",
+    "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   }
 }
