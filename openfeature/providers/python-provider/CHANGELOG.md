@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.3.0...openfeature/providers/python-provider/v1.3.1) (2026-09-19)
+
+
+### 🐛 Bug Fixes
+
+* **sonar:** resolve SonarCloud issues reported on main ([#6025](https://github.com/thomaspoignant/go-feature-flag/issues/6025)) ([e2f6a65](https://github.com/thomaspoignant/go-feature-flag/commit/e2f6a65e89eefee46a413399a29daf833683b6ed))
+* **sonar:** resolve SonarCloud issues reported on main ([#6028](https://github.com/thomaspoignant/go-feature-flag/issues/6028)) ([674a85e](https://github.com/thomaspoignant/go-feature-flag/commit/674a85e527bbe3171dc9d23635db3fcdb4a609c3))
+* **sonar:** resolve SonarCloud issues reported on main ([#6053](https://github.com/thomaspoignant/go-feature-flag/issues/6053)) ([59e3ee3](https://github.com/thomaspoignant/go-feature-flag/commit/59e3ee3eddba08897153a216e37792e3610487c4))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.46.0 to 1.47.0 ([#6067](https://github.com/thomaspoignant/go-feature-flag/issues/6067)) ([04cba7c](https://github.com/thomaspoignant/go-feature-flag/commit/04cba7c83b5a097df1fb460daa0364ceadb75baf))
+
 ## [1.3.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.2.0...openfeature/providers/python-provider/v1.3.0) (2026-09-01)
 
 
