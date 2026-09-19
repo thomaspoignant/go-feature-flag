@@ -301,6 +301,17 @@ Configuration related to the swagger behavior of the relay proxy.
 - default: **none**
 - mandatory: <NotMandatory />
 
+### `ofrepEventStream`
+
+Advertises the flag-change SSE endpoint in the OFREP bulk evaluation response so that OFREP providers can subscribe to changes instead of polling (see [OpenFeature ADR-0008](https://github.com/open-feature/protocol/blob/main/service/adrs/0008-sse-for-bulk-evaluation-changes.md)).
+
+It is disabled by default, so the bulk evaluation response is left unchanged.
+
+- option name: `ofrepEventStream`
+- type: **[ofrepEventStream](#type-ofrepeventstream)**
+- default: **none**
+- mandatory: <NotMandatory />
+
 ### `disableVersionHeader`
 
 If `disableVersionHeader` is set to **`true`**, the relay proxy will not add the header `x-gofeatureflag-version` with the GO Feature Flag version in the HTTP response.
@@ -783,6 +794,39 @@ The DNS used by the swagger configuration to access the relay proxy.
 - option name: `host`
 - type: **string**
 - default: **`localhost`**
+- mandatory: <NotMandatory />
+
+### type `ofrepEventStream`
+
+Configuration used to advertise the flag-change SSE endpoint in the OFREP bulk evaluation response.
+
+When enabled, the bulk evaluation response contains an `eventStreams` field pointing to the relay proxy SSE endpoint. The client is responsible for adding its own credentials when connecting.
+
+#### `ofrepEventStream.enabled`
+
+Enables the `eventStreams` field in the OFREP bulk evaluation response. You also have to set [`ofrepEventStream.endpoint`](#ofrepeventstreamendpoint) for the field to be added.
+
+- option name: `enabled`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+#### `ofrepEventStream.endpoint`
+
+The public base URL clients should use to reach the relay proxy SSE endpoint, for example `https://gofeatureflag.example.com`. The path of the SSE endpoint is appended automatically.
+
+- option name: `endpoint`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `ofrepEventStream.inactivityDelaySec`
+
+The delay in seconds advertised to the client, after which it should consider the stream inactive. When `0` the field is omitted.
+
+- option name: `inactivityDelaySec`
+- type: **integer**
+- default: **`0`**
 - mandatory: <NotMandatory />
 
 ## Use multiple flag sets

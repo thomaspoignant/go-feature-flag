@@ -33,6 +33,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 	type args struct {
 		bodyFile            string
 		configFlagsLocation string
+		eventStream         config.OfrepEventStream
 	}
 
 	tests := []struct {
@@ -45,6 +46,34 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			args: args{
 				bodyFile:            testdataDir + "/ofrep/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: testdataDir + "/ofrep/responses/valid_response.json",
+			},
+		},
+		{
+			name: "advertise event streams when enabled",
+			args: args{
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
+				configFlagsLocation: configFlagsLocation,
+				eventStream: config.OfrepEventStream{
+					Enabled:            true,
+					Endpoint:           "https://gofeatureflag.example.com/",
+					InactivityDelaySec: 60,
+				},
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: testdataDir + "/ofrep/responses/valid_response_with_event_streams.json",
+			},
+		},
+		{
+			name: "no event streams when enabled without endpoint",
+			args: args{
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
+				configFlagsLocation: configFlagsLocation,
+				eventStream:         config.OfrepEventStream{Enabled: true},
 			},
 			want: want{
 				httpCode: http.StatusOK,
@@ -129,7 +158,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
-			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{})
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{}, tt.args.eventStream)
 			e := echo.New()
 			rec := httptest.NewRecorder()
 
@@ -303,7 +332,7 @@ func Test_Evaluate(t *testing.T) {
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
-			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{})
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{}, config.OfrepEventStream{})
 			e := echo.New()
 			e.POST("/ofrep/v1/evaluate/flags/:flagKey", ctrl.Evaluate)
 			rec := httptest.NewRecorder()
