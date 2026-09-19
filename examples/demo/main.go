@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -30,7 +31,6 @@ func main() {
 	})
 
 	e := echo.New()
-	e.HideBanner = true
 	e.Static("/js", "js")
 	e.Static("/css", "css")
 	// Instantiate a template registry and register all html files inside the view folder
@@ -44,18 +44,20 @@ func main() {
 	}
 
 	e.GET("/", apiHandler)
-	e.Logger.Fatal(e.Start(":8080"))
+	if err := (echo.StartConfig{Address: ":8080", HideBanner: true}).Start(context.Background(), e); err != nil {
+		log.Fatal(err)
+	}
 }
 
 type TemplateRegistry struct {
 	templates *template.Template
 }
 
-func (t *TemplateRegistry) Render(w io.Writer, name string, data any, c echo.Context) error {
+func (t *TemplateRegistry) Render(c *echo.Context, w io.Writer, name string, data any) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func apiHandler(c echo.Context) error {
+func apiHandler(c *echo.Context) error {
 	mapToRender := make(map[string]string, 2500)
 	for k, user := range users {
 		color, _ := ffclient.StringVariation("color-box", user, "grey")

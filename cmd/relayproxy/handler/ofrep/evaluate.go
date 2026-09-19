@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -49,7 +49,7 @@ func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metr
 // @Failure      404 {object}  model.OFREPEvaluateResponseError "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/evaluate/flags/{flag_key} [post]
-func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
+func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
 	flagKey := c.Param("flagKey")
 	if flagKey == "" {
 		return c.JSON(
@@ -152,7 +152,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /ofrep/v1/evaluate/flags [post]
-func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
+func (h *EvaluateCtrl) BulkEvaluate(c *echo.Context) error {
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
 		return c.JSON(

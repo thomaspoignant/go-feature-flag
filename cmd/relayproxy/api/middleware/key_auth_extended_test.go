@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
@@ -19,7 +19,7 @@ func TestKeyAuthExtended(t *testing.T) {
 	invalidKey := "invalid-api-key"
 
 	// nolint:unparam
-	validator := func(key string, _ echo.Context) (bool, error) {
+	validator := func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 		return key == validKey, nil
 	}
 
@@ -104,7 +104,7 @@ func TestKeyAuthExtended(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			skipper := func(c echo.Context) bool {
+			skipper := func(c *echo.Context) bool {
 				return tt.skipper
 			}
 
@@ -114,7 +114,7 @@ func TestKeyAuthExtended(t *testing.T) {
 				Skipper:      skipper,
 			})
 
-			handler := middleware(func(c echo.Context) error {
+			handler := middleware(func(c *echo.Context) error {
 				return c.String(http.StatusOK, "Authorized")
 			})
 
@@ -137,7 +137,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 	validKey := "valid-api-key"
 
 	// nolint:unparam
-	validator := func(key string, _ echo.Context) (bool, error) {
+	validator := func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 		return key == validKey, nil
 	}
 
@@ -152,7 +152,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			Validator: nil,
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -176,18 +176,17 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "",
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
-		// Request without valid key should use default error handler
-		// Default echo error handler returns 400 Bad Request
+		// Request without valid key should use default error handler.
 		err := handler(c)
 		require.Error(t, err)
 		httpErr, ok := err.(*echo.HTTPError)
 		require.True(t, ok)
-		// Echo's default KeyAuth error handler returns 400, not 401
-		assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+		// Echo v5 returns 401 for a missing key (ErrKeyMissing); v4 returned 400.
+		assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
 	})
 
 	t.Run("uses default Skipper when nil", func(t *testing.T) {
@@ -204,7 +203,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "",
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -231,7 +230,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "", // Should use default "header:Authorization"
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -247,7 +246,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		customErrorHandler := func(err error, c echo.Context) error {
+		customErrorHandler := func(c *echo.Context, err error) error {
 			return c.String(http.StatusForbidden, "Custom error")
 		}
 
@@ -258,7 +257,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "",
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -274,7 +273,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		customSkipper := func(c echo.Context) bool {
+		customSkipper := func(c *echo.Context) bool {
 			return true // Always skip
 		}
 
@@ -285,7 +284,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "",
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -309,7 +308,7 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 			KeyLookup:    "query:apiKey", // Custom lookup from query parameter
 		})
 
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "Authorized")
 		})
 
@@ -320,9 +319,11 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 	})
 
 	t.Run("verifies default KeyLookup value matches echo default", func(t *testing.T) {
-		// This test verifies that the default KeyLookup is "header:Authorization"
-		// by checking that it matches echo's DefaultKeyAuthConfig.KeyLookup
-		assert.Equal(t, middleware.DefaultKeyAuthConfig.KeyLookup, "header:Authorization")
+		// Echo v5 folded v4's separate AuthScheme:"Bearer" field into the KeyLookup
+		// cut-prefix syntax, so the default is now "header:Authorization:Bearer ".
+		// The net effect is unchanged: the validator receives the key with the
+		// "Bearer " prefix already stripped.
+		assert.Equal(t, "header:Authorization:Bearer ", middleware.DefaultKeyAuthConfig.KeyLookup)
 	})
 }
 
@@ -331,7 +332,7 @@ func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
 	// When ErrorHandler is nil (defaulting to echo's DefaultKeyAuthConfig.ErrorHandler
 	// which is also nil), sending an invalid X-API-Key causes a nil pointer dereference
 	// panic instead of returning 401 Unauthorized.
-	validator := func(key string, _ echo.Context) (bool, error) {
+	validator := func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 		return key == "valid-key", nil
 	}
 
@@ -367,7 +368,7 @@ func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
 				// causing a panic in validateXAPIKey when X-API-Key is invalid.
 			})
 
-			handler := mw(func(c echo.Context) error {
+			handler := mw(func(c *echo.Context) error {
 				return c.String(http.StatusOK, "OK")
 			})
 
@@ -378,9 +379,9 @@ func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
 					assert.Equal(t, http.StatusOK, rec.Code)
 				} else {
 					assert.Error(t, err)
-					httpErr, ok := err.(*echo.HTTPError)
-					require.True(t, ok)
-					assert.Equal(t, tt.expectedStatus, httpErr.Code)
+					// echo.ErrUnauthorized is an immutable sentinel in v5 rather than an
+					// *echo.HTTPError, so the status has to be read via echo.StatusCode.
+					assert.Equal(t, tt.expectedStatus, echo.StatusCode(err))
 				}
 			})
 		})
@@ -389,7 +390,7 @@ func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
 
 func TestKeyAuthExtended_ValidatorError(t *testing.T) {
 	validatorErr := errors.New("db connection lost")
-	failingValidator := func(_ string, _ echo.Context) (bool, error) {
+	failingValidator := func(_ *echo.Context, _ string, _ middleware.ExtractorSource) (bool, error) {
 		return false, validatorErr
 	}
 
@@ -403,7 +404,7 @@ func TestKeyAuthExtended_ValidatorError(t *testing.T) {
 		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
 			Validator: failingValidator,
 		})
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "OK")
 		})
 
@@ -422,7 +423,7 @@ func TestKeyAuthExtended_ValidatorError(t *testing.T) {
 			Validator:    failingValidator,
 			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
 		})
-		handler := mw(func(c echo.Context) error {
+		handler := mw(func(c *echo.Context) error {
 			return c.String(http.StatusOK, "OK")
 		})
 

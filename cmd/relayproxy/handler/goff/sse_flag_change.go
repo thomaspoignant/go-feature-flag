@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/utils"
@@ -45,7 +45,7 @@ type sseFlagChange struct {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/sse/flag/change [get]
-func (h *sseFlagChange) Handler(c echo.Context) error {
+func (h *sseFlagChange) Handler(c *echo.Context) error {
 	apiKey := c.QueryParam("apiKey")
 	flagsetName, err := h.resolveFlagsetName(apiKey)
 	if err != nil {

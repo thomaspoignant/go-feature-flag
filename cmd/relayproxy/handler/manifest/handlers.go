@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -48,7 +48,7 @@ type ManifestCtrl struct {
 // @Failure      403 {object}  model.ManifestError "Forbidden"
 // @Failure      500 {object}  model.ManifestError "Internal server error"
 // @Router       /openfeature/v0/manifest [GET]
-func (m *ManifestCtrl) GetManifest(c echo.Context) error {
+func (m *ManifestCtrl) GetManifest(c *echo.Context) error {
 	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "getManifest")
 	defer span.End()
