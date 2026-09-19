@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <marker id="collect-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- streaming event records (feature = mint, tracking = coral) -->
+  <g stroke="#64748b" stroke-width="3">
+    <rect x="55" y="150" width="120" height="52" rx="12" fill="#cdf7e7"/>
+    <rect x="90" y="230" width="120" height="52" rx="12" fill="#f4845f"/>
+    <rect x="55" y="310" width="120" height="52" rx="12" fill="#cdf7e7"/>
+    <rect x="90" y="390" width="120" height="52" rx="12" fill="#f4845f"/>
+    <rect x="55" y="470" width="120" height="52" rx="12" fill="#cdf7e7"/>
+  </g>
+
+  <!-- flow into funnel -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M230 240 L300 290" marker-end="url(#collect-arrow)"/>
+    <path d="M230 336 L300 320" marker-end="url(#collect-arrow)"/>
+    <path d="M230 416 L300 350" marker-end="url(#collect-arrow)"/>
+  </g>
+
+  <!-- funnel -->
+  <path d="M310 250 L470 250 L405 330 L405 380 L375 380 L375 330 Z" fill="#9fbeb3" stroke="#64748b" stroke-width="4"/>
+
+  <!-- fan out to destinations -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M420 300 L600 180" marker-end="url(#collect-arrow)"/>
+    <path d="M470 355 L600 355" marker-end="url(#collect-arrow)"/>
+    <path d="M420 375 L600 500" marker-end="url(#collect-arrow)"/>
+  </g>
+
+  <!-- destination 1: database cylinder -->
+  <g stroke="#64748b" stroke-width="4">
+    <path d="M620 150 a55 18 0 0 0 110 0 l0 90 a55 18 0 0 1 -110 0 Z" fill="#cdf7e7"/>
+    <ellipse cx="675" cy="150" rx="55" ry="18" fill="#cdf7e7"/>
+  </g>
+
+  <!-- destination 2: cloud storage (stacked disks) -->
+  <g stroke="#64748b" stroke-width="4">
+    <ellipse cx="675" cy="335" rx="55" ry="16" fill="#cdf7e7"/>
+    <path d="M620 335 l0 24 a55 16 0 0 0 110 0 l0 -24" fill="#cdf7e7"/>
+    <path d="M620 359 l0 24 a55 16 0 0 0 110 0 l0 -24" fill="#9fbeb3"/>
+  </g>
+
+  <!-- destination 3: stream / queue (signal bars) -->
+  <g fill="#f4845f" stroke="#64748b" stroke-width="3">
+    <rect x="625" y="510" width="20" height="30" rx="4"/>
+    <rect x="653" y="490" width="20" height="50" rx="4"/>
+    <rect x="681" y="470" width="20" height="70" rx="4"/>
+    <rect x="709" y="500" width="20" height="40" rx="4"/>
+  </g>
+</svg>
