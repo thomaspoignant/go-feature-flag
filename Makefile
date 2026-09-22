@@ -1,5 +1,6 @@
 GOCMD=go
 TINYGOCMD=tinygo
+DOCKERCMD=docker
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
 ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
@@ -49,6 +50,17 @@ GOFIPS140_VERSION := $(shell cat .fips-version | tr -d '[:space:]')
 
 build-relayproxy-fips: create-out-dir ## Build the relay proxy in FIPS 140-3 mode in out/bin/
 	CGO_ENABLED=0 GOFIPS140=$(GOFIPS140_VERSION) GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy-fips ./cmd/relayproxy/
+
+# Local docker image of the relay proxy, built from source. The DockerfileGoreleaser*
+# files are release artifacts (they only COPY an already cross-compiled binary), so
+# cmd/relayproxy/Dockerfile.local is the one that can be built by hand.
+RELAYPROXY_IMAGE ?= go-feature-flag:local
+RELAYPROXY_IMAGE_VERSION ?= localdev
+
+build-relayproxy-docker: ## Build a local docker image of the relay proxy from source
+	$(DOCKERCMD) build -f cmd/relayproxy/Dockerfile.local \
+		--build-arg VERSION=$(RELAYPROXY_IMAGE_VERSION) \
+		-t $(RELAYPROXY_IMAGE) .
 
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
