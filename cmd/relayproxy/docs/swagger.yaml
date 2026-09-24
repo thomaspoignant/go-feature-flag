@@ -610,6 +610,7 @@ paths:
       description: |-
         Server-Sent Events endpoint pushing flag change notifications.
         Each event payload is a `notifier.DiffCache` JSON document.
+        When disableFlagDetailsInStream is true, values are empty objects.
         The full URL (including query string) is sensitive and must not be logged
         or persisted by intermediaries.
       parameters:
@@ -646,6 +647,7 @@ paths:
       description: |-
         This endpoint is a websocket endpoint to be notified about flag changes;
         every change pushes a notifier.DiffCache message to the client.
+        When disableFlagDetailsInStream is true, values are empty objects.
       parameters:
       - description: apiKey to authorize the connection to the relay proxy
         in: query
@@ -877,6 +879,7 @@ paths:
         Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
         is a websocket endpoint to be notified about flag changes; every
         change pushes a notifier.DiffCache message to the client.
+        When disableFlagDetailsInStream is true, values are empty objects.
       parameters:
       - description: apiKey to authorize the connection to the relay proxy
         in: query

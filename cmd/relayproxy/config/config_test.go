@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -17,6 +18,35 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+func TestParseConfigDisableFlagDetailsInStream(t *testing.T) {
+	tests := []struct {
+		name        string
+		content     string
+		environment string
+	}{
+		{name: "disabled by config file", content: "disableFlagDetailsInStream: true\n"},
+		{name: "disabled by environment variable", environment: "true"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			configPath := filepath.Join(t.TempDir(), "goff-proxy.yaml")
+			require.NoError(t, os.WriteFile(configPath, []byte(tt.content), 0o600))
+			if tt.environment != "" {
+				t.Setenv("DISABLEFLAGDETAILSINSTREAM", tt.environment)
+			}
+
+			flagSet := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			flagSet.String("config", "", "Location of your config file")
+			require.NoError(t, flagSet.Parse([]string{"--config=" + configPath}))
+
+			got, err := config.New(flagSet, zap.NewNop(), "1.X.X")
+			require.NoError(t, err)
+			assert.True(t, got.DisableFlagDetailsInStream)
+		})
+	}
+}
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
 	tests := []struct {
@@ -76,7 +106,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 					FixNotifiers: []config.NotifierConf{
-						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
+						{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
 					},
 				},
 				Server: config.Server{
@@ -115,7 +145,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 					Notifiers: []config.NotifierConf{
-						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
+						{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
 					},
 				},
 				Server: config.Server{
