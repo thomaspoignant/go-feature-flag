@@ -313,6 +313,7 @@ If `disableVersionHeader` is set to **`true`**, the relay proxy will not add the
 ### `disableFlagDetailsInStream`
 
 If `disableFlagDetailsInStream` is set to **`true`**, WebSocket and Server-Sent Events flag change payloads omit flag definitions, including targeting rules. The `deleted`, `added`, and `updated` objects retain the changed flag names with empty object values so clients can refresh their evaluated flags without receiving the underlying configuration.
+Enabling this setting requires restarting the relay proxy.
 
 - option name: `disableFlagDetailsInStream`
 - type: **boolean**
