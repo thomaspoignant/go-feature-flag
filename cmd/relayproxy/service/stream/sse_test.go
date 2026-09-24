@@ -126,6 +126,51 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 	}
 }
 
+func TestSSEService_OmitsFlagDetailsWhenDisabled(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	sseService := stream.NewSSEService(stream.WithFlagDetails(false))
+	defer sseService.Close()
+
+	srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
+	defer srv.Close()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"?stream=flagsetA", nil)
+	require.NoError(t, err)
+
+	subscribed := make(chan struct{}, 1)
+	sseService.SetOnSubscribe(func(_ string) {
+		subscribed <- struct{}{}
+	})
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	select {
+	case <-subscribed:
+	case <-ctx.Done():
+		t.Fatal("timed out waiting for SSE client to subscribe")
+	}
+	require.NoError(t, sseService.BroadcastFlagChanges("flagsetA", sensitiveDiffCache()))
+
+	scanner := bufio.NewScanner(resp.Body)
+	var received string
+	for scanner.Scan() {
+		if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
+			received = data
+			break
+		}
+	}
+	require.NoError(t, scanner.Err())
+	assert.JSONEq(t, `{
+		"deleted": {"deleted-flag": {}},
+		"added": {"added-flag": {}},
+		"updated": {"updated-flag": {}}
+	}`, received)
+}
+
 func TestSSEService_Close(t *testing.T) {
 	sseService := stream.NewSSEService()
 	sseService.Close()

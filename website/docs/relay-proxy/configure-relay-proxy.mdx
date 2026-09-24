@@ -310,6 +310,15 @@ If `disableVersionHeader` is set to **`true`**, the relay proxy will not add the
 - default: **`false`**
 - mandatory: <NotMandatory />
 
+### `disableFlagDetailsInStream`
+
+If `disableFlagDetailsInStream` is set to **`true`**, WebSocket and Server-Sent Events flag change payloads omit flag definitions, including targeting rules. The `deleted`, `added`, and `updated` objects retain the changed flag names with empty object values so clients can refresh their evaluated flags without receiving the underlying configuration.
+
+- option name: `disableFlagDetailsInStream`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
 ### `authorizedKeys`
 
 List of authorized API keys.
@@ -998,4 +1007,3 @@ flagSets:
 :::info
 During the update, there is no downtime. Requests continue to be processed normally, and the new API key configuration takes effect immediately after the update is applied.
 :::
-

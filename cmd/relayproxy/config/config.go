@@ -89,6 +89,10 @@ type Config struct {
 	// Default: false
 	EnableBulkMetricFlagNames bool `mapstructure:"enableBulkMetricFlagNames" koanf:"enablebulkmetricflagnames"`
 
+	// DisableFlagDetailsInStream (optional) removes flag definitions from WebSocket and SSE change payloads.
+	// Default: false
+	DisableFlagDetailsInStream bool `mapstructure:"disableFlagDetailsInStream" koanf:"disableflagdetailsinstream"`
+
 	// FlagSets is the list of flag sets configured.
 	// A flag set is a group of flags that can be used to configure the relay proxy.
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.

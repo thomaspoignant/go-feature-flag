@@ -28,19 +28,21 @@ type SSEService interface {
 }
 
 // NewSSEService creates a new SSEService backed by r3labs/sse.
-func NewSSEService() SSEService {
+func NewSSEService(opts ...Option) SSEService {
+	options := newOptions(opts...)
 	server := sse.New()
 	server.AutoReplay = false
 	server.AutoStream = true
-	return &sseServiceImpl{server: server}
+	return &sseServiceImpl{server: server, includeFlagDetails: options.includeFlagDetails}
 }
 
 type sseServiceImpl struct {
-	server *sse.Server
+	server             *sse.Server
+	includeFlagDetails bool
 }
 
 func (s *sseServiceImpl) BroadcastFlagChanges(flagsetName string, diff notifier.DiffCache) error {
-	data, err := json.Marshal(diff)
+	data, err := json.Marshal(flagChangePayload(diff, s.includeFlagDetails))
 	if err != nil {
 		return fmt.Errorf("sse: failed to marshal flag diff for stream %q: %w", flagsetName, err)
 	}

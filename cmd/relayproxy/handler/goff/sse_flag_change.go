@@ -36,6 +36,7 @@ type sseFlagChange struct {
 // @Tags         GO Feature Flag Evaluation Stream API
 // @Description  Server-Sent Events endpoint pushing flag change notifications.
 // @Description  Each event payload is a `notifier.DiffCache` JSON document.
+// @Description  When disableFlagDetailsInStream is true, values are empty objects.
 // @Description  The full URL (including query string) is sensitive and must not be logged
 // @Description  or persisted by intermediaries.
 // @Produce      text/event-stream
