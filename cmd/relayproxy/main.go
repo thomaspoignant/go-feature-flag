@@ -102,7 +102,7 @@ func main() {
 	}
 
 	// Init services
-	wsService := stream.NewWebsocketService()
+	wsService := stream.NewWebsocketService(stream.WithFlagDetails(!proxyConf.DisableFlagDetailsInStream))
 	sseService := stream.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
@@ -111,7 +111,6 @@ func main() {
 		prometheusNotifier,
 		proxyNotifier,
 	}, sseService)
-
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",

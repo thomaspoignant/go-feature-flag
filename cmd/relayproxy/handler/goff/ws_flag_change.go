@@ -70,6 +70,7 @@ type WSFlagChange struct {
 // @Description  Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
 // @Description  is a websocket endpoint to be notified about flag changes; every
 // @Description  change pushes a notifier.DiffCache message to the client.
+// @Description  When disableFlagDetailsInStream is true, values are empty objects.
 // @Produce      json
 // @Accept       json
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
@@ -88,6 +89,7 @@ func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
 // @Tags         GO Feature Flag Evaluation Stream API
 // @Description  This endpoint is a websocket endpoint to be notified about flag changes;
 // @Description  every change pushes a notifier.DiffCache message to the client.
+// @Description  When disableFlagDetailsInStream is true, values are empty objects.
 // @Produce      json
 // @Accept       json
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"

@@ -1,12 +1,16 @@
 package stream_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
@@ -23,6 +27,80 @@ func (m *mockConn) WriteJSON(v any) error {
 		return m.writeJSONFunc(v)
 	}
 	return nil
+}
+
+func sensitiveDiffCache() notifier.DiffCache {
+	beforeQuery := `user.email eq "before@example.com"`
+	afterQuery := `user.email eq "after@example.com"`
+	enabled := "enabled"
+	return notifier.DiffCache{
+		Deleted: map[string]flag.Flag{
+			"deleted-flag": &flag.InternalFlag{
+				Variations: &map[string]*any{"enabled": testconvert.Interface(true)},
+				Rules: &[]flag.Rule{
+					{Query: &beforeQuery, VariationResult: &enabled},
+				},
+			},
+		},
+		Added: map[string]flag.Flag{
+			"added-flag": &flag.InternalFlag{
+				Variations: &map[string]*any{"enabled": testconvert.Interface(true)},
+				Rules: &[]flag.Rule{
+					{Query: &afterQuery, VariationResult: &enabled},
+				},
+			},
+		},
+		Updated: map[string]notifier.DiffUpdated{
+			"updated-flag": {
+				Before: &flag.InternalFlag{Rules: &[]flag.Rule{{Query: &beforeQuery}}},
+				After:  &flag.InternalFlag{Rules: &[]flag.Rule{{Query: &afterQuery}}},
+			},
+		},
+	}
+}
+
+func TestBroadcastFlagChangesPayload(t *testing.T) {
+	diff := sensitiveDiffCache()
+	tests := []struct {
+		name     string
+		options  []stream.Option
+		expected any
+	}{
+		{
+			name:     "includes flag details by default",
+			expected: diff,
+		},
+		{
+			name:    "omits flag details when disabled",
+			options: []stream.Option{stream.WithFlagDetails(false)},
+			expected: map[string]map[string]struct{}{
+				"deleted": {"deleted-flag": {}},
+				"added":   {"added-flag": {}},
+				"updated": {"updated-flag": {}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			websocketService := stream.NewWebsocketService(tt.options...)
+			conn := &mockConn{}
+			var received any
+			conn.writeJSONFunc = func(v any) error {
+				received = v
+				return nil
+			}
+			websocketService.Register(conn)
+
+			websocketService.BroadcastFlagChanges(diff)
+
+			actualJSON, err := json.Marshal(received)
+			require.NoError(t, err)
+			expectedJSON, err := json.Marshal(tt.expected)
+			require.NoError(t, err)
+			assert.JSONEq(t, string(expectedJSON), string(actualJSON))
+		})
+	}
 }
 
 func TestBroadcastFlagChanges(t *testing.T) {

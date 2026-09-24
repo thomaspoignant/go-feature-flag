@@ -388,7 +388,7 @@ const docTemplate = `{
         },
         "/stream/v1/ws/flag/change": {
             "get": {
-                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.",
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
@@ -716,7 +716,7 @@ const docTemplate = `{
         },
         "/ws/v1/flag/change": {
             "get": {
-                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
+                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
