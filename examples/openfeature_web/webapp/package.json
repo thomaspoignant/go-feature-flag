@@ -33,7 +33,7 @@
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
     "@babel/preset-env": "^8.0.5",
-    "autoprefixer": "^10.5.6",
+    "autoprefixer": "^10.6.1",
     "babel-loader": "^10.1.1",
     "browser-sync": "^3.0.4",
     "eslint": "^10.10.0",
@@ -46,9 +46,9 @@
     "posthtml": "^0.16.7",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
-    "sass": "^1.104.0",
+    "sass": "^1.104.1",
     "stylelint": "^17.15.0",
-    "webpack": "^5.110.3",
+    "webpack": "^5.111.0",
     "webpack-cli": "^7.2.3"
   },
   "dependencies": {
