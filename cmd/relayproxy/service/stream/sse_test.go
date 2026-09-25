@@ -19,28 +19,33 @@ import (
 )
 
 func TestSSEService_BroadcastAndReceive(t *testing.T) {
+	fullDiff := notifier.DiffCache{
+		Added: map[string]flag.Flag{
+			"flag-1": &flag.InternalFlag{
+				Variations: &map[string]*any{
+					"A": testconvert.Interface(true),
+				},
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
+			},
+		},
+	}
+	redactedDiff := sensitiveDiffCache()
 	tests := []struct {
 		name             string
 		subscribeFlagset string
 		broadcastFlagset string
 		diff             notifier.DiffCache
+		options          []stream.Option
+		expected         any
 		expectReceive    bool
 	}{
 		{
 			name:             "client receives event from its own stream",
 			subscribeFlagset: "flagsetA",
 			broadcastFlagset: "flagsetA",
-			diff: notifier.DiffCache{
-				Added: map[string]flag.Flag{
-					"flag-1": &flag.InternalFlag{
-						Variations: &map[string]*any{
-							"A": testconvert.Interface(true),
-						},
-						DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
-					},
-				},
-			},
-			expectReceive: true,
+			diff:             fullDiff,
+			expected:         fullDiff,
+			expectReceive:    true,
 		},
 		{
 			name:             "client does not receive event from a different stream",
@@ -53,6 +58,19 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 			},
 			expectReceive: false,
 		},
+		{
+			name:             "client receives flag names when details are disabled",
+			subscribeFlagset: "flagsetA",
+			broadcastFlagset: "flagsetA",
+			diff:             redactedDiff,
+			options:          []stream.Option{stream.WithFlagDetails(false)},
+			expected: map[string]map[string]struct{}{
+				"deleted": {"deleted-flag": {}},
+				"added":   {"added-flag": {}},
+				"updated": {"updated-flag": {}},
+			},
+			expectReceive: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -60,7 +78,7 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			sseService := stream.NewSSEService()
+			sseService := stream.NewSSEService(tt.options...)
 			defer sseService.Close()
 
 			srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
@@ -100,7 +118,7 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 					}
 				}
 				require.NotEmpty(t, received)
-				expected, err := json.Marshal(tt.diff)
+				expected, err := json.Marshal(tt.expected)
 				require.NoError(t, err)
 				assert.JSONEq(t, string(expected), received)
 			} else {

@@ -342,7 +342,7 @@ const docTemplate = `{
         },
         "/stream/v1/sse/flag/change": {
             "get": {
-                "description": "Server-Sent Events endpoint pushing flag change notifications.\nEach event payload is a ` + "`" + `notifier.DiffCache` + "`" + ` JSON document.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
+                "description": "Server-Sent Events endpoint pushing flag change notifications.\nEach event payload is a ` + "`" + `notifier.DiffCache` + "`" + ` JSON document.\nWhen disableFlagDetailsInStream is true, values are empty objects.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
                 "produces": [
                     "text/event-stream"
                 ],
@@ -388,7 +388,7 @@ const docTemplate = `{
         },
         "/stream/v1/ws/flag/change": {
             "get": {
-                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.",
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
@@ -716,7 +716,7 @@ const docTemplate = `{
         },
         "/ws/v1/flag/change": {
             "get": {
-                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
+                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
