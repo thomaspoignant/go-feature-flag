@@ -1040,6 +1040,12 @@
         "model.OFREPBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
+                "eventStreams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OFREPEventStream"
+                    }
+                },
                 "flags": {
                     "type": "array",
                     "items": {
@@ -1105,6 +1111,20 @@
                 },
                 "value": {},
                 "variant": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPEventStream": {
+            "type": "object",
+            "properties": {
+                "inactivityDelaySec": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
