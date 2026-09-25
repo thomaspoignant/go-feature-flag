@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -23,7 +23,7 @@ func TestVersion(t *testing.T) {
 	middleware := middleware2.VersionHeader(middleware2.VersionHeaderConfig{
 		RelayProxyConfig: conf,
 	})
-	handler := middleware(func(c echo.Context) error {
+	handler := middleware(func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Authorized")
 	})
 
@@ -43,12 +43,12 @@ func TestNoVersion(t *testing.T) {
 		DisableVersionHeader: true,
 	}
 	middleware := middleware2.VersionHeader(middleware2.VersionHeaderConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			return conf.DisableVersionHeader
 		},
 		RelayProxyConfig: conf,
 	})
-	handler := middleware(func(c echo.Context) error {
+	handler := middleware(func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Authorized")
 	})
 
