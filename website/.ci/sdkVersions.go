@@ -312,14 +312,21 @@ func getGOVersion(packageName string) string {
 }
 
 func getSwiftVersion(repoSlug string) string {
-	//
 	u := url.URL{
 		Scheme: "https",
 		Host:   "api.github.com",
 		Path:   fmt.Sprintf("repos/%s/releases/latest", repoSlug),
 	}
 
-	resp, err := http.Get(u.String())
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}

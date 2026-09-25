@@ -33,6 +33,55 @@ authorizedKeys:
 ```
 :::
 
+## ✏️ Flag Management API (PostgreSQL only)
+
+The relay proxy is normally **read + evaluate only**: flag definitions come from retrievers
+(files, S3, GitHub, ...) that are edited out-of-band. When a flagset's retriever is the
+[PostgreSQL retriever](/docs/integrations/store-flags-configuration/postgresql),
+the relay proxy additionally exposes a write API to create, read, update and delete flags,
+because Postgres is the only retriever that can guarantee optimistic concurrency through real
+database transactions.
+
+| Method  | Path                          | Description                                    |
+|---------|-------------------------------|-------------------------------------------------|
+| `GET`   | `/v1/flags`                   | List every flag known to the caller's flagset.  |
+| `POST`  | `/v1/flags`                   | Create a flag (`409` if the key already exists).|
+| `GET`   | `/v1/flags/{flag_key}`        | Get a single flag.                              |
+| `PUT`   | `/v1/flags/{flag_key}`        | Replace a flag (creates it if absent).          |
+| `PATCH` | `/v1/flags/{flag_key}`        | RFC 7386 merge-patch of a flag.                 |
+| `DELETE`| `/v1/flags/{flag_key}`        | Delete a flag.                                  |
+| `PATCH` | `/v1/flags/{flag_key}/state`  | Enable/disable a flag (`{"disable": true}`).     |
+
+```shell
+curl -X 'POST' \
+  'http://<your_domain>:1031/v1/flags' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: <your_admin_api_key>' \
+  -d '{
+    "key": "my-new-flag",
+    "definition": {
+      "variations": { "enabled": true, "disabled": false },
+      "defaultRule": { "variation": "disabled" }
+    }
+  }'
+```
+
+Every mutating call accepts an `If-Match` header carrying the `ETag` returned by a previous
+`GET`; if the flag changed since, the write is rejected with `412 Precondition Failed` instead
+of silently overwriting a concurrent change.
+
+:::note
+These endpoints require an **admin token** (same `authorizedKeys.admin` key as the force-refresh
+endpoint above). If you use flagsets, the key must **also** be listed in the target flagset's
+`apiKeys`, since resolving which flagset to write to still goes through the normal API-key
+routing.
+
+A flagset that isn't backed by exactly one PostgreSQL retriever with an explicit `flagset`
+configured responds `403 FLAG_CONFIG` to every write call (reads still work, with
+`"editable": false` in the response).
+:::
+
 ## 🔒 FIPS 140-3 mode
 
 GO Feature Flag publishes **FIPS 140-3 validated** builds of the relay proxy so it can be

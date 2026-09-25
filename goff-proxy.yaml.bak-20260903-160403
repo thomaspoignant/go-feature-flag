@@ -1,0 +1,34 @@
+server:
+  mode: http
+  port: 1031
+
+swagger:
+  enabled: true
+
+pollingInterval: 10000
+
+# password come from env var GOFF_RETRIEVERS_0_URI, override default below
+# set: export GOFF_RETRIEVERS_0_URI="postgres://keycloak:keycloak@localhost:5432/goff"
+envVariablePrefix: "GOFF_"
+
+authorizedKeys:
+  admin:
+    - "chronotime-team-key"
+    - "suite-finance-team-key"
+
+flagsets:
+  - name: Chronotime
+    apiKeys:
+      - "chronotime-team-key"
+    retrievers:
+      - kind: postgresql
+        uri: "postgres://keycloak:keycloak@localhost:5432/goff"
+        table: "go_feature_flag"
+
+  - name: Suite-finance
+    apiKeys:
+      - "suite-finance-team-key"
+    retrievers:
+      - kind: postgresql
+        uri: "postgres://keycloak:keycloak@localhost:5432/goff"
+        table: "go_feature_flag"
