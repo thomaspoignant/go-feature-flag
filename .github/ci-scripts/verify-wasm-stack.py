@@ -19,6 +19,9 @@ of checking the wrong one.
 Usage: verify-wasm-stack.py <binary.wasm> <expected-stack-bytes>
 """
 
+from __future__ import annotations
+
+import os
 import sys
 
 
@@ -66,42 +69,53 @@ def skip_init_expr(data: bytes, pos: int) -> int:
             )
 
 
-def stack_pointer_candidates(path: str) -> list[tuple[int, int]]:
-    """Return (global_index, i32.const init value) for shadow-stack candidates."""
-    data = open(path, "rb").read()
-    if data[:4] != b"\x00asm":
-        raise SystemExit(f"{path}: not a wasm binary")
+def parse_global_entry(
+    data: bytes, pos: int, index: int, path: str
+) -> tuple[tuple[int, int] | None, int]:
+    """Parse one entry of the global section; return (candidate or None, next pos)."""
+    value_type = data[pos]
+    mutability = data[pos + 1]
+    pos += 2
+    if value_type != 0x7F or mutability != 0x01:
+        return None, skip_init_expr(data, pos)
+    if data[pos] != 0x41:  # i32.const
+        return None, skip_init_expr(data, pos)
+    value, pos = sleb(data, pos + 1)
+    if data[pos] != 0x0B:  # end
+        raise SystemExit(f"{path}: global {index} init is not a plain i32.const")
+    return (index, value), pos + 1
 
-    candidates: list[tuple[int, int]] = []
+
+def find_global_section(data: bytes, path: str) -> int:
+    """Return the position of the global count field within the global section id."""
     pos = 8
     while pos < len(data):
         section_id = data[pos]
         pos += 1
         size, pos = uleb(data, pos)
-        section_start = pos
-        if section_id == 6:  # global section
-            count, pos = uleb(data, pos)
-            for index in range(count):
-                value_type = data[pos]
-                mutability = data[pos + 1]
-                pos += 2
-                if value_type != 0x7F or mutability != 0x01:
-                    pos = skip_init_expr(data, pos)
-                    continue
-                if data[pos] != 0x41:  # i32.const
-                    pos = skip_init_expr(data, pos)
-                    continue
-                value, pos = sleb(data, pos + 1)
-                if data[pos] != 0x0B:  # end
-                    raise SystemExit(
-                        f"{path}: global {index} init is not a plain i32.const"
-                    )
-                pos += 1
-                candidates.append((index, value))
-            break
-        pos = section_start + size
-    else:
-        raise SystemExit(f"{path}: no global section found")
+        if section_id == 6:  # WASM global section id
+            return pos
+        pos += size
+    raise SystemExit(f"{path}: no global section found")
+
+
+def stack_pointer_candidates(path: str) -> list[tuple[int, int]]:
+    """Return (global_index, i32.const init value) for shadow-stack candidates."""
+    real_path = os.path.realpath(path)
+    if not real_path.endswith((".wasm", ".wasi")):
+        raise SystemExit(f"{path}: expected a .wasm or .wasi file")
+    with open(real_path, "rb") as f:
+        data = f.read()
+    if data[:4] != b"\x00asm":
+        raise SystemExit(f"{path}: not a wasm binary")
+
+    pos = find_global_section(data, path)
+    count, pos = uleb(data, pos)
+    candidates: list[tuple[int, int]] = []
+    for index in range(count):
+        candidate, pos = parse_global_entry(data, pos, index, path)
+        if candidate is not None:
+            candidates.append(candidate)
     return candidates
 
 
