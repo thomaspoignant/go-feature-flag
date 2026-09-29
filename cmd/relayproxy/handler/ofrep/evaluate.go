@@ -3,9 +3,11 @@ package ofrep
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 
 	"github.com/labstack/echo/v4"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -22,12 +24,18 @@ import (
 type EvaluateCtrl struct {
 	flagsetManager service.FlagsetManager
 	metrics        metric.Metrics
+	eventStream    config.OfrepEventStream
 }
 
-func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metrics) EvaluateCtrl {
+func NewOFREPEvaluate(
+	flagsetManager service.FlagsetManager,
+	metrics metric.Metrics,
+	eventStream config.OfrepEventStream,
+) EvaluateCtrl {
 	return EvaluateCtrl{
 		flagsetManager: flagsetManager,
 		metrics:        metrics,
+		eventStream:    eventStream,
 	}
 }
 
@@ -218,8 +226,37 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
 	)
 
+	if h.eventStream.IsEnabled() {
+		response.EventStreams = h.buildEventStreams(c)
+	}
+
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	return c.JSON(http.StatusOK, response)
+}
+
+// ofrepSSEPath is the path of the relay proxy endpoint streaming flag changes over SSE.
+const ofrepSSEPath = "/stream/v1/sse/flag/change"
+
+// buildEventStreams returns the eventStreams advertised in the OFREP bulk evaluation
+// response (OpenFeature ADR-0008).
+// The URL is built from the configured base URL
+// and contains the API key of the caller, so the provider can connect without extra credentials.
+// This URL is sensitive, it must never be logged.
+func (h *EvaluateCtrl) buildEventStreams(c echo.Context) []model.OFREPEventStream {
+	baseURL := h.eventStream.BaseURL
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil
+	}
+	u = u.JoinPath(ofrepSSEPath)
+	if apiKey := helper.APIKey(c); apiKey != "" {
+		u.RawQuery = url.Values{"apiKey": []string{apiKey}}.Encode()
+	}
+	return []model.OFREPEventStream{{
+		Type:               "sse",
+		URL:                u.String(),
+		InactivityDelaySec: h.eventStream.InactivityDelaySec,
+	}}
 }
 
 func assertOFREPEvaluateRequest(

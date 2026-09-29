@@ -501,12 +501,28 @@ func TestConfig_IsValid(t *testing.T) {
 		Debug                   bool
 		LogFormat               string
 		FlagSets                []config.FlagSet
+		OfrepEventStream        config.OfrepEventStream
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr assert.ErrorAssertionFunc
 	}{
+		{
+			name: "invalid ofrepEventStream",
+			fields: fields{
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				OfrepEventStream: config.OfrepEventStream{BaseURL: "gofeatureflag.example.com"},
+			},
+			wantErr: assert.Error,
+		},
 		{
 			name:    "empty config",
 			fields:  fields{},
@@ -946,12 +962,13 @@ func TestConfig_IsValid(t *testing.T) {
 					Notifiers:               tt.fields.Notifiers,
 					Retrievers:              tt.fields.Retrievers,
 				},
-				Server:     tt.fields.Server,
-				HideBanner: tt.fields.HideBanner,
-				Swagger:    tt.fields.Swagger,
-				LogLevel:   tt.fields.LogLevel,
-				LogFormat:  tt.fields.LogFormat,
-				FlagSets:   tt.fields.FlagSets,
+				Server:           tt.fields.Server,
+				HideBanner:       tt.fields.HideBanner,
+				Swagger:          tt.fields.Swagger,
+				LogLevel:         tt.fields.LogLevel,
+				LogFormat:        tt.fields.LogFormat,
+				FlagSets:         tt.fields.FlagSets,
+				OfrepEventStream: tt.fields.OfrepEventStream,
 			}
 			if tt.name == "empty config" {
 				c = nil
