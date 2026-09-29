@@ -24,9 +24,12 @@ func TestParseConfigDisableFlagDetailsInStream(t *testing.T) {
 		name        string
 		content     string
 		environment string
+		want        bool
 	}{
-		{name: "disabled by config file", content: "disableFlagDetailsInStream: true\n"},
-		{name: "disabled by environment variable", environment: "true"},
+		{name: "default is false"},
+		{name: "explicitly false", content: "disableFlagDetailsInStream: false\n"},
+		{name: "disabled by config file", content: "disableFlagDetailsInStream: true\n", want: true},
+		{name: "disabled by environment variable", environment: "true", want: true},
 	}
 
 	for _, tt := range tests {
@@ -43,7 +46,7 @@ func TestParseConfigDisableFlagDetailsInStream(t *testing.T) {
 
 			got, err := config.New(flagSet, zap.NewNop(), "1.X.X")
 			require.NoError(t, err)
-			assert.True(t, got.DisableFlagDetailsInStream)
+			assert.Equal(t, tt.want, got.DisableFlagDetailsInStream)
 		})
 	}
 }
