@@ -55,7 +55,7 @@ func Test_health_Handler(t *testing.T) {
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(echo.GET, "/health", nil)
+			req := httptest.NewRequest(http.MethodGet, "/health", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 			res := healthCtrl.Handler(c)

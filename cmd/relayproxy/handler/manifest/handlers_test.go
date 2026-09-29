@@ -52,7 +52,7 @@ func TestManifestCtrl_GetManifest_DefaultMode(t *testing.T) {
 	ctrl := manifest.NewManifest(flagsetManager, metric.Metrics{}, zap.NewNop())
 	e := echo.New()
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(echo.GET, manifestEndpoint, nil)
+	req := httptest.NewRequest(http.MethodGet, manifestEndpoint, nil)
 	c := e.NewContext(req, rec)
 	c.SetPath(manifestEndpoint)
 
@@ -159,7 +159,7 @@ func TestManifestCtrl_GetManifest_FlagsetMode(t *testing.T) {
 			ctrl := manifest.NewManifest(flagsetManager, metric.Metrics{}, zap.NewNop())
 			e := echo.New()
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(echo.GET, manifestEndpoint, nil)
+			req := httptest.NewRequest(http.MethodGet, manifestEndpoint, nil)
 			if tt.apiKey != "" {
 				req.Header.Set(helper.AuthorizationHeader, helper.BearerPrefix+tt.apiKey)
 			}
@@ -197,7 +197,7 @@ func TestManifestCtrl_GetManifest_NilFlagsetManager(t *testing.T) {
 	ctrl := manifest.NewManifest(nil, metric.Metrics{}, zap.NewNop())
 	e := echo.New()
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(echo.GET, manifestEndpoint, nil)
+	req := httptest.NewRequest(http.MethodGet, manifestEndpoint, nil)
 	c := e.NewContext(req, rec)
 	c.SetPath(manifestEndpoint)
 

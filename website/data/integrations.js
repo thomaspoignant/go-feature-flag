@@ -16,6 +16,7 @@ import gitlablogo from '@site/static/docs/retrievers/gitlab.png';
 import mongodblogo from '@site/static/docs/retrievers/mongodb.png';
 import redislogo from '@site/static/docs/retrievers/redis.png';
 import postgreslogo from '@site/static/docs/retrievers/postgresql.png';
+import miniologo from '@site/static/docs/retrievers/minio.png';
 import kafkalogo from '@site/static/docs/collectors/kafka.png';
 import discordlogo from '@site/static/docs/notifier/discord_logo.png';
 import slacklogo from '@site/static/docs/notifier/slack.png';
@@ -57,6 +58,16 @@ export const integrations = {
       bgColor: '#222e3c',
       logo: s3logo,
       docLink: 'aws-s3',
+    },
+    {
+      name: 'MinIO',
+      description:
+        'Retrieves the configuration from MinIO, or any other S3-compatible object store.',
+      longDescription: `Retrieves the configuration from MinIO, or any other S3-compatible object store such as Ceph or Garage. There is no dedicated MinIO retriever: you use the S3 retriever and point it at your own server.`,
+      bgColor: '#c72e49',
+      logo: miniologo,
+      docLink: 'minio',
+      minVersion: 'v1.55.4',
     },
     {
       name: 'Google Cloud Storage',
@@ -141,6 +152,17 @@ export const integrations = {
       bgColor: '#222e3c',
       logo: s3logo,
       docLink: 'aws-s3',
+    },
+    {
+      name: 'MinIO',
+      description:
+        'Export evaluation data to MinIO, or any other S3-compatible object store.',
+      longDescription: `Export evaluation data to MinIO, or any other S3-compatible object store such as Ceph or Garage. There is no dedicated MinIO exporter: you use the S3 exporter and point it at your own server.`,
+      type: 'async',
+      bgColor: '#c72e49',
+      logo: miniologo,
+      docLink: 'minio',
+      minVersion: 'v1.55.4',
     },
     {
       name: 'Azure Blob Storage',

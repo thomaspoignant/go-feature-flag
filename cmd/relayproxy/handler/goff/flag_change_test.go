@@ -98,7 +98,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(echo.GET, "/v1/flag/change", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/flag/change", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			if tt.apiKey != "" {
 				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
@@ -210,7 +210,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(echo.GET, "/v1/flag/change", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/flag/change", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			if tt.apiKey != "" {
 				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
