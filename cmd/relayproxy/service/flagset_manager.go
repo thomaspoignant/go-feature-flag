@@ -314,6 +314,13 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 		return
 	}
 
+	if m.config.DisableFlagDetailsInStream != newConfig.DisableFlagDetailsInStream {
+		m.logger.Warn("changing disableFlagDetailsInStream is not supported during runtime: "+
+			"the change is ignored and will be applied the next time the relay proxy is restarted",
+			zap.Bool("current", m.config.DisableFlagDetailsInStream),
+			zap.Bool("new", newConfig.DisableFlagDetailsInStream))
+	}
+
 	switch m.mode {
 	case flagsetManagerModeDefault:
 		m.onConfigChangeWithDefault(newConfig)

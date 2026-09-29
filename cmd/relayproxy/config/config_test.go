@@ -19,6 +19,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+func TestConfig_IncludeFlagDetailsInStream_NilConfig(t *testing.T) {
+	var c *config.Config
+	assert.True(t, c.IncludeFlagDetailsInStream())
+}
+
 func TestParseConfigDisableFlagDetailsInStream(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -47,6 +52,7 @@ func TestParseConfigDisableFlagDetailsInStream(t *testing.T) {
 			got, err := config.New(flagSet, zap.NewNop(), "1.X.X")
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got.DisableFlagDetailsInStream)
+			assert.Equal(t, !tt.want, got.IncludeFlagDetailsInStream())
 		})
 	}
 }

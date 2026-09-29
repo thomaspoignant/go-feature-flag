@@ -190,6 +190,14 @@ func (c *Config) IsDebugEnabled() bool {
 	return strings.ToLower(c.LogLevel) == "debug"
 }
 
+// IncludeFlagDetailsInStream returns true if flag change streams should include flag definitions
+func (c *Config) IncludeFlagDetailsInStream() bool {
+	if c == nil {
+		return true
+	}
+	return !c.DisableFlagDetailsInStream
+}
+
 // ZapLogLevel returns the zap core level for the log level
 func (c *Config) ZapLogLevel() zapcore.Level {
 	if c == nil {

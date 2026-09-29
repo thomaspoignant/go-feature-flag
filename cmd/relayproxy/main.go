@@ -102,7 +102,7 @@ func main() {
 	}
 
 	// Init services
-	streamOptions := []stream.Option{stream.WithFlagDetails(!proxyConf.DisableFlagDetailsInStream)}
+	streamOptions := []stream.Option{stream.WithFlagDetails(proxyConf.IncludeFlagDetailsInStream())}
 	wsService := stream.NewWebsocketService(streamOptions...)
 	sseService := stream.NewSSEService(streamOptions...)
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)

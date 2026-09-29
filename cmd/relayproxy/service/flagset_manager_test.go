@@ -2077,3 +2077,58 @@ func TestFlagsetManager_RemoveFlagsetGracefullyCloses(t *testing.T) {
 	assert.GreaterOrEqual(t, exportCalls.Load(), int64(1),
 		"removing a flagset must gracefully close it and flush its buffered events")
 }
+
+func TestFlagsetManager_OnConfigChange_DisableFlagDetailsInStream(t *testing.T) {
+	flagConfig := "../testdata/goff/configuration_flags.yaml"
+	retriever := &retrieverconf.RetrieverConf{Kind: "file", Path: flagConfig}
+	defaultMode := func(disable bool) *config.Config {
+		return &config.Config{
+			DisableFlagDetailsInStream: disable,
+			CommonFlagSet:              config.CommonFlagSet{Retriever: retriever},
+		}
+	}
+	flagsetsMode := func(disable bool) *config.Config {
+		return &config.Config{
+			DisableFlagDetailsInStream: disable,
+			FlagSets: []config.FlagSet{
+				{
+					Name:          "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{Retriever: retriever},
+					APIKeys:       []string{"test-key"},
+				},
+			},
+		}
+	}
+
+	tests := []struct {
+		name      string
+		newConfig func(disable bool) *config.Config
+		current   bool
+		new       bool
+		wantWarn  bool
+	}{
+		{name: "default mode: enabling redaction warns", newConfig: defaultMode, new: true, wantWarn: true},
+		{name: "default mode: disabling redaction warns", newConfig: defaultMode, current: true, wantWarn: true},
+		{name: "default mode: unchanged does not warn", newConfig: defaultMode, current: true, new: true},
+		{name: "flagsets mode: enabling redaction warns", newConfig: flagsetsMode, new: true, wantWarn: true},
+		{name: "flagsets mode: disabling redaction warns", newConfig: flagsetsMode, current: true, wantWarn: true},
+		{name: "flagsets mode: unchanged does not warn", newConfig: flagsetsMode},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obs, logs := observer.New(zap.WarnLevel)
+			manager, err := service.NewFlagsetManager(tt.newConfig(tt.current), zap.New(obs), nil, nil)
+			require.NoError(t, err)
+			t.Cleanup(func() { manager.Close() })
+
+			manager.OnConfigChange(tt.newConfig(tt.new))
+
+			warnLogs := logs.FilterMessageSnippet("changing disableFlagDetailsInStream is not supported during runtime")
+			if tt.wantWarn {
+				assert.Equal(t, 1, warnLogs.Len())
+			} else {
+				assert.Equal(t, 0, warnLogs.Len())
+			}
+		})
+	}
+}
