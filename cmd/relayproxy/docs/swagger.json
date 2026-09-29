@@ -334,7 +334,7 @@
         },
         "/stream/v1/sse/flag/change": {
             "get": {
-                "description": "Server-Sent Events endpoint pushing flag change notifications.\nEach event payload is a `notifier.DiffCache` JSON document.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
+                "description": "Server-Sent Events endpoint pushing flag change notifications, following OpenFeature ADR-0008.\nIt is advertised in the `eventStreams` field of the OFREP bulk evaluation response.\nEach event is sent as `event: message` with a `model.OFREPSSEEvent` JSON payload,\na `refetchEvaluation` event means that the provider must re-fetch its evaluations.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
                 "produces": [
                     "text/event-stream"
                 ],
@@ -352,9 +352,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "SSE stream of flag change events",
+                        "description": "SSE stream of OFREP flag change events",
                         "schema": {
-                            "$ref": "#/definitions/notifier.DiffCache"
+                            "$ref": "#/definitions/model.OFREPSSEEvent"
                         }
                     },
                     "400": {
@@ -1040,6 +1040,12 @@
         "model.OFREPBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
+                "eventStreams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OFREPEventStream"
+                    }
+                },
                 "flags": {
                     "type": "array",
                     "items": {
@@ -1109,6 +1115,20 @@
                 }
             }
         },
+        "model.OFREPEventStream": {
+            "type": "object",
+            "properties": {
+                "inactivityDelaySec": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "model.OFREPFlagBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
@@ -1131,6 +1151,21 @@
                 "value": {},
                 "variant": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OFREPSSEEvent": {
+            "type": "object",
+            "properties": {
+                "lastModified": {
+                    "description": "LastModified is the unix timestamp (in seconds) of the flag configuration change.",
+                    "type": "integer",
+                    "example": 1771622898
+                },
+                "type": {
+                    "description": "Type of the event, providers must ignore the types they don't know.",
+                    "type": "string",
+                    "example": "refetchEvaluation"
                 }
             }
         },
