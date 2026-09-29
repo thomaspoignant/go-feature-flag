@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -17,6 +18,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
@@ -142,21 +144,16 @@ func Test_SSE_FlagChange(t *testing.T) {
 			case <-ctx.Done():
 				t.Fatal("timed out waiting for SSE client to subscribe")
 			}
+			before := time.Now().Unix()
 			require.NoError(t, sseService.BroadcastFlagChanges("default", tt.flagChange))
 
-			scanner := bufio.NewScanner(resp.Body)
-			var received string
-			for scanner.Scan() {
-				if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
-					received = data
-					break
-				}
-			}
-			require.NotEmpty(t, received, "should have received an SSE data line")
-
-			expected, err := json.Marshal(tt.flagChange)
-			require.NoError(t, err)
-			assert.JSONEq(t, string(expected), received)
+			event := readSSEEvent(t, resp)
+			assert.NotEmpty(t, event["id"], "events should have an id")
+			assert.Equal(t, "message", event["event"])
+			var got model.OFREPSSEEvent
+			require.NoError(t, json.Unmarshal([]byte(event["data"]), &got))
+			assert.Equal(t, model.OFREPSSEEventTypeRefetchEvaluation, got.Type)
+			assert.GreaterOrEqual(t, got.LastModified, before)
 		})
 	}
 }
@@ -209,29 +206,36 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 	}))
 
 	// Broadcast to flagsetA -- the client should receive this one.
-	diff := notifier.DiffCache{
-		Added: map[string]flag.Flag{
-			"right-flag": &flag.InternalFlag{
-				Variations: &map[string]*any{
-					"A": testconvert.Interface(true),
-				},
-				DefaultRule: &flag.Rule{VariationResult: testconvert.String("A")},
-			},
-		},
-	}
-	require.NoError(t, sseService.BroadcastFlagChanges("flagsetA", diff))
+	// The event id is a timestamp, so it tells us which broadcast was received.
+	afterWrongBroadcast := time.Now().UnixNano()
+	require.NoError(t, sseService.BroadcastFlagChanges("flagsetA", notifier.DiffCache{
+		Added: map[string]flag.Flag{"right-flag": &flag.InternalFlag{}},
+	}))
 
+	event := readSSEEvent(t, resp)
+	id, err := strconv.ParseInt(event["id"], 10, 64)
+	require.NoError(t, err)
+	assert.GreaterOrEqual(t, id, afterWrongBroadcast,
+		"client should only receive the event of its own flagset")
+	assert.Contains(t, event["data"], model.OFREPSSEEventTypeRefetchEvaluation)
+}
+
+// readSSEEvent reads the next SSE event of the response and returns its fields.
+func readSSEEvent(t *testing.T, resp *http.Response) map[string]string {
+	t.Helper()
+	fields := map[string]string{}
 	scanner := bufio.NewScanner(resp.Body)
-	var received string
 	for scanner.Scan() {
-		if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
-			received = data
+		line := scanner.Text()
+		if line == "" && len(fields) > 0 {
 			break
 		}
+		if key, value, ok := strings.Cut(line, ": "); ok {
+			fields[key] = value
+		}
 	}
-	require.NotEmpty(t, received, "should have received an SSE data line")
-	assert.Contains(t, received, "right-flag")
-	assert.NotContains(t, received, "wrong-flag")
+	require.NotEmpty(t, fields["data"], "should have received an SSE data line")
+	return fields
 }
 
 func Test_SSE_FlagChange_Errors(t *testing.T) {

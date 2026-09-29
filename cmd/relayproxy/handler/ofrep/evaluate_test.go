@@ -18,7 +18,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
-	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"go.uber.org/zap"
 )
 
@@ -133,11 +132,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
-			ctrl := ofrep.NewOFREPEvaluate(
-				flagsetManager,
-				metric.Metrics{},
-				config.OfrepEventStream{Enabled: testconvert.Bool(false)},
-			)
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{}, config.OfrepEventStream{})
 			e := echo.New()
 			rec := httptest.NewRecorder()
 
@@ -181,7 +176,6 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 	type args struct {
 		eventStream config.OfrepEventStream
 		headers     map[string]string
-		host        string
 	}
 
 	tests := []struct {
@@ -190,34 +184,14 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 		want []model.OFREPEventStream
 	}{
 		{
-			name: "enabled by default, URL derived from the request",
+			name: "disabled when no base URL is configured",
 			args: args{},
-			want: []model.OFREPEventStream{
-				{Type: "sse", URL: "http://example.com/stream/v1/sse/flag/change"},
-			},
-		},
-		{
-			name: "derived URL uses X-Forwarded-Proto",
-			args: args{
-				headers: map[string]string{echo.HeaderXForwardedProto: "https"},
-				host:    "goff.example.com:8080",
-			},
-			want: []model.OFREPEventStream{
-				{Type: "sse", URL: "https://goff.example.com:8080/stream/v1/sse/flag/change"},
-			},
-		},
-		{
-			name: "disabled",
-			args: args{
-				eventStream: config.OfrepEventStream{Enabled: testconvert.Bool(false)},
-			},
 			want: nil,
 		},
 		{
 			name: "base URL and inactivity delay from the configuration",
 			args: args{
 				eventStream: config.OfrepEventStream{
-					Enabled:            testconvert.Bool(true),
 					BaseURL:            "https://gofeatureflag.example.com/",
 					InactivityDelaySec: 60,
 				},
@@ -282,9 +256,6 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			for k, v := range tt.args.headers {
 				req.Header.Set(k, v)
-			}
-			if tt.args.host != "" {
-				req.Host = tt.args.host
 			}
 			rec := httptest.NewRecorder()
 			c := echo.New().NewContext(req, rec)

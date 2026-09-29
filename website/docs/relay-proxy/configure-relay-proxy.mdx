@@ -305,7 +305,7 @@ Configuration related to the swagger behavior of the relay proxy.
 
 Advertises the flag-change SSE endpoint in the OFREP bulk evaluation response so that OFREP providers can subscribe to changes instead of polling (see [OpenFeature ADR-0008](https://github.com/open-feature/protocol/blob/main/service/adrs/0008-sse-for-bulk-evaluation-changes.md)).
 
-It is enabled by default. When the relay proxy runs as an AWS Lambda, it is only enabled if [`ofrepEventStream.baseUrl`](#ofrepeventstreambaseurl) is set, because Lambda cannot stream SSE.
+It is enabled when [`ofrepEventStream.baseUrl`](#ofrepeventstreambaseurl) is set.
 
 - option name: `ofrepEventStream`
 - type: **[ofrepEventStream](#type-ofrepeventstream)**
@@ -800,30 +800,29 @@ The DNS used by the swagger configuration to access the relay proxy.
 
 Configuration used to advertise the flag-change SSE endpoint in the OFREP bulk evaluation response.
 
-When enabled, the bulk evaluation response contains an `eventStreams` field pointing to the relay proxy SSE endpoint (`/stream/v1/sse/flag/change`).
+When [`ofrepEventStream.baseUrl`](#ofrepeventstreambaseurl) is set, the bulk evaluation response contains an `eventStreams` field pointing to the relay proxy SSE endpoint (`/stream/v1/sse/flag/change`).
+
+Each time the flag configuration changes, this endpoint sends an ADR-0008 event that tells the provider to re-fetch its evaluations:
+
+```
+id: 1771622898000000000
+event: message
+data: {"type":"refetchEvaluation","lastModified":1771622898}
+```
 
 If the OFREP request is authenticated, the API key of the caller is added to the advertised URL as the `apiKey` query parameter, so the provider can open the stream without extra credentials. As required by the ADR, this URL is sensitive and must not be logged or persisted.
-
-#### `ofrepEventStream.enabled`
-
-Adds the `eventStreams` field in the OFREP bulk evaluation response. Set it to `false` if your providers cannot reach the SSE endpoint.
-
-- option name: `enabled`
-- type: **boolean**
-- default: **`true`**
-- mandatory: <NotMandatory />
 
 #### `ofrepEventStream.baseUrl`
 
 The public base URL clients should use to reach the relay proxy, for example `https://gofeatureflag.example.com`. The path of the SSE endpoint is appended automatically, so a path prefix is kept (`https://example.com/goff` becomes `https://example.com/goff/stream/v1/sse/flag/change`).
 
-When not set, the base URL is derived from the incoming request (the `Host` header, and the scheme from `X-Forwarded-Proto` if present). Set it when the relay proxy is behind a proxy that rewrites the host or adds a path prefix.
+When not set, the `eventStreams` field is not added and OFREP providers keep polling. Do not set it when the relay proxy runs as an AWS Lambda, because Lambda cannot stream SSE.
 
 It must be an absolute `http` or `https` URL, without query parameters.
 
 - option name: `baseUrl`
 - type: **string**
-- default: **none** _(derived from the request)_
+- default: **none**
 - mandatory: <NotMandatory />
 
 #### `ofrepEventStream.inactivityDelaySec`

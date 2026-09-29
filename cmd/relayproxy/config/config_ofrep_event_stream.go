@@ -8,13 +8,9 @@ import (
 // OfrepEventStream holds the configuration used to advertise the flag-change SSE
 // endpoint in the OFREP bulk evaluation response (OpenFeature ADR-0008).
 type OfrepEventStream struct {
-	// Enabled (optional) adds the eventStreams field in the OFREP bulk evaluation response.
-	// Default: true
-	Enabled *bool `mapstructure:"enabled" koanf:"enabled"`
-
 	// BaseURL (optional) is the public base URL clients should use to reach the relay proxy,
 	// for example https://gofeatureflag.example.com. The path of the SSE endpoint is appended
-	// automatically. When empty, the base URL is derived from the incoming request.
+	// automatically. When empty, the eventStreams field is not added to the response.
 	BaseURL string `mapstructure:"baseUrl" koanf:"baseurl"`
 
 	// InactivityDelaySec (optional) is advertised to the client as the delay in seconds after
@@ -25,7 +21,7 @@ type OfrepEventStream struct {
 // IsEnabled returns true if the eventStreams field should be added to the OFREP bulk
 // evaluation response.
 func (o OfrepEventStream) IsEnabled() bool {
-	return o.Enabled == nil || *o.Enabled
+	return o.BaseURL != "" && o.IsValid() == nil
 }
 
 // IsValid checks that the configuration is valid.

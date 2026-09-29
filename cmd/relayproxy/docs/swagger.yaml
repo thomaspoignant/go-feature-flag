@@ -280,6 +280,19 @@ definitions:
       variant:
         type: string
     type: object
+  model.OFREPSSEEvent:
+    properties:
+      lastModified:
+        description: LastModified is the unix timestamp (in seconds) of the flag configuration
+          change.
+        example: 1771622898
+        type: integer
+      type:
+        description: Type of the event, providers must ignore the types they don't
+          know.
+        example: refetchEvaluation
+        type: string
+    type: object
   modeldocs.AllFlags:
     description: AllFlags contains the full list of all the flags available for the
       user
@@ -621,8 +634,10 @@ paths:
   /stream/v1/sse/flag/change:
     get:
       description: |-
-        Server-Sent Events endpoint pushing flag change notifications.
-        Each event payload is a `notifier.DiffCache` JSON document.
+        Server-Sent Events endpoint pushing flag change notifications, following OpenFeature ADR-0008.
+        It is advertised in the `eventStreams` field of the OFREP bulk evaluation response.
+        Each event is sent as `event: message` with a `model.OFREPSSEEvent` JSON payload,
+        a `refetchEvaluation` event means that the provider must re-fetch its evaluations.
         The full URL (including query string) is sensitive and must not be logged
         or persisted by intermediaries.
       parameters:
@@ -634,9 +649,9 @@ paths:
       - text/event-stream
       responses:
         "200":
-          description: SSE stream of flag change events
+          description: SSE stream of OFREP flag change events
           schema:
-            $ref: '#/definitions/notifier.DiffCache'
+            $ref: '#/definitions/model.OFREPSSEEvent'
         "400":
           description: Bad Request
           schema:

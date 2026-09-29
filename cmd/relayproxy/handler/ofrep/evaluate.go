@@ -239,17 +239,11 @@ const ofrepSSEPath = "/stream/v1/sse/flag/change"
 
 // buildEventStreams returns the eventStreams advertised in the OFREP bulk evaluation
 // response (OpenFeature ADR-0008).
-// The URL is built from the configured base URL (or from the incoming request if none is set)
+// The URL is built from the configured base URL
 // and contains the API key of the caller, so the provider can connect without extra credentials.
 // This URL is sensitive, it must never be logged.
 func (h *EvaluateCtrl) buildEventStreams(c echo.Context) []model.OFREPEventStream {
 	baseURL := h.eventStream.BaseURL
-	if baseURL == "" {
-		if c.Request().Host == "" {
-			return nil
-		}
-		baseURL = c.Scheme() + "://" + c.Request().Host
-	}
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil

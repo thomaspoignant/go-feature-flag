@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
 func TestOfrepEventStream_IsValid(t *testing.T) {
@@ -68,16 +67,20 @@ func TestOfrepEventStream_IsValid(t *testing.T) {
 func TestOfrepEventStream_IsEnabled(t *testing.T) {
 	tests := []struct {
 		name    string
-		enabled *bool
+		baseURL string
 		want    bool
 	}{
-		{name: "enabled by default", enabled: nil, want: true},
-		{name: "explicitly enabled", enabled: testconvert.Bool(true), want: true},
-		{name: "explicitly disabled", enabled: testconvert.Bool(false), want: false},
+		{name: "empty baseURL", baseURL: "", want: false},
+		{name: "valid baseURL", baseURL: "https://gofeatureflag.example.com", want: true},
+		{name: "invalid baseURL", baseURL: "://badurl", want: false},
+		{name: "unsupported scheme baseURL", baseURL: "ftp://gofeatureflag.example.com", want: false},
+		{name: "relative baseURL", baseURL: "/relative/path", want: false},
+		{name: "baseURL with query", baseURL: "https://gofeatureflag.example.com?something=1", want: false},
+		{name: "baseURL with percent-encoding error", baseURL: "https://gofeatureflag.example.com/%zz", want: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, config.OfrepEventStream{Enabled: tt.enabled}.IsEnabled())
+			assert.Equal(t, tt.want, config.OfrepEventStream{BaseURL: tt.baseURL}.IsEnabled())
 		})
 	}
 }
