@@ -62,6 +62,7 @@
   - [Notifiers](#notifiers)
   - [Export data](#export-data)
   - [Cli](#cli)
+  - [Admin CRUD APIs](#admin-crud-apis)
 - [How can I contribute?](#how-can-i-contribute)
   - [Contributors](#contributors)
   - [Sponsors](#sponsors)
@@ -631,6 +632,46 @@ Events are collected and sent in bulk to avoid spamming your exporter.
 
 ## Cli
 A command line tool is available to help you lint your configuration file: [go-feature-flag-cli](cmd/cli/README.md).
+
+## Admin CRUD APIs
+
+The relay proxy exposes a `/v1/flags` REST API to create, read, update and delete flags at runtime, instead of editing your flag configuration file by hand.
+
+```
+GET    /v1/flags
+POST   /v1/flags
+GET    /v1/flags/{flag_key}
+PUT    /v1/flags/{flag_key}
+PATCH  /v1/flags/{flag_key}
+DELETE /v1/flags/{flag_key}
+PATCH  /v1/flags/{flag_key}/state
+```
+
+> [!IMPORTANT]
+> Write operations (`POST`, `PUT`, `PATCH`, `DELETE`) only work for a flagset backed by **exactly one PostgreSQL retriever**.  
+> Other retriever kinds (file, HTTP, S3, ...) are read-only sources — the relay proxy has no way to write a change back to them, so calling a write endpoint on a flagset using them returns `403 Forbidden`.
+
+```yaml title="goff-proxy.yaml"
+retrievers:
+  - kind: postgresql
+    uri: "postgres://user:password@localhost:5432/dbname"
+    table: "go_feature_flag"
+```
+
+Every call requires an **admin** API key, both listed under `authorizedKeys.admin` and, if you are using [flagsets](https://gofeatureflag.org/docs/relay-proxy/flag_set), in the target flagset's `apiKeys` list — the key you send determines which flagset the API reads from and writes to.
+
+```yaml
+authorizedKeys:
+  admin:
+    - "my-admin-key"
+```
+
+```shell
+curl -X GET 'http://localhost:1031/v1/flags' \
+  -H 'Authorization: Bearer my-admin-key'
+```
+
+_[See the full Admin API reference in the Swagger docs.](cmd/relayproxy/docs/)_
 
 # How can I contribute?
 

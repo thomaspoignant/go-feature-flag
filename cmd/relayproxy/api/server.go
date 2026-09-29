@@ -114,6 +114,13 @@ func (s *Server) initRoutes() {
 		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
+	cListFlags := controller.NewListFlags(s.services.FlagsetManager, s.services.Metrics)
+	cCreateFlag := controller.NewCreateFlag(s.services.FlagsetManager, s.services.Metrics)
+	cGetFlag := controller.NewGetFlag(s.services.FlagsetManager, s.services.Metrics)
+	cReplaceFlag := controller.NewReplaceFlag(s.services.FlagsetManager, s.services.Metrics)
+	cPatchFlag := controller.NewPatchFlag(s.services.FlagsetManager, s.services.Metrics)
+	cDeleteFlag := controller.NewDeleteFlag(s.services.FlagsetManager, s.services.Metrics)
+	cSetFlagState := controller.NewSetFlagState(s.services.FlagsetManager, s.services.Metrics)
 
 	// Init routes
 	userAuth := s.getAuthMiddleware(UserAuth)
@@ -124,6 +131,16 @@ func (s *Server) initRoutes() {
 	s.addMonitoringRoutes()
 	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)
+	s.addFlagManagementRoutes(
+		cListFlags,
+		cCreateFlag,
+		cGetFlag,
+		cReplaceFlag,
+		cPatchFlag,
+		cDeleteFlag,
+		cSetFlagState,
+		adminAuth,
+	)
 }
 
 func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {

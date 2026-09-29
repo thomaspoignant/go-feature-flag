@@ -83,3 +83,33 @@ retriever := &postgresqlretriever.Retriever{
 - **Connection Management**: Automatic connection initialization and cleanup
 - **Error Handling**: Comprehensive error handling with detailed logging
 - **Performance Optimized**: Efficient querying with proper indexing support
+- **Write support**: The only retriever that backs the relay proxy's flag-management API
+  (create/update/delete), because it can guarantee optimistic concurrency through real
+  database transactions (see below).
+
+## Flag Management API (relay proxy)
+
+The relay proxy exposes a write API (`POST/GET/PUT/PATCH/DELETE /v1/flags[/{flag_key}]`,
+`PATCH /v1/flags/{flag_key}/state`) that only works when a flagset's retriever is this
+PostgreSQL retriever. Every other retriever kind (file, S3, GitHub, ...) has no
+compare-and-swap primitive and cannot be used for these endpoints.
+
+Requirements for a flagset to be writable:
+
+- It must have **exactly one** retriever configured, and it must be this PostgreSQL retriever.
+- The retriever must have an **explicit, non-empty `flagset` configured** (the `flagset`
+  column is `NOT NULL`, so there is no single unambiguous row to write to when no flagset is
+  set — a flagset without an explicit name always responds `403 FLAG_CONFIG` on writes, even
+  though it can still be read).
+- The table must keep the `UNIQUE (flag_name, flagset)` constraint from the schema above:
+  writes rely on it for safe upserts.
+
+Concurrency: writes take place inside a transaction that locks the target row with
+`SELECT ... FOR UPDATE` before comparing the caller-supplied `If-Match` ETag against the
+current one, so two concurrent writers racing the same flag can never both succeed silently —
+the loser gets `412 Precondition Failed`. The ETag is a strong hash computed over the
+canonical JSON of the flag definition, not over the raw JSONB bytes, so it stays stable
+regardless of Postgres's own JSON formatting.
+
+Every successful write triggers an immediate cache reload, so evaluation reflects the change
+without waiting for the next polling interval.

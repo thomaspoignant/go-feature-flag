@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.",
+        "description": "# Introduction\r\n\r\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\r\n\r\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \r\nThis API is mostly used by all the OpenFeature providers.",
         "title": "GO Feature Flag relay proxy endpoints",
         "contact": {
             "name": "GO feature flag relay proxy",
@@ -706,6 +706,466 @@
                 }
             }
         },
+        "/v1/flags": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns every flag definition known to the relay proxy for the caller's flagset.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "List feature flags",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (max 500)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by flag type",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Case-insensitive substring match on flag key",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by disabled state",
+                        "name": "disabled",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Only available when the caller's flagset is backed by exactly one writable\n(PostgreSQL) retriever with an explicit flagset configured.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Create a feature flag",
+                "parameters": [
+                    {
+                        "description": "The flag to create",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateFlagRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/flags/{flag_key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Get a feature flag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The flag key",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Full replacement of the flag definition. Creates the flag (upsert) if it\ndoes not exist yet.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Replace a feature flag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The flag key",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optimistic-concurrency guard",
+                        "name": "If-Match",
+                        "in": "header"
+                    },
+                    {
+                        "description": "The full flag definition",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Replaced",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created via upsert",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Delete a feature flag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The flag key",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optimistic-concurrency guard",
+                        "name": "If-Match",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "RFC 7386 merge-patch of the flag definition. Only the fields present in the\nbody are changed; a JSON null deletes a field.",
+                "consumes": [
+                    "application/merge-patch+json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Update parts of a feature flag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The flag key",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optimistic-concurrency guard",
+                        "name": "If-Match",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Merge-patch document",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/flags/{flag_key}/state": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Convenience endpoint that sets the disable field without touching the rest\nof the flag definition.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flag Management API"
+                ],
+                "summary": "Enable or disable a flag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The flag key",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optimistic-concurrency guard",
+                        "name": "If-Match",
+                        "in": "header"
+                    },
+                    {
+                        "description": "The new state",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SetFlagStateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "State changed",
+                        "schema": {
+                            "$ref": "#/definitions/model.FlagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/ws/v1/flag/change": {
             "get": {
                 "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
@@ -813,6 +1273,84 @@
                 }
             }
         },
+        "dto.DTO": {
+            "type": "object",
+            "properties": {
+                "bucketingKey": {
+                    "description": "BucketingKey defines a source for a dynamic targeting key",
+                    "type": "string"
+                },
+                "converter": {
+                    "description": "Converter (optional) is the name of converter to use, if no converter specified we try to determine\nwhich converter to use based on the fields we receive for the flag",
+                    "type": "string"
+                },
+                "defaultRule": {
+                    "description": "DefaultRule is the rule applied after checking that any other rules\nmatched the user.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.Rule"
+                        }
+                    ]
+                },
+                "disable": {
+                    "description": "Disable is true if the flag is disabled.",
+                    "type": "boolean"
+                },
+                "experimentation": {
+                    "description": "Experimentation is your struct to configure an experimentation.\nIt will allow you to configure a start date and an end date for your flag.\nWhen the experimentation is not running, the flag will serve the default value.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ExperimentationDto"
+                        }
+                    ]
+                },
+                "metadata": {
+                    "description": "Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "scheduledRollout": {
+                    "description": "Scheduled is your struct to configure an update on some fields of your flag over time.\nYou can add several steps that updates the flag, this is typically used if you want to gradually add more user\nin your flag.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flag.ScheduledStep"
+                    }
+                },
+                "targeting": {
+                    "description": "Rules is the list of Rule for this flag.\nThis an optional field.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flag.Rule"
+                    }
+                },
+                "trackEvents": {
+                    "description": "TrackEvents is false if you don't want to export the data in your data exporter.\nDefault value is true",
+                    "type": "boolean"
+                },
+                "variations": {
+                    "description": "Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max\nlimit except if the variationValue is a bool, the max is 2.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "version": {
+                    "description": "Version (optional) This field contains the version of the flag.\nThe version is manually managed when you configure your flags and, it is used to display the information\nin the notifications and data collection.",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ExperimentationDto": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "description": "End is the ending time of the experimentation",
+                    "type": "string"
+                },
+                "start": {
+                    "description": "Start is the starting time of the experimentation",
+                    "type": "string"
+                }
+            }
+        },
         "exporter.FeatureEventMetadata": {
             "type": "object",
             "additionalProperties": {}
@@ -840,6 +1378,19 @@
                 "ErrorFlagConfiguration"
             ]
         },
+        "flag.ExperimentationRollout": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "description": "End is the ending time of the experimentation",
+                    "type": "string"
+                },
+                "start": {
+                    "description": "Start is the starting time of the experimentation",
+                    "type": "string"
+                }
+            }
+        },
         "flag.Flag": {
             "type": "object",
             "properties": {
@@ -859,6 +1410,179 @@
                     "description": "value as set"
                 }
             }
+        },
+        "flag.ProgressiveRollout": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "description": "End contains what describes the end status of the rollout.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.ProgressiveRolloutStep"
+                        }
+                    ]
+                },
+                "initial": {
+                    "description": "Initial contains a description of the initial state of the rollout.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.ProgressiveRolloutStep"
+                        }
+                    ]
+                }
+            }
+        },
+        "flag.ProgressiveRolloutStep": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "Date is the time it starts or ends.",
+                    "type": "string"
+                },
+                "percentage": {
+                    "description": "Percentage is the percentage (initial or end) for the progressive rollout",
+                    "type": "number"
+                },
+                "variation": {
+                    "description": "Variation - name of the variation for this step",
+                    "type": "string"
+                }
+            }
+        },
+        "flag.Rule": {
+            "type": "object",
+            "properties": {
+                "disable": {
+                    "description": "Disable indicates that this rule is disabled.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Name is the name of the rule, this field is mandatory if you want\nto update the rule during scheduled rollout",
+                    "type": "string"
+                },
+                "percentage": {
+                    "description": "Percentages represents the percentage we should give to each variation.\nexample: variationA = 10%, variationB = 80%, variationC = 10%",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number",
+                        "format": "float64"
+                    }
+                },
+                "progressiveRollout": {
+                    "description": "ProgressiveRollout is your struct to configure a progressive rollout deployment of your flag.\nIt will allow you to ramp up the percentage of your flag over time.\nYou can decide at which percentage you starts with and at what percentage you ends with in your release ramp.\nBefore the start date we will serve the initial percentage and, after we will serve the end percentage.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.ProgressiveRollout"
+                        }
+                    ]
+                },
+                "query": {
+                    "description": "Query represents the query used to target the audience of the flag.",
+                    "type": "string"
+                },
+                "variation": {
+                    "description": "VariationResult represents the variation name to use if the rule apply for the user.\nIn case we have a percentage field in the config VariationResult is ignored",
+                    "type": "string"
+                }
+            }
+        },
+        "flag.ScheduledStep": {
+            "type": "object",
+            "properties": {
+                "bucketingKey": {
+                    "description": "BucketingKey defines a source for a dynamic targeting key",
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "defaultRule": {
+                    "description": "DefaultRule is the originalRule applied after checking that any other rules\nmatched the user.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.Rule"
+                        }
+                    ]
+                },
+                "disable": {
+                    "description": "Disable is true if the flag is disabled.",
+                    "type": "boolean"
+                },
+                "experimentation": {
+                    "description": "Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and\nan end date for your flag.\nWhen the experimentation is not running, the flag will serve the default value.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/flag.ExperimentationRollout"
+                        }
+                    ]
+                },
+                "metadata": {
+                    "description": "Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "scheduledRollout": {
+                    "description": "Scheduled is your struct to configure an update on some fields of your flag over time.\nYou can add several steps that updates the flag, this is typically used if you want to gradually add more user\nin your flag.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flag.ScheduledStep"
+                    }
+                },
+                "targeting": {
+                    "description": "Rules is the list of Rule for this flag.\nThis an optional field.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flag.Rule"
+                    }
+                },
+                "trackEvents": {
+                    "description": "TrackEvents is false if you don't want to export the data in your data exporter.\nDefault value is true",
+                    "type": "boolean"
+                },
+                "variations": {
+                    "description": "Variations are all the variations available for this flag. You can have as many variation as needed.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "version": {
+                    "description": "Version (optional) This field contains the version of the flag.\nThe version is manually managed when you configure your flags, and it is used to display the information\nin the notifications and data collection.",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_thomaspoignant_go-feature-flag_cmd_relayproxy_model.FlagType": {
+            "type": "string",
+            "enum": [
+                "boolean",
+                "string",
+                "integer",
+                "float",
+                "object"
+            ],
+            "x-enum-varnames": [
+                "FlagTypeBoolean",
+                "FlagTypeString",
+                "FlagTypeInteger",
+                "FlagTypeFloat",
+                "FlagTypeObject"
+            ]
+        },
+        "github_com_thomaspoignant_go-feature-flag_cmdhelpers_manifest_model.FlagType": {
+            "type": "string",
+            "enum": [
+                "boolean",
+                "string",
+                "integer",
+                "float",
+                "object"
+            ],
+            "x-enum-varnames": [
+                "FlagTypeBoolean",
+                "FlagTypeString",
+                "FlagTypeInteger",
+                "FlagTypeFloat",
+                "FlagTypeObject"
+            ]
         },
         "model.AllFlagRequest": {
             "type": "object",
@@ -903,6 +1627,28 @@
                 }
             }
         },
+        "model.CreateFlagRequest": {
+            "type": "object",
+            "properties": {
+                "definition": {
+                    "$ref": "#/definitions/dto.DTO"
+                },
+                "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "$ref": "#/definitions/flag.ErrorCode"
+                },
+                "errorDetails": {
+                    "type": "string"
+                }
+            }
+        },
         "model.EvalFlagRequest": {
             "type": "object",
             "properties": {
@@ -942,22 +1688,59 @@
                 }
             }
         },
-        "model.FlagType": {
-            "type": "string",
-            "enum": [
-                "boolean",
-                "string",
-                "integer",
-                "float",
-                "object"
-            ],
-            "x-enum-varnames": [
-                "FlagTypeBoolean",
-                "FlagTypeString",
-                "FlagTypeInteger",
-                "FlagTypeFloat",
-                "FlagTypeObject"
-            ]
+        "model.FlagListMeta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.FlagListResponse": {
+            "type": "object",
+            "properties": {
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.FlagResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/model.FlagListMeta"
+                }
+            }
+        },
+        "model.FlagResponse": {
+            "type": "object",
+            "properties": {
+                "definition": {
+                    "$ref": "#/definitions/dto.DTO"
+                },
+                "editable": {
+                    "description": "Editable is false when the owning retriever/flagset doesn't support writes.",
+                    "type": "boolean"
+                },
+                "etag": {
+                    "description": "ETag is the current revision; echo it back as If-Match on the next write.",
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "source": {
+                    "description": "Source is the retriever owning this flag, e.g. \"postgresql:go_feature_flag\".",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/github_com_thomaspoignant_go-feature-flag_cmd_relayproxy_model.FlagType"
+                }
+            }
         },
         "model.HealthResponse": {
             "type": "object",
@@ -1001,7 +1784,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/model.FlagType"
+                    "$ref": "#/definitions/github_com_thomaspoignant_go-feature-flag_cmdhelpers_manifest_model.FlagType"
                 }
             }
         },
@@ -1131,6 +1914,14 @@
                 "value": {},
                 "variant": {
                     "type": "string"
+                }
+            }
+        },
+        "model.SetFlagStateRequest": {
+            "type": "object",
+            "properties": {
+                "disable": {
+                    "type": "boolean"
                 }
             }
         },
