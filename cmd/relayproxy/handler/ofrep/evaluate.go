@@ -3,8 +3,8 @@ package ofrep
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -226,8 +226,8 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
 	)
 
-	if h.eventStream.Enabled && h.eventStream.Endpoint != "" {
-		response.EventStreams = h.buildEventStreams()
+	if h.eventStream.IsEnabled() {
+		response.EventStreams = h.buildEventStreams(c)
 	}
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -238,12 +238,29 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 const ofrepSSEPath = "/stream/v1/sse/flag/change"
 
 // buildEventStreams returns the eventStreams advertised in the OFREP bulk evaluation
-// response. The endpoint comes from the configuration, the client is responsible for
-// adding its own credentials when connecting.
-func (h *EvaluateCtrl) buildEventStreams() []model.OFREPEventStream {
+// response (OpenFeature ADR-0008).
+// The URL is built from the configured base URL (or from the incoming request if none is set)
+// and contains the API key of the caller, so the provider can connect without extra credentials.
+// This URL is sensitive, it must never be logged.
+func (h *EvaluateCtrl) buildEventStreams(c echo.Context) []model.OFREPEventStream {
+	baseURL := h.eventStream.BaseURL
+	if baseURL == "" {
+		if c.Request().Host == "" {
+			return nil
+		}
+		baseURL = c.Scheme() + "://" + c.Request().Host
+	}
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil
+	}
+	u = u.JoinPath(ofrepSSEPath)
+	if apiKey := helper.APIKey(c); apiKey != "" {
+		u.RawQuery = url.Values{"apiKey": []string{apiKey}}.Encode()
+	}
 	return []model.OFREPEventStream{{
 		Type:               "sse",
-		URL:                strings.TrimRight(h.eventStream.Endpoint, "/") + ofrepSSEPath,
+		URL:                u.String(),
 		InactivityDelaySec: h.eventStream.InactivityDelaySec,
 	}}
 }

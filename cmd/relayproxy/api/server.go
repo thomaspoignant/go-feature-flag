@@ -105,10 +105,16 @@ func (s *Server) initRoutes() {
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.FlagsetManager, s.services.Metrics)
+	ofrepEventStream := s.config.OfrepEventStream
+	if s.config.ServerMode(nil) == config.ServerModeLambda && ofrepEventStream.BaseURL == "" {
+		// AWS Lambda cannot stream SSE, we only advertise it if an external URL is configured.
+		enabled := false
+		ofrepEventStream.Enabled = &enabled
+	}
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(
 		s.services.FlagsetManager,
 		s.services.Metrics,
-		s.config.OfrepEventStream,
+		ofrepEventStream,
 	)
 	cManifest := manifest.NewManifest(s.services.FlagsetManager, s.services.Metrics, s.zapLog)
 	cEvalDataCollector := controller.NewCollectEvalData(

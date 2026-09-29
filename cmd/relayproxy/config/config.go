@@ -22,7 +22,7 @@ type Config struct {
 
 	// OfrepEventStream (optional) advertises the flag-change SSE endpoint in the OFREP bulk
 	// evaluation response so that providers can subscribe to changes instead of polling.
-	// It is disabled by default, so the bulk evaluation response is left unchanged.
+	// It is enabled by default.
 	OfrepEventStream OfrepEventStream `mapstructure:"ofrepEventStream" koanf:"ofrepeventstream"`
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
