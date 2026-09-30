@@ -65,7 +65,6 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			NewEvaluateError(flagKey, flag.ErrorCodeGeneral,
 				"No key provided in the URL"))
 	}
-	h.metrics.IncFlagEvaluation(flagKey)
 
 	reqBody := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
@@ -98,6 +97,11 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	// we set a nil value to the default value to avoid the default value to be used.
 	var defaultValue any = nil
 	flagValue, _ := flagset.RawVariation(flagKey, evalCtx, defaultValue)
+	if flagValue.ErrorCode == flag.ErrorCodeFlagNotFound {
+		h.metrics.IncFlagNotFoundEvaluation()
+	} else {
+		h.metrics.IncFlagEvaluation(flagKey)
+	}
 
 	if flagValue.Reason == flag.ReasonError {
 		httpStatus := http.StatusBadRequest
