@@ -55,7 +55,7 @@ func NewCollectEvalData(
 // @Failure 	 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/data/collector [post]
-func (h *collectEvalData) Handler(c echo.Context) error {
+func (h *collectEvalData) Handler(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	tracer := otel.Tracer(configfile.OtelTracerName)

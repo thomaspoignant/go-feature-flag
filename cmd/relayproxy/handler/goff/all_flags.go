@@ -43,7 +43,7 @@ func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) 
 // @Failure      400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
-func (h *allFlags) Handler(c echo.Context) error {
+func (h *allFlags) Handler(c *echo.Context) error {
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err

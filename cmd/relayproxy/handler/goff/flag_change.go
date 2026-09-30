@@ -42,7 +42,7 @@ type FlagChangeResponse struct {
 // @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/change [get]
-func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
+func (h *FlagChangeAPICtrl) Handler(c *echo.Context) error {
 	flagset, httpErr := helper.FlagSet(h.flagsetManager, helper.APIKey(c))
 	if httpErr != nil {
 		return httpErr

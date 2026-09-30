@@ -57,7 +57,7 @@ func NewOFREPEvaluate(
 // @Failure      404 {object}  model.OFREPEvaluateResponseError "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/evaluate/flags/{flag_key} [post]
-func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
+func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
 	flagKey := c.Param("flagKey")
 	if flagKey == "" {
 		return c.JSON(
@@ -164,7 +164,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /ofrep/v1/evaluate/flags [post]
-func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
+func (h *EvaluateCtrl) BulkEvaluate(c *echo.Context) error {
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
@@ -246,7 +246,7 @@ const ofrepSSEPath = "/stream/v1/sse/flag/change"
 // The URL is built from the configured base URL
 // and contains the API key of the caller, so the provider can connect without extra credentials.
 // This URL is sensitive, it must never be logged.
-func (h *EvaluateCtrl) buildEventStreams(c echo.Context) []model.OFREPEventStream {
+func (h *EvaluateCtrl) buildEventStreams(c *echo.Context) []model.OFREPEventStream {
 	baseURL := h.eventStream.BaseURL
 	u, err := url.Parse(baseURL)
 	if err != nil {

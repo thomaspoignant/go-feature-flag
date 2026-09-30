@@ -14,6 +14,6 @@ import "github.com/labstack/echo/v5"
 // @Produce      plain
 // @Success      200 {object}	string
 // @Router       /debug/pprof/ [get]
-func FakePprofController(_ echo.Context) {
+func FakePprofController(_ *echo.Context) {
 	// This is a fake controller, the real entry point is provided by the prometheus middleware.
 }

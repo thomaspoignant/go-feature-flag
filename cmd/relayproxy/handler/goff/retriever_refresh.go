@@ -44,7 +44,7 @@ func NewForceFlagsRefresh(flagsetManager service.FlagsetManager, metrics metric.
 // @Failure 	 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /admin/v1/retriever/refresh [post]
-func (h *forceFlagsRefresh) Handler(c echo.Context) error {
+func (h *forceFlagsRefresh) Handler(c *echo.Context) error {
 	h.metrics.IncForceRefresh()
 
 	flagset, httpErr := helper.FlagSet(h.flagsetManager, helper.APIKey(c))

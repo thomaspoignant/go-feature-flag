@@ -28,6 +28,6 @@ func NewHealth(monitoring service.Monitoring) Controller {
 // @Produce      json
 // @Success      200  {object}   model.HealthResponse
 // @Router       /health [get]
-func (h *health) Handler(c echo.Context) error {
+func (h *health) Handler(c *echo.Context) error {
 	return c.JSON(http.StatusOK, h.monitoringService.Health())
 }
