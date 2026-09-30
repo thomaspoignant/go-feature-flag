@@ -34,6 +34,7 @@
     ],
     "packages": {
         ".": {
+            "release-as": "1.56.0",
             "release-type": "go",
             "include-component-in-tag": false,
             "changelog-path": ".github/release-please/CHANGELOG.md",
