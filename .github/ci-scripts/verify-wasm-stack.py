@@ -66,43 +66,51 @@ def skip_init_expr(data: bytes, pos: int) -> int:
             )
 
 
+def _parse_global_entry(
+    data: bytes, pos: int, index: int, path: str
+) -> tuple[int, int | None]:
+    """Parse one global-section entry; returns (new pos, candidate value or None)."""
+    value_type = data[pos]
+    mutability = data[pos + 1]
+    pos += 2
+    if value_type != 0x7F or mutability != 0x01:
+        return skip_init_expr(data, pos), None
+    if data[pos] != 0x41:  # i32.const
+        return skip_init_expr(data, pos), None
+    value, pos = sleb(data, pos + 1)
+    if data[pos] != 0x0B:  # end
+        raise SystemExit(f"{path}: global {index} init is not a plain i32.const")
+    return pos + 1, value
+
+
+def _collect_global_candidates(
+    data: bytes, pos: int, path: str
+) -> list[tuple[int, int]]:
+    """Collect (global_index, i32.const init value) for every candidate global."""
+    candidates: list[tuple[int, int]] = []
+    count, pos = uleb(data, pos)
+    for index in range(count):
+        pos, value = _parse_global_entry(data, pos, index, path)
+        if value is not None:
+            candidates.append((index, value))
+    return candidates
+
+
 def stack_pointer_candidates(path: str) -> list[tuple[int, int]]:
     """Return (global_index, i32.const init value) for shadow-stack candidates."""
     data = open(path, "rb").read()
     if data[:4] != b"\x00asm":
         raise SystemExit(f"{path}: not a wasm binary")
 
-    candidates: list[tuple[int, int]] = []
     pos = 8
     while pos < len(data):
         section_id = data[pos]
         pos += 1
         size, pos = uleb(data, pos)
-        section_start = pos
         if section_id == 6:  # global section
-            count, pos = uleb(data, pos)
-            for index in range(count):
-                value_type = data[pos]
-                mutability = data[pos + 1]
-                pos += 2
-                if value_type != 0x7F or mutability != 0x01:
-                    pos = skip_init_expr(data, pos)
-                    continue
-                if data[pos] != 0x41:  # i32.const
-                    pos = skip_init_expr(data, pos)
-                    continue
-                value, pos = sleb(data, pos + 1)
-                if data[pos] != 0x0B:  # end
-                    raise SystemExit(
-                        f"{path}: global {index} init is not a plain i32.const"
-                    )
-                pos += 1
-                candidates.append((index, value))
-            break
-        pos = section_start + size
-    else:
-        raise SystemExit(f"{path}: no global section found")
-    return candidates
+            return _collect_global_candidates(data, pos, path)
+        pos += size
+    raise SystemExit(f"{path}: no global section found")
 
 
 def stack_pointer_init(path: str) -> int:
