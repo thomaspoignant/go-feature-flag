@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"

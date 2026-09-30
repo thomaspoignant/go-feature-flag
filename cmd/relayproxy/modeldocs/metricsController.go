@@ -1,6 +1,6 @@
 package modeldocs
 
-import "github.com/labstack/echo/v4"
+import "github.com/labstack/echo/v5"
 
 // FakeMetricsController is a fake entry point for swagger documentation
 //

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/ofrep"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 )
