@@ -10,6 +10,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -54,7 +55,6 @@ func (h *flagEval) Handler(c echo.Context) error {
 	if flagKey == "" {
 		return fmt.Errorf("impossible to find the flag key in the URL")
 	}
-	h.metrics.IncFlagEvaluation(flagKey)
 
 	reqBody := new(model.EvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
@@ -80,6 +80,11 @@ func (h *flagEval) Handler(c echo.Context) error {
 	}
 
 	flagValue, _ := flagset.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
+	if flagValue.ErrorCode == flag.ErrorCodeFlagNotFound {
+		h.metrics.IncFlagNotFoundEvaluation()
+	} else {
+		h.metrics.IncFlagEvaluation(flagKey)
+	}
 
 	span.SetAttributes(
 		attribute.String("flagEvaluation.flagName", flagKey),

@@ -70,6 +70,22 @@ func TestMetrics_IncFlagEvaluation(t *testing.T) {
 	)
 }
 
+func TestMetrics_IncFlagNotFoundEvaluation(t *testing.T) {
+	metricSrv, err := NewMetrics()
+	assert.NoError(t, err)
+
+	metricSrv.IncFlagNotFoundEvaluation()
+	metricSrv.IncFlagNotFoundEvaluation()
+
+	// all the flags that are not found are counted in the same time series
+	assert.Equal(t, 1, testutil.CollectAndCount(metricSrv.flagEvaluationCounter))
+	assert.Equal(
+		t,
+		2.0,
+		testutil.ToFloat64(metricSrv.flagEvaluationCounter.WithLabelValues(FlagNotFoundLabelValue)),
+	)
+}
+
 func TestMetrics_IncFlagCreated(t *testing.T) {
 	metricSrv, err := NewMetrics()
 	assert.NoError(t, err)

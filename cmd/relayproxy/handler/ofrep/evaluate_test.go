@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -426,6 +427,78 @@ func Test_Evaluate(t *testing.T) {
 			assert.NoError(t, err, "Impossible the expected wantBody file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(wantBody), rec.Body.String(), "Invalid response wantBody")
+		})
+	}
+}
+
+func Test_Evaluate_FlagEvaluationMetric(t *testing.T) {
+	const metricName = "gofeatureflag_flag_evaluations_total"
+	const metricHeader = "# HELP " + metricName + " Counter events for number of flag evaluation.\n" +
+		"# TYPE " + metricName + " counter\n"
+
+	tests := []struct {
+		name     string
+		flagKeys []string
+		bodyFile string
+		want     string
+	}{
+		{
+			name:     "should use the flag key as label if the flag exists",
+			flagKeys: []string{"number-flag", "number-flag", "targeting-key-rule"},
+			bodyFile: testdataDir + "/ofrep/valid_request.json",
+			want: metricHeader +
+				metricName + "{flag_name=\"number-flag\"} 2\n" +
+				metricName + "{flag_name=\"targeting-key-rule\"} 1\n",
+		},
+		{
+			name:     "should use the same label for all the flags that do not exist",
+			flagKeys: []string{"unknown-flag-1", "unknown-flag-2", "unknown-flag-3"},
+			bodyFile: testdataDir + "/ofrep/valid_request.json",
+			want:     metricHeader + metricName + "{flag_name=\"FLAG_NOT_FOUND\"} 3\n",
+		},
+		{
+			name:     "should not count a request that is not evaluated",
+			flagKeys: []string{"number-flag", "unknown-flag"},
+			bodyFile: testdataDir + "/ofrep/invalid_context.json",
+			want:     "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			conf := &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10000, // 10 seconds in milliseconds
+					FileFormat:      "yaml",
+					Retrievers: &[]retrieverconf.RetrieverConf{
+						{
+							Kind: retrieverconf.FileRetriever,
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			}
+
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			require.NoError(t, err, "failed to create flagset manager")
+			defer flagsetManager.Close()
+
+			metrics, err := metric.NewMetrics()
+			require.NoError(t, err)
+
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metrics, config.OfrepEventStream{})
+			e := echo.New()
+			e.POST("/ofrep/v1/evaluate/flags/:flagKey", ctrl.Evaluate)
+
+			bodyReqContent, err := os.ReadFile(tt.bodyFile)
+			require.NoError(t, err, "request body file missing %s", tt.bodyFile)
+			for _, flagKey := range tt.flagKeys {
+				req := httptest.NewRequest(
+					http.MethodPost, "/ofrep/v1/evaluate/flags/"+flagKey, strings.NewReader(string(bodyReqContent)))
+				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+				e.ServeHTTP(httptest.NewRecorder(), req)
+			}
+
+			assert.NoError(t, testutil.GatherAndCompare(metrics.Registry, strings.NewReader(tt.want), metricName))
 		})
 	}
 }
