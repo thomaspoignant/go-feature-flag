@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
@@ -9,7 +9,7 @@ import (
 // streaming connections (websocket / SSE).
 func StreamAuthorizer(config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			apiKey := c.QueryParam("apiKey")
 			if config.IsAuthenticationEnabled() && !config.APIKeyExists(apiKey) {
 				return echo.ErrUnauthorized
