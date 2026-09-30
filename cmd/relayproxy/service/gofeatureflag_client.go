@@ -341,7 +341,9 @@ func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
 	if err != nil {
 		return kafkaexporter.Settings{}, err
 	}
+	// the kafka exporter is using a sync producer, it needs both to be true to start.
 	saramaConfig.Producer.Return.Errors = true
+	saramaConfig.Producer.Return.Successes = true
 
 	switch saramaConfig.Net.SASL.Mechanism {
 	case sarama.SASLTypeSCRAMSHA256:
