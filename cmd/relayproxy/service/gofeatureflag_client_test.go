@@ -829,6 +829,22 @@ func TestSetKafkaConfig(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Nil(t, kafkaConfig.Config)
 	})
+
+	t.Run("should return a config usable by a sync producer if a custom config is set", func(t *testing.T) {
+		settings := kafkaexporter.Settings{
+			Topic:     "my-kafka-topic",
+			Addresses: []string{"addr1", "addr2"},
+			Config: &sarama.Config{
+				Version: sarama.V2_1_0_0,
+			},
+		}
+		kafkaConfig, err := setKafkaConfig(settings)
+		assert.NoError(t, err)
+
+		// the kafka exporter is using a sarama.SyncProducer, and it refuses to start if one of those is false.
+		assert.True(t, kafkaConfig.Producer.Return.Errors)
+		assert.True(t, kafkaConfig.Producer.Return.Successes)
+	})
 }
 
 func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
