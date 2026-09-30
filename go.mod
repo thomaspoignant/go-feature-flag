@@ -42,7 +42,9 @@ require (
 	github.com/knadh/koanf/providers/posflag v1.0.2
 	github.com/knadh/koanf/v2 v2.3.6
 	github.com/labstack/echo-contrib v0.50.1
+	github.com/labstack/echo-contrib/v5 v5.0.1
 	github.com/labstack/echo/v4 v4.15.4
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.3
