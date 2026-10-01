@@ -60,7 +60,7 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request",
 				errorCode:  http.StatusBadRequest,
 			},
 		},
@@ -213,7 +213,7 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request",
 				errorCode:  http.StatusBadRequest,
 			},
 		},

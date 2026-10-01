@@ -253,7 +253,7 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{}, tt.args.eventStream)
 			body, err := os.ReadFile(testdataDir + "/ofrep/valid_request.json")
 			require.NoError(t, err)
-			req := httptest.NewRequest(echo.POST, "/ofrep/v1/evaluate/flags", strings.NewReader(string(body)))
+			req := httptest.NewRequest(http.MethodPost, "/ofrep/v1/evaluate/flags", strings.NewReader(string(body)))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			for k, v := range tt.args.headers {
 				req.Header.Set(k, v)

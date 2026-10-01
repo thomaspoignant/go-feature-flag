@@ -116,7 +116,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "unexpected EOF",
+				errorMsg:   "Bad Request",
 				errorCode:  http.StatusBadRequest,
 			},
 		},
@@ -179,8 +179,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 			c.SetPath("/v1/feature/:flagKey/eval")
-			c.SetParamNames("flagKey")
-			c.SetParamValues(tt.args.flagKey)
+			c.SetPathValues(echo.PathValues{{Name: "flagKey", Value: tt.args.flagKey}})
 			handlerErr := flagEval.Handler(c)
 
 			if tt.want.handlerErr {
@@ -264,8 +263,7 @@ func Test_flag_eval_Handler_FlagEvaluationMetric(t *testing.T) {
 				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 				c := e.NewContext(req, httptest.NewRecorder())
 				c.SetPath("/v1/feature/:flagKey/eval")
-				c.SetParamNames("flagKey")
-				c.SetParamValues(flagKey)
+				c.SetPathValues(echo.PathValues{{Name: "flagKey", Value: flagKey}})
 				_ = flagEval.Handler(c)
 			}
 
