@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/labstack/echo/v5"
 	etag "github.com/pablor21/echo-etag/v5"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 )
 

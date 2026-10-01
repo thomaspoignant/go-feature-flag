@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/v5/pprof"
+	echoprometheus "github.com/labstack/echo-prometheus"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"

@@ -3,7 +3,8 @@ package api
 import (
 	"strings"
 
-	"github.com/labstack/echo-contrib/echoprometheus"
+	echootel "github.com/labstack/echo-otel/v5"
+	echoprometheus "github.com/labstack/echo-prometheus"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
@@ -16,7 +17,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -56,7 +56,7 @@ type Server struct {
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
 func (s *Server) initRoutes() {
 	s.apiEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
-	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
+	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: func(c *echo.Context) bool {

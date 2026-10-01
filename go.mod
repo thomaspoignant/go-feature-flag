@@ -41,8 +41,9 @@ require (
 	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/providers/posflag v1.0.2
 	github.com/knadh/koanf/v2 v2.3.6
-	github.com/labstack/echo-contrib v0.50.1
 	github.com/labstack/echo-contrib/v5 v5.0.1
+	github.com/labstack/echo-otel/v5 v5.0.0
+	github.com/labstack/echo-prometheus v0.0.1
 	github.com/labstack/echo/v4 v4.15.4
 	github.com/labstack/echo/v5 v5.4.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
@@ -58,7 +59,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
-	github.com/swaggo/echo-swagger v1.5.2
+	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/azure v0.44.0
@@ -72,7 +73,6 @@ require (
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
 	go.mongodb.org/mongo-driver v1.17.10
 	go.opentelemetry.io/contrib/exporters/autoexport v0.71.0
-	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.70.0
 	go.opentelemetry.io/contrib/samplers/jaegerremote v0.37.3
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/sdk v1.46.0
