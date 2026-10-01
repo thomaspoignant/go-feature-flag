@@ -22,9 +22,11 @@ const gracefulShutdownTimeout = 5 * time.Second
 
 func (s *Server) StartWithContext(ctx context.Context) {
 	defer close(s.stopped)
-	if s.stopCtx.Err() != nil {
+	select {
+	case <-s.stopRequested:
 		// Stop has been called before the server started.
 		return
+	default:
 	}
 
 	// start the OpenTelemetry tracing service
@@ -39,9 +41,14 @@ func (s *Server) StartWithContext(ctx context.Context) {
 
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	// Stop cancels s.stopCtx, which cancels ctx and gracefully shuts down the servers started below.
-	stopAfter := context.AfterFunc(s.stopCtx, cancel)
-	defer stopAfter()
+	// Stop closes s.stopRequested, which cancels ctx and gracefully shuts down the servers started below.
+	go func() {
+		select {
+		case <-s.stopRequested:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
 
 	switch s.config.ServerMode(s.zapLog) {
 	case config.ServerModeLambda:

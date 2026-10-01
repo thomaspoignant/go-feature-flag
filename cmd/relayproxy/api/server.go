@@ -1,9 +1,9 @@
 package api
 
 import (
-	"context"
 	"net/http"
 	"strings"
+	"sync"
 
 	echootel "github.com/labstack/echo-otel/v5"
 	echoprometheus "github.com/labstack/echo-prometheus"
@@ -34,14 +34,16 @@ func New(config *config.Config,
 	services service.Services,
 	zapLog *zap.Logger,
 ) Server {
+	stopRequested := make(chan struct{})
 	s := Server{
-		config:      config,
-		services:    services,
-		zapLog:      zapLog,
-		otelService: opentelemetry.NewOtelService(),
-		stopped:     make(chan struct{}),
+		config:        config,
+		services:      services,
+		zapLog:        zapLog,
+		otelService:   opentelemetry.NewOtelService(),
+		stopRequested: stopRequested,
+		stop:          sync.OnceFunc(func() { close(stopRequested) }),
+		stopped:       make(chan struct{}),
 	}
-	s.stopCtx, s.stop = context.WithCancel(context.Background())
 	s.apiEcho = echo.New()
 	s.initRoutes()
 	return s
@@ -56,9 +58,10 @@ type Server struct {
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
 
-	// stopCtx is cancelled by Stop to gracefully shut down the servers started by StartWithContext.
-	stopCtx context.Context
-	stop    context.CancelFunc
+	// stopRequested is closed (once, by stop) when Stop is called, to gracefully shut down
+	// the servers started by StartWithContext.
+	stopRequested chan struct{}
+	stop          func()
 	// stopped is closed when StartWithContext returns.
 	stopped chan struct{}
 }
