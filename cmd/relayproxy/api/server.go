@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	echootel "github.com/labstack/echo-otel/v5"
@@ -88,7 +89,7 @@ func (s *Server) initRoutes() {
 			},
 		}))
 	}
-	s.apiEcho.Use(middleware.CORS("*"))
+	s.apiEcho.Use(corsMiddleware())
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
 		Skipper: func(_ *echo.Context) bool {
@@ -135,6 +136,19 @@ func (s *Server) initRoutes() {
 	s.addMonitoringRoutes()
 	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)
+}
+
+// corsMiddleware allows any origin and answers every preflight with a fixed list of methods.
+// AllowMethods is set explicitly because, when left empty, echo v5 answers the preflight with
+// the methods registered on the route, which would change the CORS contract of the relay proxy.
+func corsMiddleware() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet, http.MethodHead, http.MethodPut,
+			http.MethodPatch, http.MethodPost, http.MethodDelete,
+		},
+	})
 }
 
 func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {
