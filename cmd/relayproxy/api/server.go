@@ -55,13 +55,11 @@ type Server struct {
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
 func (s *Server) initRoutes() {
-	s.apiEcho.HideBanner = true
-	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.IsDebugEnabled()
+	s.apiEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
@@ -84,7 +82,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(middleware.CORS())
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-		Skipper: func(_ echo.Context) bool {
+		Skipper: func(_ *echo.Context) bool {
 			return s.config.DisableVersionHeader
 		},
 		RelayProxyConfig: s.config,

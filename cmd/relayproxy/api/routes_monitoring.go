@@ -14,13 +14,11 @@ import (
 func (s *Server) addMonitoringRoutes() {
 	if s.config.EffectiveMonitoringPort(s.zapLog) != 0 {
 		s.monitoringEcho = echo.New()
-		s.monitoringEcho.HideBanner = true
-		s.monitoringEcho.HidePort = true
-		s.monitoringEcho.Debug = s.config.IsDebugEnabled()
+		s.monitoringEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
 		s.monitoringEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 		s.monitoringEcho.Use(middleware.CORS())
 		s.monitoringEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-			Skipper: func(_ echo.Context) bool {
+			Skipper: func(_ *echo.Context) bool {
 				return s.config.DisableVersionHeader
 			},
 			RelayProxyConfig: s.config,

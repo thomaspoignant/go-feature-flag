@@ -4,12 +4,13 @@ import (
 	"sync"
 
 	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/zap"
 )
 
 // bodyDumpHandler logs request bodies with truncation for large payloads.
 // Bodies larger than maxBodyLogSize are truncated and suffixed with a marker.
-func bodyDumpHandler(logger *zap.Logger) func(echo.Context, []byte, []byte) {
+func bodyDumpHandler(logger *zap.Logger) middleware.BodyDumpHandler {
 	maxBodyLogSize := 8192 // 8KiB
 	truncatedBodySuffix := []byte("... truncated ...")
 	truncatedSize := maxBodyLogSize + len(truncatedBodySuffix)
@@ -24,15 +25,17 @@ func bodyDumpHandler(logger *zap.Logger) func(echo.Context, []byte, []byte) {
 		},
 	}
 
-	return func(_ echo.Context, reqBody []byte, _ []byte) {
-		if len(reqBody) > maxBodyLogSize {
-			bufPtr := bufferPool.Get().(*[]byte)
-			truncated := *bufPtr
-			copy(truncated[:maxBodyLogSize], reqBody[:maxBodyLogSize])
-			logger.Debug("Request info", zap.ByteString("request_body", truncated))
-			bufferPool.Put(bufPtr)
-		} else {
+	return func(_ *echo.Context, reqBody []byte, _ []byte, _ error) {
+		if len(reqBody) <= maxBodyLogSize {
 			logger.Debug("Request info", zap.ByteString("request_body", reqBody))
+			return
 		}
+
+		// body is too large, truncate the request body and log it
+		bufPtr := bufferPool.Get().(*[]byte)
+		truncated := *bufPtr
+		copy(truncated[:maxBodyLogSize], reqBody[:maxBodyLogSize])
+		logger.Debug("Request info", zap.ByteString("request_body", truncated))
+		bufferPool.Put(bufPtr)
 	}
 }
