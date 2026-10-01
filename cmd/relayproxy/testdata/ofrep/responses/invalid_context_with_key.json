@@ -1,5 +1,5 @@
 {
   "errorCode": "INVALID_CONTEXT",
-  "errorDetails": "code=400, message=unexpected EOF, internal=unexpected EOF",
+  "errorDetails": "code=400, message=Bad Request, err=unexpected end of JSON input",
   "key": "number-flag"
 }

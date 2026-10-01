@@ -1,10 +1,10 @@
 package api
 
 import (
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo-contrib/pprof"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo-contrib/v5/pprof"
+	echoprometheus "github.com/labstack/echo-prometheus"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
@@ -14,13 +14,11 @@ import (
 func (s *Server) addMonitoringRoutes() {
 	if s.config.EffectiveMonitoringPort(s.zapLog) != 0 {
 		s.monitoringEcho = echo.New()
-		s.monitoringEcho.HideBanner = true
-		s.monitoringEcho.HidePort = true
-		s.monitoringEcho.Debug = s.config.IsDebugEnabled()
+		s.monitoringEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
 		s.monitoringEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
-		s.monitoringEcho.Use(middleware.CORS())
+		s.monitoringEcho.Use(corsMiddleware())
 		s.monitoringEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-			Skipper: func(_ echo.Context) bool {
+			Skipper: func(_ *echo.Context) bool {
 				return s.config.DisableVersionHeader
 			},
 			RelayProxyConfig: s.config,

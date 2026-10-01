@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -55,7 +55,7 @@ func NewCollectEvalData(
 // @Failure 	 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/data/collector [post]
-func (h *collectEvalData) Handler(c echo.Context) error {
+func (h *collectEvalData) Handler(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	tracer := otel.Tracer(configfile.OtelTracerName)

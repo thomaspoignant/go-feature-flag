@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
@@ -21,7 +21,7 @@ func VersionHeader(cfg VersionHeaderConfig) echo.MiddlewareFunc {
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			if skipper(c) {
 				return next(c)
 			}
@@ -32,6 +32,6 @@ func VersionHeader(cfg VersionHeaderConfig) echo.MiddlewareFunc {
 	}
 }
 
-func DefaultVersionHeaderSkipper(_ echo.Context) bool {
+func DefaultVersionHeaderSkipper(_ *echo.Context) bool {
 	return false
 }
