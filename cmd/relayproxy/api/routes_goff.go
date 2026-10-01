@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/labstack/echo/v5"
+	etag "github.com/pablor21/echo-etag/v5"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
-	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 )
 
 func (s *Server) addGOFFRoutes(
@@ -18,8 +18,8 @@ func (s *Server) addGOFFRoutes(
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
 	v1.Use(authMiddleware)
-	v1.Use(helpermiddleware.EtagWithConfig(helpermiddleware.EtagConfig{
-		Skipper: func(c echo.Context) bool {
+	v1.Use(etag.WithConfig(etag.Config{
+		Skipper: func(c *echo.Context) bool {
 			switch c.Path() {
 			case
 				"/v1/flag/change",
