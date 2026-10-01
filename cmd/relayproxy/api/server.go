@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"strings"
 
 	echootel "github.com/labstack/echo-otel/v5"
@@ -37,7 +38,9 @@ func New(config *config.Config,
 		services:    services,
 		zapLog:      zapLog,
 		otelService: opentelemetry.NewOtelService(),
+		stopped:     make(chan struct{}),
 	}
+	s.stopCtx, s.stop = context.WithCancel(context.Background())
 	s.apiEcho = echo.New()
 	s.initRoutes()
 	return s
@@ -51,6 +54,12 @@ type Server struct {
 	services       service.Services
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
+
+	// stopCtx is cancelled by Stop to gracefully shut down the servers started by StartWithContext.
+	stopCtx context.Context
+	stop    context.CancelFunc
+	// stopped is closed when StartWithContext returns.
+	stopped chan struct{}
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
@@ -79,7 +88,7 @@ func (s *Server) initRoutes() {
 			},
 		}))
 	}
-	s.apiEcho.Use(middleware.CORS())
+	s.apiEcho.Use(middleware.CORS("*"))
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
 		Skipper: func(_ *echo.Context) bool {
