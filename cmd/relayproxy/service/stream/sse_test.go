@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -196,16 +197,7 @@ func TestSSEService_Comments(t *testing.T) {
 			defer resp.Body.Close()
 			require.Equal(t, tt.wantStatus, resp.StatusCode)
 
-			var lines []string
-			reader := bufio.NewReader(resp.Body)
-			for {
-				line, err := reader.ReadString('\n')
-				if err != nil {
-					break // end of the body or timeout
-				}
-				lines = append(lines, line)
-			}
-
+			lines := readLines(resp.Body)
 			if tt.wantConnected {
 				// No event is broadcast: the first bytes of the body must be the connection comment,
 				// otherwise some browsers (e.g. Firefox) never fire the EventSource "open" event.
@@ -215,17 +207,35 @@ func TestSSEService_Comments(t *testing.T) {
 			} else {
 				assert.NotContains(t, lines, ": connected\n")
 			}
+			heartbeats := countLine(lines, ": heartbeat\n")
 			if tt.wantHeartbeat {
-				heartbeats := 0
-				for _, line := range lines {
-					if line == ": heartbeat\n" {
-						heartbeats++
-					}
-				}
 				assert.GreaterOrEqual(t, heartbeats, 2, "should receive heartbeats before the timeout")
 			} else {
-				assert.NotContains(t, lines, ": heartbeat\n")
+				assert.Zero(t, heartbeats)
 			}
 		})
 	}
+}
+
+// readLines reads the body line by line until it ends or the request times out.
+func readLines(body io.Reader) []string {
+	var lines []string
+	reader := bufio.NewReader(body)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			return lines
+		}
+		lines = append(lines, line)
+	}
+}
+
+func countLine(lines []string, want string) int {
+	count := 0
+	for _, line := range lines {
+		if line == want {
+			count++
+		}
+	}
+	return count
 }
