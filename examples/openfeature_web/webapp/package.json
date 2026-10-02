@@ -48,7 +48,7 @@
     "posthtml-modules": "^0.9.1",
     "sass": "^1.105.0",
     "stylelint": "^17.15.0",
-    "webpack": "^5.111.0",
+    "webpack": "^5.111.1",
     "webpack-cli": "^7.2.3"
   },
   "dependencies": {
