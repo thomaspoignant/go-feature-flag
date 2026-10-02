@@ -1,4 +1,3 @@
-version: '3'
 services:
   gofeatureflag:
     image: thomaspoignant/go-feature-flag
