@@ -311,3 +311,14 @@ func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertUpdatedFlagsToDiscordEmbed_diffError(t *testing.T) {
+	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
+	})
+	require.Len(t, embeds, 1)
+	require.Len(t, embeds[0].Fields, 1)
+	assert.Equal(t, notifier.ChangesUnavailable, embeds[0].Fields[0].Name)
+	assert.Contains(t, embeds[0].Fields[0].Value, "impossible to compute flag changes")
+}

@@ -205,3 +205,11 @@ func (rt *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	req.Body = io.NopCloser(bytes.NewBuffer(body))
 	return rt.response, nil
 }
+
+func TestConvertToMicrosoftTeamsMessage_diffError(t *testing.T) {
+	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	msg := convertToMicrosoftTeamsMessage(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
+	})
+	assert.Contains(t, msg, notifier.ChangesUnavailable+": impossible to compute flag changes")
+}

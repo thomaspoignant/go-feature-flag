@@ -215,3 +215,14 @@ func TestSlackNotifier_Notify(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertUpdatedFlagsToSlackMessage_diffError(t *testing.T) {
+	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
+	})
+	assert.Len(t, attachments, 1)
+	assert.Len(t, attachments[0].Fields, 1)
+	assert.Equal(t, notifier.ChangesUnavailable, attachments[0].Fields[0].Title)
+	assert.Contains(t, attachments[0].Fields[0].Value, "impossible to compute flag changes")
+}

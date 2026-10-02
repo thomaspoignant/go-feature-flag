@@ -119,8 +119,11 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
-		changes := notifier.FlagChanges(value.Before, value.After)
-		fields := make([]embedField, 0, len(changes))
+		changes, err := notifier.FlagChanges(value.Before, value.After)
+		fields := make([]embedField, 0, len(changes)+1)
+		if err != nil {
+			fields = append(fields, embedField{Name: notifier.ChangesUnavailable, Value: err.Error()})
+		}
 		for _, change := range changes {
 			fieldValue := fmt.Sprintf("%s => %s", change.From, change.To)
 			short := len(fieldValue) < longDiscordField

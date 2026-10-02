@@ -116,7 +116,14 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Fields:     []Field{},
 		}
 
-		for _, change := range notifier.FlagChanges(value.Before, value.After) {
+		changes, err := notifier.FlagChanges(value.Before, value.After)
+		if err != nil {
+			attachment.Fields = append(
+				attachment.Fields,
+				Field{Title: notifier.ChangesUnavailable, Value: err.Error()},
+			)
+		}
+		for _, change := range changes {
 			value := fmt.Sprintf("%s => %s", change.From, change.To)
 			short := len(value) < longSlackAttachment
 			attachment.Fields = append(

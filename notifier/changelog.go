@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -19,10 +20,16 @@ type FieldChange struct {
 	To string
 }
 
+// ChangesUnavailable labels a notification entry for an update whose changes could not be computed.
+const ChangesUnavailable = "Changes could not be computed"
+
 // FlagChanges returns every field that changed between two versions of a flag,
 // sorted by path, including fields that were added or removed.
-func FlagChanges(before, after any) []FieldChange {
-	changelog, _ := diff.Diff(before, after, diff.AllowTypeMismatch(true))
+func FlagChanges(before, after any) ([]FieldChange, error) {
+	changelog, err := diff.Diff(before, after, diff.AllowTypeMismatch(true))
+	if err != nil {
+		return nil, fmt.Errorf("impossible to compute flag changes: %w", err)
+	}
 	changes := make([]FieldChange, 0, len(changelog))
 	for _, change := range changelog {
 		changes = append(changes, FieldChange{
@@ -32,7 +39,7 @@ func FlagChanges(before, after any) []FieldChange {
 		})
 	}
 	sort.SliceStable(changes, func(i, j int) bool { return changes[i].Path < changes[j].Path })
-	return changes
+	return changes, nil
 }
 
 // ReadableValue renders a value for humans: JSON for anything JSON can encode,

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -99,9 +100,19 @@ func TestFlagChanges(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			after := baseFlag()
 			tt.update(after)
-			assert.Equal(t, tt.want, notifier.FlagChanges(baseFlag(), after))
+			got, err := notifier.FlagChanges(baseFlag(), after)
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestFlagChanges_error(t *testing.T) {
+	before := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	after := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	got, err := notifier.FlagChanges(before, after)
+	assert.ErrorContains(t, err, "impossible to compute flag changes")
+	assert.Nil(t, got)
 }
 
 func TestReadableValue(t *testing.T) {

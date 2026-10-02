@@ -69,7 +69,11 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
 	for _, key := range updatedKeys {
 		value := diffCache.Updated[key]
 		msgText += fmt.Sprintf("\n * ✏️ Flag **%s** updated", key)
-		for _, change := range notifier.FlagChanges(value.Before, value.After) {
+		changes, err := notifier.FlagChanges(value.Before, value.After)
+		if err != nil {
+			msgText += fmt.Sprintf("\n   * %s: %s", notifier.ChangesUnavailable, err)
+		}
+		for _, change := range changes {
 			msgText += fmt.Sprintf("\n   * %s: %s => %s", change.Path, change.From, change.To)
 		}
 	}
