@@ -272,22 +272,42 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 }
 
 func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
-	after := map[string]any{}
-	for i := 0; i < 30; i++ {
-		after[fmt.Sprintf("key%02d", i)] = i
+	tests := []struct {
+		name         string
+		changes      int
+		wantSummary  bool
+		wantNotShown string
+	}{
+		{name: "below the limit", changes: 24},
+		{name: "at the limit", changes: 25},
+		{name: "one over the limit", changes: 26, wantSummary: true, wantNotShown: "2 more changes not shown."},
+		{name: "well over the limit", changes: 30, wantSummary: true, wantNotShown: "6 more changes not shown."},
 	}
-	embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
-		Updated: map[string]notifier.DiffUpdated{
-			"test-flag": {
-				Before: &flag.InternalFlag{Metadata: &map[string]any{}},
-				After:  &flag.InternalFlag{Metadata: &after},
-			},
-		},
-	})
-	require.Len(t, embeds, 1)
-	fields := embeds[0].Fields
-	require.Len(t, fields, maxDiscordFields)
-	assert.Equal(t, "Metadata.key00", fields[0].Name)
-	assert.Equal(t, "Too many changes to show", fields[maxDiscordFields-1].Name)
-	assert.Equal(t, "6 more changes not shown.", fields[maxDiscordFields-1].Value)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			after := map[string]any{}
+			for i := 0; i < tt.changes; i++ {
+				after[fmt.Sprintf("key%02d", i)] = i
+			}
+			embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
+				Updated: map[string]notifier.DiffUpdated{
+					"test-flag": {
+						Before: &flag.InternalFlag{Metadata: &map[string]any{}},
+						After:  &flag.InternalFlag{Metadata: &after},
+					},
+				},
+			})
+			require.Len(t, embeds, 1)
+			fields := embeds[0].Fields
+			assert.Equal(t, "Metadata.key00", fields[0].Name)
+			if !tt.wantSummary {
+				require.Len(t, fields, tt.changes)
+				assert.Equal(t, fmt.Sprintf("Metadata.key%02d", tt.changes-1), fields[len(fields)-1].Name)
+				return
+			}
+			require.Len(t, fields, maxDiscordFields)
+			assert.Equal(t, "Too many changes to show", fields[maxDiscordFields-1].Name)
+			assert.Equal(t, tt.wantNotShown, fields[maxDiscordFields-1].Value)
+		})
+	}
 }
