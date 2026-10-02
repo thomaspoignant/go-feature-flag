@@ -4,7 +4,7 @@ import Link from '@docusaurus/Link';
 export function HowItWorks() {
   return (
     <section
-      className="py-[3rem] text-center"
+      className="py-[3rem] px-4 text-center"
       aria-labelledby="how-it-works-title">
       <span
         id="how-it-works-title"
@@ -22,7 +22,7 @@ export function HowItWorks() {
           <strong>exporters</strong> plug into the stack you are using.
         </p>
       </div>
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto">
         <div className="rounded-2xl bg-white dark:bg-white/95 p-6 md:p-8 shadow-xs border border-solid border-[#273437]/10">
           <img
             src="/docs/openfeature/architecture.svg"
