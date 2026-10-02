@@ -132,8 +132,8 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 									},
 								},
 								Experimentation: &flag.ExperimentationRollout{
-									Start: testconvert.Time(time.Unix(1095379400, 0)),
-									End:   testconvert.Time(time.Unix(1095371000, 0)),
+									Start: testconvert.Time(time.Unix(1095379400, 0).UTC()),
+									End:   testconvert.Time(time.Unix(1095371000, 0).UTC()),
 								},
 							},
 							After: &flag.InternalFlag{

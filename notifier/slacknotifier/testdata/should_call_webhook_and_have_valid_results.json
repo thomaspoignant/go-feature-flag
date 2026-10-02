@@ -15,52 +15,52 @@
       "fields": [
         {
           "title": "DefaultRule.Percentages",
-          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "short": false
+          "value": "{\"False\":0,\"True\":100} => null",
+          "short": true
         },
         {
           "title": "DefaultRule.VariationResult",
-          "value": "nil =\u003e (*string)(\"Default\")",
+          "value": "null => \"Default\"",
           "short": true
         },
         {
           "title": "Disable",
-          "value": "nil =\u003e (*bool)(true)",
+          "value": "null => true",
           "short": true
         },
         {
           "title": "Experimentation",
-          "value": "(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil",
+          "value": "{\"start\":\"2004-09-17T00:03:20Z\",\"end\":\"2004-09-16T21:43:20Z\"} => null",
           "short": false
         },
         {
           "title": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}",
+          "value": "null => [{\"name\":\"rule1\",\"query\":\"key eq \\\"not-a-ke\\\"\",\"percentage\":{\"False\":20,\"True\":80}}]",
           "short": false
         },
         {
           "title": "TrackEvents",
-          "value": "nil =\u003e (*bool)(false)",
+          "value": "null => false",
           "short": true
         },
         {
           "title": "Variations.Default",
-          "value": "false =\u003e \"strDefault\"",
+          "value": "false => \"strDefault\"",
           "short": true
         },
         {
           "title": "Variations.False",
-          "value": "false =\u003e \"strFalse\"",
+          "value": "false => \"strFalse\"",
           "short": true
         },
         {
           "title": "Variations.True",
-          "value": "true =\u003e \"strTrue\"",
+          "value": "true => \"strTrue\"",
           "short": true
         },
         {
           "title": "Version",
-          "value": "nil =\u003e (*string)(\"1.1\")",
+          "value": "null => \"1.1\"",
           "short": true
         }
       ],
