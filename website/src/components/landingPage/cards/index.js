@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Link from '@docusaurus/Link';
 
 const CARD_CLASS =
-  'flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 shadow-sm transition-shadow duration-200 hover:shadow-md dark:border-gray-700 dark:bg-[#1f2024]';
+  'flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 shadow-xs transition-shadow duration-200 hover:shadow-md dark:border-gray-700 dark:bg-[#1f2024]';
 
 const COLUMN_CLASS = {
   2: 'sm:grid-cols-2',

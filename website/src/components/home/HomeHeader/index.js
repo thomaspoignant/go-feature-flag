@@ -10,13 +10,13 @@ import useGitHubStars from '@site/src/hooks/useGitHubStars';
 function GetStartedButton() {
   return (
     <div className="relative inline-flex group">
-      <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
+      <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-linear-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
       <Link
         to={'/docs/'}
         title="Get Started with GO Feature Flag"
         data-ga-event="install"
         data-ga-method="get_started_cta"
-        className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden border-2 border-solid border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+        className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden border-2 border-solid border-transparent focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
         <FaArrowAltCircleRight className="mr-2" />
         Get Started in 60 seconds
       </Link>
@@ -37,7 +37,7 @@ function ViewOnGitHubButton() {
       <Link
         to={siteConfig.customFields.github}
         title={githubLinkTitle}
-        className="hover:no-underline inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-gray-800 dark:text-gray-100 hover:text-white bg-transparent hover:bg-[#9fbeb3] border-2 border-solid border-[#9fbeb3] transition-all duration-200 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+        className="hover:no-underline inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-gray-800 dark:text-gray-100 hover:text-white bg-transparent hover:bg-[#9fbeb3] border-2 border-solid border-[#9fbeb3] transition-all duration-200 font-pj rounded-xl focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
         <i className="fa-brands fa-github mr-4" aria-hidden="true"></i>
         View on GitHub
         {(githubStars !== null || !failed) && (

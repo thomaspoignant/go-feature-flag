@@ -95,7 +95,7 @@ function CopyButton({code, analyticsEvent, analyticsMethod}) {
         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-poppins font-medium',
         'text-gray-700 dark:text-gray-200',
         'bg-gray-100 hover:bg-gray-200 dark:bg-[#2a2a2a] dark:hover:bg-[#363636]',
-        'transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ifm-color-primary)]'
+        'transition-colors focus:outline-hidden focus:ring-2 focus:ring-[var(--ifm-color-primary)]'
       )}>
       {copied ? (
         <CheckIcon className="w-3.5 h-3.5 text-[var(--ifm-color-primary)]" />
@@ -211,7 +211,7 @@ export function CodeCard({
                 className={clsx(
                   'px-3 pt-1.5 pb-2 -mb-px text-sm font-medium font-poppins whitespace-nowrap',
                   'bg-transparent border-0 border-b-2 border-solid transition-colors',
-                  'focus:outline-none focus-visible:outline-none',
+                  'focus:outline-hidden focus-visible:outline-hidden',
                   isActive
                     ? 'border-b-[var(--ifm-color-primary)] text-[var(--ifm-color-primary)]'
                     : 'border-b-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'

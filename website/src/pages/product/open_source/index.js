@@ -188,7 +188,7 @@ export default function OpenSourcePage() {
         title="Everything, in the open, under MIT"
         media={
           <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
-            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
               <FaBalanceScale className="h-9 w-9 shrink-0 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
               <div>
                 <p className="m-0 text-lg font-bold text-gray-800 dark:text-gray-50">
@@ -199,7 +199,7 @@ export default function OpenSourcePage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
               <RiOpenSourceFill className="h-9 w-9 shrink-0 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
               <div>
                 <p className="m-0 text-lg font-bold text-gray-800 dark:text-gray-50">
@@ -241,13 +241,13 @@ export default function OpenSourcePage() {
         reverse
         media={
           <div className="mx-auto grid w-full max-w-sm grid-cols-1 gap-4">
-            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
               <FaComments className="h-9 w-9 shrink-0 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
               <p className="m-0 font-semibold text-gray-800 dark:text-gray-50">
                 An active Slack channel for questions and help
               </p>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+            <div className="flex items-center gap-4 rounded-2xl border border-solid border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
               <FaUsers className="h-9 w-9 shrink-0 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
               <p className="m-0 font-semibold text-gray-800 dark:text-gray-50">
                 A growing list of companies running it in production
@@ -289,7 +289,7 @@ export default function OpenSourcePage() {
           are two ways to help, both of them genuinely appreciated.
         </p>
         <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 text-left shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+          <div className="flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 text-left shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
             <FaHeart className="mb-4 h-9 w-9 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
             <h3 className="m-0 text-2xl font-bold text-gray-800 dark:text-gray-50">
               Sponsor on GitHub
@@ -304,7 +304,7 @@ export default function OpenSourcePage() {
               <FaHeart /> Become a sponsor
             </Link>
           </div>
-          <div className="flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 text-left shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+          <div className="flex h-full flex-col rounded-2xl border border-solid border-gray-200 bg-white p-8 text-left shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
             <FaUsers className="mb-4 h-9 w-9 text-[color:var(--ifm-color-primary-dark)] dark:text-[color:var(--ifm-color-primary)]" />
             <h3 className="m-0 text-2xl font-bold text-gray-800 dark:text-gray-50">
               Add yourself to the adopters
@@ -327,7 +327,7 @@ export default function OpenSourcePage() {
         eyebrow="Need a hand?"
         title="Paid support, when community help isn't enough"
         media={
-          <div className="mx-auto w-full max-w-sm rounded-2xl border border-solid border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-[#1f2024]">
+          <div className="mx-auto w-full max-w-sm rounded-2xl border border-solid border-gray-200 bg-white p-8 shadow-xs dark:border-gray-700 dark:bg-[#1f2024]">
             <p className="m-0 mb-5 text-sm font-semibold uppercase tracking-wide text-titles-500">
               Enterprise support includes
             </p>

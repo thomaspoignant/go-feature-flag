@@ -11,7 +11,7 @@ export default function BlogHero({post}) {
   return (
     <Link
       to={post.permalink}
-      className="group mb-12 grid grid-cols-1 gap-8 overflow-hidden rounded-3xl border border-solid border-gray-200 bg-white no-underline shadow-sm transition-shadow duration-200 hover:no-underline hover:shadow-lg dark:border-gray-700 dark:bg-[#1f2024] lg:grid-cols-2 lg:gap-0">
+      className="group mb-12 grid grid-cols-1 gap-8 overflow-hidden rounded-3xl border border-solid border-gray-200 bg-white no-underline shadow-xs transition-shadow duration-200 hover:no-underline hover:shadow-lg dark:border-gray-700 dark:bg-[#1f2024] lg:grid-cols-2 lg:gap-0">
       {/* See BlogPostCard: `object-contain` keeps wide banners readable. */}
       <div className="aspect-[1200/630] overflow-hidden bg-gray-50 dark:bg-gray-800 lg:aspect-auto lg:h-full">
         <img

@@ -86,7 +86,7 @@ function Frame({tint = 'titles', children}) {
   return (
     <div
       className={
-        'not-prose my-8 p-5 md:p-6 rounded-2xl border border-solid border-[#273437]/10 dark:border-white/10 bg-gradient-to-b ' +
+        'not-prose my-8 p-5 md:p-6 rounded-2xl border border-solid border-[#273437]/10 dark:border-white/10 bg-linear-to-b ' +
         from +
         ' to-transparent'
       }>
@@ -174,7 +174,7 @@ export function AfterDiagram() {
           />
         </div>
         <DownArrow />
-        <div className="w-full max-w-md px-4 py-3 rounded-xl bg-titles-500/90 text-[#273437] font-bold shadow-sm">
+        <div className="w-full max-w-md px-4 py-3 rounded-xl bg-titles-500/90 text-[#273437] font-bold shadow-xs">
           <i className="fa-solid fa-plug mr-2" aria-hidden />{' '}
           OpenFeature API
           <span className="block text-xs font-semibold opacity-80">
@@ -182,7 +182,7 @@ export function AfterDiagram() {
           </span>
         </div>
         <DownArrow />
-        <div className="w-full max-w-md px-4 py-3 rounded-xl bg-[#18b192] text-white font-bold shadow-sm">
+        <div className="w-full max-w-md px-4 py-3 rounded-xl bg-[#18b192] text-white font-bold shadow-xs">
           <i className="fa-solid fa-bolt mr-2" aria-hidden />{' '}
           GO Feature Flag RelayProxy
           <span className="block text-xs font-semibold opacity-90">
