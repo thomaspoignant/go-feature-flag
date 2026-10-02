@@ -6,7 +6,7 @@ import clsx from 'clsx';
 export function Whatis() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <section className="py-[1.5rem] text-center bg-gray-100 dark:bg-[#363636]">
+    <section className="py-[1.5rem] px-4 text-center bg-gray-100 dark:bg-[#363636]">
       <span className="text-gray-800 dark:text-gray-50 text-5xl font-poppins font-bold tracking-[-0.18rem]">
         What is GO Feature Flag?
       </span>
