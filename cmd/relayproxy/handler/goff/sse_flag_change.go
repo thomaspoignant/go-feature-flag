@@ -38,6 +38,8 @@ type sseFlagChange struct {
 // @Description  It is advertised in the `eventStreams` field of the OFREP bulk evaluation response.
 // @Description  Each event is sent as `event: message` with a `model.OFREPSSEEvent` JSON payload,
 // @Description  a `refetchEvaluation` event means that the provider must re-fetch its evaluations.
+// @Description  The stream also sends SSE comment lines (`: connected` when the connection opens,
+// @Description  `: heartbeat` every 30 seconds), they are ignored by SSE clients.
 // @Description  The full URL (including query string) is sensitive and must not be logged
 // @Description  or persisted by intermediaries.
 // @Produce      text/event-stream

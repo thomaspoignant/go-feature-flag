@@ -136,51 +136,96 @@ func TestSSEService_Close(t *testing.T) {
 	sseService.Close()
 }
 
-// connectSSE opens an SSE connection on the service and returns a reader on the response body.
-func connectSSE(t *testing.T, ctx context.Context, sseService stream.SSEService) *bufio.Reader {
-	t.Helper()
-	srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
-	t.Cleanup(srv.Close)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"?stream=flagsetA", nil)
-	require.NoError(t, err)
-	resp, err := http.DefaultClient.Do(req)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = resp.Body.Close() })
-	require.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "text/event-stream", resp.Header.Get("Content-Type"))
-	return bufio.NewReader(resp.Body)
-}
+func TestSSEService_Comments(t *testing.T) {
+	tests := []struct {
+		name              string
+		query             string
+		heartbeatInterval time.Duration
+		wantStatus        int
+		wantConnected     bool
+		wantHeartbeat     bool
+	}{
+		{
+			name:              "connected comment is the first bytes of the body",
+			query:             "?stream=flagsetA",
+			heartbeatInterval: 0,
+			wantStatus:        http.StatusOK,
+			wantConnected:     true,
+			wantHeartbeat:     false,
+		},
+		{
+			name:              "heartbeat comments are sent periodically",
+			query:             "?stream=flagsetA",
+			heartbeatInterval: 50 * time.Millisecond,
+			wantStatus:        http.StatusOK,
+			wantConnected:     true,
+			wantHeartbeat:     true,
+		},
+		{
+			name:              "negative interval disables the heartbeat",
+			query:             "?stream=flagsetA",
+			heartbeatInterval: -1,
+			wantStatus:        http.StatusOK,
+			wantConnected:     true,
+			wantHeartbeat:     false,
+		},
+		{
+			name:              "no connected comment on an error response",
+			query:             "",
+			heartbeatInterval: 50 * time.Millisecond,
+			wantStatus:        http.StatusInternalServerError,
+			wantConnected:     false,
+			wantHeartbeat:     false,
+		},
+	}
 
-func TestSSEService_SendsConnectedCommentOnConnect(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	sseService := stream.NewSSEService(stream.WithSSEHeartbeatInterval(0))
-	defer sseService.Close()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// The body is read until this timeout, it leaves time for several heartbeats.
+			ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+			defer cancel()
+			sseService := stream.NewSSEService(stream.WithSSEHeartbeatInterval(tt.heartbeatInterval))
+			defer sseService.Close()
 
-	// No event is broadcast: the first bytes of the body must be the connection comment,
-	// otherwise some browsers (e.g. Firefox) never fire the EventSource "open" event.
-	reader := connectSSE(t, ctx, sseService)
-	line, err := reader.ReadString('\n')
-	require.NoError(t, err)
-	assert.Equal(t, ": connected\n", line)
-	line, err = reader.ReadString('\n')
-	require.NoError(t, err)
-	assert.Equal(t, "\n", line, "the comment must be terminated by a blank line")
-}
+			srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
+			defer srv.Close()
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+tt.query, nil)
+			require.NoError(t, err)
+			resp, err := http.DefaultClient.Do(req)
+			require.NoError(t, err)
+			defer resp.Body.Close()
+			require.Equal(t, tt.wantStatus, resp.StatusCode)
 
-func TestSSEService_SendsHeartbeat(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	sseService := stream.NewSSEService(stream.WithSSEHeartbeatInterval(50 * time.Millisecond))
-	defer sseService.Close()
+			var lines []string
+			reader := bufio.NewReader(resp.Body)
+			for {
+				line, err := reader.ReadString('\n')
+				if err != nil {
+					break // end of the body or timeout
+				}
+				lines = append(lines, line)
+			}
 
-	reader := connectSSE(t, ctx, sseService)
-	heartbeats := 0
-	for heartbeats < 2 {
-		line, err := reader.ReadString('\n')
-		require.NoError(t, err, "should receive heartbeats before the timeout")
-		if line == ": heartbeat\n" {
-			heartbeats++
-		}
+			if tt.wantConnected {
+				// No event is broadcast: the first bytes of the body must be the connection comment,
+				// otherwise some browsers (e.g. Firefox) never fire the EventSource "open" event.
+				require.GreaterOrEqual(t, len(lines), 2)
+				assert.Equal(t, ": connected\n", lines[0])
+				assert.Equal(t, "\n", lines[1], "the comment must be terminated by a blank line")
+			} else {
+				assert.NotContains(t, lines, ": connected\n")
+			}
+			if tt.wantHeartbeat {
+				heartbeats := 0
+				for _, line := range lines {
+					if line == ": heartbeat\n" {
+						heartbeats++
+					}
+				}
+				assert.GreaterOrEqual(t, heartbeats, 2, "should receive heartbeats before the timeout")
+			} else {
+				assert.NotContains(t, lines, ": heartbeat\n")
+			}
+		})
 	}
 }
