@@ -134,8 +134,8 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 		if len(fields) > maxDiscordFields {
 			hidden := len(fields) - (maxDiscordFields - 1)
 			fields = append(fields[:maxDiscordFields-1], embedField{
-				Name:  "Too many changes to fit here",
-				Value: fmt.Sprintf("%d more changes, check the logs for the full list.", hidden),
+				Name:  "Too many changes to show",
+				Value: fmt.Sprintf("%d more changes not shown.", hidden),
 			})
 		}
 		embeds = append(embeds, embed{

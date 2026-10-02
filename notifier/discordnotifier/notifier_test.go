@@ -288,6 +288,6 @@ func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
 	fields := embeds[0].Fields
 	require.Len(t, fields, maxDiscordFields)
 	assert.Equal(t, "Metadata.key00", fields[0].Name)
-	assert.Equal(t, "Too many changes to fit here", fields[maxDiscordFields-1].Name)
-	assert.Equal(t, "6 more changes, check the logs for the full list.", fields[maxDiscordFields-1].Value)
+	assert.Equal(t, "Too many changes to show", fields[maxDiscordFields-1].Name)
+	assert.Equal(t, "6 more changes not shown.", fields[maxDiscordFields-1].Value)
 }
