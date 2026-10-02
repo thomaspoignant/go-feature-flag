@@ -22,6 +22,7 @@ const (
 	colorUpdated     = 16753920
 	colorAdded       = 32768
 	longDiscordField = 35
+	maxDiscordFields = 25
 )
 
 // Notifier is the component in charge of sending flag changes to Discord.
@@ -130,6 +131,13 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 			})
 		}
 		sort.Sort(byTitle(fields))
+		if len(fields) > maxDiscordFields {
+			hidden := len(fields) - (maxDiscordFields - 1)
+			fields = append(fields[:maxDiscordFields-1], embedField{
+				Name:  "Too many changes to fit here",
+				Value: fmt.Sprintf("%d more changes, check the logs for the full list.", hidden),
+			})
+		}
 		embeds = append(embeds, embed{
 			Title:  fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			Color:  colorUpdated,

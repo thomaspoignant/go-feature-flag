@@ -1,6 +1,7 @@
 package discordnotifier
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -268,4 +269,25 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
+	after := map[string]any{}
+	for i := 0; i < 30; i++ {
+		after[fmt.Sprintf("key%02d", i)] = i
+	}
+	embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{
+			"test-flag": {
+				Before: &flag.InternalFlag{Metadata: &map[string]any{}},
+				After:  &flag.InternalFlag{Metadata: &after},
+			},
+		},
+	})
+	require.Len(t, embeds, 1)
+	fields := embeds[0].Fields
+	require.Len(t, fields, maxDiscordFields)
+	assert.Equal(t, "Metadata.key00", fields[0].Name)
+	assert.Equal(t, "Too many changes to fit here", fields[maxDiscordFields-1].Name)
+	assert.Equal(t, "6 more changes, check the logs for the full list.", fields[maxDiscordFields-1].Value)
 }
