@@ -152,7 +152,3 @@ func (w *connectedCommentWriter) Flush() {
 	}
 	w.flusher.Flush()
 }
-
-func (w *connectedCommentWriter) Unwrap() http.ResponseWriter {
-	return w.ResponseWriter
-}
