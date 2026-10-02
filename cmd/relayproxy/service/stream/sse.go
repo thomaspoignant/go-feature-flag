@@ -3,8 +3,10 @@ package stream
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/r3labs/sse/v2"
@@ -31,15 +33,28 @@ type SSEService interface {
 }
 
 // NewSSEService creates a new SSEService backed by r3labs/sse.
-func NewSSEService() SSEService {
+func NewSSEService(opts ...Option) SSEService {
 	server := sse.New()
 	server.AutoReplay = false
 	server.AutoStream = true
-	return &sseServiceImpl{server: server}
+	s := &sseServiceImpl{
+		server:        server,
+		activeStreams: map[string]int{},
+		done:          make(chan struct{}),
+	}
+	if interval := newOptions(opts...).sseHeartbeatInterval; interval > 0 {
+		go s.sendHeartbeats(interval)
+	}
+	return s
 }
 
 type sseServiceImpl struct {
 	server *sse.Server
+	// activeStreams counts the connected clients per stream, used to send the heartbeats.
+	activeStreams   map[string]int
+	muActiveStreams sync.Mutex
+	done            chan struct{}
+	closeOnce       sync.Once
 }
 
 // BroadcastFlagChanges only notifies that the flags changed, the diff is not sent:
@@ -62,6 +77,13 @@ func (s *sseServiceImpl) BroadcastFlagChanges(flagsetName string, _ notifier.Dif
 }
 
 func (s *sseServiceImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	streamID := r.URL.Query().Get("stream")
+	s.trackStream(streamID, 1)
+	defer s.trackStream(streamID, -1)
+
+	if flusher, ok := w.(http.Flusher); ok {
+		w = &connectedCommentWriter{ResponseWriter: w, flusher: flusher}
+	}
 	s.server.ServeHTTP(w, r)
 }
 
@@ -72,5 +94,65 @@ func (s *sseServiceImpl) SetOnSubscribe(fn func(streamID string)) {
 }
 
 func (s *sseServiceImpl) Close() {
+	s.closeOnce.Do(func() { close(s.done) })
 	s.server.Close()
+}
+
+func (s *sseServiceImpl) trackStream(streamID string, delta int) {
+	s.muActiveStreams.Lock()
+	defer s.muActiveStreams.Unlock()
+	s.activeStreams[streamID] += delta
+	if s.activeStreams[streamID] <= 0 {
+		delete(s.activeStreams, streamID)
+	}
+}
+
+// sendHeartbeats periodically sends an SSE comment on every stream with connected clients,
+// so that proxies and load balancers do not close the connections while no flag changes.
+func (s *sseServiceImpl) sendHeartbeats(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-s.done:
+			return
+		case <-ticker.C:
+			s.muActiveStreams.Lock()
+			streamIDs := make([]string, 0, len(s.activeStreams))
+			for streamID := range s.activeStreams {
+				streamIDs = append(streamIDs, streamID)
+			}
+			s.muActiveStreams.Unlock()
+			for _, streamID := range streamIDs {
+				s.server.TryPublish(streamID, &sse.Event{Comment: []byte("heartbeat")})
+			}
+		}
+	}
+}
+
+// connectedCommentWriter sends an SSE comment right after the response headers.
+// Some browsers (e.g. Firefox) fire the EventSource "open" event only once the first
+// bytes of the body are received: without it, clients stay "connecting" until the first event.
+type connectedCommentWriter struct {
+	http.ResponseWriter
+	flusher http.Flusher
+	status  int
+	sent    bool
+}
+
+func (w *connectedCommentWriter) WriteHeader(statusCode int) {
+	w.status = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (w *connectedCommentWriter) Flush() {
+	if !w.sent && w.status == http.StatusOK {
+		w.sent = true
+		_, _ = io.WriteString(w.ResponseWriter, ": connected\n\n")
+	}
+	w.flusher.Flush()
+}
+
+func (w *connectedCommentWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
 }

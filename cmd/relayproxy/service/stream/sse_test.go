@@ -102,6 +102,9 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 			scanner := bufio.NewScanner(resp.Body)
 			for scanner.Scan() {
 				line := scanner.Text()
+				if strings.HasPrefix(line, ":") {
+					continue // SSE comment (connection comment or heartbeat), ignored by clients
+				}
 				if line == "" && len(fields) > 0 {
 					break
 				}
@@ -131,4 +134,53 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 func TestSSEService_Close(t *testing.T) {
 	sseService := stream.NewSSEService()
 	sseService.Close()
+}
+
+// connectSSE opens an SSE connection on the service and returns a reader on the response body.
+func connectSSE(t *testing.T, ctx context.Context, sseService stream.SSEService) *bufio.Reader {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
+	t.Cleanup(srv.Close)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"?stream=flagsetA", nil)
+	require.NoError(t, err)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = resp.Body.Close() })
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "text/event-stream", resp.Header.Get("Content-Type"))
+	return bufio.NewReader(resp.Body)
+}
+
+func TestSSEService_SendsConnectedCommentOnConnect(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	sseService := stream.NewSSEService(stream.WithSSEHeartbeatInterval(0))
+	defer sseService.Close()
+
+	// No event is broadcast: the first bytes of the body must be the connection comment,
+	// otherwise some browsers (e.g. Firefox) never fire the EventSource "open" event.
+	reader := connectSSE(t, ctx, sseService)
+	line, err := reader.ReadString('\n')
+	require.NoError(t, err)
+	assert.Equal(t, ": connected\n", line)
+	line, err = reader.ReadString('\n')
+	require.NoError(t, err)
+	assert.Equal(t, "\n", line, "the comment must be terminated by a blank line")
+}
+
+func TestSSEService_SendsHeartbeat(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	sseService := stream.NewSSEService(stream.WithSSEHeartbeatInterval(50 * time.Millisecond))
+	defer sseService.Close()
+
+	reader := connectSSE(t, ctx, sseService)
+	heartbeats := 0
+	for heartbeats < 2 {
+		line, err := reader.ReadString('\n')
+		require.NoError(t, err, "should receive heartbeats before the timeout")
+		if line == ": heartbeat\n" {
+			heartbeats++
+		}
+	}
 }
