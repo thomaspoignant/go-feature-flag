@@ -24,8 +24,10 @@ requires-python = ">=3.10"
 dependencies = [
     "openfeature-sdk>=0.8.4,<0.11.0",
     "openfeature-provider-ofrep>=0.3.0",
+    # Not imported directly: floor for the transitive dep (via ofrep -> requests) to exclude CVE-affected versions.
+    "idna>=3.15",
     "pydantic>=2.13.4",
-    "urllib3>=2.7.0",
+    "urllib3>=2.8.0",
     "wasmtime>=47.0.1",
 ]
 
