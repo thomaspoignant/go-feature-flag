@@ -63,7 +63,7 @@ export function generateFeaturedCard({title, href, columnTitle = 'Explore'}) {
         href="${href}"
         class="no-underline hover:no-underline flex items-center gap-4 rounded-xl bg-gray-100 dark:bg-gray-800 p-3 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
       >
-        <span class="shrink-0 w-28 h-20 rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-teal-300"></span>
+        <span class="shrink-0 w-28 h-20 rounded-lg bg-linear-to-br from-indigo-500 via-purple-500 to-teal-300"></span>
         <span class="flex flex-col gap-3">
           <span class="text-sm font-poppins font-[500] text-gray-800 dark:text-gray-200 leading-snug">
             ${title}

@@ -8,7 +8,7 @@ import {postShape} from '../propTypes';
 // The whole card is a single link: one tab stop per post, and the entire
 // surface is clickable.
 const CARD_CLASS =
-  'group flex h-full flex-col overflow-hidden rounded-2xl border border-solid border-gray-200 bg-white no-underline shadow-sm transition-shadow duration-200 hover:no-underline hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-gray-700 dark:bg-[#1f2024] dark:focus-visible:ring-offset-[#1b1b1d]';
+  'group flex h-full flex-col overflow-hidden rounded-2xl border border-solid border-gray-200 bg-white no-underline shadow-xs transition-shadow duration-200 hover:no-underline hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-gray-700 dark:bg-[#1f2024] dark:focus-visible:ring-offset-[#1b1b1d]';
 
 export default function BlogPostCard({post}) {
   const image = useBaseUrl(post.image);

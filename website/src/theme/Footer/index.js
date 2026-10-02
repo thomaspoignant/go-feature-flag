@@ -41,7 +41,7 @@ const CustomForm = ({status, message, onValidated}) => {
   return (
     <div className={'text-center items-center'}>
       <input
-        className={clsx('w-full p-5 rounded rounded-2xl border-2 max-w-xl')}
+        className={clsx('w-full p-5 rounded-2xl border-2 max-w-xl')}
         ref={node => (email = node)}
         type="email"
         placeholder="Your Email"
@@ -64,7 +64,7 @@ const CustomForm = ({status, message, onValidated}) => {
       )}
       <button
         type="button"
-        className="w-full max-w-xl mt-4 h-12 rounded-2xl cursor-pointer text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium text-sm px-5 py-2.5 text-center me-2 mb-2"
+        className="w-full max-w-xl mt-4 h-12 rounded-2xl cursor-pointer text-white bg-linear-to-br from-purple-600 to-blue-500 hover:bg-linear-to-bl focus:ring-4 focus:outline-hidden focus:ring-blue-300 dark:focus:ring-blue-800 font-medium text-sm px-5 py-2.5 text-center me-2 mb-2"
         onClick={submit}>
         <i className="fa-regular fa-paper-plane"></i> Subscribe
       </button>

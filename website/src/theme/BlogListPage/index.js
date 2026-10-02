@@ -128,7 +128,7 @@ function BlogListPageContent({items, metadata: {blogTitle}}) {
             <button
               type="button"
               onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
-              className="cursor-pointer rounded-full border border-solid border-goff-600 bg-transparent px-8 py-3 font-semibold text-goff-700 transition-colors duration-150 hover:bg-goff-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-goff-400 dark:text-goff-300 dark:hover:bg-goff-500 dark:hover:text-gray-900 dark:focus-visible:ring-offset-[#1b1b1d]">
+              className="cursor-pointer rounded-full border border-solid border-goff-600 bg-transparent px-8 py-3 font-semibold text-goff-700 transition-colors duration-150 hover:bg-goff-600 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-goff-400 dark:text-goff-300 dark:hover:bg-goff-500 dark:hover:text-gray-900 dark:focus-visible:ring-offset-[#1b1b1d]">
               Load more ({remaining})
             </button>
           </div>

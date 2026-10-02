@@ -253,7 +253,7 @@ export function ComparisonTable() {
                         src={row.logo}
                         alt={`${row.tool} logo`}
                         loading="lazy"
-                        className="w-6 h-6 shrink-0 rounded object-contain"
+                        className="w-6 h-6 shrink-0 rounded-sm object-contain"
                       />
                     )}
                     <span className="inline-flex flex-col items-start gap-1">

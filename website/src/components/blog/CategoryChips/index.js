@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const BASE_CHIP_CLASS =
-  'cursor-pointer rounded-full border border-solid px-4 py-2 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1b1b1d]';
+  'cursor-pointer rounded-full border border-solid px-4 py-2 text-sm font-semibold transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-goff-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1b1b1d]';
 
 // goff-700 rather than goff-600: white-on-goff-600 is 3.9:1, below the 4.5:1
 // WCAG AA threshold for this text size.

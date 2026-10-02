@@ -23,7 +23,7 @@ export function HowItWorks() {
         </p>
       </div>
       <div className="max-w-5xl mx-auto px-4">
-        <div className="rounded-2xl bg-white dark:bg-white/95 p-6 md:p-8 shadow-sm border border-solid border-[#273437]/10">
+        <div className="rounded-2xl bg-white dark:bg-white/95 p-6 md:p-8 shadow-xs border border-solid border-[#273437]/10">
           <img
             src="/docs/openfeature/architecture.svg"
             alt="GO Feature Flag architecture: OpenFeature SDKs talking to the relay-proxy, which loads flag configuration via retrievers and emits events via notifiers and exporters."

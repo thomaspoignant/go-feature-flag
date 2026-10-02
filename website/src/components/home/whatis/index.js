@@ -67,11 +67,11 @@ export function Whatis() {
         </div>
       </div>
       <div className="relative inline-flex group ml-5">
-        <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
+        <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-linear-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"></div>
         <Link
           to={'/docs/getting-started'}
           title="Dive into GO Feature Flag"
-          className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+          className="hover:no-underline hover:text-white relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl overflow-hidden focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
           <i className="fa-solid fa-circle-right mr-4"></i>
           Dive into GO Feature Flag
         </Link>
