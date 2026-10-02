@@ -22,7 +22,7 @@ export function HowItWorks() {
           <strong>exporters</strong> plug into the stack you are using.
         </p>
       </div>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-[62rem] mx-auto">
         <div className="rounded-2xl bg-white dark:bg-white/95 p-6 md:p-8 shadow-xs border border-solid border-[#273437]/10">
           <img
             src="/docs/openfeature/architecture.svg"
