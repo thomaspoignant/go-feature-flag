@@ -1222,3 +1222,67 @@ func Test_PortFreedAfterShutdown(t *testing.T) {
 	require.NoError(t, err, "port %d should be free after shutdown", port)
 	ln2.Close()
 }
+
+func Test_StopBeforeStart(t *testing.T) {
+	// Pick a free port.
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+
+	proxyConf := &config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]retrieverconf.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
+		},
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: port,
+		},
+	}
+
+	l := newTestLogger(t)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil)
+	require.NoError(t, err)
+	services := service.Services{
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  stream.NewWebsocketService(),
+		FlagsetManager:    flagsetManager,
+	}
+	s := api.New(proxyConf, services, l.ZapLogger)
+
+	// StartWithContext has not run, so Stop cannot see the servers drain and must give up
+	// when its context is done instead of blocking forever.
+	stopCtx, cancelStop := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancelStop()
+	stopReturned := make(chan struct{})
+	go func() {
+		s.Stop(stopCtx)
+		close(stopReturned)
+	}()
+	select {
+	case <-stopReturned:
+	case <-time.After(5 * time.Second):
+		t.Fatal("Stop did not return after its context was done")
+	}
+
+	// A server stopped before it started must return immediately without serving.
+	done := make(chan struct{})
+	go func() {
+		s.StartWithContext(context.Background())
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("StartWithContext did not return for a server already stopped")
+	}
+
+	ln2, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	require.NoError(t, err, "port %d should never have been bound", port)
+	ln2.Close()
+}

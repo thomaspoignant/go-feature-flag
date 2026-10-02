@@ -1,11 +1,14 @@
 package api
 
 import (
+	"net/http"
 	"strings"
+	"sync"
 
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echootel "github.com/labstack/echo-otel/v5"
+	echoprometheus "github.com/labstack/echo-prometheus"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
@@ -16,7 +19,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -32,11 +34,15 @@ func New(config *config.Config,
 	services service.Services,
 	zapLog *zap.Logger,
 ) Server {
+	stopRequested := make(chan struct{})
 	s := Server{
-		config:      config,
-		services:    services,
-		zapLog:      zapLog,
-		otelService: opentelemetry.NewOtelService(),
+		config:        config,
+		services:      services,
+		zapLog:        zapLog,
+		otelService:   opentelemetry.NewOtelService(),
+		stopRequested: stopRequested,
+		stop:          sync.OnceFunc(func() { close(stopRequested) }),
+		stopped:       make(chan struct{}),
 	}
 	s.apiEcho = echo.New()
 	s.initRoutes()
@@ -51,17 +57,22 @@ type Server struct {
 	services       service.Services
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
+
+	// stopRequested is closed (once, by stop) when Stop is called, to gracefully shut down
+	// the servers started by StartWithContext.
+	stopRequested chan struct{}
+	stop          func()
+	// stopped is closed when StartWithContext returns.
+	stopped chan struct{}
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
 func (s *Server) initRoutes() {
-	s.apiEcho.HideBanner = true
-	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.IsDebugEnabled()
-	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
+	s.apiEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
+	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
@@ -81,10 +92,10 @@ func (s *Server) initRoutes() {
 			},
 		}))
 	}
-	s.apiEcho.Use(middleware.CORS())
+	s.apiEcho.Use(corsMiddleware())
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-		Skipper: func(_ echo.Context) bool {
+		Skipper: func(_ *echo.Context) bool {
 			return s.config.DisableVersionHeader
 		},
 		RelayProxyConfig: s.config,
@@ -130,22 +141,35 @@ func (s *Server) initRoutes() {
 	s.addManifestRoutes(cManifest, userAuth)
 }
 
+// corsMiddleware allows any origin and answers every preflight with a fixed list of methods.
+// AllowMethods is set explicitly because, when left empty, echo v5 answers the preflight with
+// the methods registered on the route, which would change the CORS contract of the relay proxy.
+func corsMiddleware() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet, http.MethodHead, http.MethodPut,
+			http.MethodPatch, http.MethodPost, http.MethodDelete,
+		},
+	})
+}
+
 func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {
 	switch middlewareType {
 	case AdminAuth:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeysAdminExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
 	default:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
-			Skipper: func(c echo.Context) bool {
+			Skipper: func(_ *echo.Context) bool {
 				return !s.config.IsAuthenticationEnabled()
 			},
 		})

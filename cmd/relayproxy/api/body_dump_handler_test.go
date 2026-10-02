@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -17,7 +16,7 @@ func Test_bodyDumpHandler_smallBody(t *testing.T) {
 
 	body := []byte("small body")
 	handler := bodyDumpHandler(logger)
-	handler(echo.Context(nil), body, nil)
+	handler(nil, body, nil, nil)
 
 	logs := recorded.All()
 	assert.Len(t, logs, 1)
@@ -33,7 +32,7 @@ func Test_bodyDumpHandler_largeBody(t *testing.T) {
 
 	body := []byte(strings.Repeat("x", 20*1024)) // 20KB
 	handler := bodyDumpHandler(logger)
-	handler(echo.Context(nil), body, nil)
+	handler(nil, body, nil, nil)
 
 	logs := recorded.All()
 	assert.Len(t, logs, 1)
@@ -54,7 +53,7 @@ func Benchmark_bodyDumpHandler(b *testing.B) {
 		b.ResetTimer()
 
 		for b.Loop() {
-			handler(echo.Context(nil), body, nil)
+			handler(nil, body, nil, nil)
 		}
 	})
 
@@ -64,7 +63,7 @@ func Benchmark_bodyDumpHandler(b *testing.B) {
 		b.ResetTimer()
 
 		for b.Loop() {
-			handler(echo.Context(nil), body, nil)
+			handler(nil, body, nil, nil)
 		}
 	})
 }

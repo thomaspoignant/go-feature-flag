@@ -5,11 +5,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
 
 type awsLambdaHandler struct {
-	adapter *echoadapter.EchoLambdaV2
+	adapter *httpadapter.HandlerAdapterV2
 }
 
 func (h *awsLambdaHandler) Start() {

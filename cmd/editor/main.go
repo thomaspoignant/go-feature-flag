@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 
-	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
+	"go.uber.org/zap"
 )
 
 // This service is an API used to evaluate a flag with an evaluation context
@@ -38,16 +40,18 @@ func main() {
 	e.GET("/health", HealthHandler)
 
 	if _, exists := os.LookupEnv("RUN_AS_LAMBDA"); exists {
-		adapter := awsLambdaHandler{adapter: echoadapter.NewV2(e)}
+		adapter := awsLambdaHandler{adapter: httpadapter.NewV2(e)}
 		adapter.Start()
 	} else {
-		e.Logger.Fatal(e.Start(":1323"))
+		if err := (echo.StartConfig{Address: ":1323"}).Start(context.Background(), e); err != nil {
+			logger.ZapLogger.Fatal("error starting the editor API", zap.Error(err))
+		}
 	}
 }
 
 // EvaluateHandler is the function called when calling the endpoint /v1/feature/evaluate.
 // It will perform a flag evaluation and return the resolutionDetails and the value.
-func EvaluateHandler(c echo.Context) error {
+func EvaluateHandler(c *echo.Context) error {
 	u := new(editorEvaluateRequest)
 	if err := c.Bind(u); err != nil {
 		return err
@@ -73,7 +77,7 @@ func EvaluateHandler(c echo.Context) error {
 }
 
 // HealthHandler endpoint to validate that the service is up and running.
-func HealthHandler(c echo.Context) error {
+func HealthHandler(c *echo.Context) error {
 	return c.String(http.StatusOK, "OK")
 }
 
