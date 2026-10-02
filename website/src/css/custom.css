@@ -9,9 +9,53 @@
 /* Import variables from a separate file to prevent Tailwind from purging them */
 @import './variables.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Tailwind v4, without preflight (Infima provides the base styles).
+ * Utilities are imported unlayered on purpose: layered CSS always loses
+ * against unlayered CSS, so a layered import would let Infima override
+ * Tailwind classes.
+ * No `@layer a, b, c;` ordering statement either: Docusaurus' clean-css
+ * minifier mis-parses it and drops the rule that follows.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' source(none);
+
+/*
+ * `blog/` is scanned too: posts style pull-quotes and figures with Tailwind
+ * classes inline (see the DataGalaxy and Solaris case studies), and without
+ * this source those classes are purged and the markup renders unstyled.
+ */
+@source '../../src';
+@source '../../docs';
+@source '../../blog';
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-jakarta:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono:
+    'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  --color-goff-50: #edfcf7;
+  --color-goff-100: #cdf7e7;
+  --color-goff-200: #abefd9;
+  --color-goff-300: #74e1c4;
+  --color-goff-400: #3ccbaa;
+  --color-goff-500: #18b192;
+  --color-goff-600: #0c8f77;
+  --color-goff-700: #0a7263;
+  --color-goff-800: #0a5b4f;
+  --color-goff-900: #0a4a41;
+  --color-goff-950: #042a26;
+
+  --color-titles-500: #9fbeb3;
+}
 
 
 .menu__link {

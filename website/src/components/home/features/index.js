@@ -80,7 +80,7 @@ export function Rollout() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className="mr-25">
+          <div>
             <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
               Advanced rollout capabilities
             </h2>
@@ -149,7 +149,7 @@ export function Sdk() {
           </div>
         </div>
         <div className="col col--6">
-          <div className="mr-25">
+          <div>
             <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
               Supports your favorite languages
             </h2>
@@ -204,7 +204,7 @@ export function Integration() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className="mr-25">
+          <div>
             <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
               Integrates with different systems
             </h2>
@@ -274,7 +274,7 @@ export function OpenFeatureEcosystem() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className="mr-25">
+          <div>
             <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
               Part of the OpenFeature Ecosystem
             </h2>
