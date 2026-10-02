@@ -14,8 +14,6 @@
  * Utilities are imported unlayered on purpose: layered CSS always loses
  * against unlayered CSS, so a layered import would let Infima override
  * Tailwind classes.
- * No `@layer a, b, c;` ordering statement either: Docusaurus' clean-css
- * minifier mis-parses it and drops the rule that follows.
  */
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' source(none);
@@ -28,6 +26,12 @@
 @source '../../src';
 @source '../../docs';
 @source '../../blog';
+
+/*
+ * `container` is Infima's layout class. Tailwind v4's `container` utility
+ * would override its max-width (1320px -> 1280px on wide screens).
+ */
+@source not inline('container');
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
