@@ -173,3 +173,62 @@ func Test_gitlab_Retrieve(t *testing.T) {
 		})
 	}
 }
+
+func Test_gitlab_RetrievePathEscaping(t *testing.T) {
+	tests := []struct {
+		name     string
+		filePath string
+	}{
+		{
+			name:     "simple filename",
+			filePath: "flags.yaml",
+		},
+		{
+			name:     "nested path",
+			filePath: "config/flags.yaml",
+		},
+		{
+			name:     "spaces in directory and filename",
+			filePath: "flag configs/my flags.yaml",
+		},
+		{
+			name:     "literal plus sign",
+			filePath: "flags/my+flags.yaml",
+		},
+		{
+			name:     "literal percent encoding",
+			filePath: "flags/my%20flags.yaml",
+		},
+		{
+			name:     "query and fragment delimiters",
+			filePath: "flags/my?#flags.yaml",
+		},
+		{
+			name:     "non-ASCII filename",
+			filePath: "flags/caf\u00e9.yaml",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &mock.HTTP{}
+			r := gitlabretriever.Retriever{
+				RepositorySlug: "team/subgroup/config",
+				FilePath:       tt.filePath,
+				Branch:         "feature/add+flags",
+			}
+			r.SetHTTPClient(client)
+
+			_, err := r.Retrieve(context.Background())
+			if !assert.NoError(t, err) {
+				return
+			}
+			// The project slug and file path must each occupy a single URL path segment.
+			assert.Len(t, strings.Split(client.Req.URL.EscapedPath(), "/"), 9)
+			assert.Equal(t,
+				"/api/v4/projects/team/subgroup/config/repository/files/"+tt.filePath+"/raw",
+				client.Req.URL.Path)
+			assert.Equal(t, "ref=feature%2Fadd%2Bflags", client.Req.URL.RawQuery)
+			assert.Empty(t, client.Req.URL.Fragment)
+		})
+	}
+}

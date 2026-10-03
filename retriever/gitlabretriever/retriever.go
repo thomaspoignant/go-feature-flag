@@ -58,9 +58,9 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	path := strings.Join([]string{
 		r.BaseURL, "api/v4/projects",
-		url.QueryEscape(r.RepositorySlug),
+		url.PathEscape(r.RepositorySlug),
 		"repository/files",
-		url.QueryEscape(r.FilePath), "raw"}, "/")
+		url.PathEscape(r.FilePath), "raw"}, "/")
 
 	parsedURL, err := url.Parse(path)
 	if err != nil {
