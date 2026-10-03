@@ -1,6 +1,6 @@
 """Shared helpers for flag evaluation."""
 
-from typing import Any, Type, Union
+from typing import Any, Type
 
 
 def changed_flag_keys(
@@ -15,7 +15,7 @@ def changed_flag_keys(
     )
 
 
-def matches_type(value: Any, expected_type: Union[Type, tuple]) -> bool:
+def matches_type(value: Any, expected_type: Type | tuple) -> bool:
     """isinstance(), except that a bool never satisfies a non-bool resolver.
 
     Python makes bool a subclass of int, so isinstance(True, int) is True and a

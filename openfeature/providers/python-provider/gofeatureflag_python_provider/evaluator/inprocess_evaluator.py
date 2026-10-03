@@ -413,7 +413,7 @@ class InProcessEvaluator(AbstractEvaluator):
         self,
         flag_key: str,
         default_value: T,
-        expected_type: Union[Type[T], tuple],
+        expected_type: Type[T] | tuple,
         evaluation_context: Optional[EvaluationContext],
         remote_resolver: str,
     ) -> FlagResolutionDetails[T]:
