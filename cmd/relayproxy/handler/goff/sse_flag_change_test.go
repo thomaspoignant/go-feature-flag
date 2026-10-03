@@ -227,6 +227,9 @@ func readSSEEvent(t *testing.T, resp *http.Response) map[string]string {
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
+		if strings.HasPrefix(line, ":") {
+			continue // SSE comment (connection comment or heartbeat), ignored by clients
+		}
 		if line == "" && len(fields) > 0 {
 			break
 		}
