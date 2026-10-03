@@ -58,9 +58,9 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	path := strings.Join([]string{
 		r.BaseURL, "api/v4/projects",
-		url.PathEscape(r.RepositorySlug),
+		escapePathSegment(r.RepositorySlug),
 		"repository/files",
-		url.PathEscape(r.FilePath), "raw"}, "/")
+		escapePathSegment(r.FilePath), "raw"}, "/")
 
 	parsedURL, err := url.Parse(path)
 	if err != nil {
@@ -88,6 +88,13 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	return httpRetriever.Retrieve(ctx)
+}
+
+// escapePathSegment encodes s as a single URL path segment, as expected by the GitLab API.
+// url.PathEscape leaves "+" as is, but some servers and proxies decode it as a space,
+// so we keep encoding it as "%2B".
+func escapePathSegment(s string) string {
+	return strings.ReplaceAll(url.PathEscape(s), "+", "%2B")
 }
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.
