@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.56.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.56.0...v1.56.1) (2026-10-03)
+
+
+### 🐛 Bug Fixes
+
+* **gitlab:** correctly encode spaces in file paths ([#6168](https://github.com/thomaspoignant/go-feature-flag/issues/6168)) ([3317794](https://github.com/thomaspoignant/go-feature-flag/commit/331779411405fa1b0cd123594a4cbea6988e0c93))
+* **gitlab:** pin escaped request paths and keep + encoded as %2B ([#6175](https://github.com/thomaspoignant/go-feature-flag/issues/6175)) ([727e072](https://github.com/thomaspoignant/go-feature-flag/commit/727e07249527a134dd7784a06cd1ab8ec5c7a5f7))
+* **relayproxy:** send an initial SSE comment so Firefox opens the stream ([#6172](https://github.com/thomaspoignant/go-feature-flag/issues/6172)) ([10aaadb](https://github.com/thomaspoignant/go-feature-flag/commit/10aaadb44c27bfc6bd4fca62adc3113e76fd65d0))
+
+
+### 📚 Documentation
+
+* **readme:** fix typo in sponsors badge alt text ([#6177](https://github.com/thomaspoignant/go-feature-flag/issues/6177)) ([f6f4740](https://github.com/thomaspoignant/go-feature-flag/commit/f6f4740e9cecb69e673679cee5a2c0e23ca33257))
+
+
+### ⚙️ CI/CD
+
+* **benchmark:** re-save benchmark data on every main run ([#6176](https://github.com/thomaspoignant/go-feature-flag/issues/6176)) ([eaeea1e](https://github.com/thomaspoignant/go-feature-flag/commit/eaeea1e64d1d0d97030532be062ac8ab80875e0c))
+
 ## [1.56.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.55.3...v1.56.0) (2026-09-30)
 
 
