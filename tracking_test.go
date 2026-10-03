@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -36,6 +37,10 @@ func TestValidTrackingEvent(t *testing.T) {
 		map[string]any{"additional data": "value"},
 	)
 
+	// the tracking event is exported by the daemon of the exporter, Track() is not waiting for it.
+	require.Eventually(t, func() bool {
+		return len(exp.GetExportedEvents()) == 1
+	}, 10*time.Second, 10*time.Millisecond, "the tracking event was never exported")
 	assert.Equal(t, 1, len(exp.ExportedEvents))
 	assert.Equal(t, "1668d845-051d-4dd9-907a-7ebe6aa2c9da", exp.ExportedEvents[0].UserKey)
 	assert.Equal(t, "my-feature-flag", exp.ExportedEvents[0].Key)

@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"runtime"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -20,6 +23,223 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
+
+// blockingExporter is an exporter that is blocked in every Export call until release is closed.
+type blockingExporter struct {
+	bulk    bool
+	release chan struct{}
+
+	mutex  sync.Mutex
+	events []exporter.ExportableEvent
+}
+
+func (b *blockingExporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
+	<-b.release
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	b.events = append(b.events, events...)
+	return nil
+}
+
+func (b *blockingExporter) IsBulk() bool {
+	return b.bulk
+}
+
+func (b *blockingExporter) exportedEvents() []exporter.ExportableEvent {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	return append([]exporter.ExportableEvent{}, b.events...)
+}
+
+// flakyExporter is an exporter that fails the first nbFailures calls to Export.
+// Contrary to mock.Exporter it only keeps the events of the calls in success.
+type flakyExporter struct {
+	bulk       bool
+	nbFailures int32
+
+	nbCalls atomic.Int32
+	mutex   sync.Mutex
+	events  []exporter.ExportableEvent
+}
+
+func (f *flakyExporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
+	if f.nbCalls.Add(1) <= f.nbFailures {
+		return errors.New("exporter is down")
+	}
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+	f.events = append(f.events, events...)
+	return nil
+}
+
+func (f *flakyExporter) IsBulk() bool {
+	return f.bulk
+}
+
+func (f *flakyExporter) exportedEvents() []exporter.ExportableEvent {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+	return append([]exporter.ExportableEvent{}, f.events...)
+}
+
+func newTestFeatureEvents(nbEvents int) ([]exporter.FeatureEvent, []exporter.ExportableEvent) {
+	events := make([]exporter.FeatureEvent, nbEvents)
+	exportableEvents := make([]exporter.ExportableEvent, nbEvents)
+	for i := range nbEvents {
+		events[i] = exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder(fmt.Sprintf("user-%d", i)).Build(),
+			"random-key", "YO", "defaultVar", false, "", "SERVER", nil)
+		exportableEvents[i] = events[i]
+	}
+	return events, exportableEvents
+}
+
+func TestDataExporterManager_AddEventDoesNotWaitForTheExporter(t *testing.T) {
+	tests := []struct {
+		name string
+		bulk bool
+	}{
+		{name: "non bulk exporter", bulk: false},
+		{name: "bulk exporter with the max number of events reached", bulk: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			blockedExporter := &blockingExporter{bulk: tt.bulk, release: make(chan struct{})}
+			dc := exporter.NewManager[exporter.FeatureEvent](
+				[]exporter.Config{{
+					FlushInterval:    10 * time.Minute,
+					MaxEventInMemory: 1,
+					Exporter:         blockedExporter,
+				}},
+				exporter.DefaultExporterCleanQueueInterval,
+				nil,
+			)
+			dc.Start()
+			defer dc.Stop()
+			var releaseOnce sync.Once
+			release := func() { releaseOnce.Do(func() { close(blockedExporter.release) }) }
+			// Stop() is flushing the events, we have to release the exporter before.
+			defer release()
+
+			inputEvents, want := newTestFeatureEvents(200)
+			allEventsAdded := make(chan struct{})
+			go func() {
+				defer close(allEventsAdded)
+				for _, event := range inputEvents {
+					dc.AddEvent(event)
+				}
+			}()
+
+			select {
+			case <-allEventsAdded:
+			case <-time.After(2 * time.Second):
+				require.Fail(t, "AddEvent is waiting for the exporter, a slow exporter should not block the caller")
+			}
+
+			release()
+			require.Eventually(t, func() bool {
+				return len(blockedExporter.exportedEvents()) == len(want)
+			}, 10*time.Second, 10*time.Millisecond, "the events were not all exported once the exporter is back")
+			assert.Equal(t, want, blockedExporter.exportedEvents())
+		})
+	}
+}
+
+func TestDataExporterManager_NonBulkExporterRetriesExportInErrorWithoutNewEvent(t *testing.T) {
+	flaky := &flakyExporter{bulk: false, nbFailures: 3}
+	dc := exporter.NewManager[exporter.FeatureEvent](
+		[]exporter.Config{{
+			// the delay between 2 retries is never higher than the flush interval
+			FlushInterval: 20 * time.Millisecond,
+			Exporter:      flaky,
+		}},
+		exporter.DefaultExporterCleanQueueInterval,
+		nil,
+	)
+	dc.Start()
+	defer dc.Stop()
+
+	inputEvents, want := newTestFeatureEvents(1)
+	dc.AddEvent(inputEvents[0])
+
+	require.Eventually(t, func() bool {
+		return len(flaky.exportedEvents()) == len(want)
+	}, 10*time.Second, 5*time.Millisecond, "the export in error was never retried")
+	assert.Equal(t, want, flaky.exportedEvents())
+	assert.Equal(t, int32(4), flaky.nbCalls.Load(), "we expect 3 calls in error and 1 in success")
+}
+
+func TestDataExporterManager_ExporterInErrorIsNotCalledForEveryEvent(t *testing.T) {
+	tests := []struct {
+		name string
+		bulk bool
+	}{
+		{name: "non bulk exporter", bulk: false},
+		{name: "bulk exporter with the max number of events reached", bulk: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			alwaysFailing := &flakyExporter{bulk: tt.bulk, nbFailures: math.MaxInt32}
+			dc := exporter.NewManager[exporter.FeatureEvent](
+				[]exporter.Config{{
+					FlushInterval:    10 * time.Minute,
+					MaxEventInMemory: 1,
+					Exporter:         alwaysFailing,
+				}},
+				exporter.DefaultExporterCleanQueueInterval,
+				nil,
+			)
+			dc.Start()
+			defer dc.Stop()
+
+			inputEvents, _ := newTestFeatureEvents(500)
+			for _, event := range inputEvents {
+				dc.AddEvent(event)
+			}
+
+			require.Eventually(t, func() bool {
+				return alwaysFailing.nbCalls.Load() >= 1
+			}, 10*time.Second, 5*time.Millisecond, "the exporter was never called")
+			// the 1st retry is done after 1 second, so we should only have the 1st call.
+			time.Sleep(100 * time.Millisecond)
+			assert.LessOrEqual(t, alwaysFailing.nbCalls.Load(), int32(2),
+				"an exporter in error should not be called for every event")
+		})
+	}
+}
+
+func TestDataExporterManager_StopExportsThePendingEvents(t *testing.T) {
+	tests := []struct {
+		name string
+		bulk bool
+	}{
+		{name: "non bulk exporter", bulk: false},
+		{name: "bulk exporter", bulk: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockExporter := &flakyExporter{bulk: tt.bulk}
+			dc := exporter.NewManager[exporter.FeatureEvent](
+				[]exporter.Config{{
+					FlushInterval:    10 * time.Minute,
+					MaxEventInMemory: 100000,
+					Exporter:         mockExporter,
+				}},
+				exporter.DefaultExporterCleanQueueInterval,
+				nil,
+			)
+			dc.Start()
+
+			inputEvents, want := newTestFeatureEvents(500)
+			for _, event := range inputEvents {
+				dc.AddEvent(event)
+			}
+			dc.Stop()
+
+			assert.Equal(t, want, mockExporter.exportedEvents())
+		})
+	}
+}
 
 func TestDataExporterManager_flushWithTime(t *testing.T) {
 	tests := []struct {
@@ -106,7 +326,8 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			dataExporterMock := []exporter.Config{
 				{
-					FlushInterval:    10 * time.Millisecond,
+					// we don't want the flush interval to trigger the flush in this test.
+					FlushInterval:    10 * time.Minute,
 					MaxEventInMemory: 100,
 					Exporter:         tt.mockExporter,
 				},
@@ -121,7 +342,7 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 
 			// Initialize inputEvents slice
 			var inputEvents []exporter.FeatureEvent
-			for i := 0; i <= 100; i++ {
+			for i := 0; i < 100; i++ {
 				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
 					ffcontext.NewEvaluationContextBuilder("ABCD").
 						AddCustom("anonymous", true).
@@ -140,7 +361,12 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 				dc.AddEvent(event)
 				want[i] = event
 			}
-			assert.Equal(t, want[:100], tt.mockExporter.GetExportedEvents())
+			// the flush is done by the daemon of the exporter, not by AddEvent.
+			require.Eventually(t, func() bool {
+				return len(tt.mockExporter.GetExportedEvents()) == len(want)
+			}, 10*time.Second, 10*time.Millisecond,
+				"reaching the max number of events in memory never triggered a flush")
+			assert.Equal(t, want, tt.mockExporter.GetExportedEvents())
 		})
 	}
 }
@@ -180,7 +406,7 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 
 			// Initialize inputEvents slice
 			var inputEvents []exporter.FeatureEvent
-			for i := 0; i <= 100000; i++ {
+			for i := 0; i < 100000; i++ {
 				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
 					ffcontext.NewEvaluationContextBuilder("ABCD").
 						AddCustom("anonymous", true).
@@ -199,7 +425,12 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 				dc.AddEvent(event)
 				want[i] = event
 			}
-			assert.Equal(t, want[:100000], tt.mockExporter.GetExportedEvents())
+			// the flush is done by the daemon of the exporter, not by AddEvent.
+			require.Eventually(t, func() bool {
+				return len(tt.mockExporter.GetExportedEvents()) == len(want)
+			}, 10*time.Second, 10*time.Millisecond,
+				"reaching the default max number of events in memory never triggered a flush")
+			assert.Equal(t, want, tt.mockExporter.GetExportedEvents())
 		})
 	}
 }
@@ -235,6 +466,11 @@ func TestDataExporterManager_exporterReturnError(t *testing.T) {
 		dc.AddEvent(event)
 		want[i] = event
 	}
+	// The 1st export is in error and the daemon retries it, the mock also keeps the events of the call
+	// in error, so when we have more events than what we have added the retry is done.
+	require.Eventually(t, func() bool {
+		return len(mockExporter.GetExportedEvents()) > len(want)
+	}, 10*time.Second, 10*time.Millisecond, "the export in error was never retried")
 	// check that the first 100 events are exported
 	assert.Equal(t, want[:100], mockExporter.GetExportedEvents()[:100])
 	handler.AssertMessage("error while exporting data: random err")
@@ -251,6 +487,7 @@ func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 	}
 	dc := exporter.NewManager[exporter.FeatureEvent](
 		dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
+	// we don't call Start() on purpose, an exporter that is not in bulk mode should work without it.
 	defer dc.Stop()
 
 	// Initialize inputEvents slice
@@ -264,11 +501,13 @@ func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 	for i, event := range inputEvents {
 		dc.AddEvent(event)
 		want[i] = event
-		// we have to wait because we are opening a new thread to slow down the flag evaluation.
-		time.Sleep(1 * time.Millisecond)
 	}
 
-	assert.Equal(t, want[:100], mockExporter.GetExportedEvents())
+	// the events are exported by the daemon of the exporter as soon as they are added, not by AddEvent.
+	require.Eventually(t, func() bool {
+		return len(mockExporter.GetExportedEvents()) == len(want)
+	}, 10*time.Second, 10*time.Millisecond, "the non bulk exporter never exported the events")
+	assert.Equal(t, want, mockExporter.GetExportedEvents())
 }
 
 func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
@@ -377,6 +616,10 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 		time.Sleep(1 * time.Millisecond)
 	}
 
+	// the non bulk exporter is called by its daemon as soon as the events are added.
+	require.Eventually(t, func() bool {
+		return len(mockExporter1.GetExportedEvents()) == len(want)
+	}, 10*time.Second, time.Millisecond, "the non bulk exporter never exported the events")
 	assert.Equal(t, want[:100], mockExporter1.GetExportedEvents())
 	assert.Equal(t, 0, len(mockExporter2.GetExportedEvents()))
 	time.Sleep(250 * time.Millisecond)
