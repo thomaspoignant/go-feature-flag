@@ -56,7 +56,10 @@ function App() {
             {fields.map((field, index) => (
               <FlagForm label={`${EDITOR_NAME}.${index}`} key={field.id} />
             ))}
-            <button className={styles.button} onClick={addNewFlag}>
+            <button
+              type="button"
+              className={styles.button}
+              onClick={addNewFlag}>
               <span className="fa-stack fa-1x">
                 <i
                   className={clsx(

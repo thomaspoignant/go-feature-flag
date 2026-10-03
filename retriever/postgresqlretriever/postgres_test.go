@@ -1,3 +1,5 @@
+//go:build docker
+
 package postgresqlretriever_test
 
 import (
@@ -19,10 +21,14 @@ func TestGetPool_MultipleURIsAndReuse(t *testing.T) {
 		Image:        "postgres:15-alpine",
 		ExposedPorts: []string{"5432/tcp"},
 		Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
-		// This waits until the log says the system is ready, preventing connection errors
+		// The postgres entrypoint starts a temporary server to run init scripts, then restarts,
+		// so the "ready" log line appears twice. Waiting for the first one lets us connect
+		// during the restart and fail with "the database system is starting up".
 		WaitingFor: wait.ForAll(
-			wait.ForLog("database system is ready to accept connections").WithStartupTimeout(10*time.Second),
-			wait.ForListeningPort("5432/tcp").WithStartupTimeout(10*time.Second),
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(60*time.Second),
+			wait.ForListeningPort("5432/tcp").WithStartupTimeout(60*time.Second),
 		),
 	}
 

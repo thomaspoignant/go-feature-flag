@@ -215,8 +215,51 @@ type GoogleCloudStorageHandler struct {
 func (g *GoogleCloudStorageHandler) handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		g.r = r
+		// Return a minimal but valid GCS object response so the client's writer
+		// can decode it on Close() without reporting an upload error.
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"name":"test-object","bucket":"test"}`))
 	})
+}
+
+// TestGoogleStorage_Export_UploadError ensures that a failed upload is reported
+// instead of being silently swallowed. The GCS writer buffers the payload and
+// flushes it on Close, so the server error surfaces from wc.Close() rather than
+// io.Copy; Export must still return an error.
+func TestGoogleStorage_Export_UploadError(t *testing.T) {
+	serv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error":{"code":500,"message":"boom"}}`))
+	}))
+	httpclient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, // nolint: gosec
+			},
+		},
+	}
+
+	f := gcstorageexporter.Exporter{
+		Bucket: "test",
+		Options: []option.ClientOption{
+			option.WithEndpoint(serv.URL),
+			option.WithoutAuthentication(),
+			option.WithHTTPClient(&httpclient),
+		},
+	}
+
+	err := f.Export(
+		context.Background(),
+		&fflog.FFLogger{LeveledLogger: slog.Default()},
+		[]exporter.ExportableEvent{
+			exporter.FeatureEvent{
+				Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+				Variation: "Default", Value: "YO", Default: false,
+			},
+		},
+	)
+	assert.Error(t, err, "Export should error when the upload fails")
 }
 
 func TestGoogleCloudStorage_IsBulk(t *testing.T) {

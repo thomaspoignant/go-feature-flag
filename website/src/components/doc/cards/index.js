@@ -22,7 +22,7 @@ function Card(item) {
           <div className={styles.linkBox}>
             {item.relayproxy && (
               <Link to={item.relayproxy}>
-                <button className={clsx(styles.button)}>
+                <button type="button" className={clsx(styles.button)}>
                   <i className="fa-solid fa-server"></i> Configure the Relay
                   Proxy
                 </button>
@@ -30,7 +30,7 @@ function Card(item) {
             )}
             {item.gomodule && (
               <Link to={item.gomodule}>
-                <button className={clsx(styles.button)}>
+                <button type="button" className={clsx(styles.button)}>
                   <i className="devicon-go-original-wordmark"></i> Configure the
                   GO Module
                 </button>

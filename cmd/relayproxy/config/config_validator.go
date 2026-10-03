@@ -23,6 +23,9 @@ func (c *Config) IsValid() error {
 	if err := c.validateServerConfig(); err != nil {
 		return err
 	}
+	if err := c.OfrepEventStream.IsValid(); err != nil {
+		return err
+	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}

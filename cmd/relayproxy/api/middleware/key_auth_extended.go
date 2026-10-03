@@ -3,8 +3,8 @@ package middleware
 import (
 	"errors"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 )
 
@@ -22,7 +22,7 @@ type KeyAuthExtendedConfig struct {
 	Skipper middleware.Skipper
 
 	// KeyLookup is a string in the form of "<source>:<name>" that is used
-	// to extract key from the request. Optional. Default value "header:Authorization".
+	// to extract key from the request. Optional. Default value "header:Authorization:Bearer ".
 	// Possible values:
 	// - "header:<name>" or "header:<name>:<cut-prefix>" - extracts key from the request header
 	// - "query:<name>" - extracts key from the query string
@@ -53,24 +53,27 @@ func setDefaults(config *KeyAuthExtendedConfig) error {
 // If handled is true and error is nil, the request should continue to next handler.
 // If handled is true and error is not nil, the error should be returned.
 // If handled is false, fall back to standard KeyAuth middleware.
-func validateXAPIKey(c echo.Context, config KeyAuthExtendedConfig, next echo.HandlerFunc) (bool, error) {
+func validateXAPIKey(c *echo.Context, config KeyAuthExtendedConfig, next echo.HandlerFunc) (bool, error) {
 	xAPIKey := c.Request().Header.Get(helper.XAPIKeyHeader)
 	if xAPIKey == "" {
-		return false, nil // X-API-Key not present, fall back to standard middleware
+		// X-API-Key not present, fall back to standard middleware
+		return false, nil
 	}
 
-	valid, err := config.Validator(xAPIKey, c)
+	valid, err := config.Validator(c, xAPIKey, middleware.ExtractorSourceHeader)
 	if err != nil {
 		if config.ErrorHandler == nil {
 			return true, err
 		}
-		return true, config.ErrorHandler(err, c) // X-API-Key present but validation error
+		// X-API-Key present but validation error
+		return true, config.ErrorHandler(c, err)
 	}
 	if !valid {
 		if config.ErrorHandler == nil {
 			return true, echo.ErrUnauthorized
 		}
-		return true, config.ErrorHandler(echo.ErrUnauthorized, c) // X-API-Key present but invalid
+		// X-API-Key present but invalid
+		return true, config.ErrorHandler(c, echo.ErrUnauthorized)
 	}
 
 	// X-API-Key is valid, continue to next handler
@@ -84,7 +87,7 @@ func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
 	err := setDefaults(&config)
 	if err != nil {
 		return func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(c echo.Context) error {
+			return func(c *echo.Context) error {
 				return err
 			}
 		}
@@ -99,7 +102,7 @@ func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
 	})
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			// Check if we should skip this middleware
 			if config.Skipper(c) {
 				return next(c)

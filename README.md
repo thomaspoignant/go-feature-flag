@@ -88,7 +88,7 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
   - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/experimentation).
   - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/progressive).
   - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/scheduled).
-- Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, `kubernetes`, see the [_full list_](https://gofeatureflag.org/docs/integrations/store-flags-configuration#available-retrievers))_.
+- Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, `Kafka`, see the [_full list_](https://gofeatureflag.org/docs/integrations/export-evaluation-data))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
 - Support your full stack, from the backend to the frontend including your mobile apps.
 
@@ -336,6 +336,7 @@ The available retrievers are:
 - **Redis**
 - **BitBucket**
 - **AzBlobStorage**
+- **PostgreSQL**
 - ...
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/integrations/store-flags-configuration#available-retrievers)_
@@ -489,7 +490,11 @@ For detailed information on the fields required to create a flag, please refer t
 
 ## Rule format
 
-The query format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
+GO Feature Flag supports two query formats to write your targeting rules:
+- A simple expression language based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library _(described below)_.
+- [JSONLogic](https://jsonlogic.com), when the query is provided as a JSON object. The format is auto-detected from the query content.
+
+The `nikunjy/rules` query format is based on the following operations.
 
 All the operations can be written in capitalized or lowercase (ex: `eq` or `EQ` can be used).  
 Logical Operations supported are `AND` `OR`.
@@ -585,6 +590,7 @@ Available notifiers are:
 - **Webhook**
 - **Discord**
 - **Microsoft Teams**
+- **Log**
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.    
@@ -594,10 +600,14 @@ It collects all variation events and can save these events in several locations:
 - **Log** *- use your logger to write the variation usages.*
 - **AWS S3** *- export your variation usages to S3.*
 - **AWS Kinesis** *- publish your variation usages to AWS Kinesis Stream.*
-- **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
-- **Webhook** *- export your variation usages by calling a webhook.*
 - **AWS SQS** *- export your variation usages by sending events to SQS.*
+- **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Google PubSub** *- export your variation usages by publishing events to PubSub topic.*
+- **Webhook** *- export your variation usages by calling a webhook.*
+- **Kafka** *- publish your variation usages to a Kafka topic.*
+- **Google BigQuery** *- export your variation usages to a BigQuery table.*
+- **Azure Blob Storage** *- export your variation usages to Azure Blob Storage.*
+- **OpenTelemetry** *- send your variation usages as OpenTelemetry traces.*
 
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and is considered "full fidelity" events.

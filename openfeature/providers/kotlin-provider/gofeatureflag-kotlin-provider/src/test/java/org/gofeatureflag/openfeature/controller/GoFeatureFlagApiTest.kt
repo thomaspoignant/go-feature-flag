@@ -18,6 +18,11 @@ import java.io.File
 
 
 class GoFeatureFlagApiTest {
+    companion object {
+        private const val CUSTOM_HEADER_NAME = "X-Custom-Header"
+        private const val CUSTOM_HEADER_VALUE = "custom-value"
+    }
+
     private var mockWebServer: MockWebServer? = null
     private var defaultFeatureEventLists: List<FeatureEvent> = listOf(
         FeatureEvent(
@@ -124,14 +129,14 @@ class GoFeatureFlagApiTest {
                 GoFeatureFlagOptions(
                     endpoint = mockWebServer!!.url("/").toString(),
                     customHeaders = mapOf(
-                        "X-Custom-Header" to "custom-value",
+                        CUSTOM_HEADER_NAME to CUSTOM_HEADER_VALUE,
                         "X-Another-Header" to "another-value"
                     )
                 )
             )
         api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
-        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
+        assertEquals(CUSTOM_HEADER_VALUE, recordedRequest.headers[CUSTOM_HEADER_NAME])
         assertEquals("another-value", recordedRequest.headers["X-Another-Header"])
     }
 
@@ -143,13 +148,13 @@ class GoFeatureFlagApiTest {
                 GoFeatureFlagOptions(
                     endpoint = mockWebServer!!.url("/").toString(),
                     apiKey = "my-api-key",
-                    customHeaders = mapOf("X-Custom-Header" to "custom-value")
+                    customHeaders = mapOf(CUSTOM_HEADER_NAME to CUSTOM_HEADER_VALUE)
                 )
             )
         api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
         assertEquals("my-api-key", recordedRequest.headers["X-API-Key"])
-        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
+        assertEquals(CUSTOM_HEADER_VALUE, recordedRequest.headers[CUSTOM_HEADER_NAME])
     }
 
     @Test

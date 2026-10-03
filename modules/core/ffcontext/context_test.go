@@ -339,3 +339,38 @@ func TestEvaluationContextToMap(t *testing.T) {
 		})
 	}
 }
+
+func TestEvaluationContextToMap_DoesNotMutateContext(t *testing.T) {
+	t.Run("targetingKey is not leaked into the context attributes", func(t *testing.T) {
+		ctx := ffcontext.NewEvaluationContext("user-123")
+		ctx.AddCustomAttribute("company", "acme")
+
+		_ = ctx.ToMap()
+
+		assert.Equal(t, map[string]any{"company": "acme"}, ctx.GetCustom(),
+			"ToMap() must not add targetingKey to the context's attributes")
+	})
+
+	t.Run("mutating the returned map does not leak back into the context", func(t *testing.T) {
+		ctx := ffcontext.NewEvaluationContext("user-123")
+		ctx.AddCustomAttribute("company", "acme")
+
+		m := ctx.ToMap()
+		m["injected"] = true
+
+		assert.NotContains(t, ctx.GetCustom(), "injected",
+			"mutating the map returned by ToMap() must not reach back into the context")
+		assert.Equal(t, map[string]any{"company": "acme"}, ctx.GetCustom())
+	})
+
+	t.Run("multiple calls are stable and leave the context untouched", func(t *testing.T) {
+		ctx := ffcontext.NewEvaluationContext("user-123")
+		ctx.AddCustomAttribute("company", "acme")
+
+		first := ctx.ToMap()
+		second := ctx.ToMap()
+
+		assert.Equal(t, first, second, "successive ToMap() calls must return equal maps")
+		assert.Equal(t, map[string]any{"company": "acme"}, ctx.GetCustom())
+	})
+}

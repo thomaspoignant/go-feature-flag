@@ -32,7 +32,7 @@ type evaluationContextBuilderImpl struct {
 // This function is here for compatibility reason, please consider using AddCustom("anonymous", true)
 // instead of using this function.
 func (u *evaluationContextBuilderImpl) Anonymous(anonymous bool) EvaluationContextBuilder {
-	u.custom["anonymous"] = anonymous
+	u.custom[anonymousAttribute] = anonymous
 	return u
 }
 

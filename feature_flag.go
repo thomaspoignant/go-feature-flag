@@ -222,6 +222,11 @@ func SetOffline(control bool) {
 }
 
 // SetOfflineWithContext updates the config Offline parameter
+//
+// Known limitation: going back online does not restart the background polling. StopPolling
+// closes the background updater channel for good, so the StartPolling call below returns
+// immediately. Fixing this requires recreating the background updater, which is tracked
+// separately.
 func SetOfflineWithContext(ctx context.Context, control bool) {
 	if !ff.IsOffline() && control {
 		ff.retrieverManager.StopPolling()

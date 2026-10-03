@@ -38,7 +38,10 @@ export function Variations({type, label}) {
           />
         ))}
       </div>
-      <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+      <button
+        type="button"
+        className={styles.buttonPlus}
+        onMouseDown={handleOnClick}>
         <span className="fa-stack fa-1x">
           <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
           <i className="fa-solid fa-plus fa-stack-1x fa-inverse"></i>
@@ -59,7 +62,7 @@ Variation.propTypes = {
 function Variation({type, label, remove, index, icon}) {
   const {register} = useFormContext();
   const valueField = (type, label, register) => {
-    const isJson = type && type.toUpperCase() === 'JSON';
+    const isJson = typeof type === 'string' && type.toUpperCase() === 'JSON';
     if (isJson) {
       return <JsonEditor register={register} required={true} label={label} />;
     }
@@ -88,7 +91,10 @@ function Variation({type, label, remove, index, icon}) {
       </div>
       <div className="col-span-1">
         {
-          <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+          <button
+            type="button"
+            className={styles.buttonPlus}
+            onMouseDown={handleOnClick}>
             <span className="fa-stack fa-1x">
               <i
                 className={clsx(

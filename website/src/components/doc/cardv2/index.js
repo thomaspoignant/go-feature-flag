@@ -5,8 +5,8 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 export function Cards(props) {
-  const listItems = props.cards.map((item, index) => (
-    <Card {...item} key={index} />
+  const listItems = props.cards.map(item => (
+    <Card {...item} key={item.title} />
   ));
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xl:grid-cols-3">
@@ -46,26 +46,22 @@ export function Card(props) {
         </div>
         <p className={styles.message}>{props.content}</p>
         <div className={styles.badgeSection}>
-          {props.badges &&
-            props.badges.map(item => {
-              return (
-                <span
-                  className={clsx(styles.badge, styles.badgeInfo)}
-                  key={item}>
-                  {item}
-                </span>
-              );
-            })}
-          {props.warningBadges &&
-            props.warningBadges.map(item => {
-              return (
-                <span
-                  className={clsx(styles.badge, styles.badgeWarning)}
-                  key={item}>
-                  {item}
-                </span>
-              );
-            })}
+          {props.badges?.map(item => {
+            return (
+              <span className={clsx(styles.badge, styles.badgeInfo)} key={item}>
+                {item}
+              </span>
+            );
+          })}
+          {props.warningBadges?.map(item => {
+            return (
+              <span
+                className={clsx(styles.badge, styles.badgeWarning)}
+                key={item}>
+                {item}
+              </span>
+            );
+          })}
         </div>
       </div>
     </Link>

@@ -3,6 +3,9 @@ slug: introduction-blog-post
 title: "Introduction blog post"
 authors: [thomaspoignant]
 tags: [GO Feature Flag, v0.x.x]
+image: ./logo.png
+image_alt: "The GO Feature Flag logo"
+category: Product
 ---
 
 <center>

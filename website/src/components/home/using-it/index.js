@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Link from '@docusaurus/Link';
 import lyft from '@site/static/img/using-it/lyft.png';
 import tencent from '@site/static/img/using-it/tencent.png';
 import minder from '@site/static/img/using-it/minder.png';
@@ -83,7 +82,7 @@ export function UsingIt() {
   ];
 
   return (
-    <section className={'pt-5 px-5'}>
+    <section className={'pt-5 px-5 bg-white dark:bg-[#1b1b1d]'}>
       <div className="grid grid-pad text-center">
         <span className="text-2xl">
           Trusted in production by engineering teams at
@@ -110,15 +109,11 @@ function UsingItLogos({companies}) {
     <div className={'grid grid-cols-2 lg:grid-cols-6 mt-8 items-center mb-0'}>
       {companies.map(company => (
         <div key={company.name}>
-          <Link to={company.url}>
-            <img
-              src={company.logo}
-              alt={company.name}
-              className={
-                company.imgClassName ? company.imgClassName : 'max-w-28'
-              }
-            />
-          </Link>
+          <img
+            src={company.logo}
+            alt={company.name}
+            className={company.imgClassName ? company.imgClassName : 'max-w-28'}
+          />
         </div>
       ))}
     </div>

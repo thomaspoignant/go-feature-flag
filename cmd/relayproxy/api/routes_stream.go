@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 )
@@ -33,7 +33,7 @@ func (s *Server) addStreamRoutes() {
 // the new endpoint. We do not set Sunset until the removal date is decided.
 func deprecatedAlias(replacement string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			c.Response().Header().Set("Deprecation", "true")
 			c.Response().Header().Set(
 				"Link",

@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/examples/lint_flag_programmatically
 
-go 1.24.8
+go 1.24.13
 
 require (
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.1.4

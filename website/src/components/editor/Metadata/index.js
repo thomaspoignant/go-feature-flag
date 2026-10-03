@@ -33,7 +33,10 @@ export function Metadata({label}) {
           />
         ))}
       </div>
-      <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+      <button
+        type="button"
+        className={styles.buttonPlus}
+        onMouseDown={handleOnClick}>
         <span className="fa-stack fa-1x">
           <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
           <i className="fa-solid fa-plus fa-stack-1x fa-inverse"></i>
@@ -65,7 +68,10 @@ function MetadataItem({type, label, remove, index, icon}) {
       </div>
       <div className="col-1-12 mobile-col-1-12">
         {
-          <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+          <button
+            type="button"
+            className={styles.buttonPlus}
+            onMouseDown={handleOnClick}>
             <span className="fa-stack fa-1x">
               <i
                 className={clsx(

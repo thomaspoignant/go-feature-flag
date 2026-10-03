@@ -11,7 +11,7 @@ export default function Pricing() {
         className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
         aria-hidden="true"
       >
-        <div className="mx-auto aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#000] to-[#c0f2e7] opacity-30"></div>
+        <div className="mx-auto aspect-[1155/678] w-[72.1875rem] bg-linear-to-tr from-[#000] to-[#c0f2e7] opacity-30"></div>
       </div>
       <div className="mx-auto max-w-2xl text-center lg:max-w-4xl">
         <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-blue-100">
@@ -131,13 +131,13 @@ export default function Pricing() {
           </ul>
           <Link
             to={"mailto:contact@gofeatureflag.org?subject=Enterprise support"}
-            className=" mt-8 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-10"
+            className=" mt-8 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-10"
           >
             Contact us
           </Link>
           <Link
             to={"https://zcal.co/gofeatureflag/30min"}
-            className="mt-2 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-2"
+            className="mt-2 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-2"
           >
             Book a meeting 📅
           </Link>

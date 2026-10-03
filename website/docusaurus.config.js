@@ -1,8 +1,50 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const fs = require('node:fs');
+const path = require('node:path');
+
+// Versions still built & served (small rolling window, kept for build speed).
+const builtVersions = require('./versions.json');
+
+// Versions that once shipped docs but are no longer built. Their /docs/vX.Y.Z/…
+// URLs would 404; we 200-redirect each page to its current-docs equivalent
+// (see createRedirects in the client-redirects plugin below).
+const removedVersions = fs
+  .readdirSync(path.join(__dirname, 'versioned_docs'), {withFileTypes: true})
+  .filter(entry => entry.isDirectory() && entry.name.startsWith('version-'))
+  .map(entry => entry.name.replace(/^version-/, ''))
+  .filter(version => !builtVersions.includes(version));
+
 const {sdk} = require('./data/sdk');
 const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
+const {
+  generateProductDropdownHTML,
+} = require('./src/components/navbar/product');
+const {
+  generateResourcesDropdownHTML,
+} = require('./src/components/navbar/resources');
+const {
+  generateDevelopersDropdownHTML,
+} = require('./src/components/navbar/developers');
+
+/**
+ * Blog posts dated in the future are drafts: they stay out of production builds
+ * until their date arrives. `npm run start` keeps them visible so they can be
+ * previewed, and SHOW_FUTURE_POSTS=true forces them into a build (deploy previews).
+ *
+ * @type {import('@docusaurus/plugin-content-blog').ProcessBlogPostsFn}
+ */
+const hideFuturePosts = async ({blogPosts}) => {
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.SHOW_FUTURE_POSTS === 'true'
+  ) {
+    return undefined; // keep every post
+  }
+  const now = Date.now();
+  return blogPosts.filter(post => post.metadata.date.getTime() <= now);
+};
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -21,11 +63,26 @@ const config = {
     },
     mermaid: true,
   },
+  clientModules: [require.resolve('./src/clientModules/gtagEvents.js')],
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
+          // The blog list is now a single card grid ("Load more" instead of
+          // server-side pagination), so the old paginated routes are gone.
+          {
+            from: '/blog/page/2',
+            to: '/blog',
+          },
+          {
+            from: '/blog/page/3',
+            to: '/blog',
+          },
+          {
+            from: '/product/open_feature_support',
+            to: '/product/open-feature',
+          },
           {
             from: '/docs/configure_flag/flag_format',
             to: '/docs/configure_flag/create-flags',
@@ -193,6 +250,42 @@ const config = {
             to: '/docs/relay-proxy/install_relay_proxy',
           },
         ],
+        // For every current-docs page, emit a redirect from the same path under
+        // each removed version, so old deep links (e.g.
+        // /docs/v1.30.0/sdk/client_providers/openfeature_javascript) 200-redirect
+        // to the current page instead of 404-ing. Only the current version is
+        // served at /docs/<path> with no version segment; built versioned paths
+        // (/docs/v1.54.1/…) and the /docs/next tree are skipped. Old URLs whose
+        // slug changed between versions won't match a current path and are
+        // handled by the 404 page (src/theme/NotFound/Content) plus the explicit
+        // entries above.
+        /** @param {string} existingPath */
+        createRedirects(existingPath) {
+          // `postsPerPage: 'ALL'` also removed the paginated tag pages, e.g.
+          // /blog/tags/openfeature/page/2. Point them back at the tag page.
+          if (
+            existingPath.startsWith('/blog/tags/') &&
+            !existingPath.includes('/page/')
+          ) {
+            return [`${existingPath}/page/2`];
+          }
+          // Bare docs landing -> emit /docs/<version> for old bare version roots.
+          if (existingPath === '/docs') {
+            return removedVersions.map(version => `/docs/${version}`);
+          }
+          if (!existingPath.startsWith('/docs/')) {
+            return undefined;
+          }
+          const subPath = existingPath.slice('/docs/'.length);
+          const firstSegment = subPath.split('/')[0];
+          if (
+            firstSegment === 'next' ||
+            /^v\d+\.\d+\.\d+(?:-rc\.\d+)?$/.test(firstSegment)
+          ) {
+            return undefined;
+          }
+          return removedVersions.map(version => `/docs/${version}/${subPath}`);
+        },
       },
     ],
     require('./plugins/tailwind-plugin.cjs'),
@@ -200,7 +293,7 @@ const config = {
 
   customFields: {
     description:
-      'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source. Get the full feature flag experience using OpenFeature and GO Feature Flag.',
+      'GO Feature Flag is a simple and lightweight feature flag solution, 100% Open Source. Get the full feature flag experience with OpenFeature and GO Feature Flag.',
     logo: 'img/logo/logo.png',
     github: 'https://github.com/thomaspoignant/go-feature-flag',
     sponsor: 'https://github.com/sponsors/thomaspoignant',
@@ -209,8 +302,6 @@ const config = {
       '//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp',
     swaggerURL:
       'https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/docs/swagger.yaml',
-    playgroundEvaluationApi:
-      'https://editor.api.gofeatureflag.org/v1/feature/evaluate',
   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -243,6 +334,26 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          processBlogPosts: hideFuturePosts,
+          // Not rendered on the page (the card grid opens straight on the
+          // hero) — this is the /blog meta description and og:description.
+          // Kept because the Docusaurus default is the bare word "Blog".
+          blogDescription:
+            'Feature flag practices, release notes and community news from the GO Feature Flag team.',
+          // The blog index renders every post as a card and reveals them 12 at a
+          // time client-side, so the whole list has to reach the page at once.
+          postsPerPage: 'ALL',
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
+          // Docusaurus defaults, plus README.md so the blog contribution guide
+          // living next to the posts is not published as one of them.
+          exclude: [
+            '**/_*.{js,jsx,ts,tsx,md,mdx}',
+            '**/_*/**',
+            '**/*.test.{js,jsx,ts,tsx}',
+            '**/__tests__/**',
+            '**/README.md',
+          ],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -252,10 +363,38 @@ const config = {
           customCss: [require.resolve('./src/css/custom.css')],
         },
         sitemap: {
+          lastmod: 'datetime',
           changefreq: 'weekly',
-          priority: 0.5,
-          ignorePatterns: ['/tags/**'],
+          priority: 0.5, // default fallback for pages not matched below
+          ignorePatterns: [
+            '/tags/**',
+            // Client-side redirect stubs left over from the paginated blog and
+            // tag lists.
+            '/blog/page/**',
+            '/blog/tags/**/page/**',
+            '/docs/next/**',
+            '/docs/v2*',
+            '/docs/v2*/**',
+            '/docs/v1*',
+            '/docs/v1*/**',
+            '/docs/v0*',
+            '/docs/v0*/**',
+          ],
           filename: 'sitemap.xml',
+          createSitemapItems: async params => {
+            const {defaultCreateSitemapItems, ...rest} = params;
+            const items = await defaultCreateSitemapItems(rest);
+            return items.map(item => {
+              const {pathname} = new URL(item.url);
+              if (pathname === '/' || pathname === '/blog') {
+                return {...item, priority: 1.0};
+              }
+              if (pathname.startsWith('/product/')) {
+                return {...item, priority: 0.8};
+              }
+              return item; // keeps default 0.5
+            });
+          },
         },
       }),
     ],
@@ -296,63 +435,42 @@ const config = {
           {
             position: 'left',
             label: 'Product',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
             items: [
               {
-                to: '/product/what_is_feature_management',
-                html: '<i class="fa-solid fa-list-check menu-icon"></i> What is Feature Management?',
+                type: 'html',
+                value: generateProductDropdownHTML(),
+                className: 'dyte-dropdown',
               },
+            ],
+          },
+          {
+            position: 'left',
+            label: 'Resources',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
+            items: [
               {
-                to: '/product/why_go_feature_flag',
-                html: '<i class="fa-solid fa-laptop-code menu-icon"></i> Why GO Feature Flag?',
-              },
-              {
-                to: '/product/open_feature_support',
-                html: '<i class="fa-solid fa-toggle-on menu-icon"></i> Open Feature Support',
+                type: 'html',
+                value: generateResourcesDropdownHTML(),
+                className: 'dyte-dropdown',
               },
             ],
           },
           {
             position: 'left',
             label: 'Developers',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
             items: [
               {
-                to: '/docs/getting-started',
-                html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
-              },
-              {
-                to: '/docs/sdk',
-                html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
-              },
-              {
-                to: '/editor',
-                html: '<i class="fa-solid fa-pencil menu-icon"></i> Flag Editor',
-              },
-              {
-                html: '<i class="fa-solid fa-book menu-icon"></i> Documentation',
-                type: 'doc',
-                docId: 'index',
-              },
-              {
-                html: '<i class="fa-solid fa-eye menu-icon"></i> Examples <i class="fa fa-external-link" aria-hidden="true"></i>',
-                to: 'https://github.com/thomaspoignant/go-feature-flag/tree/main/examples',
-              },
-              {
-                html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
-                to: '/blog/feature-flag-best-practice',
-              },
-              {
-                to: '/slack',
-                html: '<i class="fa-brands fa-slack menu-icon"></i> Community <i class="fa fa-external-link" aria-hidden="true"></i>',
-              },
-              {
-                to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-                html: '<i class="fa-brands fa-github menu-icon"></i> Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+                type: 'html',
+                value: generateDevelopersDropdownHTML(),
+                className: 'dyte-dropdown',
               },
             ],
           },
-          {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
-          {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', html: 'Editor', position: 'left'},
           {to: '/pricing', html: 'Pricing', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
@@ -398,7 +516,7 @@ const config = {
               },
               {
                 label: 'OpenFeature',
-                to: '/product/open_feature_support',
+                to: '/product/open-feature',
               },
               {
                 label: 'Documentation',

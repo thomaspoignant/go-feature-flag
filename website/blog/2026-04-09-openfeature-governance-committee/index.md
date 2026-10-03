@@ -4,6 +4,9 @@ description: Thomas Poignant, creator of GO Feature Flag, has been elected to th
 date: 2026-04-09
 authors: [thomaspoignant]
 tags: [openfeature, governance, community, cncf]
+image: ./banner.jpeg
+image_alt: "Line drawing of people seated around a table with the OpenFeature logo, captioned \"Shape the Future of Open Feature Flagging\""
+category: Community
 ---
 
 Thomas Poignant, creator of GO Feature Flag, has been elected to the **OpenFeature Governance Committee** for the

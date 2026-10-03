@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -77,11 +77,58 @@ func TestPprofEndpointsStarts(t *testing.T) {
 
 			go apiServer.StartWithContext(context.Background())
 			defer apiServer.Stop(context.Background())
-			time.Sleep(1 * time.Second) // waiting for the apiServer to start
+			waitForServer(t, fmt.Sprintf("http://localhost:%d", portToCheck))
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/debug/pprof/heap", portToCheck))
-			defer func() { _ = resp.Body.Close() }()
 			require.NoError(t, err)
+			defer func() { _ = resp.Body.Close() }()
 			require.Equal(t, tt.expectedStatusCode, resp.StatusCode)
+		})
+	}
+}
+
+// Test_VersionHeader_On_MonitoringServer checks that the version header middleware is attached
+// to the monitoring server when it runs on a dedicated port, and that it honours
+// disableVersionHeader on both servers.
+func Test_VersionHeader_On_MonitoringServer(t *testing.T) {
+	tests := []struct {
+		name                 string
+		disableVersionHeader bool
+		expectedVersion      string
+	}{
+		{
+			name:                 "version header enabled",
+			disableVersionHeader: false,
+			expectedVersion:      "1.2.3",
+		},
+		{
+			name:                 "version header disabled",
+			disableVersionHeader: true,
+			expectedVersion:      "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			conf := testConfig(t)
+			conf.Version = "1.2.3"
+			conf.DisableVersionHeader = tt.disableVersionHeader
+			conf.Server.MonitoringPort = testutils.GetFreePort(t)
+			baseURL := startTestServer(t, conf)
+			monitoringURL := fmt.Sprintf("http://localhost:%d", conf.Server.MonitoringPort)
+
+			monitoringResp := doRequest(t, http.MethodGet, monitoringURL+"/health", nil)
+			assert.Equal(t, http.StatusOK, monitoringResp.StatusCode)
+			assert.Equal(t,
+				tt.expectedVersion,
+				monitoringResp.Header.Get("X-GOFEATUREFLAG-VERSION"),
+				"monitoring server")
+
+			apiResp := doRequest(t, http.MethodGet, baseURL+"/v1/flag/change", nil)
+			assert.Equal(t, http.StatusOK, apiResp.StatusCode)
+			assert.Equal(t,
+				tt.expectedVersion,
+				apiResp.Header.Get("X-GOFEATUREFLAG-VERSION"),
+				"api server")
 		})
 	}
 }

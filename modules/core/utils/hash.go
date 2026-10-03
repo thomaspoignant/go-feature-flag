@@ -5,7 +5,7 @@ import "hash/fnv"
 // Hash is taking a string and convert.
 func Hash(s string) uint32 {
 	h := fnv.New32a()
-	h.Write([]byte(s))
+	_, _ = h.Write([]byte(s))
 	return h.Sum32()
 }
 

@@ -15,6 +15,15 @@ func TestWasmReadBufferFromMemory_ZeroLengthReturnsEmptySlice(t *testing.T) {
 	}
 }
 
+func TestWasmReadBufferFromMemory_ReadsExactBytes(t *testing.T) {
+	data := []byte("hello wasm \x00\xff!")
+	result := helpers.WasmReadBufferFromMemory(
+		(*uint32)(unsafe.Pointer(&data[0])), uint32(len(data)))
+	if string(result) != string(data) {
+		t.Errorf("Expected %q, got %q", data, result)
+	}
+}
+
 func TestWasmCopyBufferToMemory_ReturnsCorrectPointerAndSize(t *testing.T) {
 	buffer := []byte{0x10, 0x20, 0x30}
 	result := helpers.WasmCopyBufferToMemory(buffer)
@@ -28,11 +37,8 @@ func TestWasmCopyBufferToMemory_ReturnsCorrectPointerAndSize(t *testing.T) {
 	}
 }
 
-func TestWasmCopyBufferToMemory_EmptyBufferPanics(t *testing.T) {
-	defer func() {
-		if recover() == nil {
-			t.Errorf("Expected panic for empty buffer, but did not panic")
-		}
-	}()
-	helpers.WasmCopyBufferToMemory([]byte{})
+func TestWasmCopyBufferToMemory_EmptyBufferReturnsZero(t *testing.T) {
+	if result := helpers.WasmCopyBufferToMemory([]byte{}); result != 0 {
+		t.Errorf("Expected 0 for empty buffer, got %d", result)
+	}
 }

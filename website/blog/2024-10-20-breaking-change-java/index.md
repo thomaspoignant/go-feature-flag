@@ -3,6 +3,9 @@ title: (Java) OpenFeature provider improve the internal cache management.
 description: The Java provider has been updated to improve the internal cache management by migrating from guava cache to caffeine cache.
 authors: [thomaspoignant]
 tags: [openfeature,java,breaking changes]
+image: /img/logo/x-card.png
+image_alt: "The GO Feature Flag mascot and logo with the tagline \"Ship Faster, Reduce Risk, and Build Scale\""
+category: Product
 ---
 
 Until Today the java provider, used the guava cache to store the flags and the segments.

@@ -173,3 +173,90 @@ func Test_gitlab_Retrieve(t *testing.T) {
 		})
 	}
 }
+
+func Test_gitlab_RetrievePathEscaping(t *testing.T) {
+	const projectPath = "/api/v4/projects/team%2Fsubgroup%2Fconfig/repository/files/"
+	tests := []struct {
+		name            string
+		filePath        string
+		branch          string
+		wantEscapedPath string
+		wantRawQuery    string
+	}{
+		{
+			name:            "simple filename",
+			filePath:        "flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "nested path",
+			filePath:        "config/flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "config%2Fflags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "spaces in directory and filename",
+			filePath:        "flag configs/my flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flag%20configs%2Fmy%20flags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "literal plus sign",
+			filePath:        "flags/my+flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flags%2Fmy%2Bflags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "literal percent encoding",
+			filePath:        "flags/my%20flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flags%2Fmy%2520flags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "query and fragment delimiters",
+			filePath:        "flags/my?#flags.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flags%2Fmy%3F%23flags.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "non-ASCII filename",
+			filePath:        "flags/caf\u00e9.yaml",
+			branch:          "feature/add+flags",
+			wantEscapedPath: projectPath + "flags%2Fcaf%C3%A9.yaml/raw",
+			wantRawQuery:    "ref=feature%2Fadd%2Bflags",
+		},
+		{
+			name:            "default branch",
+			filePath:        "flags.yaml",
+			wantEscapedPath: projectPath + "flags.yaml/raw",
+			wantRawQuery:    "ref=main",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &mock.HTTP{}
+			r := gitlabretriever.Retriever{
+				RepositorySlug: "team/subgroup/config",
+				FilePath:       tt.filePath,
+				Branch:         tt.branch,
+			}
+			r.SetHTTPClient(client)
+
+			_, err := r.Retrieve(context.Background())
+			if !assert.NoError(t, err) {
+				return
+			}
+			// EscapedPath is what is sent on the wire, URL.Path would hide the encoding.
+			assert.Equal(t, tt.wantEscapedPath, client.Req.URL.EscapedPath())
+			assert.Equal(t, tt.wantRawQuery, client.Req.URL.RawQuery)
+			assert.Empty(t, client.Req.URL.Fragment)
+		})
+	}
+}

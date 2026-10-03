@@ -342,7 +342,7 @@ const docTemplate = `{
         },
         "/stream/v1/sse/flag/change": {
             "get": {
-                "description": "Server-Sent Events endpoint pushing flag change notifications.\nEach event payload is a ` + "`" + `notifier.DiffCache` + "`" + ` JSON document.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
+                "description": "Server-Sent Events endpoint pushing flag change notifications, following OpenFeature ADR-0008.\nIt is advertised in the ` + "`" + `eventStreams` + "`" + ` field of the OFREP bulk evaluation response.\nEach event is sent as ` + "`" + `event: message` + "`" + ` with a ` + "`" + `model.OFREPSSEEvent` + "`" + ` JSON payload,\na ` + "`" + `refetchEvaluation` + "`" + ` event means that the provider must re-fetch its evaluations.\nThe stream also sends SSE comment lines (` + "`" + `: connected` + "`" + ` when the connection opens,\n` + "`" + `: heartbeat` + "`" + ` every 30 seconds), they are ignored by SSE clients.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
                 "produces": [
                     "text/event-stream"
                 ],
@@ -360,9 +360,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "SSE stream of flag change events",
+                        "description": "SSE stream of OFREP flag change events",
                         "schema": {
-                            "$ref": "#/definitions/notifier.DiffCache"
+                            "$ref": "#/definitions/model.OFREPSSEEvent"
                         }
                     },
                     "400": {
@@ -388,7 +388,7 @@ const docTemplate = `{
         },
         "/stream/v1/ws/flag/change": {
             "get": {
-                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.",
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
@@ -716,7 +716,7 @@ const docTemplate = `{
         },
         "/ws/v1/flag/change": {
             "get": {
-                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
+                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.\nWhen disableFlagDetailsInStream is true, values are empty objects.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1048,6 +1048,12 @@ const docTemplate = `{
         "model.OFREPBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
+                "eventStreams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OFREPEventStream"
+                    }
+                },
                 "flags": {
                     "type": "array",
                     "items": {
@@ -1117,6 +1123,20 @@ const docTemplate = `{
                 }
             }
         },
+        "model.OFREPEventStream": {
+            "type": "object",
+            "properties": {
+                "inactivityDelaySec": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "model.OFREPFlagBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
@@ -1139,6 +1159,21 @@ const docTemplate = `{
                 "value": {},
                 "variant": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OFREPSSEEvent": {
+            "type": "object",
+            "properties": {
+                "lastModified": {
+                    "description": "LastModified is the unix timestamp (in seconds) of the flag configuration change.",
+                    "type": "integer",
+                    "example": 1771622898
+                },
+                "type": {
+                    "description": "Type of the event, providers must ignore the types they don't know.",
+                    "type": "string",
+                    "example": "refetchEvaluation"
                 }
             }
         },

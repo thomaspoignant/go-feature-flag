@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 	"go.uber.org/zap"
@@ -18,7 +18,7 @@ func TestZapLogger200(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusOK, "")
 	}
 
@@ -41,7 +41,7 @@ func TestZapLogger300(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusFound, "")
 	}
 
@@ -63,7 +63,7 @@ func TestZapLogger400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "")
 	}
 
@@ -86,7 +86,7 @@ func TestZapLogger500(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, "")
 	}
 
@@ -109,7 +109,7 @@ func TestZapLoggerHealth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, "")
 	}
 
@@ -126,7 +126,7 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	h := func(c echo.Context) error {
+	h := func(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, "")
 	}
 

@@ -1,0 +1,4 @@
+{
+    "inherits": ["wasi"],
+    "ldflags": ["-z", "stack-size=1048576"]
+}

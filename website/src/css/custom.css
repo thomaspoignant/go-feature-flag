@@ -9,9 +9,57 @@
 /* Import variables from a separate file to prevent Tailwind from purging them */
 @import './variables.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Tailwind v4, without preflight (Infima provides the base styles).
+ * Utilities are imported unlayered on purpose: layered CSS always loses
+ * against unlayered CSS, so a layered import would let Infima override
+ * Tailwind classes.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' source(none);
+
+/*
+ * `blog/` is scanned too: posts style pull-quotes and figures with Tailwind
+ * classes inline (see the DataGalaxy and Solaris case studies), and without
+ * this source those classes are purged and the markup renders unstyled.
+ */
+@source '../../src';
+@source '../../docs';
+@source '../../blog';
+
+/*
+ * `container` is Infima's layout class. Tailwind v4's `container` utility
+ * would override its max-width (1320px -> 1280px on wide screens).
+ */
+@source not inline('container');
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-jakarta:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono:
+    'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  --color-goff-50: #edfcf7;
+  --color-goff-100: #cdf7e7;
+  --color-goff-200: #abefd9;
+  --color-goff-300: #74e1c4;
+  --color-goff-400: #3ccbaa;
+  --color-goff-500: #18b192;
+  --color-goff-600: #0c8f77;
+  --color-goff-700: #0a7263;
+  --color-goff-800: #0a5b4f;
+  --color-goff-900: #0a4a41;
+  --color-goff-950: #042a26;
+
+  --color-titles-500: #9fbeb3;
+}
 
 
 .menu__link {
@@ -138,7 +186,72 @@ div[class^="announcementBar_"] {
     color: #73c6b6;
 }
 
-html.plugin-blog h2,
+/* ============================================================================
+   Responsive navbar mega-menus (mobile sidebar)
+   ============================================================================
+   The "Product", "Resources" and "Developers" mega-menus are injected as raw
+   HTML (see src/components/navbar/menu.js) and reused as-is inside the mobile
+   navbar sidebar. Their desktop layout is a wide, fixed-width row of columns
+   (`flex-row flex-nowrap w-max` with `min-w-[180px]` columns), which overflows
+   the narrow mobile sidebar and crops the right-hand columns/links.
+
+   These overrides are scoped to `.navbar-sidebar` so they only affect the menu
+   when it is rendered in the mobile sidebar; the desktop dropdown popup keeps
+   its original side-by-side layout. */
+.navbar-sidebar .megamenu-dropdown,
+.navbar-sidebar .megamenu-dropdown > div {
+    width: 100%;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+/* Columns: fill the width and drop the fixed min-width that forces overflow. */
+.navbar-sidebar .megamenu-dropdown [class*="min-w-"] {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Remove the vertical separator that only makes sense side-by-side. The
+   horizontal padding is handled uniformly by the `px-6` rule below, so every
+   column (with or without a divider) shares the same left edge. */
+.navbar-sidebar .megamenu-dropdown [class*="border-l"] {
+    border-left: 0;
+}
+
+/* Trim the generous horizontal padding so links are not pushed off-screen, and
+   apply it uniformly to every column so the stacked sections stay aligned. */
+.navbar-sidebar .megamenu-dropdown [class*="px-6"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Give stacked sub-sections (every column after the first) a little breathing
+   room above their heading, since they no longer sit in their own column. */
+.navbar-sidebar .megamenu-dropdown [class*="border-l"] > h3 {
+    margin-top: 1rem;
+}
+
+/* Stack the "Get Help" cards row and let each card use the full width. */
+.navbar-sidebar .megamenu-dropdown [class*="flex-row"] {
+    flex-direction: column;
+}
+
+.navbar-sidebar .megamenu-dropdown [class*="w-72"] {
+    width: 100%;
+}
+
+/* Blog article typography. The list page is excluded: it is a card grid whose
+   headings size themselves with Tailwind. */
+html.plugin-blog:not(.blog-list-page) h2,
 html.plugin-blog.blog-post-page h1 {
     font-size: 2rem;
+}
+
+/* Blog list "Load more": cards outside the visible window stay in the DOM so
+   every post remains a crawlable link, and so the <noscript> override in
+   src/theme/BlogListPage can reveal them all when JavaScript is unavailable.
+   Plain CSS rather than a Tailwind class precisely because <noscript> has to be
+   able to override it. */
+.goff-blog-card--collapsed {
+    display: none;
 }

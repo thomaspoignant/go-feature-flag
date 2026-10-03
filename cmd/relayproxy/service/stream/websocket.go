@@ -29,27 +29,31 @@ type WebsocketService interface {
 }
 
 // NewWebsocketService is a constructor to create a new WebsocketService.
-func NewWebsocketService() WebsocketService {
+func NewWebsocketService(opts ...Option) WebsocketService {
+	options := newOptions(opts...)
 	return &websocketServiceImpl{
-		clients: map[WebsocketConnector]any{},
-		mutex:   &sync.RWMutex{},
-		closed:  make(chan struct{}),
+		clients:            map[WebsocketConnector]any{},
+		mutex:              &sync.RWMutex{},
+		closed:             make(chan struct{}),
+		includeFlagDetails: options.includeFlagDetails,
 	}
 }
 
 // websocketServiceImpl is the implementation of the interface.
 type websocketServiceImpl struct {
-	clients map[WebsocketConnector]any
-	mutex   *sync.RWMutex
-	closed  chan struct{}
+	clients            map[WebsocketConnector]any
+	mutex              *sync.RWMutex
+	closed             chan struct{}
+	includeFlagDetails bool
 }
 
 // BroadcastFlagChanges is sending a string to all the open connection.
 func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
+	payload := flagChangePayload(diff, w.includeFlagDetails)
 	for c := range w.clients {
-		err := c.WriteJSON(diff)
+		err := c.WriteJSON(payload)
 		if err != nil {
 			w.mutex.RUnlock()
 			w.Deregister(c)

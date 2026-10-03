@@ -3,6 +3,9 @@ title: Watch Thomas's PlatformCon 2025 Talk on Feature Flag Decoupling
 description: Thomas Poignant presents "Decouple Deployments and Releases with OpenFeature" at PlatformCon 2025, exploring how to separate feature releases from code deployments using feature flags and OpenFeature.
 authors: [thomaspoignant]
 tags: [platformcon, openfeature, feature flags, deployment, release management]
+image: ./banner.jpg
+image_alt: "PlatformCon 2025 speaker card for the \"Decouple Deployments and Releases with OpenFeature\" talk, with a photo of Thomas Poignant"
+category: Community
 ---
 
 # Watch Thomas's PlatformCon 2025 Talk on Feature Flag Decoupling

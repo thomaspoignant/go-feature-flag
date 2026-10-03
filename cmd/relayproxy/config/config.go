@@ -20,6 +20,11 @@ type Config struct {
 	// Swagger is the swagger configuration
 	Swagger Swagger `mapstructure:"swagger" koanf:"swagger"`
 
+	// OfrepEventStream (optional) advertises the flag-change SSE endpoint in the OFREP bulk
+	// evaluation response so that providers can subscribe to changes instead of polling.
+	// It is enabled when OfrepEventStream.BaseURL is set.
+	OfrepEventStream OfrepEventStream `mapstructure:"ofrepEventStream" koanf:"ofrepeventstream"`
+
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
@@ -88,6 +93,10 @@ type Config struct {
 	// This adds flag_name labels to the all_flags_evaluations_total_with_flag metric.
 	// Default: false
 	EnableBulkMetricFlagNames bool `mapstructure:"enableBulkMetricFlagNames" koanf:"enablebulkmetricflagnames"`
+
+	// DisableFlagDetailsInStream (optional) removes flag definitions from WebSocket change payloads.
+	// Default: false
+	DisableFlagDetailsInStream bool `mapstructure:"disableFlagDetailsInStream" koanf:"disableflagdetailsinstream"`
 
 	// FlagSets is the list of flag sets configured.
 	// A flag set is a group of flags that can be used to configure the relay proxy.

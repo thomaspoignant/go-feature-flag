@@ -8,6 +8,9 @@ import (
 
 const flagNameLabel = "flag_name"
 
+// FlagNotFoundLabelValue is the value of the flag_name label used for the evaluation of flags that do not exist.
+const FlagNotFoundLabelValue = "FLAG_NOT_FOUND"
+
 type MetricsOpts struct {
 	// enables per-flag metrics for bulk evaluation endpoints
 	EnableBulkMetricFlagNames bool
@@ -199,6 +202,13 @@ func (m *Metrics) IncFlagEvaluation(flagName string) {
 		labels := prom.Labels{flagNameLabel: flagName}
 		m.flagEvaluationCounter.With(labels).Inc()
 	}
+}
+
+// IncFlagNotFoundEvaluation increment the number of evaluation of flags that do not exist.
+// We are not using the flag key as label, because every unknown key sent by a client would create
+// a new time series that is never deleted.
+func (m *Metrics) IncFlagNotFoundEvaluation() {
+	m.IncFlagEvaluation(FlagNotFoundLabelValue)
 }
 
 // IncAllFlag increment the number call to AllFlag
