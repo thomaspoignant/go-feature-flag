@@ -1,9 +1,17 @@
 package stream
 
-import "github.com/thomaspoignant/go-feature-flag/notifier"
+import (
+	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+)
+
+// defaultSSEHeartbeatInterval is the default interval between two SSE heartbeat comments.
+const defaultSSEHeartbeatInterval = 30 * time.Second
 
 type options struct {
-	includeFlagDetails bool
+	includeFlagDetails   bool
+	sseHeartbeatInterval time.Duration
 }
 
 // Option configures flag change streams.
@@ -16,8 +24,16 @@ func WithFlagDetails(include bool) Option {
 	}
 }
 
+// WithSSEHeartbeatInterval sets the interval between two SSE heartbeat comments,
+// sent to keep idle connections open through proxies. A value <= 0 disables the heartbeat.
+func WithSSEHeartbeatInterval(interval time.Duration) Option {
+	return func(options *options) {
+		options.sseHeartbeatInterval = interval
+	}
+}
+
 func newOptions(opts ...Option) options {
-	options := options{includeFlagDetails: true}
+	options := options{includeFlagDetails: true, sseHeartbeatInterval: defaultSSEHeartbeatInterval}
 	for _, opt := range opts {
 		opt(&options)
 	}

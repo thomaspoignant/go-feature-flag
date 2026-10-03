@@ -638,6 +638,8 @@ paths:
         It is advertised in the `eventStreams` field of the OFREP bulk evaluation response.
         Each event is sent as `event: message` with a `model.OFREPSSEEvent` JSON payload,
         a `refetchEvaluation` event means that the provider must re-fetch its evaluations.
+        The stream also sends SSE comment lines (`: connected` when the connection opens,
+        `: heartbeat` every 30 seconds), they are ignored by SSE clients.
         The full URL (including query string) is sensitive and must not be logged
         or persisted by intermediaries.
       parameters:

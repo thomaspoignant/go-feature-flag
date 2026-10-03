@@ -38,10 +38,12 @@ func TestDeprecatedAliasHeaders(t *testing.T) {
 	flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil)
 	require.NoError(t, err)
 
+	sseService := stream.NewSSEService()
+	defer sseService.Close()
 	apiServer := api.New(c, service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
 		WebsocketService:  stream.NewWebsocketService(),
-		SSEService:        stream.NewSSEService(),
+		SSEService:        sseService,
 		FlagsetManager:    flagsetManager,
 		Metrics:           metric.Metrics{},
 	}, z)
