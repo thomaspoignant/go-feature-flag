@@ -3,10 +3,12 @@ title: 'In-Process Evaluation for GO Feature Flag OpenFeature Providers'
 description: 'GO, Java, .NET, Python, and JavaScript/TypeScript providers now support in-process evaluation for faster flag resolution with far fewer network calls.'
 authors: [thomaspoignant]
 tags: [openfeature, performance, in-process, ofrep]
-image: https://gofeatureflag.org/assets/images/inprocess-banner-61bbdb9406831475b10959f8702e9872.png
+image: ./inprocess-banner.jpg
+image_alt: "Banner about in-process evaluation in the GO Feature Flag OpenFeature providers"
+category: Product
 ---
 
-![In-Process OpenFeature Providers Banner](./inprocess-banner.png)
+![In-Process OpenFeature Providers Banner](./inprocess-banner.jpg)
 
 # ⚡ In-Process Evaluation for GO Feature Flag OpenFeature Providers
 

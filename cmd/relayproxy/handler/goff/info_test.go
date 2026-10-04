@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
@@ -87,7 +87,7 @@ func Test_info_Handler(t *testing.T) {
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(echo.GET, "/info", nil)
+			req := httptest.NewRequest(http.MethodGet, "/info", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
 			res := infoCtrl.Handler(c)
@@ -145,7 +145,7 @@ func Test_info_Handler_Error(t *testing.T) {
 
 		e := echo.New()
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(echo.GET, "/info", nil)
+		req := httptest.NewRequest(http.MethodGet, "/info", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		c := e.NewContext(req, rec)
 		res := infoCtrl.Handler(c)
@@ -172,7 +172,7 @@ func Test_info_Handler_Error(t *testing.T) {
 
 		e := echo.New()
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(echo.GET, "/info", nil)
+		req := httptest.NewRequest(http.MethodGet, "/info", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		c := e.NewContext(req, rec)
 		res := infoCtrl.Handler(c)

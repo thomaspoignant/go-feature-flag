@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.cli.jvm.main
 
 plugins {
-    kotlin("jvm") version "2.4.0"
+    kotlin("jvm") version "2.4.20"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("java")
@@ -16,8 +16,8 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("dev.openfeature.contrib.providers:go-feature-flag:1.1.2")
-    implementation("dev.openfeature:sdk:1.20.2")
+    implementation("dev.openfeature.contrib.providers:go-feature-flag:1.2.1")
+    implementation("dev.openfeature:sdk:1.22.1")
 }
 
 tasks.test {

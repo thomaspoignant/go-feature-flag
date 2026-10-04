@@ -37,7 +37,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 `))),
 	}
 
-	error := &http.Response{
+	errorResponse := &http.Response{
 		Status:     "KO",
 		StatusCode: http.StatusInternalServerError,
 		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
@@ -72,7 +72,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 	if strings.Contains(req.URL.String(), "error") {
 		return nil, errors.New("http error")
 	} else if strings.HasSuffix(req.URL.String(), "httpError") {
-		return error, nil
+		return errorResponse, nil
 	}
 
 	return success, nil

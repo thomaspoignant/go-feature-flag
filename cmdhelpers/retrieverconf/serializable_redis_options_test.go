@@ -80,7 +80,7 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 				assert.Equal(t, 600000*time.Millisecond, opts.ConnMaxLifetime)
 				assert.True(t, opts.PoolFIFO)
 				assert.True(t, opts.ContextTimeoutEnabled)
-				assert.False(t, opts.DisableIndentity)
+				assert.False(t, opts.DisableIdentity)
 				assert.Equal(t, "test", opts.IdentitySuffix)
 			},
 		},

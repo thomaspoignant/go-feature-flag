@@ -77,6 +77,7 @@ func (f *Exporter) Export(
 	if err != nil {
 		return err
 	}
+	defer func() { _ = os.RemoveAll(outputDir) }()
 
 	fileExporter := fileexporter.Exporter{
 		Format:                  f.Format,
@@ -105,28 +106,44 @@ func (f *Exporter) Export(
 			)
 			continue
 		}
-		defer func() { _ = of.Close() }()
-
-		// prepend the path
-		source := fileName
-		if f.Path != "" {
-			source = f.Path + "/" + fileName
-		}
-
-		_, err = client.UploadFile(ctx, f.Container, source, of, nil)
-		if err != nil {
-			logger.Error(
-				"[Azure Exporter] failed to upload file",
-				slog.String("path", outputDir+"/"+fileName),
-			)
+		if err := f.uploadFile(ctx, client, logger, of, outputDir, fileName); err != nil {
 			return err
 		}
-
-		logger.Info(
-			"[Azure Exporter] file uploaded.",
-			slog.String("location", f.Container+"/"+fileName),
-		)
 	}
+	return nil
+}
+
+// uploadFile uploads a single file to Azure Blob Storage and closes the file
+// handle before returning. Keeping the defer here (instead of in the calling
+// loop) ensures at most one file descriptor is open at a time, regardless of
+// batch size.
+func (f *Exporter) uploadFile(
+	ctx context.Context,
+	client *azblob.Client,
+	logger *fflog.FFLogger,
+	of *os.File,
+	outputDir, fileName string,
+) error {
+	defer func() { _ = of.Close() }()
+
+	// prepend the path
+	source := fileName
+	if f.Path != "" {
+		source = f.Path + "/" + fileName
+	}
+
+	if _, err := client.UploadFile(ctx, f.Container, source, of, nil); err != nil {
+		logger.Error(
+			"[Azure Exporter] failed to upload file",
+			slog.String("path", outputDir+"/"+fileName),
+		)
+		return err
+	}
+
+	logger.Info(
+		"[Azure Exporter] file uploaded.",
+		slog.String("location", f.Container+"/"+fileName),
+	)
 	return nil
 }
 

@@ -1075,6 +1075,154 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should apply the most recent scheduled step when two steps edit the same rule name (newest date wins)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*any{
+					"variationTrue":  testconvert.Interface(true),
+					"variationFalse": testconvert.Interface(false),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("DEV environment"),
+						Query:           testconvert.String(`{"===":[{"var":"EnvironmentUUID"},"0ffcc8da-1f70-4229-8ef7-b5a3130cdd52"]}`),
+						VariationResult: testconvert.String("variationFalse"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					Name:            testconvert.String("Default"),
+					VariationResult: testconvert.String("variationFalse"),
+				},
+				Metadata: &map[string]any{
+					"type":       "ADVANCED_FLAG",
+					"metadataId": "5cbd0920-7b2c-4186-9cca-3313de925fe2",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{ // newest date, listed first
+						InternalFlag: flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("DEV environment"),
+									Query:           testconvert.String(`{"===":[{"var":"EnvironmentUUID"},"0ffcc8da-1f70-4229-8ef7-b5a3130cdd52"]}`),
+									VariationResult: testconvert.String("variationFalse"),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Date(2026, 6, 11, 9, 50, 0, 0, time.UTC)),
+					},
+					{ // oldest date, listed second
+						InternalFlag: flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("DEV environment"),
+									Query:           testconvert.String(`{"===":[{"var":"EnvironmentUUID"},"0ffcc8da-1f70-4229-8ef7-b5a3130cdd52"]}`),
+									VariationResult: testconvert.String("variationTrue"),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Date(2026, 6, 11, 9, 49, 0, 0, time.UTC)),
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("EnvironmentUUID", "0ffcc8da-1f70-4229-8ef7-b5a3130cdd52").
+					AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+						CurrentDateTime: testconvert.Time(
+							time.Date(2026, 6, 11, 9, 51, 0, 0, time.UTC),
+						),
+					}).
+					Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: false,
+				},
+			},
+			// Newest scheduled step (09:50, variationFalse) must win over the
+			// older one (09:49, variationTrue).
+			want: false,
+			want1: flag.ResolutionDetails{
+				Variant:   "variationFalse",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("DEV environment"),
+				Metadata: map[string]any{
+					"type":              "ADVANCED_FLAG",
+					"metadataId":        "5cbd0920-7b2c-4186-9cca-3313de925fe2",
+					"evaluatedRuleName": "DEV environment",
+				},
+			},
+		},
+		{
+			name: "Should keep rules added by an earlier scheduled step when a later step adds another rule",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*any{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]any{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{ // older step adds rule-a
+						InternalFlag: flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("rule-a"),
+									Query:           testconvert.String("key eq \"user-a\""),
+									VariationResult: testconvert.String("variation_B"),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Date(2026, 6, 11, 9, 49, 0, 0, time.UTC)),
+					},
+					{ // newer step adds a different rule-b
+						InternalFlag: flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("rule-b"),
+									Query:           testconvert.String("key eq \"user-b\""),
+									VariationResult: testconvert.String("variation_C"),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Date(2026, 6, 11, 9, 50, 0, 0, time.UTC)),
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-a").
+					AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+						CurrentDateTime: testconvert.Time(
+							time.Date(2026, 6, 11, 9, 51, 0, 0, time.UTC),
+						),
+					}).
+					Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			// rule-a (added by the older step) must survive after the newer step
+			// adds rule-b, so a "user-a" context still matches rule-a.
+			want: "value_B",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_B",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("rule-a"),
+				Metadata: map[string]any{
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule-a",
+				},
+			},
+		},
+		{
 			name: "Should ignore scheduled steps with no dates",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*any{

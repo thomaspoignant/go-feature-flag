@@ -16,6 +16,12 @@ export const info = integrations.retrievers.find((r) => r.name === retrieverName
 GitLab has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
 :::
 
+:::note
+The retriever handles URL encoding, so write the repository slug and the file path as they appear in GitLab:
+- `repositorySlug` / `RepositorySlug`: `group/subgroup/project`, not `group%2Fsubgroup%2Fproject`.
+- `path` / `FilePath`: `flag configs/my flags.yaml`, without replacing spaces with `%20` or `+`.
+:::
+
 ## Configure the relay proxy
 
 To configure your relay proxy to use the {retrieverName} retriever, you need to add the following

@@ -39,6 +39,12 @@
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
             "component": "go-feature-flag",
+            "extra-files": [
+                {
+                    "type": "generic",
+                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml"
+                }
+            ],
             "exclude-paths": [
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
@@ -83,7 +89,12 @@
             "changelog-path": "CHANGELOG.md",
             "extra-files": [
                 "pyproject.toml",
-                "README.md"
+                "README.md",
+                {
+                    "path": "uv.lock",
+                    "type": "toml",
+                    "jsonpath": "$.package[?(@.name.value=='gofeatureflag-python-provider')].version"
+                }
             ]
         }
     }

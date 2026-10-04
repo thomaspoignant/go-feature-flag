@@ -1,7 +1,7 @@
 {
   "overrides": [
     {
-      "files": "*.js",
+      "files": ["*.js", "*.mjs"],
       "options": {
         "arrowParens": "avoid",
         "bracketSpacing": false,

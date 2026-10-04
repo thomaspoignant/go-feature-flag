@@ -13,12 +13,12 @@ jobs:
       actions: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false
       - name: Setup go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           check-latest: true
@@ -27,13 +27,13 @@ jobs:
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 23
           package-manager-cache: false
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
-      - uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5.3.0
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: "7.0.x"
       - run: make vendor
@@ -49,7 +49,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -61,14 +61,14 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           check-latest: true
           cache: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Docker login
         env:
@@ -76,6 +76,17 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+
+      # The images are mirrored to ghcr.io/go-feature-flag/*, which lives under the
+      # organisation while this repository lives under a personal account. The built-in
+      # GITHUB_TOKEN is scoped to the repository owner and cannot write there, and GHCR
+      # only accepts personal access tokens (classic), hence the dedicated GHCR_TOKEN.
+      - name: GHCR login
+        env:
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
@@ -88,7 +99,7 @@ jobs:
         run: echo "GOFIPS140=$(cat .fips-version | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
           version: latest
@@ -106,7 +117,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Release readme to DockerHub
@@ -126,7 +137,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Release readme to DockerHub
@@ -146,7 +157,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Release readme to DockerHub
@@ -183,19 +194,19 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           persist-credentials: false
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           package-manager-cache: false
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
@@ -204,7 +215,7 @@ jobs:
         run: npm run docusaurus docs:version "$VERSION"
 
       - name: Setup go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
           check-latest: true
@@ -215,7 +226,7 @@ jobs:
         run: go run versions.go
 
       - name: Checkout main branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -262,14 +273,14 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           persist-credentials: false
 
       - name: Setup go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: ./release/go.mod
           check-latest: true
@@ -284,7 +295,7 @@ jobs:
         run: ./out/bin/jsonschema-generator --schema-location=./.schema/flag-schema.json
 
       - name: Checkout main branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -314,48 +325,79 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-relay-proxy-helm-chart:
-    # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
-    # in the Chart.yaml file of the helm-chart.
+  release-helm-chart:
     runs-on: ubuntu-latest
-    name: Bump Relay Proxy Helm Chart appVersion
+    name: Release Relay Proxy Helm chart
     needs:
       - goreleaser
     permissions:
       contents: read
-      pull-requests: write
     env:
-      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
+      CHART_DIR: ./cmd/relayproxy/helm-charts/relay-proxy
+      HAS_GHCR_TOKEN: ${{ secrets.GHCR_TOKEN != '' }}
     steps:
       - name: Extract version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+        run: |
+          app_version="${GITHUB_REF#refs/tags/}"
+          echo "APP_VERSION=${app_version}" >> "$GITHUB_ENV"
+          echo "CHART_VERSION=${app_version#v}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 1
           persist-credentials: false
 
-      - name: Bump chart appVersion
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: VERSION="${{ env.VERSION }}" make bump-helm-chart-version
-
-      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        env:
-          VERSION: ${{ env.VERSION }}
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          base: main
-          branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
-          title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
-          body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}
-          commit-message: Bump relay-proxy helm chart version ${{ env.VERSION }}
-          labels: automerge
-          assignees: thomaspoignant
-          draft: false
-          signoff: true
-          delete-branch: true
+          version: v3.19.0
+
+      # Both publish steps below take the version from the tag, never from Chart.yaml, so the
+      # published artifact can never disagree with the release. This check is only there to
+      # fail loudly if release-please stopped bumping the file, since users reading the
+      # repository would then see a version that does not match what was published.
+      - name: Check Chart.yaml matches the released version
+        run: |
+          chart_version=$(helm show chart "$CHART_DIR" | awk '/^version:/ {print $2}')
+          if [ "$chart_version" != "$CHART_VERSION" ]; then
+            echo "Chart.yaml says ${chart_version}, tag says ${CHART_VERSION}."
+            echo "release-please should have bumped it through the extra-files entry in"
+            echo ".github/release-please/release-please-config.json; check the"
+            echo "x-release-please-version annotations in Chart.yaml."
+            exit 1
+          fi
+
+      - name: Publish Helm chart to charts.gofeatureflag.org
+        uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
+        with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          charts_dir: ./cmd/relayproxy/helm-charts/
+          chart_version: ${{ env.CHART_VERSION }}
+          app_version: ${{ env.APP_VERSION }}
+          charts_url: https://charts.gofeatureflag.org
+          owner: go-feature-flag
+          repository: helm-charts
+          branch: gh-pages
+          target_dir: ./
+          commit_username: thomaspoignant
+          commit_email: thomaspoignant@goferatureflag.org
+
+      - name: GHCR login
+        if: env.HAS_GHCR_TOKEN == 'true'
+        env:
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | helm registry login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
+
+      - name: Push Helm chart to GHCR
+        if: env.HAS_GHCR_TOKEN == 'true'
+        env:
+          OCI_REPO: oci://ghcr.io/go-feature-flag/charts
+        run: |
+          helm package "$CHART_DIR" \
+            --version "$CHART_VERSION" \
+            --app-version "$APP_VERSION" \
+            --destination /tmp/charts
+          helm push "/tmp/charts/relay-proxy-${CHART_VERSION}.tgz" "$OCI_REPO"

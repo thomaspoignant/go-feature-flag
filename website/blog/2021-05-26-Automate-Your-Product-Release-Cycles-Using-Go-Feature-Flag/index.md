@@ -3,6 +3,9 @@ slug: automate-your-product-release-cycles-using-go-feature-flag
 title: "Automate Your Product Release Cycles Using Go Feature Flag"
 authors: [ thomaspoignant ]
 tags: [ GO Feature Flag, v0.x.x ]
+image: ./head.jpg
+image_alt: "Illustration of an automated product release pipeline"
+category: Engineering
 ---
 
 ![](./head.jpg)

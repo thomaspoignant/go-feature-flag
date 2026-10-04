@@ -3,9 +3,11 @@ package ofrep
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
@@ -22,12 +24,18 @@ import (
 type EvaluateCtrl struct {
 	flagsetManager service.FlagsetManager
 	metrics        metric.Metrics
+	eventStream    config.OfrepEventStream
 }
 
-func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metrics) EvaluateCtrl {
+func NewOFREPEvaluate(
+	flagsetManager service.FlagsetManager,
+	metrics metric.Metrics,
+	eventStream config.OfrepEventStream,
+) EvaluateCtrl {
 	return EvaluateCtrl{
 		flagsetManager: flagsetManager,
 		metrics:        metrics,
+		eventStream:    eventStream,
 	}
 }
 
@@ -49,7 +57,7 @@ func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metr
 // @Failure      404 {object}  model.OFREPEvaluateResponseError "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/evaluate/flags/{flag_key} [post]
-func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
+func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
 	flagKey := c.Param("flagKey")
 	if flagKey == "" {
 		return c.JSON(
@@ -57,7 +65,6 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			NewEvaluateError(flagKey, flag.ErrorCodeGeneral,
 				"No key provided in the URL"))
 	}
-	h.metrics.IncFlagEvaluation(flagKey)
 
 	reqBody := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
@@ -90,6 +97,11 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	// we set a nil value to the default value to avoid the default value to be used.
 	var defaultValue any = nil
 	flagValue, _ := flagset.RawVariation(flagKey, evalCtx, defaultValue)
+	if flagValue.ErrorCode == flag.ErrorCodeFlagNotFound {
+		h.metrics.IncFlagNotFoundEvaluation()
+	} else {
+		h.metrics.IncFlagEvaluation(flagKey)
+	}
 
 	if flagValue.Reason == flag.ReasonError {
 		httpStatus := http.StatusBadRequest
@@ -152,7 +164,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /ofrep/v1/evaluate/flags [post]
-func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
+func (h *EvaluateCtrl) BulkEvaluate(c *echo.Context) error {
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
@@ -218,8 +230,37 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
 	)
 
+	if h.eventStream.IsEnabled() {
+		response.EventStreams = h.buildEventStreams(c)
+	}
+
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	return c.JSON(http.StatusOK, response)
+}
+
+// ofrepSSEPath is the path of the relay proxy endpoint streaming flag changes over SSE.
+const ofrepSSEPath = "/stream/v1/sse/flag/change"
+
+// buildEventStreams returns the eventStreams advertised in the OFREP bulk evaluation
+// response (OpenFeature ADR-0008).
+// The URL is built from the configured base URL
+// and contains the API key of the caller, so the provider can connect without extra credentials.
+// This URL is sensitive, it must never be logged.
+func (h *EvaluateCtrl) buildEventStreams(c *echo.Context) []model.OFREPEventStream {
+	baseURL := h.eventStream.BaseURL
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil
+	}
+	u = u.JoinPath(ofrepSSEPath)
+	if apiKey := helper.APIKey(c); apiKey != "" {
+		u.RawQuery = url.Values{"apiKey": []string{apiKey}}.Encode()
+	}
+	return []model.OFREPEventStream{{
+		Type:               "sse",
+		URL:                u.String(),
+		InactivityDelaySec: h.eventStream.InactivityDelaySec,
+	}}
 }
 
 func assertOFREPEvaluateRequest(

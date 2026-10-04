@@ -4,9 +4,11 @@ description: Community-built skills and an MCP server that improve the AI-assist
 date: 2026-05-02
 authors: [thomaspoignant]
 tags: [openfeature, ai, developer-experience, community]
-image: https://gofeatureflag.org/assets/images/banner-d245b9f91cecf0c12be153b14acaeb35.png
+image: ./banner.jpg
+image_alt: "Banner about AI tooling for GO Feature Flag and OpenFeature"
+category: Engineering
 ---
-![Banner](banner.png)
+![Banner](banner.jpg)
 
 AI coding assistants have become a regular part of the developer workflow — writing boilerplate,
 suggesting configurations, explaining APIs. But when it comes to feature flags, generic AI often

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
@@ -70,6 +70,7 @@ type WSFlagChange struct {
 // @Description  Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
 // @Description  is a websocket endpoint to be notified about flag changes; every
 // @Description  change pushes a notifier.DiffCache message to the client.
+// @Description  When disableFlagDetailsInStream is true, values are empty objects.
 // @Produce      json
 // @Accept       json
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
@@ -78,7 +79,7 @@ type WSFlagChange struct {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ws/v1/flag/change [get]
-func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
+func (f *WSFlagChange) LegacyHandler(c *echo.Context) error {
 	// This handler is deprecated and we keep it for the documentation.
 	return f.Handler(c)
 }
@@ -88,6 +89,7 @@ func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
 // @Tags         GO Feature Flag Evaluation Stream API
 // @Description  This endpoint is a websocket endpoint to be notified about flag changes;
 // @Description  every change pushes a notifier.DiffCache message to the client.
+// @Description  When disableFlagDetailsInStream is true, values are empty objects.
 // @Produce      json
 // @Accept       json
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
@@ -96,7 +98,7 @@ func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/ws/flag/change [get]
-func (f *WSFlagChange) Handler(c echo.Context) error {
+func (f *WSFlagChange) Handler(c *echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err

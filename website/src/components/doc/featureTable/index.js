@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  * @returns {JSX.Element} A table showing the features and their status
  */
 export const FeatureTable = ({sdk}) => {
-  if (!sdk || !sdk.featureList || !Array.isArray(sdk.featureList)) {
+  if (!sdk?.featureList || !Array.isArray(sdk.featureList)) {
     return null;
   }
 

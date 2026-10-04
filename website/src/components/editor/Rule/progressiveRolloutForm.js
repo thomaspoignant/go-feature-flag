@@ -1,5 +1,6 @@
 import {Controller, useFormContext} from 'react-hook-form';
-import _ from 'lodash';
+import get from 'lodash/get';
+import isNil from 'lodash/isNil';
 import styles from './styles.module.css';
 import clsx from 'clsx';
 import DatePicker from 'react-datepicker';
@@ -109,8 +110,8 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
 }
 
 function DisplayErrors(errors, label) {
-  const stepErrors = _.get(errors, label);
-  if (_.isNil(stepErrors)) {
+  const stepErrors = get(errors, label);
+  if (isNil(stepErrors)) {
     return null;
   }
 

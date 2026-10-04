@@ -3,6 +3,9 @@ title: Introducing Exporter Metadata in the GO Feature Flag Provider for OpenFea
 description: Exporter metadata in the GO Feature Flag provider for OpenFeature allows enriching evaluation events with static context data like environment or app version for improved observability and analysis.
 authors: [thomaspoignant]
 tags: [openfeature,exporter]
+image: /img/logo/x-card.png
+image_alt: "The GO Feature Flag mascot and logo with the tagline \"Ship Faster, Reduce Risk, and Build Scale\""
+category: Product
 ---
 
 # Introducing Exporter Metadata in the GO Feature Flag Provider for OpenFeature

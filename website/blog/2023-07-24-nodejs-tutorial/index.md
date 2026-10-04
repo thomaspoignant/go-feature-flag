@@ -3,7 +3,9 @@ title: Add Feature Flags in your Node.JS application using GO Feature Flag and O
 description: In this video, we'll walk you through the process of implementing feature flags in your Node js applications, allowing you to roll out new features gradually and control their visibility in real-time.
 authors: [thomaspoignant]
 tags: [openfeature, nodeJS]
-image: http://gofeatureflag.org/assets/images/banner-819d71b94352213afa22d2b53f376cab.png
+image: ./banner.png
+image_alt: "Banner for the Node.js feature flag tutorial with GO Feature Flag and OpenFeature"
+category: Engineering
 ---
 
 <iframe width="100%" height="444" src="https://www.youtube.com/embed/ascFFZqjQAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>

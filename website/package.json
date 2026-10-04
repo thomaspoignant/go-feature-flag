@@ -13,27 +13,29 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "lint": "eslint \"**/*.js\"",
+    "lint:blog": "node scripts/check-blog-frontmatter.mjs",
     "eslint:fix": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.10.1",
-    "@docusaurus/plugin-client-redirects": "^3.10.1",
-    "@docusaurus/plugin-google-gtag": "^3.10.1",
-    "@docusaurus/plugin-google-tag-manager": "^3.10.1",
-    "@docusaurus/preset-classic": "^3.10.1",
-    "@docusaurus/theme-mermaid": "^3.10.1",
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/plugin-client-redirects": "^3.10.2",
+    "@docusaurus/plugin-google-gtag": "^3.10.2",
+    "@docusaurus/plugin-google-tag-manager": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@docusaurus/theme-mermaid": "^3.10.2",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
     "@mdx-js/react": "^3.1.1",
     "@react-querybuilder/dnd": "^8.16.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@uiw/react-textarea-code-editor": "^3.1.1",
-    "autoprefixer": "^10.5.0",
+    "autoprefixer": "^10.6.1",
     "clsx": "^2.1.1",
     "core-js": "^3.49.0",
     "json2toml": "^6.1.2",
     "lodash": "^4.18.1",
     "mobx": "^6.15.3",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.28",
     "prism-react-renderer": "^2.4.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
@@ -52,13 +54,13 @@
     "stream": "^0.0.3",
     "stream-browserify": "^3.0.0",
     "styled-components": "^6.4.1",
-    "tailwindcss": "^3.4.19",
+    "tailwindcss": "^4.3.3",
     "yaml": "^2.8.4"
   },
   "devDependencies": {
-    "@docusaurus/eslint-plugin": "^3.10.1",
-    "@docusaurus/module-type-aliases": "^3.10.1",
-    "@docusaurus/types": "^3.10.1",
+    "@docusaurus/eslint-plugin": "^3.10.2",
+    "@docusaurus/module-type-aliases": "^3.10.2",
+    "@docusaurus/types": "^3.10.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-mdx": "^3.7.0",
     "eslint-plugin-prettier": "^5.5.5",
@@ -82,6 +84,12 @@
     "node": ">=18.0"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.0"
+    "serialize-javascript": "^7.0.0",
+    "@docusaurus/theme-mermaid": {
+      "mermaid": "^11.17.2"
+    },
+    "sockjs": {
+      "uuid": "^11.1.1"
+    }
   }
 }

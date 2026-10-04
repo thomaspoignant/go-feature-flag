@@ -317,6 +317,146 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 	}
 }
 
+// TestConfigChangeFlagsetAddRemove validates that flagsets can be added or removed at runtime
+// through the configuration file watch mechanism, without restarting the relay proxy.
+func TestConfigChangeFlagsetAddRemove(t *testing.T) {
+	tests := []struct {
+		name               string
+		port               string
+		initialConfigFile  string
+		modifiedConfigFile string
+		checksBeforeChange []httpRequestCheck
+		checksAfterChange  []httpRequestCheck
+	}{
+		{
+			name:               "add a new flagset at runtime",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-add-flagset.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-add-flagset-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{
+					apiKey:          apiKey2,
+					expectedStatus:  http.StatusOK,
+					bodyContains:    []string{fooFlagName},
+					bodyNotContains: []string{testFlagName},
+				},
+			},
+		},
+		{
+			name:               "remove a flagset at runtime",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-remove-flagset.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-remove-flagset-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusOK, bodyContains: []string{fooFlagName}},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
+			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
+			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
+			callbackCalled := make(chan bool, 1)
+			logger, err := zap.NewDevelopment()
+			require.NoError(t, err)
+			s, c := newAPIServerWithLogger(t, configFile, logger, func(newConfig *config.Config) {
+				callbackCalled <- true
+			})
+			defer func() {
+				s.Stop(context.Background())
+				_ = c.StopConfigChangeWatcher()
+			}()
+			time.Sleep(100 * time.Millisecond) // wait for the server to start
+
+			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20d"}}`
+
+			for _, check := range tt.checksBeforeChange {
+				doHTTPRequestAndCheck(t, urlAPIAllFlags, body, check, phaseBeforeChange)
+			}
+
+			_ = testutils.ReplaceAndCopyFileToExistingFile(t, tt.modifiedConfigFile, configFile, "1031", tt.port)
+
+			select {
+			case <-callbackCalled:
+				time.Sleep(100 * time.Millisecond)
+			case <-time.After(5000 * time.Millisecond):
+				require.Fail(t, timeoutCallbackMsg)
+			}
+
+			for _, check := range tt.checksAfterChange {
+				doHTTPRequestAndCheck(t, urlAPIAllFlags, body, check, phaseAfterChange)
+			}
+		})
+	}
+}
+
+// TestConfigChangeFlagsetForbiddenModification validates that modifying an existing flagset
+// (anything other than its API keys) is rejected at runtime: an error is logged and the flagset
+// keeps serving its original configuration until the relay proxy is restarted.
+func TestConfigChangeFlagsetForbiddenModification(t *testing.T) {
+	port := testutils.GetFreePortAsString(t)
+	urlAPIAllFlags := localhostURL + port + allFlagsEndpoint
+	configFile := testutils.CopyFileToNewTempFile(t, "../testdata/config/flagset-modify-config.yaml")
+	testutils.ReplaceInFile(t, configFile, "1031", port)
+	callbackCalled := make(chan bool, 1)
+	core, observedLogs := observer.New(zapcore.ErrorLevel)
+	observedLogger := zap.New(core)
+	s, c := newAPIServerWithLogger(t, configFile, observedLogger, func(newConfig *config.Config) {
+		callbackCalled <- true
+	})
+	defer func() {
+		s.Stop(context.Background())
+		_ = c.StopConfigChangeWatcher()
+	}()
+	time.Sleep(100 * time.Millisecond) // wait for the server to start
+
+	body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
+
+	// Before the change the flagset serves flag-config.yaml (test-flag).
+	doHTTPRequestAndCheck(t, urlAPIAllFlags, body, httpRequestCheck{
+		apiKey:          apiKey1,
+		expectedStatus:  http.StatusOK,
+		bodyContains:    []string{testFlagName},
+		bodyNotContains: []string{fooFlagName},
+	}, phaseBeforeChange)
+
+	// Change the retriever of the existing flagset: this is a forbidden modification.
+	_ = testutils.ReplaceAndCopyFileToExistingFile(
+		t, "../testdata/config/flagset-modify-config-MODIFIED.yaml", configFile, "1031", port)
+
+	select {
+	case <-callbackCalled:
+		time.Sleep(100 * time.Millisecond)
+	case <-time.After(5000 * time.Millisecond):
+		require.Fail(t, timeoutCallbackMsg)
+	}
+
+	// The modification is rejected with an explicit error log.
+	rejectedLogs := observedLogs.FilterMessageSnippet("modifying a flagset is not supported at runtime")
+	assert.GreaterOrEqual(t, rejectedLogs.Len(), 1,
+		"expected an error log about the rejected flagset modification")
+
+	// The flagset still serves the ORIGINAL configuration (test-flag, not foo-flag).
+	doHTTPRequestAndCheck(t, urlAPIAllFlags, body, httpRequestCheck{
+		apiKey:          apiKey1,
+		expectedStatus:  http.StatusOK,
+		bodyContains:    []string{testFlagName},
+		bodyNotContains: []string{fooFlagName},
+	}, phaseAfterChange)
+}
+
 func newAPIServerWithLogger(
 	t *testing.T,
 	configFile *os.File,

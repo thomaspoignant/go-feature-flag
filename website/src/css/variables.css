@@ -5,13 +5,13 @@
 
 /* Light theme variables */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary: #9fbeb3;
+  --ifm-color-primary-dark: #73c6b6;
   --ifm-color-primary-darker: #277148;
   --ifm-color-primary-darkest: #205d3b;
   --ifm-color-primary-light: #33925d;
   --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary-lightest: #73c6b6;
   --ifm-code-font-size: 90%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
@@ -57,7 +57,7 @@
 
 /* Dark theme variables - html prefix increases specificity to override :root */
 html[data-theme="dark"] {
-  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary: #cdf7e7;
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
   --ifm-color-primary-darkest: #1a8870;

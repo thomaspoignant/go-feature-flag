@@ -23,7 +23,8 @@ const COLUMNS = [
 
 // Cell builders — explicitly named for the recurring visual semantics so the
 // row data below stays a one-liner per cell. Verified against each project's
-// own docs / the OpenFeature ecosystem (June 2026). Qualitative only — no numbers.
+// own docs / the OpenFeature ecosystem (re-checked September 2026). Qualitative
+// only — no numbers.
 const cellG = text => ({text, icon: 'check', tone: 'good'}); // green check
 const cellY = text => ({text, icon: 'partial', tone: 'warn'}); // amber partial
 const cellR = text => ({text, icon: 'cross', tone: 'bad'}); // red cross
@@ -123,7 +124,7 @@ const ROWS = [
     cells: {
       license: cellTxt('MIT', 'good'),
       db: cellG('None (GitOps)'),
-      openfeature: cellR('None (own SDKs)'),
+      openfeature: cellG('Official providers'),
       ui: cellCross('None (Git/CLI)'),
       experimentation: cellY('Definition only'),
       open: cellG('Yes — fully open'),
@@ -227,6 +228,9 @@ export function ComparisonTable() {
         <tbody>
           {ROWS.map((row, rowIndex) => {
             const isAlt = rowIndex % 2 === 1;
+            const rowHeaderBg = isAlt
+              ? 'bg-titles-500/[0.04]'
+              : 'bg-white dark:bg-[#2a2a2a]';
             return (
               <tr
                 key={row.tool}
@@ -241,12 +245,7 @@ export function ComparisonTable() {
                     borderClass,
                     row.featured
                       ? 'text-titles-500 bg-titles-500/[0.12]'
-                      : clsx(
-                          'text-gray-800 dark:text-gray-50',
-                          isAlt
-                            ? 'bg-titles-500/[0.04]'
-                            : 'bg-white dark:bg-[#2a2a2a]'
-                        )
+                      : clsx('text-gray-800 dark:text-gray-50', rowHeaderBg)
                   )}>
                   <span className="inline-flex items-center gap-2">
                     {row.logo && (
@@ -254,7 +253,7 @@ export function ComparisonTable() {
                         src={row.logo}
                         alt={`${row.tool} logo`}
                         loading="lazy"
-                        className="w-6 h-6 shrink-0 rounded object-contain"
+                        className="w-6 h-6 shrink-0 rounded-sm object-contain"
                       />
                     )}
                     <span className="inline-flex flex-col items-start gap-1">

@@ -12,7 +12,7 @@ export const Card = ({
   featureList,
 }) => {
   return (
-    <div className="max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div className="max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       {logo && <img src={logo} className={'min-h-20 max-h-20'} alt={'logo'} />}
       {!logo && cssLogo && <i className={clsx(cssLogo, 'text-6xl')}></i>}
       <a href={link}>

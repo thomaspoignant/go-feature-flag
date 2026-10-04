@@ -2,9 +2,12 @@ package retriever_test
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -136,39 +139,53 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 			}
 
 			// Verify that Init was called on the expected retrievers
-			for retrieverName, shouldBeCalled := range tt.expectedInitCalls {
-				retrieverFound := false
-				for _, r := range tt.retrievers {
-					if mockRetriever, ok := r.(interface{ GetName() string }); ok {
-						if mockRetriever.GetName() == retrieverName {
-							retrieverFound = true
-							if legacyRetriever, ok := r.(*mockretriever.InitializableRetrieverLegacy); ok {
-								if shouldBeCalled {
-									assert.True(t, legacyRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							if standardRetriever, ok := r.(*mockretriever.InitializableRetriever); ok {
-								if shouldBeCalled {
-									assert.True(t, standardRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							if flagsetRetriever, ok := r.(*mockretriever.InitializableRetrieverWithFlagset); ok {
-								if shouldBeCalled {
-									assert.True(t, flagsetRetriever.InitCalled, "Init should have been called on %s", retrieverName)
-								}
-							}
-							break
-						}
-					}
-				}
-				if shouldBeCalled {
-					assert.True(t, retrieverFound, "Retriever %s should have been found", retrieverName)
-				}
-			}
+			assertInitCalls(t, tt.retrievers, tt.expectedInitCalls)
 
 			// Clean up
 			_ = manager.Shutdown(ctx)
 		})
+	}
+}
+
+// findRetrieverByName returns the first retriever exposing GetName() == name,
+// or nil when none matches.
+func findRetrieverByName(retrievers []retriever.Retriever, name string) retriever.Retriever {
+	for _, r := range retrievers {
+		if named, ok := r.(interface{ GetName() string }); ok && named.GetName() == name {
+			return r
+		}
+	}
+	return nil
+}
+
+// initCalled reports whether Init was recorded as called on a mock retriever.
+// The second return value is false when r is not an initializable mock type.
+func initCalled(r retriever.Retriever) (called bool, ok bool) {
+	switch v := r.(type) {
+	case *mockretriever.InitializableRetrieverLegacy:
+		return v.InitCalled, true
+	case *mockretriever.InitializableRetriever:
+		return v.InitCalled, true
+	case *mockretriever.InitializableRetrieverWithFlagset:
+		return v.InitCalled, true
+	default:
+		return false, false
+	}
+}
+
+// assertInitCalls verifies that Init was called on each retriever that the test
+// case expects to have been initialized.
+func assertInitCalls(t *testing.T, retrievers []retriever.Retriever, expected map[string]bool) {
+	t.Helper()
+	for name, shouldBeCalled := range expected {
+		if !shouldBeCalled {
+			continue
+		}
+		r := findRetrieverByName(retrievers, name)
+		assert.NotNil(t, r, "Retriever %s should have been found", name)
+		if called, ok := initCalled(r); ok {
+			assert.True(t, called, "Init should have been called on %s", name)
+		}
 	}
 }
 
@@ -245,4 +262,89 @@ variation = "A"
 			_ = manager.Shutdown(ctx)
 		})
 	}
+}
+
+// countingRetriever counts how many times Retrieve was called. It is read from the test
+// goroutine while the background updater writes to it, hence the mutex.
+type countingRetriever struct {
+	mu    sync.Mutex
+	calls int
+}
+
+func (r *countingRetriever) Retrieve(_ context.Context) ([]byte, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.calls++
+	return []byte(`{"test-flag":{"variations":{"A":true,"B":false},` +
+		`"defaultRule":{"variation":"A"}}}`), nil
+}
+
+func (r *countingRetriever) Calls() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.calls
+}
+
+func newPollingManager(t *testing.T, r retriever.Retriever) *retriever.Manager {
+	t.Helper()
+	logger := fflog.FFLogger{}
+	cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
+	// ManagerConfig.PollingInterval is not clamped, the 1s floor lives in ffclient.Config.
+	return retriever.NewManager(retriever.ManagerConfig{
+		FileFormat:      "json",
+		PollingInterval: 10 * time.Millisecond,
+	}, []retriever.Retriever{r}, cacheManager, &logger)
+}
+
+// TestManagerShutdownStopsThePolling makes sure that Shutdown stops the background updater.
+// Before this was fixed, the polling goroutine outlived Close() forever and kept retrieving
+// flags, updating the cache and rewriting the persistent flag configuration file.
+func TestManagerShutdownStopsThePolling(t *testing.T) {
+	ctx := context.Background()
+	r := &countingRetriever{}
+	manager := newPollingManager(t, r)
+	require.NoError(t, manager.Init(ctx))
+
+	require.Eventually(t, func() bool { return r.Calls() > 1 },
+		time.Second, 10*time.Millisecond, "the polling never started")
+
+	require.NoError(t, manager.Shutdown(ctx))
+	callsAtShutdown := r.Calls()
+
+	require.Never(t, func() bool { return r.Calls() > callsAtShutdown },
+		200*time.Millisecond, 10*time.Millisecond,
+		"the background updater is still polling after Shutdown")
+}
+
+// TestManagerStopPollingIsIdempotent guards against a "close of closed channel" panic:
+// SetOffline() calls StopPolling, and Shutdown() calls it again.
+func TestManagerStopPollingIsIdempotent(t *testing.T) {
+	ctx := context.Background()
+	manager := newPollingManager(t, &countingRetriever{})
+	require.NoError(t, manager.Init(ctx))
+
+	assert.NotPanics(t, func() {
+		manager.StopPolling()
+		manager.StopPolling()
+		_ = manager.Shutdown(ctx)
+	})
+}
+
+// TestManagerStopPollingWithPollingDisabled makes sure that stopping a manager that never
+// started a background updater is a no-op instead of a nil-pointer dereference.
+func TestManagerStopPollingWithPollingDisabled(t *testing.T) {
+	ctx := context.Background()
+	logger := fflog.FFLogger{}
+	cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
+	manager := retriever.NewManager(retriever.ManagerConfig{
+		FileFormat:      "json",
+		PollingInterval: -1 * time.Second,
+	}, []retriever.Retriever{&countingRetriever{}}, cacheManager, &logger)
+	require.NoError(t, manager.Init(ctx))
+
+	assert.NotPanics(t, func() {
+		manager.StartPolling(ctx)
+		manager.StopPolling()
+		_ = manager.Shutdown(ctx)
+	})
 }

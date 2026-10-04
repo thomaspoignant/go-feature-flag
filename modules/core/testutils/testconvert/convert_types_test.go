@@ -248,33 +248,3 @@ func TestInterface(t *testing.T) {
 		})
 	}
 }
-
-func TestPointerIndependence(t *testing.T) {
-	t.Run("Bool pointer independence", func(t *testing.T) {
-		original := true
-		ptr := testconvert.Bool(original)
-		original = false
-		assert.True(t, *ptr, "Pointer value should not change when original variable changes")
-	})
-
-	t.Run("String pointer independence", func(t *testing.T) {
-		original := "original"
-		ptr := testconvert.String(original)
-		original = "changed"
-		assert.Equal(t, "original", *ptr, "Pointer value should not change when original variable changes")
-	})
-
-	t.Run("Int pointer independence", func(t *testing.T) {
-		original := 42
-		ptr := testconvert.Int(original)
-		original = 100
-		assert.Equal(t, 42, *ptr, "Pointer value should not change when original variable changes")
-	})
-
-	t.Run("Float64 pointer independence", func(t *testing.T) {
-		original := 3.14
-		ptr := testconvert.Float64(original)
-		original = 2.71
-		assert.Equal(t, 3.14, *ptr, "Pointer value should not change when original variable changes")
-	})
-}

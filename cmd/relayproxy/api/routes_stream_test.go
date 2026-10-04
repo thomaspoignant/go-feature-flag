@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,17 +38,19 @@ func TestDeprecatedAliasHeaders(t *testing.T) {
 	flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil)
 	require.NoError(t, err)
 
+	sseService := stream.NewSSEService()
+	defer sseService.Close()
 	apiServer := api.New(c, service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
 		WebsocketService:  stream.NewWebsocketService(),
-		SSEService:        stream.NewSSEService(),
+		SSEService:        sseService,
 		FlagsetManager:    flagsetManager,
 		Metrics:           metric.Metrics{},
 	}, z)
 
 	go apiServer.StartWithContext(context.Background())
 	defer apiServer.Stop(context.Background())
-	time.Sleep(1 * time.Second)
+	waitForServer(t, fmt.Sprintf("http://localhost:%d", c.ServerPort(z)))
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/ws/v1/flag/change", c.ServerPort(z)))
 	require.NoError(t, err)

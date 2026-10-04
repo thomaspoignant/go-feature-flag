@@ -1,8 +1,21 @@
 GOCMD=go
 TINYGOCMD=tinygo
+DOCKERCMD=docker
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
 ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
+
+# The custom target files (cmd/wasm/targets/) raise the wasm shadow stack from
+# the 64KB wasm-ld default to 1MB (`-z stack-size=`). The 64KB stack could be
+# overflowed by recursive JSON decoding or targeting-query parsing on realistic
+# flag configurations, trapping and permanently poisoning the instance
+# (issue #5651). Note: TinyGo's -stack-size flag only affects goroutine stacks,
+# not the system stack used with -scheduler=none, hence the linker flag.
+# `verify-wasm-stack` asserts the produced binaries actually carry that stack
+# size, so a TinyGo upgrade that stops honoring the target-JSON ldflags fails
+# CI instead of silently regressing. It is kept out of the build targets (it
+# needs python3) and runs as a separate step in CI and in the release script.
+WASM_STACK_SIZE := 1048576
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
@@ -38,6 +51,17 @@ GOFIPS140_VERSION := $(shell cat .fips-version | tr -d '[:space:]')
 build-relayproxy-fips: create-out-dir ## Build the relay proxy in FIPS 140-3 mode in out/bin/
 	CGO_ENABLED=0 GOFIPS140=$(GOFIPS140_VERSION) GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy-fips ./cmd/relayproxy/
 
+# Local docker image of the relay proxy, built from source. The DockerfileGoreleaser*
+# files are release artifacts (they only COPY an already cross-compiled binary), so
+# cmd/relayproxy/Dockerfile.local is the one that can be built by hand.
+RELAYPROXY_IMAGE ?= go-feature-flag:local
+RELAYPROXY_IMAGE_VERSION ?= localdev
+
+build-relayproxy-docker: ## Build a local docker image of the relay proxy from source
+	$(DOCKERCMD) build -f cmd/relayproxy/Dockerfile.local \
+		--build-arg VERSION=$(RELAYPROXY_IMAGE_VERSION) \
+		-t $(RELAYPROXY_IMAGE) .
+
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
 
@@ -48,10 +72,14 @@ build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in 
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasm -target ./targets/wasm-stack1m.json -opt=2 -opt=s --no-debug -scheduler=none
 
 build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasi -target ./targets/wasi-stack1m.json -opt=2 -opt=s --no-debug -scheduler=none
+
+verify-wasm-stack: ## Assert the built wasm/wasi binaries carry the expected shadow stack size (run by CI, needs python3)
+	python3 .github/ci-scripts/verify-wasm-stack.py out/bin/gofeatureflag-evaluation.wasm $(WASM_STACK_SIZE)
+	python3 .github/ci-scripts/verify-wasm-stack.py out/bin/gofeatureflag-evaluation.wasi $(WASM_STACK_SIZE)
 
 build-modules:  ## Run build command to build all modules in the workspace
 	@echo "Building all modules in the workspace..."
@@ -116,15 +144,6 @@ generate-helm-docs: ## Generates helm documentation for the project
 	$(GOWORK_ENV) $(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 	helm-docs
 
-bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
-	@if [ -z "$(VERSION)" ]; then \
-		echo "$(RED)Error: VERSION is required$(RESET)"; \
-		echo "Usage: VERSION=v1.2.3 make bump-helm-chart-version"; \
-		echo "       VERSION=v1.2.3 make bump-helm-chart-version"; \
-		exit 1; \
-	fi
-	.github/ci-scripts/bump-helm-chart.sh $(VERSION)
-
 bump-wasm-contrib: create-out-dir ## Bump WASM version in the different contrib repositories (usage: make bump-wasm-contrib VERSION=v2.0.12)
 	@if [ -z "$(VERSION)" ]; then \
 		echo "$(RED)Error: VERSION is required$(RESET)"; \
@@ -160,10 +179,10 @@ bench: ## Launch the benchmark test
 	 $(GOWORK_ENV) $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
 
 ## Lint:
-lint: ## Use golintci-lint on your project
+lint: ## Use golintci-lint on all the modules of the project
 	mkdir -p ./bin
 	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b ./bin
-	./bin/golangci-lint run --timeout=5m ./... # Run linters
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Linting $(module)"; cd $(module) && $(CURDIR)/bin/golangci-lint run --timeout=5m --config $(CURDIR)/.golangci.yml ./...) &&) true
 
 vuln-check: ## Run govulncheck on all modules in the workspace
 	@which govulncheck > /dev/null 2>&1 || $(GOCMD) install golang.org/x/vuln/cmd/govulncheck@latest
@@ -172,6 +191,10 @@ vuln-check: ## Run govulncheck on all modules in the workspace
 		cd $$module && $(GOWORK_ENV) govulncheck ./... || exit 1; \
 		cd - >/dev/null; \
 	done
+
+vuln-check-relayproxy: ## Run govulncheck on the relay proxy only
+	@which govulncheck > /dev/null 2>&1 || $(GOCMD) install golang.org/x/vuln/cmd/govulncheck@latest
+	$(GOWORK_ENV) govulncheck ./cmd/relayproxy/...
 
 ## Help:
 help: ## Show this help.

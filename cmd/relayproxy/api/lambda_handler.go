@@ -5,17 +5,17 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
-	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
-	"github.com/labstack/echo/v4"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
-// newAwsLambdaHandlerManager is creating a new awsLambdaHandler struct with the echoadapter
-// to proxy all lambda event to echo.
+// newAwsLambdaHandlerManager is creating a new awsLambdaHandler struct with the httpadapter
+// to proxy all lambda event to echo (*echo.Echo is an http.Handler).
 func newAwsLambdaHandlerManager(echoInstance *echo.Echo, basePath string) awsLambdaHandler {
-	adapterAPIGtwV2 := echoadapter.NewV2(echoInstance)
-	adapterALB := echoadapter.NewALB(echoInstance)
-	adapterAPIGtwV1 := echoadapter.New(echoInstance)
+	adapterAPIGtwV2 := httpadapter.NewV2(echoInstance)
+	adapterALB := httpadapter.NewALB(echoInstance)
+	adapterAPIGtwV1 := httpadapter.New(echoInstance)
 
 	// Configure base path stripping if a base path is provided
 	if basePath != "" {
@@ -32,9 +32,9 @@ func newAwsLambdaHandlerManager(echoInstance *echo.Echo, basePath string) awsLam
 }
 
 type awsLambdaHandler struct {
-	adapterAPIGtwV2 *echoadapter.EchoLambdaV2
-	adapterAPIGtwV1 *echoadapter.EchoLambda
-	adapterALB      *echoadapter.EchoLambdaALB
+	adapterAPIGtwV2 *httpadapter.HandlerAdapterV2
+	adapterAPIGtwV1 *httpadapter.HandlerAdapter
+	adapterALB      *httpadapter.HandlerAdapterALB
 }
 
 // SelectAdapter returns the appropriate adapter based on the mode.

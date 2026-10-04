@@ -10,7 +10,9 @@ from gofeatureflag_python_provider.hooks.data_collector import (
     default_targeting_key,
 )
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import FeatureEvent
+from gofeatureflag_python_provider.services.model.request_data_collector import (
+    FeatureEvent,
+)
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.flag_evaluation import FlagEvaluationDetails, FlagType
 from openfeature.hook import HookContext
@@ -272,15 +274,189 @@ class TestError:
 
 
 # ---------------------------------------------------------------------------
-# initialize() / shutdown()
+# contextKind
 # ---------------------------------------------------------------------------
 
 
-class TestLifecycle:
-    def test_initialize_starts_event_publisher(self, hook, mock_event_publisher):
-        hook.initialize()
-        mock_event_publisher.start.assert_called_once()
+@pytest.mark.parametrize(
+    "anonymous_value,expected",
+    [
+        (True, "anonymousUser"),
+        (False, "user"),
+        # Only an explicit true means anonymous. A truthiness test would read
+        # the string "false" -- and any other non-empty value -- as anonymous.
+        ("false", "user"),
+        ("true", "user"),
+        (1, "user"),
+    ],
+)
+def test_context_kind_requires_anonymous_to_be_exactly_true(
+    mock_evaluator, anonymous_value, expected
+):
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    ctx = EvaluationContext(
+        targeting_key="user-1", attributes={"anonymous": anonymous_value}
+    )
+    hook_context = HookContext(
+        flag_key="test-flag",
+        flag_type=FlagType.BOOLEAN,
+        default_value=False,
+        evaluation_context=ctx,
+    )
 
-    def test_shutdown_stops_event_publisher(self, hook, mock_event_publisher):
-        hook.shutdown()
-        mock_event_publisher.stop.assert_called_once()
+    hook.after(hook_context, _make_details(), {})
+
+    assert publisher.add_event.call_args[0][0].contextKind == expected
+
+
+def test_context_kind_defaults_to_user_when_attribute_absent(mock_evaluator):
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+
+    hook.after(_make_hook_context(), _make_details(), {})
+
+    assert publisher.add_event.call_args[0][0].contextKind == "user"
+
+
+def test_fallback_results_do_not_produce_a_feature_event(mock_evaluator):
+    """The relay proxy evaluated it and already recorded it.
+
+    Emitting here would count the same evaluation twice.
+    """
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    details = FlagEvaluationDetails(
+        flag_key="test-flag",
+        value=True,
+        variant="on",
+        reason="TARGETING_MATCH",
+        flag_metadata={"gofeatureflag_evaluated_remotely": True},
+    )
+
+    hook.after(_make_hook_context(), details, {})
+
+    publisher.add_event.assert_not_called()
+
+
+def test_locally_evaluated_results_still_produce_a_feature_event(mock_evaluator):
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    details = FlagEvaluationDetails(
+        flag_key="test-flag",
+        value=True,
+        variant="on",
+        reason="TARGETING_MATCH",
+        flag_metadata={"description": "a flag"},
+    )
+
+    hook.after(_make_hook_context(), details, {})
+
+    publisher.add_event.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# source and version
+# ---------------------------------------------------------------------------
+
+
+def test_events_are_labelled_as_in_process(mock_evaluator):
+    """Every event this provider emits is a local evaluation.
+
+    PROVIDER_CACHE is for values served from a remote-mode cache, and SERVER is
+    reserved for events the relay proxy generated itself.
+    """
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+
+    hook.after(_make_hook_context(), _make_details(), {})
+    assert publisher.add_event.call_args[0][0].source == "INPROCESS"
+
+    publisher.reset_mock()
+    hook.error(_make_hook_context(), ValueError("boom"), {})
+    assert publisher.add_event.call_args[0][0].source == "INPROCESS"
+
+
+def test_event_carries_the_flag_version_when_present(mock_evaluator):
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    details = FlagEvaluationDetails(
+        flag_key="test-flag",
+        value=True,
+        variant="on",
+        reason="TARGETING_MATCH",
+        flag_metadata={"version": "1.7"},
+    )
+
+    hook.after(_make_hook_context(), details, {})
+
+    assert publisher.add_event.call_args[0][0].version == "1.7"
+
+
+def test_event_version_is_unset_when_the_flag_has_none(mock_evaluator):
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+
+    hook.after(_make_hook_context(), _make_details(), {})
+
+    assert publisher.add_event.call_args[0][0].version is None
+
+
+@pytest.mark.parametrize(
+    "raw_version,expected",
+    [(2, "2"), (1.7, "1.7"), (True, "True")],
+)
+def test_a_non_string_flag_version_does_not_break_the_evaluation(
+    mock_evaluator, raw_version, expected
+):
+    """Flag metadata is user-authored, so `version` can be any JSON type.
+
+    An event model that rejects it would raise inside this hook, and the SDK
+    turns a hook failure into an error result — so a flag carrying
+    `metadata: {version: 2}` would never resolve to its real value again.
+    """
+    publisher = MagicMock()
+    hook = DataCollectorHook(
+        options=_make_options(),
+        event_publisher=publisher,
+        evaluator=mock_evaluator,
+    )
+    details = FlagEvaluationDetails(
+        flag_key="test-flag",
+        value=True,
+        variant="on",
+        reason="TARGETING_MATCH",
+        flag_metadata={"version": raw_version},
+    )
+
+    hook.after(_make_hook_context(), details, {})
+
+    assert publisher.add_event.call_args[0][0].version == expected

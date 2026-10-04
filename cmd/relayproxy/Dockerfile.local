@@ -1,0 +1,32 @@
+# Dockerfile to build the relay proxy image from source.
+#
+# The other Dockerfiles in this directory (DockerfileGoreleaser*) are consumed by
+# GoReleaser during a release: they only COPY a binary that has already been
+# cross-compiled, so they cannot be built by hand. This one compiles the relay
+# proxy itself and is the one to use locally.
+#
+# Build it with:
+#   make build-relayproxy-docker
+#
+# ...or directly, from the repository root (the build context must be the root):
+#   docker build -f cmd/relayproxy/Dockerfile.local -t go-feature-flag:local .
+#
+# Run it:
+#   docker run -p 1031:1031 \
+#     -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
+#     go-feature-flag:local
+
+FROM golang:1.26 AS build
+WORKDIR /src
+COPY . .
+# GOWORK=off mirrors what CI does (see Makefile): the root module resolves
+# modules/core from the module proxy, so no go.work is needed here.
+ARG VERSION=localdev
+RUN CGO_ENABLED=0 GOWORK=off go build \
+    -ldflags="-s -w -X main.version=${VERSION}" \
+    -o /out/go-feature-flag ./cmd/relayproxy
+
+FROM gcr.io/distroless/static-debian13:latest
+COPY --from=build /out/go-feature-flag /go-feature-flag
+EXPOSE 1031
+CMD ["/go-feature-flag"]

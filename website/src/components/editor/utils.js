@@ -35,7 +35,8 @@ function convertValueIntoType(value, type) {
     case 'json':
       try {
         return JSON.parse(value.value);
-      } catch (e) {
+      } catch {
+        // Invalid JSON input falls back to undefined.
         return undefined;
       }
     case 'number':
@@ -66,9 +67,7 @@ function convertMetadata(metadata) {
 }
 
 function convertRule(ruleForm) {
-  let variation,
-    percentage,
-    progressiveRollout = undefined;
+  let variation, percentage, progressiveRollout;
   const {selectedVar} = ruleForm;
   switch (selectedVar) {
     case 'percentage':

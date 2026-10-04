@@ -1,6 +1,6 @@
 # How to contribute to GO Feature Flag website
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.  
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.  
 
 You will need to have **nodejs** installed in your machine to work with the documentation website.
 

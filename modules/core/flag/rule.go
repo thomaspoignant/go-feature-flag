@@ -275,7 +275,7 @@ func (r *Rule) getPercentageBuckets() map[string]percentageBucket {
 	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
 	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the
 	// buckets every time we are in this function.
-	variationNames := make([]string, 0)
+	variationNames := make([]string, 0, len(percentage))
 	for k := range percentage {
 		variationNames = append(variationNames, k)
 	}

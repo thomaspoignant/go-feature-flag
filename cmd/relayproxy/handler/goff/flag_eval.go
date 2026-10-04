@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -49,12 +50,11 @@ func NewFlagEval(flagsetMngr service.FlagsetManager, metrics metric.Metrics) Con
 // @Failure      400 {object}  modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
-func (h *flagEval) Handler(c echo.Context) error {
+func (h *flagEval) Handler(c *echo.Context) error {
 	flagKey := c.Param("flagKey")
 	if flagKey == "" {
 		return fmt.Errorf("impossible to find the flag key in the URL")
 	}
-	h.metrics.IncFlagEvaluation(flagKey)
 
 	reqBody := new(model.EvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
@@ -80,6 +80,11 @@ func (h *flagEval) Handler(c echo.Context) error {
 	}
 
 	flagValue, _ := flagset.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
+	if flagValue.ErrorCode == flag.ErrorCodeFlagNotFound {
+		h.metrics.IncFlagNotFoundEvaluation()
+	} else {
+		h.metrics.IncFlagEvaluation(flagKey)
+	}
 
 	span.SetAttributes(
 		attribute.String("flagEvaluation.flagName", flagKey),

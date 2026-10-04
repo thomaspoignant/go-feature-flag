@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/evaluation"
@@ -18,6 +19,24 @@ func main() {
 	// We keep this main empty because it is required by the tinygo when building wasm.
 }
 
+// evaluatePanicBuffer holds the pre-serialized GENERAL error that evaluate
+// returns when the output-copy path panics, so that path allocates nothing and
+// never calls back into helpers that might panic again.
+//
+// It has to be its own package-level variable: helpers.lastOutput is a single
+// slot that every successful evaluation overwrites, so it cannot keep this
+// buffer reachable. Without a root here the bytes behind evaluatePanicOutput
+// could be collected, and a bare uint64 is not a reference the GC can follow.
+var evaluatePanicBuffer = []byte(errorResult(
+	flag.ErrorCodeGeneral,
+	"recovered from panic during evaluation",
+))
+
+// evaluatePanicOutput is the packed pointer/length of evaluatePanicBuffer.
+// WasmCopyBufferToMemory points at the slice it is given rather than copying,
+// so this stays valid for the lifetime of the instance.
+var evaluatePanicOutput = helpers.WasmCopyBufferToMemory(evaluatePanicBuffer)
+
 // nolint: unused
 // evaluate is the entry point for the wasm module.
 // what it does is:
@@ -26,22 +45,63 @@ func main() {
 // 3. write the result to the memory
 //
 //export evaluate
-func evaluate(valuePosition *uint32, length uint32) uint64 {
+func evaluate(valuePosition *uint32, length uint32) (result uint64) {
+	// The copy into module memory runs outside safeEvaluation's recover; a
+	// panic here must not trap either (a trap poisons the instance), so return
+	// the pre-serialized GENERAL error instead of 0.
+	defer func() {
+		if recover() != nil {
+			result = evaluatePanicOutput
+		}
+	}()
+	return helpers.WasmCopyBufferToMemory([]byte(safeEvaluation(valuePosition, length)))
+}
+
+// errorResult serializes a structured evaluation error the host can parse.
+func errorResult(code flag.ErrorCode, details string) string {
+	return model.VariationResult[any]{
+		ErrorCode:    code,
+		ErrorDetails: details,
+	}.ToJsonStr()
+}
+
+// evaluationFn is an indirection over localEvaluation so tests can exercise
+// the panic-recovery path of safeEvaluation.
+var evaluationFn = localEvaluation
+
+// safeEvaluation wraps the evaluation so that any Go panic becomes a
+// structured error result instead of a WASM trap. A trap must be avoided:
+// it leaves the module's shadow stack pointer unrestored, which permanently
+// poisons the instance (every later call faults inside malloc). Note that
+// recover cannot catch a stack-overflow trap itself — that is what the
+// nesting-depth guards in localEvaluation are for.
+func safeEvaluation(valuePosition *uint32, length uint32) (result string) {
+	defer func() {
+		if r := recover(); r != nil {
+			result = errorResult(flag.ErrorCodeGeneral,
+				fmt.Sprintf("recovered from panic during evaluation: %v", r))
+		}
+	}()
 	input := helpers.WasmReadBufferFromMemory(valuePosition, length)
-	c := localEvaluation(string(input))
-	return helpers.WasmCopyBufferToMemory([]byte(c))
+	return evaluationFn(string(input))
 }
 
 // localEvaluation is the function that will be called from the evaluate function.
 // It will unmarshal the input, call the evaluation function and return the result.
 func localEvaluation(input string) string {
+	if scanJSONDepth(input) > maxInputNestingDepth {
+		return errorResult(flag.ErrorCodeParseError, fmt.Sprintf(
+			"input JSON exceeds the maximum nesting depth (%d)", maxInputNestingDepth))
+	}
+
 	var evaluateInput EvaluateInput
 	err := json.Unmarshal([]byte(input), &evaluateInput)
 	if err != nil {
-		return model.VariationResult[any]{
-			ErrorCode:    flag.ErrorCodeParseError,
-			ErrorDetails: err.Error(),
-		}.ToJsonStr()
+		return errorResult(flag.ErrorCodeParseError, err.Error())
+	}
+
+	if detail, over := firstQueryViolation(&evaluateInput.Flag); over {
+		return errorResult(flag.ErrorCodeParseError, detail)
 	}
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)

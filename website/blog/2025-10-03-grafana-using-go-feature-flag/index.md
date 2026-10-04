@@ -2,12 +2,14 @@
 title: 'Grafana is Now Using GO Feature Flag 🎉'
 authors: [thomaspoignant]
 tags: [grafana, announcement]
-image: https://gofeatureflag.org/assets/images/grafana-go-feature-flag-8b3765aa4fe3e4debecb26f203bfd4cc.png
+image: ./grafana-go-feature-flag.jpg
+image_alt: "The Grafana and GO Feature Flag logos side by side"
+category: Community
 ---
 
 We’re proud to announce that [**Grafana**](https://github.com/grafana/grafana), one of the world’s most popular observability platforms, is now using **[GO Feature Flag](https://gofeatureflag.org)** as a dependency in their project! 🚀
 
-![Grafana using GO Feature Flag](./grafana-go-feature-flag.png)
+![Grafana using GO Feature Flag](./grafana-go-feature-flag.jpg)
 _(Screenshot from Grafana’s `go.mod` file showing GO Feature Flag)_
 
 This is a huge milestone for us. Grafana is one of the most widely used observability platforms in the world, relied upon by countless developers and organizations to monitor and visualize their systems. Seeing such a respected open-source project adopt **GO Feature Flag** is a strong validation of the reliability, performance, and simplicity of our solution.

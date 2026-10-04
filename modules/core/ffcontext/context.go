@@ -1,8 +1,13 @@
 package ffcontext
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"maps"
+)
 
 var _ Context = (*EvaluationContext)(nil)
+
+const anonymousAttribute = "anonymous"
 
 type Context interface {
 	// GetKey return the unique targetingKey for the context.
@@ -32,7 +37,7 @@ func NewEvaluationContext(key string) EvaluationContext {
 // ctx.AddCustomAttribute("anonymous", true)
 func NewAnonymousEvaluationContext(key string) EvaluationContext {
 	return EvaluationContext{targetingKey: key, attributes: map[string]any{
-		"anonymous": true,
+		anonymousAttribute: true,
 	}}
 }
 
@@ -70,7 +75,7 @@ func (u EvaluationContext) GetKey() string {
 
 // IsAnonymous return if the user is anonymous or not.
 func (u EvaluationContext) IsAnonymous() bool {
-	anonymous := u.attributes["anonymous"]
+	anonymous := u.attributes[anonymousAttribute]
 	switch v := anonymous.(type) {
 	case bool:
 		return v
@@ -91,8 +96,13 @@ func (u EvaluationContext) AddCustomAttribute(name string, value any) {
 	}
 }
 
+// ToMap returns a new map containing the context attributes plus the targetingKey.
+// The returned map is a shallow copy: the top-level map is independent from the context,
+// so adding or removing keys does not affect it, but nested reference values (maps, slices,
+// pointers) are shared and mutating them will also mutate the context.
 func (u EvaluationContext) ToMap() map[string]any {
-	resMap := u.attributes
+	resMap := make(map[string]any, len(u.attributes)+1)
+	maps.Copy(resMap, u.attributes)
 	resMap["targetingKey"] = u.targetingKey
 	return resMap
 }

@@ -33,7 +33,10 @@ export function Targeting({label, variations}) {
             label={`${label}.${index}`}
             isDefaultRule={false}
           />
-          <button className={styles.button} onMouseDown={removeCurrent}>
+          <button
+            type="button"
+            className={styles.button}
+            onMouseDown={removeCurrent}>
             <span className="fa-stack fa-1x">
               <i
                 className={clsx(
@@ -45,7 +48,7 @@ export function Targeting({label, variations}) {
           </button>
         </div>
       ))}
-      <button className={styles.button} onMouseDown={addNewRule}>
+      <button type="button" className={styles.button} onMouseDown={addNewRule}>
         <span className="fa-stack fa-1x">
           <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
           <i className="fa-solid fa-plus fa-stack-1x fa-inverse"></i>

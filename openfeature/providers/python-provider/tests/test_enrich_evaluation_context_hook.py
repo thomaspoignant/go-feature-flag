@@ -40,6 +40,43 @@ def test_before_adds_gofeatureflag_when_metadata_non_empty():
     assert result.attributes.get("gofeatureflag") == {"exporterMetadata": metadata}
 
 
+def test_before_preserves_caller_supplied_gofeatureflag_siblings():
+    """'gofeatureflag' is a namespace shared with the caller.
+
+    flagList and currentDateTime are caller inputs; replacing the whole object
+    to write exporterMetadata silently destroys them.
+    """
+    metadata = {"appName": "demo"}
+    hook = EnrichEvaluationContextHook(metadata=metadata)
+    caller_supplied = {
+        "flagList": ["flag-a", "flag-b"],
+        "currentDateTime": "2026-01-01T00:00:00Z",
+    }
+    hc = _make_hook_context(attributes={"gofeatureflag": dict(caller_supplied)})
+
+    result = hook.before(hc, {})
+
+    assert result is not None
+    assert result.attributes["gofeatureflag"] == {
+        **caller_supplied,
+        "exporterMetadata": metadata,
+    }
+    # The caller's own dict must not be mutated.
+    assert hc.evaluation_context.attributes["gofeatureflag"] == caller_supplied
+
+
+def test_before_replaces_gofeatureflag_when_it_is_not_a_map():
+    """A non-map value is replaced rather than treated as an error."""
+    metadata = {"appName": "demo"}
+    hook = EnrichEvaluationContextHook(metadata=metadata)
+    hc = _make_hook_context(attributes={"gofeatureflag": "not-a-map"})
+
+    result = hook.before(hc, {})
+
+    assert result is not None
+    assert result.attributes["gofeatureflag"] == {"exporterMetadata": metadata}
+
+
 def test_before_does_not_add_gofeatureflag_when_metadata_empty():
     """When metadata is empty dict, returned context has no gofeatureflag key."""
     hook = EnrichEvaluationContextHook(metadata={})

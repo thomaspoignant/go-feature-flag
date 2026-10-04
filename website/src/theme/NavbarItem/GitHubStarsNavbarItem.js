@@ -15,7 +15,7 @@ export default function GitHubStarsNavbarItem() {
   return (
     <Link
       to={siteConfig.customFields.github}
-      className="navbar__item inline-flex items-center gap-1.5 font-semibold text-current hover:text-current hover:no-underline hover:opacity-60 transition-opacity"
+      className="navbar__item hidden min-[997px]:inline-flex items-center gap-1.5 font-semibold text-current hover:text-current hover:no-underline hover:opacity-60 transition-opacity"
       aria-label={ariaLabel}
       title={ariaLabel}>
       <i

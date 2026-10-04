@@ -1,21 +1,14 @@
 package api
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"net"
 	"net/http"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
-	"time"
+	"sync"
 
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echootel "github.com/labstack/echo-otel/v5"
+	echoprometheus "github.com/labstack/echo-prometheus"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
@@ -26,7 +19,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -42,11 +34,15 @@ func New(config *config.Config,
 	services service.Services,
 	zapLog *zap.Logger,
 ) Server {
+	stopRequested := make(chan struct{})
 	s := Server{
-		config:      config,
-		services:    services,
-		zapLog:      zapLog,
-		otelService: opentelemetry.NewOtelService(),
+		config:        config,
+		services:      services,
+		zapLog:        zapLog,
+		otelService:   opentelemetry.NewOtelService(),
+		stopRequested: stopRequested,
+		stop:          sync.OnceFunc(func() { close(stopRequested) }),
+		stopped:       make(chan struct{}),
 	}
 	s.apiEcho = echo.New()
 	s.initRoutes()
@@ -61,17 +57,22 @@ type Server struct {
 	services       service.Services
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
+
+	// stopRequested is closed (once, by stop) when Stop is called, to gracefully shut down
+	// the servers started by StartWithContext.
+	stopRequested chan struct{}
+	stop          func()
+	// stopped is closed when StartWithContext returns.
+	stopped chan struct{}
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
 func (s *Server) initRoutes() {
-	s.apiEcho.HideBanner = true
-	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.IsDebugEnabled()
-	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
+	s.apiEcho.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(s.config.IsDebugEnabled())
+	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
@@ -91,10 +92,10 @@ func (s *Server) initRoutes() {
 			},
 		}))
 	}
-	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	s.apiEcho.Use(corsMiddleware())
 
 	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
-		Skipper: func(_ echo.Context) bool {
+		Skipper: func(_ *echo.Context) bool {
 			return s.config.DisableVersionHeader
 		},
 		RelayProxyConfig: s.config,
@@ -105,7 +106,11 @@ func (s *Server) initRoutes() {
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.FlagsetManager, s.services.Metrics)
-	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.FlagsetManager, s.services.Metrics)
+	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(
+		s.services.FlagsetManager,
+		s.services.Metrics,
+		s.config.OfrepEventStream,
+	)
 	cManifest := manifest.NewManifest(s.services.FlagsetManager, s.services.Metrics, s.zapLog)
 	cEvalDataCollector := controller.NewCollectEvalData(
 		s.services.FlagsetManager,
@@ -136,170 +141,35 @@ func (s *Server) initRoutes() {
 	s.addManifestRoutes(cManifest, userAuth)
 }
 
-func (s *Server) StartWithContext(ctx context.Context) {
-	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(ctx, s.zapLog, s.config)
-	if err != nil {
-		s.zapLog.Error(
-			"error while initializing OTel, continuing without tracing enabled",
-			zap.Error(err),
-		)
-		// we can continue because otel is not mandatory to start the server
-	}
-
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	switch s.config.ServerMode(s.zapLog) {
-	case config.ServerModeLambda:
-		s.startAwsLambda()
-	case config.ServerModeUnixSocket:
-		s.startUnixSocketServer(ctx)
-	default:
-		s.startAsHTTPServer(ctx)
-	}
-}
-
-// startUnixSocketServer launch the API server as a unix socket.
-func (s *Server) startUnixSocketServer(ctx context.Context) {
-	socketPath := s.config.UnixSocketPath()
-
-	// Clean up the old socket file if it exists (important for graceful restarts)
-	if _, err := os.Stat(socketPath); err == nil {
-		if err := os.Remove(socketPath); err != nil {
-			s.zapLog.Fatal("Could not remove old socket file", zap.String("path", socketPath), zap.Error(err))
-		}
-	}
-
-	// Start a http server for monitoring if monitoringport is configured
-	if s.isMonitoringPortConfigured() {
-		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
-	}
-
-	lc := net.ListenConfig{}
-	listener, err := lc.Listen(ctx, "unix", socketPath)
-	if err != nil {
-		s.zapLog.Fatal("Error creating Unix listener", zap.Error(err))
-	}
-
-	defer func() {
-		if err := listener.Close(); err != nil {
-			s.zapLog.Error("error closing unix socket listener", zap.Error(err))
-		}
-	}()
-	s.apiEcho.Listener = listener
-
-	s.zapLog.Info(
-		"Starting go-feature-flag relay proxy as unix socket...",
-		zap.String("socket", socketPath),
-		zap.String("version", s.config.Version))
-
-	err = s.apiEcho.StartServer(new(http.Server))
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting relay proxy as unix socket", zap.Error(err))
-	}
-}
-
-// startAsHTTPServer launch the API server
-func (s *Server) startAsHTTPServer(ctx context.Context) {
-	if s.isMonitoringPortConfigured() {
-		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
-	}
-
-	address := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.ServerPort(s.zapLog))
-	s.zapLog.Info(
-		"Starting go-feature-flag relay proxy ...",
-		zap.String("address", address),
-		zap.String("version", s.config.Version))
-
-	shutdownDone := make(chan struct{})
-	// nolint:gosec
-	go func() {
-		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
-			s.zapLog.Error("error shutting down api server", zap.Error(err))
-		}
-		close(shutdownDone)
-	}()
-
-	err := s.apiEcho.Start(address)
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
-	}
-
-	// Wait for Shutdown to finish draining connections before returning.
-	<-shutdownDone
-}
-
-func (s *Server) startMonitoringServer() {
-	addressMonitoring := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.EffectiveMonitoringPort(s.zapLog))
-	s.zapLog.Info(
-		"Starting monitoring",
-		zap.String("address", addressMonitoring))
-	err := s.monitoringEcho.Start(addressMonitoring)
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
-	}
-}
-
-// startAwsLambda is starting the relay proxy as an AWS Lambda
-func (s *Server) startAwsLambda() {
-	lambda.Start(s.lambdaHandler())
-}
-
-// lambdaHandler returns the appropriate lambda handler based on the configuration.
-// We need a dedicated function because it is called from tests as well, this is the
-// reason why we can't merged it in startAwsLambda.
-func (s *Server) lambdaHandler() any {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.EffectiveAwsApiGatewayBasePath(s.zapLog))
-	return handlerMngr.SelectAdapter(s.config.LambdaAdapter(s.zapLog))
-}
-
-// Stop shutdown the API server
-func (s *Server) Stop(ctx context.Context) {
-	err := s.otelService.Stop(ctx)
-	if err != nil {
-		s.zapLog.Error("impossible to stop otel", zap.Error(err))
-	}
-
-	if s.monitoringEcho != nil {
-		if err = s.monitoringEcho.Shutdown(ctx); err != nil {
-			s.zapLog.Error("error stopping monitoring", zap.Error(err))
-		}
-	}
-
-	if s.apiEcho != nil {
-		if err = s.apiEcho.Shutdown(ctx); err != nil {
-			s.zapLog.Error("error stopping relay proxy", zap.Error(err))
-		}
-	}
-}
-
-// isMonitoringPortConfigured checks if the monitoring port is configured.
-func (s *Server) isMonitoringPortConfigured() bool {
-	return s.monitoringEcho != nil && s.config.EffectiveMonitoringPort(s.zapLog) > 0
+// corsMiddleware allows any origin and answers every preflight with a fixed list of methods.
+// AllowMethods is set explicitly because, when left empty, echo v5 answers the preflight with
+// the methods registered on the route, which would change the CORS contract of the relay proxy.
+func corsMiddleware() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet, http.MethodHead, http.MethodPut,
+			http.MethodPatch, http.MethodPost, http.MethodDelete,
+		},
+	})
 }
 
 func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {
 	switch middlewareType {
 	case AdminAuth:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeysAdminExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
 	default:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
+			Validator: func(_ *echo.Context, key string, _ middleware.ExtractorSource) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
-			Skipper: func(c echo.Context) bool {
+			Skipper: func(_ *echo.Context) bool {
 				return !s.config.IsAuthenticationEnabled()
 			},
 		})

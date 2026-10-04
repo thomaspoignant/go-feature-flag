@@ -1,10 +1,12 @@
 package controller_test
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
@@ -20,7 +22,7 @@ func Test_retriever_refresh_Handler_no_goff(t *testing.T) {
 	e := echo.New()
 	rec := httptest.NewRecorder()
 
-	req := httptest.NewRequest(echo.POST, "/admin/v1/retriever/refresh", nil)
+	req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c := e.NewContext(req, rec)
 	handlerErr := ctrl.Handler(c)
@@ -50,10 +52,15 @@ func Test_retriever_refresh_Handler_valid(t *testing.T) {
 	defaultFlagset := flagsetManager.Default()
 	previousRefresh := defaultFlagset.GetCacheRefreshDate()
 
+	// Ensure the forced refresh lands on a strictly later timestamp even on
+	// platforms with a coarse monotonic clock (Windows timer granularity ~15ms),
+	// otherwise the initial load and the forced refresh can share the same instant.
+	time.Sleep(50 * time.Millisecond)
+
 	ctrl := controller.NewForceFlagsRefresh(flagsetManager, metric.Metrics{})
 	e := echo.New()
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(echo.POST, "/admin/v1/retriever/refresh", nil)
+	req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c := e.NewContext(req, rec)
 	handlerErr := ctrl.Handler(c)

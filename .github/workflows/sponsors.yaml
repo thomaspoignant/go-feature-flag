@@ -12,13 +12,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: sponsors
           persist-credentials: false
 
       - name: Generate Sponsors 💖
-        uses: JamesIves/github-sponsors-readme-action@2fd9142e765f755780202122261dc85e78459405 # v1.6.0
+        uses: JamesIves/github-sponsors-readme-action@02650b8cd445fc16dfef73195f9c406dce041623 # v1.6.1
         with:
           token: ${{ secrets.SPONSORS_GITHUB_PAT }}
           file: "sponsors/README.md"
