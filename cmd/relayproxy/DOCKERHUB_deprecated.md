@@ -1,5 +1,7 @@
 # GO Feature Flag Relay Proxy
 
+<span style="color: red">🚨 Attention: The image `thomaspoignant/go-feature-flag-relay-proxy` is **deprecated**. The official image is now [`gofeatureflag/go-feature-flag`](https://hub.docker.com/r/gofeatureflag/go-feature-flag). Existing tags will keep working for now, but we recommend migrating as soon as possible. See the [installation documentation](https://gofeatureflag.org/docs/relay-proxy/install_relay_proxy).</span>
+
 <p align="center">
   <img width="250" height="238" src="https://github.com/thomaspoignant/go-feature-flag/raw/main/logo.png" alt="go-feature-flag logo" />
 </p>
@@ -15,6 +17,15 @@
 
 --- 
 
+# How to migrate
+
+Migrating only requires changing the image name, the configuration file location (`/goff/goff-proxy.yaml`) and the default port (`1031`) are the same.
+
+```diff
+- thomaspoignant/go-feature-flag-relay-proxy:latest
++ gofeatureflag/go-feature-flag:latest
+```
+
 # What is GO Feature Flag Relay Proxy?
 
 The GO Feature Flag Relay Proxy retrieve your feature flag configuration file using [`thomaspoignant/go-feature-flag`](https://github.com/thomaspoignant/go-feature-flag) SDK and expose APIs to get your flags variations.  
@@ -27,7 +38,7 @@ For more information about GO Feature Flag Relay Proxy, please visit [github.com
 
 # Quick reference
 
-- This default distribution is the official distribution for `go-feature-flag-relay-proxy`.
+- This image name is deprecated, the official distribution is [`gofeatureflag/go-feature-flag`](https://hub.docker.com/r/gofeatureflag/go-feature-flag).
 
 - Where to file issues: 
   [https://github.com/thomaspoignant/go-feature-flag/issues/](https://github.com/thomaspoignant/go-feature-flag/issues/new?assignees=&labels=bug%2C+relay-proxy%2C+docker%2C+needs-triage&template=bug.md&title=(bug%20docker)).
@@ -41,7 +52,7 @@ For more information about GO Feature Flag Relay Proxy, please visit [github.com
 
 # How to use this image
 
-**`go-feature-flag-relay-proxy`** requires a configuration file to be used.
+The relay proxy requires a configuration file to be used.
 
 By default, we expect to have this configuration file in the `/goff` directory of the container and the file should be named `goff-proxy.yaml`.  
 
@@ -50,12 +61,12 @@ The default port used for the service is `1031`.
 ```shell
 docker run \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag-relay-proxy:latest
+  gofeatureflag/go-feature-flag:latest
 ```
 
 ## Test it locally
 
-This is a small example on how to run `go-feature-flag-relay-proxy` locally.
+This is a small example on how to run the relay proxy locally.
 
 ```shell
 # Download an example of a basic configuration file.
@@ -65,7 +76,7 @@ curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/r
 docker run \
   -p 1031:1031 \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag-relay-proxy:latest
+  gofeatureflag/go-feature-flag:latest
   
 # Call the API
 curl -X 'POST' \
