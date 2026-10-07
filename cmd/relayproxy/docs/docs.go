@@ -342,7 +342,7 @@ const docTemplate = `{
         },
         "/stream/v1/sse/flag/change": {
             "get": {
-                "description": "Server-Sent Events endpoint pushing flag change notifications, following OpenFeature ADR-0008.\nIt is advertised in the ` + "`" + `eventStreams` + "`" + ` field of the OFREP bulk evaluation response.\nEach event is sent as ` + "`" + `event: message` + "`" + ` with a ` + "`" + `model.OFREPSSEEvent` + "`" + ` JSON payload,\na ` + "`" + `refetchEvaluation` + "`" + ` event means that the provider must re-fetch its evaluations.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
+                "description": "Server-Sent Events endpoint pushing flag change notifications, following OpenFeature ADR-0008.\nIt is advertised in the ` + "`" + `eventStreams` + "`" + ` field of the OFREP bulk evaluation response.\nEach event is sent as ` + "`" + `event: message` + "`" + ` with a ` + "`" + `model.OFREPSSEEvent` + "`" + ` JSON payload,\na ` + "`" + `refetchEvaluation` + "`" + ` event means that the provider must re-fetch its evaluations.\nThe stream also sends SSE comment lines (` + "`" + `: connected` + "`" + ` when the connection opens,\n` + "`" + `: heartbeat` + "`" + ` every 30 seconds), they are ignored by SSE clients.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
                 "produces": [
                     "text/event-stream"
                 ],

@@ -820,6 +820,8 @@ event: message
 data: {"type":"refetchEvaluation","lastModified":1771622898}
 ```
 
+The stream also sends SSE comment lines, which spec-compliant clients ignore: `: connected` right after the connection is opened, and `: heartbeat` every 30 seconds so that proxies do not close idle connections.
+
 If the OFREP request is authenticated, the API key of the caller is added to the advertised URL as the `apiKey` query parameter, so the provider can open the stream without extra credentials. As required by the ADR, this URL is sensitive and must not be logged or persisted.
 
 #### `ofrepEventStream.baseUrl`

@@ -20,3 +20,4 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | Buzzvil              | https://www.buzzvil.com/en                            | Feature flags for backend and frontend         |
 | DataGalaxy           | https://www.datagalaxy.com/                           | Relay proxy with OpenFeature across the stack  |
 | Solaris SE           | https://www.solarisgroup.com/                         | GitOps flags via relay proxy on AWS Fargate    |
+| Kargo                | https://www.kargo.com                                 | Relay proxy in every region with OpenFeature   |
