@@ -93,7 +93,7 @@ To learn how to configure the relay proxy, read [Configuration](https://gofeatur
 ## Exporting metrics and traces
 
 To export the data you can use all the capabilities of `go-feature-flag` SDK.  
-To configure it please refer to the [type `exporter` section](https://gofeatureflag.org/docs/relay-proxy/configure-relay-proxy#exporter) of the configuration.
+To configure it please refer to the [type `exporter` section](https://gofeatureflag.org/docs/relay-proxy/configure-relay-proxy#type-exporter) of the configuration.
 
 
 ## Service endpoints
