@@ -3,18 +3,16 @@ package org.gofeatureflag.integrationtests;
 
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
+import dev.openfeature.contrib.providers.gofeatureflag.exception.AuthenticationFailure;
 import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import dev.openfeature.sdk.*;
-import dev.openfeature.sdk.exceptions.GeneralError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -83,6 +81,7 @@ public class ProviderTests {
                 .reason(Reason.DISABLED.toString())
                 .value(false)
                 .variant("SdkDefault")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -142,6 +141,7 @@ public class ProviderTests {
                 .reason(Reason.DISABLED.toString())
                 .value("default")
                 .variant("SdkDefault")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<String> got = goffClient.getStringDetails(flagKey, "default", defaultEvaluationContext);
         assertEquals(expected, got);
@@ -201,6 +201,7 @@ public class ProviderTests {
                 .reason(Reason.DISABLED.toString())
                 .value(123.45)
                 .variant("SdkDefault")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Double> got = goffClient.getDoubleDetails(flagKey, 123.45, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -260,6 +261,7 @@ public class ProviderTests {
                 .reason(Reason.DISABLED.toString())
                 .value(123)
                 .variant("SdkDefault")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Integer> got = goffClient.getIntegerDetails(flagKey, 123, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -320,6 +322,7 @@ public class ProviderTests {
                 .reason(Reason.DISABLED.toString())
                 .value(new Value(123))
                 .variant("SdkDefault")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Value> got = goffClient.getObjectDetails(flagKey, new Value(123), defaultEvaluationContext);
         assertEquals(expected, got);
@@ -369,7 +372,7 @@ public class ProviderTests {
                 .apiKey("").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
 
-        assertThrows(GeneralError.class, () -> {
+        assertThrows(AuthenticationFailure.class, () -> {
             OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         });
 
@@ -394,7 +397,7 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        assertThrows(GeneralError.class, () -> {
+        assertThrows(AuthenticationFailure.class, () -> {
             OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         });
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
