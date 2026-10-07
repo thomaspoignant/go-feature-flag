@@ -28,15 +28,22 @@ This can be useful if you want to use the same feature flags configuration file 
 <!-- - If you are using any SDKs that connect to the Relay Proxy. -->
 
 ## Installation
+All installation options are described in the [installation documentation](https://gofeatureflag.org/docs/relay-proxy/install_relay_proxy).
+
+### Install using Docker
+```shell
+docker pull gofeatureflag/go-feature-flag:latest
+```
+
 ### Install using Homebrew (mac and linux)
 ```shell
-brew install go-feature-flag-relay-proxy
+brew install go-feature-flag
 ```
 
 ### Install using Scoop (windows)
 ```shell
 scoop bucket add org https://github.com/go-feature-flag/scoop.git
-scoop install go-feature-flag-relay-proxy
+scoop install go-feature-flag
 ```
 
 ## Getting started
@@ -52,7 +59,7 @@ retriever:
 
 After that you can launch the **relay proxy** by using this command:
 ```shell
-go-feature-flag-relay-proxy --config=/path/to/your/configfile
+go-feature-flag --config=/path/to/your/configfile
 ```
 
 The **relay proxy** will read the configuration file and retrieve all the flags.    
@@ -62,7 +69,11 @@ After that you can use all the available endpoints _(see **Service endpoints** s
 ## Deployment options
 
 A common way to run **go-feature-flag relay proxy** is to use the Docker Container.  
-An image is available on docker Hub [`thomaspoignant/go-feature-flag-relay-proxy`](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy).
+The official image is available on Docker Hub [`gofeatureflag/go-feature-flag`](https://hub.docker.com/r/gofeatureflag/go-feature-flag).
+
+> [!WARNING]
+> The image `thomaspoignant/go-feature-flag-relay-proxy` is **deprecated**.  
+> To migrate, replace the image name with `gofeatureflag/go-feature-flag`, the configuration and the default port are the same.
 
 You can also run it as a service in your application following the **Installation** section.
 
@@ -77,12 +88,12 @@ But if you don't provide this option, the relay proxy will look in these folders
 - `/goff/`
 - `/etc/opt/goff/`
 
-To learn how to configure the relay proxy, read [Configuration](https://gofeatureflag.org/docs/relay_proxy/configure_relay_proxy).
+To learn how to configure the relay proxy, read [Configuration](https://gofeatureflag.org/docs/relay-proxy/configure-relay-proxy).
 
 ## Exporting metrics and traces
 
 To export the data you can use all the capabilities of `go-feature-flag` SDK.  
-To configure it please refer to the [type `exporter` section](https://gofeatureflag.org/docs/relay_proxy/configure_relay_proxy#exporter) of the configuration.
+To configure it please refer to the [type `exporter` section](https://gofeatureflag.org/docs/relay-proxy/configure-relay-proxy#exporter) of the configuration.
 
 
 ## Service endpoints
