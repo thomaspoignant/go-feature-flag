@@ -11,13 +11,13 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.1
 	github.com/BurntSushi/toml v1.6.0
-	github.com/IBM/sarama v1.61.0
+	github.com/IBM/sarama v1.61.1
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.55.1
 	github.com/aws/aws-sdk-go-v2 v1.47.1
 	github.com/aws/aws-sdk-go-v2/config v1.33.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.6
-	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.10
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.4.11
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.56.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.1
@@ -49,7 +49,7 @@ require (
 	github.com/pablor21/echo-etag/v5 v5.0.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.3
-	github.com/prometheus/common v0.71.0
+	github.com/prometheus/common v0.72.0
 	github.com/pterm/pterm v0.12.83
 	github.com/r3labs/diff/v3 v3.0.2
 	github.com/r3labs/sse/v2 v2.10.0
@@ -200,7 +200,7 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.20.0 // indirect
+	github.com/klauspost/compress v1.20.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
@@ -229,7 +229,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pierrec/lz4/v4 v4.1.30 // indirect
+	github.com/pierrec/lz4/v4 v4.1.31 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/xattr v0.4.12 // indirect
