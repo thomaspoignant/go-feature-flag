@@ -383,8 +383,8 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
-                .errorCode(ErrorCode.FLAG_NOT_FOUND)
-                .errorMessage("Flag bool_targeting_match was not found in your configuration")
+                .errorCode(ErrorCode.PROVIDER_FATAL)
+                .errorMessage("Provider is in an irrecoverable error state")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -408,8 +408,8 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
-                .errorCode(ErrorCode.FLAG_NOT_FOUND)
-                .errorMessage("Flag bool_targeting_match was not found in your configuration")
+                .errorCode(ErrorCode.PROVIDER_FATAL)
+                .errorMessage("Provider is in an irrecoverable error state")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
