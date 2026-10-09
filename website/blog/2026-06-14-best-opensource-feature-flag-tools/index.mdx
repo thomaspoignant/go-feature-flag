@@ -33,6 +33,7 @@ import growthbookLogo from '@site/static/img/comparison/growthbook.png';
 import fliptLogo from '@site/static/img/comparison/flipt.png';
 import posthogLogo from '@site/static/img/comparison/posthog.png';
 import featurevisorLogo from '@site/static/img/comparison/featurevisor.png';
+import difLogo from '@site/static/img/comparison/dif.png';
 
 
 ![Best Open-Source Feature Flagging Tools in 2026](./banner.jpeg)
@@ -250,6 +251,27 @@ analytics, **notifiers** for change alerts, and a flag <Link to="/editor">editor
 Featurevisor is the minimal end of that philosophy; GOFF is the same philosophy with
 the rest of the workflow included.
 
+### dif {#dif}
+
+<ToolHeader logo={difLogo} alt="dif" posture="Official provider (JS server only)" postureTone="warn">
+Flags and A/B tests as Markdown files, compiled into the app at build time.
+</ToolHeader>
+
+dif keeps each flag or experiment as one Markdown file with YAML frontmatter in the
+application repo. A Rust CLI validates the files and `dif build` compiles the active
+ones into a typed TypeScript client, so there is no server, no database and no
+datafile to publish. The SDK evaluates in-process by hashing the user ID. Validation
+is the distinctive part: `dif validate` exits non-zero when variant weights don't sum
+to 100 or when two active experiments on the same surface could reach the same users.
+The project maintains one OpenFeature provider, `@dif.sh/openfeature`, for the
+JavaScript **server** SDK.
+
+<Field label="Best for" tone="good" icon="fa-circle-check">JavaScript and TypeScript teams that want flag changes reviewed in pull requests and checked in CI, and are happy for a change to ship with a deploy.</Field>
+
+<Field label="Watch-outs" tone="warn" icon="fa-triangle-exclamation">**JavaScript/TypeScript only**, and the OpenFeature provider is **server-side only** with string and boolean evaluation (number and object flags return `TYPE_MISMATCH`). **No runtime toggling**: weights and audiences are compiled in, so any change is a merge, a build and a deploy. **No management UI**, no environments concept, and no statistical analysis in the open-source project. A young project (v0.6.x).</Field>
+
+<Field label="License & hosting" tone="info" icon="fa-scale-balanced">**MIT** CLI and SDKs. No server, no database. Results and dashboards are a separate, paid hosted product (Dif Cloud) whose source is not in the repo.</Field>
+
 ## At a glance
 
 <ComparisonTable />
@@ -261,7 +283,7 @@ Feature-flag tooling isn't one-size-fits-all. A few common scenarios:
 - **You want OpenFeature-native flagging you can install in minutes and that stays fully open.** This is GO Feature Flag's home turf: a single binary with no database to operate, MIT-licensed with no paid core, GitOps-friendly retrievers, native providers across many languages, and both remote and in-process evaluation. **→ GO Feature Flag.**
 - **Experimentation with real statistical analysis is the primary goal.** **GrowthBook** (warehouse-native stats) or **PostHog** (if you already run its analytics suite) will serve you better than a flag-first tool.
 - **You need enterprise governance, RBAC, SSO, and commercial support.** **Unleash** or **Flagsmith** are mature open-core platforms built for that — just budget for the paid tier and a PostgreSQL deployment.
-- **You want pure GitOps with no server at all.** **Flipt v2** (Git-native server with a UI) or **Featurevisor** (CDN datafiles, no server at all) fit that brief.
+- **You want pure GitOps with no server at all.** **Flipt v2** (Git-native server with a UI), **Featurevisor** (CDN datafiles, no server at all) or **dif** (JS/TS only; flags compiled into the app at build time) fit that brief.
 
 The throughline: whichever you choose, write your application against **OpenFeature**.
 That's what keeps the decision reversible — and it's exactly why a tool's OpenFeature

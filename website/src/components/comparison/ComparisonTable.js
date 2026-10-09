@@ -9,6 +9,7 @@ import growthbookLogo from '@site/static/img/comparison/growthbook.png';
 import fliptLogo from '@site/static/img/comparison/flipt.png';
 import posthogLogo from '@site/static/img/comparison/posthog.png';
 import featurevisorLogo from '@site/static/img/comparison/featurevisor.png';
+import difLogo from '@site/static/img/comparison/dif.png';
 
 // Columns mirror the comparison spec. The first column is the row header (tool).
 const COLUMNS = [
@@ -128,6 +129,18 @@ const ROWS = [
       ui: cellCross('None (Git/CLI)'),
       experimentation: cellY('Definition only'),
       open: cellG('Yes — fully open'),
+    },
+  },
+  {
+    tool: 'dif',
+    logo: difLogo,
+    cells: {
+      license: cellTxt('MIT', 'good'),
+      db: cellG('None (compiled at build)'),
+      openfeature: cellY('Official provider (JS server only)'),
+      ui: cellCross('None (Git/CLI)'),
+      experimentation: cellY('Definition only'),
+      open: cellY('Open CLI + SDK; paid hosted results'),
     },
   },
 ];
