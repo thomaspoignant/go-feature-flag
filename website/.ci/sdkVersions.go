@@ -58,7 +58,7 @@ type GO struct {
 func main() {
 	var wg sync.WaitGroup
 	versions := Versions{}
-	wg.Add(16)
+	wg.Add(17)
 	go func() {
 		defer wg.Done()
 		versions.Swift.Provider = getSwiftVersion("go-feature-flag/openfeature-swift-provider")
@@ -136,11 +136,11 @@ func main() {
 	}()
 	wg.Wait()
 
-	var content []byte
-	content, err := json.Marshal(versions)
+	content, err := json.MarshalIndent(versions, "", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}
+	content = append(content, '\n')
 
 	err = os.WriteFile("./website/static/sdk-versions.json", content, 0644)
 	if err != nil {
