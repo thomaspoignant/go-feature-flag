@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -253,16 +254,23 @@ func getPypiVersion(packageName string) string {
 }
 
 func getNugetVersion(packageName string) string {
+	// NuGet's v3 flat-container API requires lowercase package IDs.
+	// Mixed-case IDs return HTTP 404 with an XML BlobNotFound body
+	// (often with a UTF-8 BOM), which breaks json.Unmarshal.
 	u := url.URL{
 		Scheme: "https",
 		Host:   "api.nuget.org",
-		Path:   fmt.Sprintf("v3-flatcontainer/%s/index.json", packageName),
+		Path:   fmt.Sprintf("v3-flatcontainer/%s/index.json", strings.ToLower(packageName)),
 	}
 	resp, err := http.Get(u.String())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Fatalf("nuget request failed: %s returned status %d", u.String(), resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -277,6 +285,9 @@ func getNugetVersion(packageName string) string {
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(res.Versions) == 0 {
+		log.Fatalf("nuget package %q returned an empty versions list", packageName)
 	}
 	return res.Versions[len(res.Versions)-1]
 }
