@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.8.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.2...modules/core/v0.8.0) (2026-10-10)
+
+
+### 🚀 New Features
+
+* migrate the relay proxy from echo v4 to v5 ([#6000](https://github.com/thomaspoignant/go-feature-flag/issues/6000)) ([27ef744](https://github.com/thomaspoignant/go-feature-flag/commit/27ef744d94cc3700e5f6c38f3b17de49b5f91db3))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.3 ([#5804](https://github.com/thomaspoignant/go-feature-flag/issues/5804)) ([5cd3520](https://github.com/thomaspoignant/go-feature-flag/commit/5cd352036f7fcc22edbe34d47af85f1c675eec9f))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.5 to 1.43.7 ([#5923](https://github.com/thomaspoignant/go-feature-flag/issues/5923)) ([6e64093](https://github.com/thomaspoignant/go-feature-flag/commit/6e640937a0d8d2f107f9fc9af57386cf40672853))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.46.0 to 1.47.0 ([#6067](https://github.com/thomaspoignant/go-feature-flag/issues/6067)) ([04cba7c](https://github.com/thomaspoignant/go-feature-flag/commit/04cba7c83b5a097df1fb460daa0364ceadb75baf))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.47.0 to 1.47.1 ([#6154](https://github.com/thomaspoignant/go-feature-flag/issues/6154)) ([2f54b43](https://github.com/thomaspoignant/go-feature-flag/commit/2f54b43bc3ce4535fa7236a2a494cd4f2b7e82bc))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.33.4 to 1.33.5 ([#6096](https://github.com/thomaspoignant/go-feature-flag/issues/6096)) ([83f71d5](https://github.com/thomaspoignant/go-feature-flag/commit/83f71d5f2987a77621c32035b80aee880dfbbaf3))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5771](https://github.com/thomaspoignant/go-feature-flag/issues/5771)) ([e46119d](https://github.com/thomaspoignant/go-feature-flag/commit/e46119d953efe049174b5d87518824d1330fef8b))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#5840](https://github.com/thomaspoignant/go-feature-flag/issues/5840)) ([b11fb03](https://github.com/thomaspoignant/go-feature-flag/commit/b11fb03abcba68ee2fc82ed98f838747fe406dca))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6091](https://github.com/thomaspoignant/go-feature-flag/issues/6091)) ([9488035](https://github.com/thomaspoignant/go-feature-flag/commit/94880359b2e96d799edd58486b9edfb21ebba5c2))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6123](https://github.com/thomaspoignant/go-feature-flag/issues/6123)) ([ba87b8d](https://github.com/thomaspoignant/go-feature-flag/commit/ba87b8d4d84e4a9bdf3d9f05016cb3ebf0b9b0c1))
+* Bump github.com/aws/smithy-go from 1.27.5 to 1.27.6 ([#5807](https://github.com/thomaspoignant/go-feature-flag/issues/5807)) ([627e361](https://github.com/thomaspoignant/go-feature-flag/commit/627e3610e09f3bb48ed968d6d3d99a228a434ad8))
+* Bump github.com/aws/smithy-go from 1.27.7 to 1.27.8 ([#5895](https://github.com/thomaspoignant/go-feature-flag/issues/5895)) ([c7f9192](https://github.com/thomaspoignant/go-feature-flag/commit/c7f9192f1a3e69d6b837b8750917275d2078444e))
+* **dependencies:** Bump github.com/stretchr/testify in /modules/core ([#5865](https://github.com/thomaspoignant/go-feature-flag/issues/5865)) ([bb23e0f](https://github.com/thomaspoignant/go-feature-flag/commit/bb23e0fe1ad7a099361ca57bb3b6e859732b766b))
+* **dependencies:** Bump github.com/stretchr/testify in /modules/core ([#5900](https://github.com/thomaspoignant/go-feature-flag/issues/5900)) ([177d3d6](https://github.com/thomaspoignant/go-feature-flag/commit/177d3d6c43e07fb937abef203c5246497530d207))
+
 ## [0.7.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.1...modules/core/v0.7.2) (2026-07-01)
 
 
