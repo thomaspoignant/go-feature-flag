@@ -7,15 +7,14 @@ jobs:
   sdk-versions:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # persist-credentials must be true: git-auto-commit-action has no token
-          # input and pushes with the checkout credentials (default GITHUB_TOKEN).
           fetch-depth: 1
-          persist-credentials: true
+          persist-credentials: false
       - name: Setup go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
@@ -23,7 +22,19 @@ jobs:
           check-latest: true
           cache: false
       - run: go run ./website/.ci/sdkVersions.go
-      - uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+      # Open (or update) an automerge PR instead of pushing to protected main.
+      # PERSONAL_GITHUB_TOKEN is required so the PR triggers the required status checks;
+      # GITHUB_TOKEN commits do not. create-pull-request skips the PR when nothing changed.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          push_options: "--force"
-          commit_message: "docs(website): update SDK versions"
+          branch: chore/update-sdk-versions
+          title: "chore(docs): update SDK versions"
+          body: Automated pull request to update website/static/sdk-versions.json with the latest SDK versions.
+          commit-message: "chore(docs): update SDK versions"
+          labels: automerge
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
