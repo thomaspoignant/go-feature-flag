@@ -29,9 +29,9 @@ jobs:
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           branch: chore/update-sdk-versions
-          title: "chore(docs): update SDK versions"
+          title: "docs(version): update SDK versions"
           body: Automated pull request to update website/static/sdk-versions.json with the latest SDK versions.
-          commit-message: "chore(docs): update SDK versions"
+          commit-message: "docs(version): update SDK versions"
           labels: automerge
           assignees: thomaspoignant
           draft: false
