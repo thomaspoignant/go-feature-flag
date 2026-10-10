@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.3.0...openfeature/providers/python-provider/v1.3.1) (2026-10-10)
+
+
+### 🐛 Bug Fixes
+
+* **python-provider:** bump urllib3 to 2.8.0 and idna to 3.20 (security) ([#6139](https://github.com/thomaspoignant/go-feature-flag/issues/6139)) ([b21ccc2](https://github.com/thomaspoignant/go-feature-flag/commit/b21ccc24e134f16c575e799a3a469f0509853752))
+* **sonar:** resolve SonarCloud issues reported on main ([#6025](https://github.com/thomaspoignant/go-feature-flag/issues/6025)) ([e2f6a65](https://github.com/thomaspoignant/go-feature-flag/commit/e2f6a65e89eefee46a413399a29daf833683b6ed))
+* **sonar:** resolve SonarCloud issues reported on main ([#6028](https://github.com/thomaspoignant/go-feature-flag/issues/6028)) ([674a85e](https://github.com/thomaspoignant/go-feature-flag/commit/674a85e527bbe3171dc9d23635db3fcdb4a609c3))
+* **sonar:** resolve SonarCloud issues reported on main ([#6053](https://github.com/thomaspoignant/go-feature-flag/issues/6053)) ([59e3ee3](https://github.com/thomaspoignant/go-feature-flag/commit/59e3ee3eddba08897153a216e37792e3610487c4))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.46.0 to 1.47.0 ([#6067](https://github.com/thomaspoignant/go-feature-flag/issues/6067)) ([04cba7c](https://github.com/thomaspoignant/go-feature-flag/commit/04cba7c83b5a097df1fb460daa0364ceadb75baf))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.47.0 to 1.47.1 ([#6154](https://github.com/thomaspoignant/go-feature-flag/issues/6154)) ([2f54b43](https://github.com/thomaspoignant/go-feature-flag/commit/2f54b43bc3ce4535fa7236a2a494cd4f2b7e82bc))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.33.4 to 1.33.5 ([#6096](https://github.com/thomaspoignant/go-feature-flag/issues/6096)) ([83f71d5](https://github.com/thomaspoignant/go-feature-flag/commit/83f71d5f2987a77621c32035b80aee880dfbbaf3))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6091](https://github.com/thomaspoignant/go-feature-flag/issues/6091)) ([9488035](https://github.com/thomaspoignant/go-feature-flag/commit/94880359b2e96d799edd58486b9edfb21ebba5c2))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6123](https://github.com/thomaspoignant/go-feature-flag/issues/6123)) ([ba87b8d](https://github.com/thomaspoignant/go-feature-flag/commit/ba87b8d4d84e4a9bdf3d9f05016cb3ebf0b9b0c1))
+
 ## [1.3.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v1.2.0...openfeature/providers/python-provider/v1.3.0) (2026-09-01)
 
 
