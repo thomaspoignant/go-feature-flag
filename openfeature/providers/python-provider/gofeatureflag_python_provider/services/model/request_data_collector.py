@@ -1,6 +1,6 @@
 from gofeatureflag_python_provider.options import BaseModel
 from pydantic import Field, SkipValidation
-from typing import Optional, Any, Union
+from typing import Optional, Any
 
 
 class FeatureEvent(BaseModel):
@@ -53,7 +53,7 @@ class FeatureEvent(BaseModel):
 
 class RequestDataCollector(BaseModel):
     # Meta are the extra information added to identify who is calling the endpoint.
-    meta: Optional[dict[str, Union[str, int, float, bool]]] = None
+    meta: dict[str, str | int | float | bool] | None = None
 
     # Events is the list of the event we send in the payload
     events: list[FeatureEvent] = []
