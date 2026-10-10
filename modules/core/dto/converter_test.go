@@ -75,6 +75,9 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 				TrackEvents: testconvert.Bool(true),
 				Disable:     testconvert.Bool(false),
 				Version:     testconvert.String("v1"),
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("other-flag"), Value: testconvert.Interface(true)},
+				},
 			},
 			expected: flag.InternalFlag{
 				BucketingKey: testconvert.String("bucketKey"),
@@ -133,6 +136,9 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 					End:   testconvert.Time(time.Date(2022, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 				Metadata: &map[string]any{"key": "value"},
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("other-flag"), Value: testconvert.Interface(true)},
+				},
 			},
 		},
 		{
@@ -212,6 +218,9 @@ func TestConvertInternalFlagToDto(t *testing.T) {
 				TrackEvents: testconvert.Bool(true),
 				Disable:     testconvert.Bool(false),
 				Version:     testconvert.String("v1"),
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("other-flag"), Value: testconvert.Interface(true)},
+				},
 			},
 			expected: dto.DTO{
 				BucketingKey: testconvert.String("bucketKey"),
@@ -268,6 +277,9 @@ func TestConvertInternalFlagToDto(t *testing.T) {
 				TrackEvents: testconvert.Bool(true),
 				Disable:     testconvert.Bool(false),
 				Version:     testconvert.String("v1"),
+				Needs: &[]flag.NeedsDependency{
+					{Flag: testconvert.String("other-flag"), Value: testconvert.Interface(true)},
+				},
 			},
 		},
 		{
