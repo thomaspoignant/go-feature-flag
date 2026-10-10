@@ -41,6 +41,11 @@ Considering the volume of information to process and the potential impact on you
   </li>
 </ul>
 
+### What happens if an exporter is failing or slow?
+The exporters are never called during the flag evaluation: the events are stored in memory and a background process sends them to the exporter, so a slow exporter does not slow down your evaluations.
+
+If an export fails, the events are kept in memory and GO Feature Flag retries to send them with an exponential backoff, starting at `1 second` and never higher than the flush interval of the exporter _(`60 seconds` by default)_.
+
 ## Supported exporters
 
 <ul>

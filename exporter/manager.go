@@ -43,12 +43,14 @@ func NewManager[T ExportableEvent](exporters []Config,
 	}
 }
 
+// AddEvent is adding the event to the event store and asking the exporters to flush if needed.
+// It never calls the exporters directly, to avoid blocking the caller when an exporter is slow or down.
 func (m *managerImpl[T]) AddEvent(event T) {
 	store := *m.eventStore
 	store.Add(event)
 	for _, consumer := range m.consumers {
 		if !consumer.IsBulk() {
-			consumer.Flush()
+			consumer.RequestFlush()
 			continue
 		}
 
@@ -58,7 +60,7 @@ func (m *managerImpl[T]) AddEvent(event T) {
 			continue
 		}
 		if count >= consumer.GetMaxEventInMemory() {
-			consumer.Flush()
+			consumer.RequestFlush()
 			continue
 		}
 	}
