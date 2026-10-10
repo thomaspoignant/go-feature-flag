@@ -9,11 +9,8 @@ import (
 	"net/url"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 
-	"github.com/luci/go-render/render"
-	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
@@ -119,20 +116,20 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Fields:     []Field{},
 		}
 
-		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-		for _, change := range changelog {
-			if change.Type == "update" {
-				value := fmt.Sprintf(
-					"%s => %s",
-					render.Render(change.From),
-					render.Render(change.To),
-				)
-				short := len(value) < longSlackAttachment
-				attachment.Fields = append(
-					attachment.Fields,
-					Field{Title: strings.Join(change.Path, "."), Short: short, Value: value},
-				)
-			}
+		changes, err := notifier.FlagChanges(value.Before, value.After)
+		if err != nil {
+			attachment.Fields = append(
+				attachment.Fields,
+				Field{Title: notifier.ChangesUnavailable, Value: err.Error()},
+			)
+		}
+		for _, change := range changes {
+			value := fmt.Sprintf("%s => %s", change.From, change.To)
+			short := len(value) < longSlackAttachment
+			attachment.Fields = append(
+				attachment.Fields,
+				Field{Title: change.Path, Short: short, Value: value},
+			)
 		}
 
 		sort.Sort(ByTitle(attachment.Fields))
