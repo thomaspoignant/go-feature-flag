@@ -22,7 +22,7 @@
         "provider": "0.2.1"
     },
     "go": {
-        "provider": "v1.1.2",
+        "provider": "v1.1.3",
         "sdk": "v1.19.0"
     },
     "swift": {
