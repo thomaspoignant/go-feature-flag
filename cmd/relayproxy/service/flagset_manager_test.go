@@ -3,9 +3,11 @@ package service_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -547,6 +549,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 
 	// Test default mode
 	t.Run("default mode", func(t *testing.T) {
+		outputDir := t.TempDir()
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -554,6 +557,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 					Kind: "file",
 					Path: flagConfig,
 				},
+				Exporter: bufferedFileExporter(outputDir),
 			},
 		}
 		logger := zap.NewNop()
@@ -564,13 +568,13 @@ func TestFlagsetManager_Close(t *testing.T) {
 		}
 		assert.NotNil(t, manager)
 
-		assert.NotPanics(t, func() {
-			manager.Close()
-		})
+		_, _ = manager.Default().BoolVariation("test-flag-rule-apply", ffcontext.NewEvaluationContext("user-key"), false)
+		assertFlushedOnClose(t, manager, outputDir)
 	})
 
 	// Test flagset mode
 	t.Run("flagset mode", func(t *testing.T) {
+		outputDir := t.TempDir()
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
@@ -580,6 +584,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 							Kind: "file",
 							Path: flagConfig,
 						},
+						Exporter: bufferedFileExporter(outputDir),
 					},
 					APIKeys: []string{"test-api-key"},
 				},
@@ -593,10 +598,36 @@ func TestFlagsetManager_Close(t *testing.T) {
 		}
 		assert.NotNil(t, manager)
 
-		assert.NotPanics(t, func() {
-			manager.Close()
-		})
+		flagset, err := manager.FlagSet("test-api-key")
+		require.NoError(t, err)
+		_, _ = flagset.BoolVariation("test-flag-rule-apply", ffcontext.NewEvaluationContext("user-key"), false)
+		assertFlushedOnClose(t, manager, outputDir)
 	})
+}
+
+// bufferedFileExporter returns a file exporter whose flush interval is long enough
+// that events stay in memory until the flagset manager is closed.
+func bufferedFileExporter(outputDir string) *config.ExporterConf {
+	return &config.ExporterConf{
+		Kind:             config.FileExporter,
+		OutputDir:        outputDir,
+		FlushInterval:    time.Hour.Milliseconds(),
+		MaxEventInMemory: 10_000,
+	}
+}
+
+// assertFlushedOnClose checks that the buffered events are only written once the manager is closed.
+func assertFlushedOnClose(t *testing.T, manager service.FlagsetManager, outputDir string) {
+	t.Helper()
+	files, err := os.ReadDir(outputDir)
+	require.NoError(t, err)
+	require.Empty(t, files, "events should still be buffered before Close")
+
+	manager.Close()
+
+	files, err = os.ReadDir(outputDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, files, "Close should flush the buffered events to the exporter")
 }
 
 // setupManager is a helper function to create a manager and capture log messages
