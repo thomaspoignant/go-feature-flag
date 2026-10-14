@@ -61,3 +61,54 @@ tests:
           path: spec.template.spec.containers[0].securityContext.capabilities.drop
           value:
             - ALL
+
+  - it: should keep explicit false, zero and empty user values over nonRoot defaults
+    template: deployment.yaml
+    set:
+      nonRoot:
+        enabled: true
+      podSecurityContext:
+        runAsNonRoot: false
+        fsGroup: 0
+      securityContext:
+        allowPrivilegeEscalation: true
+        capabilities:
+          drop: []
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: false
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 0
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          value: []
+
+  - it: should replace nested nonRoot defaults as a whole
+    template: deployment.yaml
+    set:
+      nonRoot:
+        enabled: true
+      podSecurityContext:
+        seccompProfile:
+          type: Localhost
+          localhostProfile: profiles/relay-proxy.json
+      securityContext:
+        capabilities:
+          add:
+            - NET_BIND_SERVICE
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile
+          value:
+            type: Localhost
+            localhostProfile: profiles/relay-proxy.json
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities
+          value:
+            add:
+              - NET_BIND_SERVICE

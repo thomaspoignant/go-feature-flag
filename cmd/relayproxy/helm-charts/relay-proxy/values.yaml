@@ -88,7 +88,8 @@ securityContext: {}
 nonRoot:
   # -- Run the relay proxy as the distroless `nonroot` user (uid/gid 65532) with a hardened
   # security context (runAsNonRoot, fsGroup, RuntimeDefault seccomp, no privilege escalation,
-  # all capabilities dropped). Keys set in `podSecurityContext` / `securityContext` take precedence.
+  # all capabilities dropped). Each key you set in `podSecurityContext` / `securityContext` replaces
+  # the matching default as a whole (e.g. setting `capabilities` replaces `capabilities.drop: [ALL]`).
   # `readOnlyRootFilesystem` is not set: the file exporter and `persistentFlagConfigurationFile`
   # write to the container filesystem.
   enabled: false
