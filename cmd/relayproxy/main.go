@@ -136,6 +136,8 @@ func main() {
 		wsService.Close()
 		sseService.Close()
 		apiServer.Stop(ctx)
+		// Closing the flagsets flushes the exporters, once the server no longer accepts requests.
+		flagsetManager.Close()
 	}()
 	apiServer.StartWithContext(context.Background())
 }
