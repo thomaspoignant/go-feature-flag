@@ -1,0 +1,63 @@
+suite: test security context
+templates:
+  - deployment.yaml
+  - configmap.yaml
+tests:
+  - it: should keep empty security contexts by default
+    template: deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext
+          value: {}
+      - equal:
+          path: spec.template.spec.containers[0].securityContext
+          value: {}
+
+  - it: should run as non-root when nonRoot.enabled is true
+    template: deployment.yaml
+    set:
+      nonRoot:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext
+          value:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            fsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+      - equal:
+          path: spec.template.spec.containers[0].securityContext
+          value:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+
+  - it: should let user security contexts override nonRoot defaults
+    template: deployment.yaml
+    set:
+      nonRoot:
+        enabled: true
+      podSecurityContext:
+        runAsUser: 1000
+      securityContext:
+        readOnlyRootFilesystem: true
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 1000
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 65532
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          value:
+            - ALL

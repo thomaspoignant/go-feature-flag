@@ -85,6 +85,14 @@ securityContext: {}
 # runAsNonRoot: true
 # runAsUser: 1000
 
+nonRoot:
+  # -- Run the relay proxy as the distroless `nonroot` user (uid/gid 65532) with a hardened
+  # security context (runAsNonRoot, fsGroup, RuntimeDefault seccomp, no privilege escalation,
+  # all capabilities dropped). Keys set in `podSecurityContext` / `securityContext` take precedence.
+  # `readOnlyRootFilesystem` is not set: the file exporter and `persistentFlagConfigurationFile`
+  # write to the container filesystem.
+  enabled: false
+
 service:
   # -- The type of service to create
   type: ClusterIP

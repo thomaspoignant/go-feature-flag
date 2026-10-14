@@ -32,8 +32,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "relay-proxy.serviceAccountName" . }}
+      {{- $podSecurityContext := .Values.podSecurityContext }}
+      {{- if .Values.nonRoot.enabled }}
+      {{- $podSecurityContext = merge (deepCopy (.Values.podSecurityContext | default (dict))) (dict "runAsNonRoot" true "runAsUser" 65532 "runAsGroup" 65532 "fsGroup" 65532 "seccompProfile" (dict "type" "RuntimeDefault")) }}
+      {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $podSecurityContext | nindent 8 }}
       volumes:
         - name: relay-proxy-config-volume
           configMap:
@@ -45,8 +49,12 @@ spec:
             - name: {{ $name }}
               {{- $item | toYaml | nindent 14 }}
             {{- end }}
+          {{- $securityContext := .Values.securityContext }}
+          {{- if .Values.nonRoot.enabled }}
+          {{- $securityContext = merge (deepCopy (.Values.securityContext | default (dict))) (dict "allowPrivilegeEscalation" false "capabilities" (dict "drop" (list "ALL"))) }}
+          {{- end }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml $securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ if .Values.image.fips }}-fips{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
