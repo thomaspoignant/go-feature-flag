@@ -136,3 +136,53 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(logs.AllUntimed()))
 }
+
+func TestZapLoggerRedactsAPIKey(t *testing.T) {
+	tests := []struct {
+		name string
+		uri  string
+		want string
+	}{
+		{
+			name: "no query",
+			uri:  "/ws/v1/flag/change",
+			want: "GET /ws/v1/flag/change",
+		},
+		{
+			name: "apiKey only",
+			uri:  "/stream/v1/sse/flag/change?apiKey=secret",
+			want: "GET /stream/v1/sse/flag/change?apiKey=REDACTED",
+		},
+		{
+			name: "apiKey among other params",
+			uri:  "/stream/v1/ws/flag/change?a=1&apiKey=secret&b=2",
+			want: "GET /stream/v1/ws/flag/change?a=1&apiKey=REDACTED&b=2",
+		},
+		{
+			name: "no apiKey",
+			uri:  "/stream/v1/ws/flag/change?a=1&b=2",
+			want: "GET /stream/v1/ws/flag/change?a=1&b=2",
+		},
+		{
+			name: "percent-encoded apiKey name",
+			uri:  "/ws/v1/flag/change?api%4Bey=secret",
+			want: "GET /ws/v1/flag/change?api%4Bey=REDACTED",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, tt.uri, nil)
+			c := e.NewContext(req, httptest.NewRecorder())
+			h := func(c *echo.Context) error {
+				return c.String(http.StatusUnauthorized, "")
+			}
+
+			obs, logs := observer.New(zap.DebugLevel)
+			err := middleware.ZapLogger(zap.New(obs), false)(h)(c)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, logs.Len())
+			assert.Equal(t, tt.want, logs.AllUntimed()[0].ContextMap()["request"])
+		})
+	}
+}
