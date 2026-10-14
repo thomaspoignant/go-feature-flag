@@ -70,6 +70,18 @@ tests:
       - isNull:
           path: spec.minAvailable
 
+  - it: should set maxUnavailable to 0 when explicitly set
+    template: pdb.yaml
+    set:
+      pdb.enable: true
+      pdb.maxUnavailable: 0
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 0
+      - isNull:
+          path: spec.minAvailable
+
   - it: should set maxUnavailable when both are specified
     template: pdb.yaml
     set:

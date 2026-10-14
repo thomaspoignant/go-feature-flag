@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "relay-proxy.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.pdb.maxUnavailable }}
+  {{- if not (kindIs "invalid" .Values.pdb.maxUnavailable) }}
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}
   {{- else }}
   minAvailable: {{ .Values.pdb.minAvailable | default 1 }}
