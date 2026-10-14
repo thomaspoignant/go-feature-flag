@@ -32,8 +32,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "relay-proxy.serviceAccountName" . }}
+      {{- $podSecurityContext := .Values.podSecurityContext }}
+      {{- if .Values.nonRoot.enabled }}
+      {{- $podSecurityContext = dict "runAsNonRoot" true "runAsUser" 65532 "runAsGroup" 65532 "fsGroup" 65532 "seccompProfile" (dict "type" "RuntimeDefault") }}
+      {{- range $key, $value := .Values.podSecurityContext }}
+      {{- $_ := set $podSecurityContext $key $value }}
+      {{- end }}
+      {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $podSecurityContext | nindent 8 }}
       volumes:
         - name: relay-proxy-config-volume
           configMap:
@@ -45,8 +52,15 @@ spec:
             - name: {{ $name }}
               {{- $item | toYaml | nindent 14 }}
             {{- end }}
+          {{- $securityContext := .Values.securityContext }}
+          {{- if .Values.nonRoot.enabled }}
+          {{- $securityContext = dict "allowPrivilegeEscalation" false "capabilities" (dict "drop" (list "ALL")) }}
+          {{- range $key, $value := .Values.securityContext }}
+          {{- $_ := set $securityContext $key $value }}
+          {{- end }}
+          {{- end }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml $securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ if .Values.image.fips }}-fips{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
