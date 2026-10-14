@@ -120,16 +120,20 @@ GODEBUG=fips140=only ./out/bin/relayproxy-fips --config=/goff/config.yaml
 
 If you deploy the relay proxy with our [Helm chart](./deployment/helm), the FIPS build
 covers cryptography but a hardened deployment should also tighten the container's runtime
-security context. The chart exposes `securityContext` options that are commented out by
-default — for FedRAMP-style boundaries we recommend enabling at least:
+security context. Set `nonRoot.enabled` to run the proxy as the distroless `nonroot` user
+(uid/gid 65532) with privilege escalation disabled, all capabilities dropped and the
+`RuntimeDefault` seccomp profile. For FedRAMP-style boundaries we recommend also making the
+root filesystem read-only:
 
 ```yaml
 # values.yaml (Helm)
+nonRoot:
+  enabled: true
 securityContext:
-  runAsNonRoot: true
   readOnlyRootFilesystem: true
 ```
 
-This runs the proxy as a non-root user with an immutable root filesystem. Combine it with
-your platform's pod security standards as appropriate.
+Leave `readOnlyRootFilesystem` off if you use the file exporter or
+`persistentFlagConfigurationFile`: both write to the container filesystem.
+Combine this with your platform's pod security standards as appropriate.
 
