@@ -7,52 +7,52 @@
       "fields": [
         {
           "name": "DefaultRule.Percentages",
-          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "inline": false
+          "value": "{\"False\":0,\"True\":100} => null",
+          "inline": true
         },
         {
           "name": "DefaultRule.VariationResult",
-          "value": "nil =\u003e (*string)(\"Default\")",
+          "value": "null => \"Default\"",
           "inline": true
         },
         {
           "name": "Disable",
-          "value": "nil =\u003e (*bool)(true)",
+          "value": "null => true",
           "inline": true
         },
         {
           "name": "Experimentation",
-          "value": "(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil",
+          "value": "{\"start\":\"2004-09-17T00:03:20Z\",\"end\":\"2004-09-16T21:43:20Z\"} => null",
           "inline": false
         },
         {
           "name": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}",
+          "value": "null => [{\"name\":\"rule1\",\"query\":\"key eq \\\"not-a-ke\\\"\",\"percentage\":{\"False\":20,\"True\":80}}]",
           "inline": false
         },
         {
           "name": "TrackEvents",
-          "value": "nil =\u003e (*bool)(false)",
+          "value": "null => false",
           "inline": true
         },
         {
           "name": "Variations.Default",
-          "value": "false =\u003e \"strDefault\"",
+          "value": "false => \"strDefault\"",
           "inline": true
         },
         {
           "name": "Variations.False",
-          "value": "false =\u003e \"strFalse\"",
+          "value": "false => \"strFalse\"",
           "inline": true
         },
         {
           "name": "Variations.True",
-          "value": "true =\u003e \"strTrue\"",
+          "value": "true => \"strTrue\"",
           "inline": true
         },
         {
           "name": "Version",
-          "value": "nil =\u003e (*string)(\"1.1\")",
+          "value": "null => \"1.1\"",
           "inline": true
         }
       ]
