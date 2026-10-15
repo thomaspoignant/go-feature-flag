@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.55.3](https://img.shields.io/badge/Version-1.55.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.55.3](https://img.shields.io/badge/AppVersion-v1.55.3-informational?style=flat-square)
+![Version: 1.56.1](https://img.shields.io/badge/Version-1.56.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.56.1](https://img.shields.io/badge/AppVersion-v1.56.1-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -94,7 +94,7 @@ relayproxy:
 	<tbody>
 		<tr>
 			<td id="affinity">
-				<a href="./values.yaml#L139">affinity</a>
+				<a href="./values.yaml#L150">affinity</a>
             </td>
 			<td>
 object
@@ -112,7 +112,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling">
-				<a href="./values.yaml#L120">autoscaling</a>
+				<a href="./values.yaml#L131">autoscaling</a>
             </td>
 			<td>
 object
@@ -136,7 +136,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling--enabled">
-				<a href="./values.yaml#L122">autoscaling.enabled</a>
+				<a href="./values.yaml#L133">autoscaling.enabled</a>
             </td>
 			<td>
 bool
@@ -154,7 +154,7 @@ false
 		</tr>
 		<tr>
 			<td id="autoscaling--maxReplicas">
-				<a href="./values.yaml#L126">autoscaling.maxReplicas</a>
+				<a href="./values.yaml#L137">autoscaling.maxReplicas</a>
             </td>
 			<td>
 int
@@ -172,7 +172,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--minReplicas">
-				<a href="./values.yaml#L124">autoscaling.minReplicas</a>
+				<a href="./values.yaml#L135">autoscaling.minReplicas</a>
             </td>
 			<td>
 int
@@ -190,7 +190,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetCPUUtilizationPercentage">
-				<a href="./values.yaml#L128">autoscaling.targetCPUUtilizationPercentage</a>
+				<a href="./values.yaml#L139">autoscaling.targetCPUUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -208,7 +208,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetMemoryUtilizationPercentage">
-				<a href="./values.yaml#L130">autoscaling.targetMemoryUtilizationPercentage</a>
+				<a href="./values.yaml#L141">autoscaling.targetMemoryUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -226,7 +226,7 @@ int
 		</tr>
 		<tr>
 			<td id="commonLabels">
-				<a href="./values.yaml#L68">commonLabels</a>
+				<a href="./values.yaml#L70">commonLabels</a>
             </td>
 			<td>
 object
@@ -262,7 +262,7 @@ object
 		</tr>
 		<tr>
 			<td id="extraManifests">
-				<a href="./values.yaml#L142">extraManifests</a>
+				<a href="./values.yaml#L153">extraManifests</a>
             </td>
 			<td>
 list
@@ -388,7 +388,7 @@ list
 		</tr>
 		<tr>
 			<td id="ingress">
-				<a href="./values.yaml#L93">ingress</a>
+				<a href="./values.yaml#L104">ingress</a>
             </td>
 			<td>
 object
@@ -422,7 +422,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--annotations">
-				<a href="./values.yaml#L99">ingress.annotations</a>
+				<a href="./values.yaml#L110">ingress.annotations</a>
             </td>
 			<td>
 object
@@ -440,7 +440,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--className">
-				<a href="./values.yaml#L97">ingress.className</a>
+				<a href="./values.yaml#L108">ingress.className</a>
             </td>
 			<td>
 string
@@ -458,7 +458,7 @@ string
 		</tr>
 		<tr>
 			<td id="ingress--enabled">
-				<a href="./values.yaml#L95">ingress.enabled</a>
+				<a href="./values.yaml#L106">ingress.enabled</a>
             </td>
 			<td>
 bool
@@ -494,7 +494,7 @@ string
 		</tr>
 		<tr>
 			<td id="nodeSelector">
-				<a href="./values.yaml#L133">nodeSelector</a>
+				<a href="./values.yaml#L144">nodeSelector</a>
             </td>
 			<td>
 object
@@ -508,6 +508,24 @@ object
 			</td>
 			<td>
 				Node labels for pod assignment
+			</td>
+		</tr>
+		<tr>
+			<td id="nonRoot--enabled">
+				<a href="./values.yaml#L95">nonRoot.enabled</a>
+            </td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+false
+</pre>
+</div>
+			</td>
+			<td>
+				Run the relay proxy as the distroless `nonroot` user (uid/gid 65532) with a hardened security context (runAsNonRoot, fsGroup, RuntimeDefault seccomp, no privilege escalation, all capabilities dropped). Each key you set in `podSecurityContext` / `securityContext` replaces the matching default as a whole (e.g. setting `capabilities` replaces `capabilities.drop: [ALL]`). `readOnlyRootFilesystem` is not set: the file exporter and `persistentFlagConfigurationFile` write to the container filesystem.
 			</td>
 		</tr>
 		<tr>
@@ -526,6 +544,24 @@ false
 			</td>
 			<td>
 				
+			</td>
+		</tr>
+		<tr>
+			<td id="pdb--maxUnavailable">
+				<a href="./values.yaml#L64">pdb.maxUnavailable</a>
+            </td>
+			<td>
+int or string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+null
+</pre>
+</div>
+			</td>
+			<td>
+				Maximum number (or percentage, e.g. "25%") of pods that can be unavailable. When set, it takes precedence over `minAvailable`.
 			</td>
 		</tr>
 		<tr>
@@ -548,7 +584,7 @@ int
 		</tr>
 		<tr>
 			<td id="podAnnotations">
-				<a href="./values.yaml#L65">podAnnotations</a>
+				<a href="./values.yaml#L67">podAnnotations</a>
             </td>
 			<td>
 object
@@ -566,7 +602,7 @@ object
 		</tr>
 		<tr>
 			<td id="podLabels">
-				<a href="./values.yaml#L71">podLabels</a>
+				<a href="./values.yaml#L73">podLabels</a>
             </td>
 			<td>
 object
@@ -584,7 +620,7 @@ object
 		</tr>
 		<tr>
 			<td id="podSecurityContext">
-				<a href="./values.yaml#L74">podSecurityContext</a>
+				<a href="./values.yaml#L76">podSecurityContext</a>
             </td>
 			<td>
 object
@@ -638,7 +674,7 @@ int
 		</tr>
 		<tr>
 			<td id="resources--requests--cpu">
-				<a href="./values.yaml#L117">resources.requests.cpu</a>
+				<a href="./values.yaml#L128">resources.requests.cpu</a>
             </td>
 			<td>
 string
@@ -656,7 +692,7 @@ string
 		</tr>
 		<tr>
 			<td id="resources--requests--memory">
-				<a href="./values.yaml#L115">resources.requests.memory</a>
+				<a href="./values.yaml#L126">resources.requests.memory</a>
             </td>
 			<td>
 string
@@ -674,7 +710,7 @@ string
 		</tr>
 		<tr>
 			<td id="securityContext">
-				<a href="./values.yaml#L78">securityContext</a>
+				<a href="./values.yaml#L80">securityContext</a>
             </td>
 			<td>
 object
@@ -692,7 +728,7 @@ object
 		</tr>
 		<tr>
 			<td id="service--port">
-				<a href="./values.yaml#L90">service.port</a>
+				<a href="./values.yaml#L101">service.port</a>
             </td>
 			<td>
 int
@@ -710,7 +746,7 @@ int
 		</tr>
 		<tr>
 			<td id="service--type">
-				<a href="./values.yaml#L88">service.type</a>
+				<a href="./values.yaml#L99">service.type</a>
             </td>
 			<td>
 string
@@ -782,7 +818,7 @@ string
 		</tr>
 		<tr>
 			<td id="tolerations">
-				<a href="./values.yaml#L136">tolerations</a>
+				<a href="./values.yaml#L147">tolerations</a>
             </td>
 			<td>
 list
