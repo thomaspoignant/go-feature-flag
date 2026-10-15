@@ -128,14 +128,25 @@ func main() {
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
 
-	// Defers run LIFO: streaming clients disconnect first, then HTTP server stops.
-	defer func() {
-		logger.ZapLogger.Info("Stopping API server")
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		wsService.Close()
-		sseService.Close()
-		apiServer.Stop(ctx)
-	}()
+	defer shutdown(logger.ZapLogger, &apiServer, wsService, sseService, flagsetManager)
 	apiServer.StartWithContext(context.Background())
+}
+
+// shutdown stops the relay proxy: streaming clients disconnect first, then the HTTP server stops,
+// and finally the flagsets are closed.
+func shutdown(
+	logger *zap.Logger,
+	apiServer interface{ Stop(ctx context.Context) },
+	wsService stream.WebsocketService,
+	sseService stream.SSEService,
+	flagsetManager service.FlagsetManager,
+) {
+	logger.Info("Stopping API server")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	wsService.Close()
+	sseService.Close()
+	apiServer.Stop(ctx)
+	// Closing the flagsets flushes the exporters, once the server no longer accepts requests.
+	flagsetManager.Close()
 }
