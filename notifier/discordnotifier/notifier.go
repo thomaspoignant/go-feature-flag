@@ -9,11 +9,8 @@ import (
 	"net/url"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 
-	"github.com/luci/go-render/render"
-	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
@@ -25,6 +22,7 @@ const (
 	colorUpdated     = 16753920
 	colorAdded       = 32768
 	longDiscordField = 35
+	maxDiscordFields = 25
 )
 
 // Notifier is the component in charge of sending flag changes to Discord.
@@ -121,24 +119,28 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
-		fields := []embedField{}
-		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-		for _, change := range changelog {
-			if change.Type == "update" {
-				fieldValue := fmt.Sprintf(
-					"%s => %s",
-					render.Render(change.From),
-					render.Render(change.To),
-				)
-				short := len(fieldValue) < longDiscordField
-				fields = append(fields, embedField{
-					Name:   strings.Join(change.Path, "."),
-					Value:  fieldValue,
-					Inline: short,
-				})
-			}
+		changes, err := notifier.FlagChanges(value.Before, value.After)
+		fields := make([]embedField, 0, len(changes)+1)
+		if err != nil {
+			fields = append(fields, embedField{Name: notifier.ChangesUnavailable, Value: err.Error()})
+		}
+		for _, change := range changes {
+			fieldValue := fmt.Sprintf("%s => %s", change.From, change.To)
+			short := len(fieldValue) < longDiscordField
+			fields = append(fields, embedField{
+				Name:   change.Path,
+				Value:  fieldValue,
+				Inline: short,
+			})
 		}
 		sort.Sort(byTitle(fields))
+		if len(fields) > maxDiscordFields {
+			hidden := len(fields) - (maxDiscordFields - 1)
+			fields = append(fields[:maxDiscordFields-1], embedField{
+				Name:  "Too many changes to show",
+				Value: fmt.Sprintf("%d more changes not shown.", hidden),
+			})
+		}
 		embeds = append(embeds, embed{
 			Title:  fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			Color:  colorUpdated,
