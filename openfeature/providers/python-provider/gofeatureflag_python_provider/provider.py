@@ -257,7 +257,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: dict,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagResolutionDetails[Union[list, dict]]:
+    ) -> FlagResolutionDetails[list | dict]:
         """
         Resolve the flag as an object.
 
