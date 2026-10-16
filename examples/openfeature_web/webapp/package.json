@@ -30,7 +30,7 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/preset-env": "^8.0.6",
+    "@babel/preset-env": "^8.0.7",
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
     "autoprefixer": "^10.6.1",
