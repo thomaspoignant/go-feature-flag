@@ -1,0 +1,20 @@
+.gitlab {
+    background-image: url("gitlab.png");
+    background-repeat: no-repeat;
+    background-size: 35%;
+    padding-left: 2.8rem;
+}
+
+.github {
+    background-image: url("gha.png");
+    background-repeat: no-repeat;
+    background-size: 20%;
+    padding-left: 2.5rem;
+}
+
+.circleci {
+    background-image: url("circleci.png");
+    background-repeat: no-repeat;
+    background-size: 30%;
+    padding-left: 2.5rem;
+}
