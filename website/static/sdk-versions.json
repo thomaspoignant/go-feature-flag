@@ -11,7 +11,7 @@
         "serverSDK": "1.23.0",
         "webSDK": "1.10.0",
         "providerServer": "2.0.0",
-        "providerWeb": "0.2.9"
+        "providerWeb": "0.2.10"
     },
     "pypi": {
         "sdk": "0.10.0",
