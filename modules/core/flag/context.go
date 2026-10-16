@@ -11,6 +11,14 @@ type Context struct {
 
 	// DefaultSdkValue is the default value of the SDK when calling the variation.
 	DefaultSdkValue any `json:"defaultSdkValue,omitempty"`
+
+	// DependencyFlagResolver resolves a sibling flag by name so that a flag declaring a `needs`
+	// dependency can be evaluated against it. The consumer running the evaluation is responsible
+	// for setting it (typically backed by the flag cache), which is why it is not serialized.
+	//
+	// When it is nil, a flag that declares a `needs` dependency is treated as disabled
+	// (fail-closed). Flags without a `needs` field are never impacted.
+	DependencyFlagResolver func(flagName string) (Flag, bool) `json:"-"`
 }
 
 // AddIntoEvaluationContextEnrichment adds a key and value to the evaluation context enrichment.
