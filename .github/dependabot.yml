@@ -16,6 +16,18 @@ updates:
       default-days: 7
       exclude:
         - "github.com/thomaspoignant/go-feature-flag/modules/core"
+    # Sibling modules share versions: separate PRs end up empty after rebase
+    # and release-please then adds those empty commits to every package.
+    groups:
+      aws:
+        patterns:
+          - "github.com/aws/aws-sdk-go-v2*"
+          - "github.com/aws/smithy-go"
+        update-types: ["minor", "patch"]
+      opentelemetry:
+        patterns:
+          - "go.opentelemetry.io/*"
+        update-types: ["minor", "patch"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
