@@ -58,6 +58,16 @@ type InternalFlag struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
+
+	// CreatedAt is the date used as the starting point of the TTL, it should be in UTC.
+	// A flag without CreatedAt (and without ExpiresAt) never expires.
+	CreatedAt *time.Time `json:"createdAt,omitempty" yaml:"createdAt,omitempty" toml:"createdAt,omitempty"`
+
+	// TTL is the time to live of the flag, such as "90d" or "12h". It overrides the default TTL.
+	TTL *string `json:"ttl,omitempty" yaml:"ttl,omitempty" toml:"ttl,omitempty"`
+
+	// ExpiresAt is the date at which the flag expires, it should be in UTC. It overrides CreatedAt and TTL.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty" yaml:"expiresAt,omitempty" toml:"expiresAt,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -73,6 +83,16 @@ func (f *InternalFlag) Value(
 	}
 
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
+	if expiration, expired := f.expirationIfExpired(evaluationDate, flagContext.DefaultTTL); expired {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeFlagExpired,
+			ErrorMessage: fmt.Sprintf("flag %q expired on %s", flagName, expiration.Format(time.RFC3339)),
+			Metadata:     f.GetMetadata(),
+		}
+	}
+
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
 	if err != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
@@ -310,6 +330,10 @@ func (f *InternalFlag) IsValid() error {
 				return err
 			}
 		}
+	}
+
+	if err := f.validateTTL(); err != nil {
+		return err
 	}
 
 	// Validate that we have a default Rule

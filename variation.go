@@ -395,6 +395,7 @@ func getVariation[T model.JSONType](
 	flagCtx := flag.Context{
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
+		DefaultTTL:                  g.config.DefaultFlagTTL,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)

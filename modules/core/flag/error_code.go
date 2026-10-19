@@ -17,4 +17,7 @@ const (
 
 	// 	ErrorFlagConfiguration is returned when we were not able to use the flag because of a misconfiguration
 	ErrorFlagConfiguration ErrorCode = "FLAG_CONFIG"
+
+	// ErrorCodeFlagExpired is returned when the TTL of the flag is over.
+	ErrorCodeFlagExpired ErrorCode = "FLAG_EXPIRED"
 )

@@ -45,6 +45,7 @@ func (g *GoFeatureFlag) GetFlagStates(
 	flagCtx := flag.Context{
 		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 		DefaultSdkValue:             nil,
+		DefaultTTL:                  g.config.DefaultFlagTTL,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)

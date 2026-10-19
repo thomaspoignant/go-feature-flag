@@ -245,6 +245,42 @@ It means that for a specific `targetingKey` the user will always see the same fl
     </tr>
     <tr>
       <td>
+        <code>createdAt</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Creation date of the flag, <b>in UTC</b> (RFC 3339, for example <code>2026-01-15T00:00:00Z</code>), it is the starting point of the TTL. <i>A flag without <code>createdAt</code> never expires, unless <code>expiresAt</code> is set.</i>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>ttl</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Time to live of the flag, for example <code>90d</code>, <code>12h</code> or <code>1h30m</code>. The flag expires at <code>createdAt</code> + <code>ttl</code>. It overrides the default TTL.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>expiresAt</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Date at which the flag expires, <b>in UTC</b> (RFC 3339, for example <code>2026-04-15T00:00:00Z</code>). It overrides <code>createdAt</code> and <code>ttl</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>version</code>
         <br />
         <sup><sup>optional</sup></sup>
@@ -318,6 +354,43 @@ It means that for a specific `targetingKey` the user will always see the same fl
 
   </tbody>
 </table>
+
+## ⏳ Flag TTL
+
+Feature flags are meant to be short-lived. Each flag has a time to live (TTL), and when it is over the flag becomes **expired**:
+it is not deleted, but every evaluation returns the default value of the SDK with the error code `FLAG_EXPIRED` and
+an explicit message (for example `flag "my-flag" expired on 2026-04-15T00:00:00Z`).
+
+The expiration date of a flag is the first of:
+
+1. `expiresAt` if the flag defines it.
+2. `createdAt` + `ttl` if the flag defines a `ttl`.
+3. `createdAt` + the default TTL of the flagset (`defaultFlagTTL` in the relay proxy flagset configuration).
+4. `createdAt` + the global default TTL (`defaultFlagTTL` in the relay proxy configuration or `DefaultFlagTTL` in the Go module). **Default: 90 days.**
+
+```yaml
+my-flag:
+  createdAt: 2026-01-15T00:00:00Z
+  ttl: 30d
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: disabled
+```
+
+:::note
+A flag without `createdAt` (and without `expiresAt`) never expires, there is no date to compute the TTL from.
+:::
+
+:::info
+`createdAt` and `expiresAt` must be written in **UTC** (the `Z` suffix). If a date is written with another offset it is
+converted to UTC, and the expiration date shown in the error message is always in UTC.
+A `ttl` is a duration, it does not depend on any time zone.
+:::
+
+The relay proxy checks the TTLs every 5 seconds, logs a warning when a flag expires and lists the expired flags
+of each flagset in the `expiredFlags` field of the `/info` endpoint.
 
 ## Advanced configurations
 

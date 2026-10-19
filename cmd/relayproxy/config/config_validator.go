@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -24,6 +25,9 @@ func (c *Config) IsValid() error {
 		return err
 	}
 	if err := c.OfrepEventStream.IsValid(); err != nil {
+		return err
+	}
+	if err := validateDefaultFlagTTL(c.DefaultFlagTTL); err != nil {
 		return err
 	}
 	if len(c.FlagSets) > 0 {
@@ -120,6 +124,17 @@ func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
 	// Validate notifiers
 	if err := validateNotifiers(flagset.Notifiers); err != nil {
 		return err
+	}
+	return validateDefaultFlagTTL(flagset.DefaultFlagTTL)
+}
+
+// validateDefaultFlagTTL validates the default flag TTL, an empty value means "use the inherited default".
+func validateDefaultFlagTTL(ttl string) error {
+	if ttl == "" {
+		return nil
+	}
+	if _, err := flag.ParseTTL(ttl); err != nil {
+		return fmt.Errorf("defaultFlagTTL: %w", err)
 	}
 	return nil
 }

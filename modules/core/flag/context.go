@@ -1,5 +1,7 @@
 package flag
 
+import "time"
+
 type Context struct {
 	// EvaluationContextEnrichment will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluation, such as a server version, environment, ...
@@ -11,6 +13,10 @@ type Context struct {
 
 	// DefaultSdkValue is the default value of the SDK when calling the variation.
 	DefaultSdkValue any `json:"defaultSdkValue,omitempty"`
+
+	// DefaultTTL is the TTL applied to the flags without their own TTL.
+	// A zero or negative value means that the flags without their own TTL never expire.
+	DefaultTTL time.Duration `json:"defaultTTL,omitempty"`
 }
 
 // AddIntoEvaluationContextEnrichment adds a key and value to the evaluation context enrichment.
