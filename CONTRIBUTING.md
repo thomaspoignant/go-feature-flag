@@ -12,7 +12,7 @@ Please take a moment to review the following guidelines.
 1. [How Can I Contribute?](#-how-can-i-contribute)
 1. [Where can I ask questions about the project?](#-where-can-i-ask-questions-about-the-project)
 1. [Book a Meeting](#-book-a-meeting)
-1. [Development Setup](#-development-setup)
+1. [Development Setup](#‍-development-setup)
 1. [Documentation](#-documentation)
 1. [License](#-license)
 
