@@ -12,19 +12,19 @@ func TestConfig_IsValid_DefaultFlagTTL(t *testing.T) {
 	retriever := &retrieverconf.RetrieverConf{Kind: "file", Path: "../testdata/config/valid-file.yaml"}
 	tests := []struct {
 		name    string
-		config  config.Config
+		config  *config.Config
 		wantErr string
 	}{
-		{name: "empty ttl", config: config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever}}},
-		{name: "valid global ttl", config: config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever, DefaultFlagTTL: "90d"}}},
+		{name: "empty ttl", config: &config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever}}},
+		{name: "valid global ttl", config: &config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever, DefaultFlagTTL: "90d"}}},
 		{
 			name:    "invalid global ttl",
-			config:  config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever, DefaultFlagTTL: "soon"}},
+			config:  &config.Config{CommonFlagSet: config.CommonFlagSet{Retriever: retriever, DefaultFlagTTL: "soon"}},
 			wantErr: `defaultFlagTTL: invalid ttl "soon"`,
 		},
 		{
 			name: "invalid flagset ttl",
-			config: config.Config{FlagSets: []config.FlagSet{{
+			config: &config.Config{FlagSets: []config.FlagSet{{
 				Name:          "fs",
 				APIKeys:       []string{"key"},
 				CommonFlagSet: config.CommonFlagSet{Retriever: retriever, DefaultFlagTTL: "-3d"},
