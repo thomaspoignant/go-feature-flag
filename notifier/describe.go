@@ -13,15 +13,25 @@ import (
 )
 
 // DescribeChanges returns one sentence per change between two versions of a flag,
-// in the order the fields appear in a flag file.
+// in the order the fields appear in a flag file. Names and values are formatted as
+// markdown inline code.
 // It describes every field of flag.InternalFlag and returns an error for any other flag type.
 func DescribeChanges(before, after flag.Flag) ([]string, error) {
+	return describeChanges(before, after, func(text string) string { return "`" + text + "`" })
+}
+
+// DescribeChangesPlain is DescribeChanges without inline code, for destinations that cannot display it.
+func DescribeChangesPlain(before, after flag.Flag) ([]string, error) {
+	return describeChanges(before, after, func(text string) string { return text })
+}
+
+func describeChanges(before, after flag.Flag, code func(string) string) ([]string, error) {
 	b, okBefore := before.(*flag.InternalFlag)
 	a, okAfter := after.(*flag.InternalFlag)
 	if !okBefore || !okAfter || b == nil || a == nil {
 		return nil, fmt.Errorf("impossible to describe changes between flags of type %T and %T", before, after)
 	}
-	d := &describer{}
+	d := &describer{code: code}
 	d.flag(b, a)
 	return d.lines, nil
 }
@@ -31,7 +41,8 @@ const MaxListedChanges = 50
 
 // ChangeList renders changes one per line, each starting with bullet.
 // It shows at most MaxListedChanges changes and, when maxLength is above zero,
-// stays within maxLength characters. A last line counts the changes left out.
+// stays within maxLength characters. A last line counts the changes left out,
+// and the list is empty when not even that line fits.
 func ChangeList(changes []string, bullet string, maxLength int) string {
 	for shown := min(len(changes), MaxListedChanges); ; shown-- {
 		lines := make([]string, 0, shown+1)
@@ -42,34 +53,52 @@ func ChangeList(changes []string, bullet string, maxLength int) string {
 			lines = append(lines, fmt.Sprintf("…and %d more changes", hidden))
 		}
 		text := strings.Join(lines, "\n")
-		if maxLength <= 0 || utf8.RuneCountInString(text) <= maxLength || shown == 0 {
+		if maxLength <= 0 || utf8.RuneCountInString(text) <= maxLength {
 			return text
+		}
+		if shown == 0 {
+			return ""
 		}
 	}
 }
 
+// notAppliedInStep marks fields that scheduled rollout steps do not apply.
+const notAppliedInStep = " (not applied by scheduled steps)"
+
 type describer struct {
 	lines []string
-	// inStep is true when describing what a scheduled rollout step sets, where rules
-	// and variations update the flag rather than being added to it.
+	// code formats a name or a value.
+	code func(string) string
+	// inStep is true when describing a scheduled rollout step. A step is a partial update:
+	// it only changes the fields it sets, and rules are merged field by field.
 	inStep bool
 }
 
-func (d *describer) add(format string, args ...any) {
+func (d *describer) addf(format string, args ...any) {
 	d.lines = append(d.lines, fmt.Sprintf(format, args...))
 }
 
 func (d *describer) flag(b, a *flag.InternalFlag) {
+	stepNote := ""
+	if d.inStep {
+		stepNote = notAppliedInStep
+	}
 	d.toggle("Flag", "disable", b.Disable, a.Disable, false, "disabled", "enabled")
 	d.toggle("Event tracking", "trackEvents", b.TrackEvents, a.TrackEvents, true, "turned on", "turned off")
-	d.text("Version", b.Version, a.Version)
-	d.text("Bucketing key", b.BucketingKey, a.BucketingKey)
+	d.text("Version", b.Version, a.Version, "")
+	d.text("Bucketing key", b.BucketingKey, a.BucketingKey, stepNote)
 	d.variations(b.Variations, a.Variations)
 	d.targeting(b.Rules, a.Rules)
 	d.defaultRule(b.DefaultRule, a.DefaultRule)
 	d.experimentation(b.Experimentation, a.Experimentation)
-	d.scheduled(b.Scheduled, a.Scheduled)
-	d.metadata(b.Metadata, a.Metadata)
+	if d.inStep {
+		if ReadableValue(b.Scheduled) != ReadableValue(a.Scheduled) {
+			d.addf("Scheduled rollout changed%s", notAppliedInStep)
+		}
+	} else {
+		d.scheduled(b.Scheduled, a.Scheduled)
+	}
+	d.metadata(b.Metadata, a.Metadata, stepNote)
 }
 
 // toggle describes an optional boolean. Setting or removing it without changing its
@@ -80,32 +109,34 @@ func (d *describer) toggle(subject, field string, before, after *bool, defaultVa
 		// A scheduled step sets the value at its date, whatever the default is,
 		// and leaves it alone when the field is absent.
 		if after == nil {
-			d.add("%s: `%s: %t` no longer set", subject, field, *before)
+			d.addf("%s: %s no longer set", subject, d.code(fmt.Sprintf("%s: %t", field, *before)))
 			return
 		}
 		oldValue = !newValue
 	}
 	switch {
 	case oldValue != newValue && newValue:
-		d.add("%s %s", subject, onTrue)
+		d.addf("%s %s", subject, onTrue)
 	case oldValue != newValue:
-		d.add("%s %s", subject, onFalse)
+		d.addf("%s %s", subject, onFalse)
 	case before == nil && after != nil:
-		d.add("%s: `%s: %t` added (already the default)", subject, field, *after)
+		d.addf("%s: %s added (already the default)", subject, d.code(fmt.Sprintf("%s: %t", field, *after)))
 	case before != nil && after == nil:
-		d.add("%s: `%s: %t` removed (already the default)", subject, field, *before)
+		d.addf("%s: %s removed (already the default)", subject, d.code(fmt.Sprintf("%s: %t", field, *before)))
 	}
 }
 
-func (d *describer) text(label string, before, after *string) {
+func (d *describer) text(label string, before, after *string, note string) {
 	switch {
 	case equalPtr(before, after):
 	case before == nil:
-		d.add("%s set to `%s`", label, *after)
+		d.addf("%s set to %s%s", label, d.code(*after), note)
+	case after == nil && d.inStep:
+		d.addf("%s no longer set%s", label, note)
 	case after == nil:
-		d.add("%s removed (was `%s`)", label, *before)
+		d.addf("%s removed (was %s)%s", label, d.code(*before), note)
 	default:
-		d.add("%s changed from `%s` to `%s`", label, *before, *after)
+		d.addf("%s changed from %s to %s%s", label, d.code(*before), d.code(*after), note)
 	}
 }
 
@@ -116,58 +147,72 @@ func (d *describer) variations(before, after *map[string]*any) {
 		newValue, inAfter := a[name]
 		switch {
 		case !inBefore && d.inStep:
-			d.add("Variation `%s` set to `%s`", name, readablePtr(newValue))
+			d.addf("Variation %s set to %s", d.code(name), d.code(readablePtr(newValue)))
 		case !inBefore:
-			d.add("Variation `%s` added: `%s`", name, readablePtr(newValue))
+			d.addf("Variation %s added: %s", d.code(name), d.code(readablePtr(newValue)))
+		case !inAfter && d.inStep:
+			d.addf("Variation %s no longer set", d.code(name))
 		case !inAfter:
-			d.add("Variation `%s` removed (was `%s`)", name, readablePtr(oldValue))
+			d.addf("Variation %s removed (was %s)", d.code(name), d.code(readablePtr(oldValue)))
 		case readablePtr(oldValue) != readablePtr(newValue):
-			d.add("Variation `%s` changed from `%s` to `%s`",
-				name, readablePtr(oldValue), readablePtr(newValue))
+			d.addf("Variation %s changed from %s to %s",
+				d.code(name), d.code(readablePtr(oldValue)), d.code(readablePtr(newValue)))
 		}
 	}
 }
 
 // targeting pairs rules by name, so inserting a rule does not show every later rule as changed.
-// Rules without a name are paired by position.
+// Rules without a name, or sharing a name with an earlier rule, are paired by position.
 func (d *describer) targeting(before, after *[]flag.Rule) {
 	b, a := indexRules(derefSlice(before)), indexRules(derefSlice(after))
-	renamed := findRenames(b, a)
+	renamed := map[ruleKey]ruleKey{}
+	if !d.inStep {
+		renamed = findRenames(b, a)
+	}
 
 	for _, key := range a.order {
 		newRule := a.rules[key]
 		if oldKey, ok := renamed[key]; ok {
-			d.add("Targeting rule %s renamed to %s", ruleLabel(oldKey), ruleLabel(key))
+			d.addf("Targeting rule %s renamed to %s", d.ruleLabel(oldKey), d.ruleLabel(key))
 			continue
 		}
 		oldRule, existed := b.rules[key]
+		label := "Targeting rule " + d.ruleLabel(key)
 		switch {
-		case existed:
-			d.rule("Targeting rule "+ruleLabel(key), oldRule, newRule, false)
+		case d.inStep && existed:
+			d.patchChange(label, oldRule, newRule)
 		case d.inStep:
-			d.add("Targeting rule %s set: %s", ruleLabel(key), describeRule(newRule))
+			d.addf("%s updated with %s", label, d.describePatch(newRule))
+		case existed:
+			d.rule(label, oldRule, newRule, false)
 		default:
-			d.add("Targeting rule %s added: %s", ruleLabel(key), describeRule(newRule))
+			d.addf("%s added: %s", label, d.describeRule(newRule))
 		}
 	}
-	renamedFrom := make(map[string]bool, len(renamed))
+	renamedFrom := make(map[ruleKey]bool, len(renamed))
 	for _, oldKey := range renamed {
 		renamedFrom[oldKey] = true
 	}
 	for _, key := range b.order {
-		if _, kept := a.rules[key]; !kept && !renamedFrom[key] {
-			d.add("Targeting rule %s removed", ruleLabel(key))
+		if _, kept := a.rules[key]; kept || renamedFrom[key] {
+			continue
+		}
+		if d.inStep {
+			d.addf("Targeting rule %s no longer changed", d.ruleLabel(key))
+		} else {
+			d.addf("Targeting rule %s removed", d.ruleLabel(key))
 		}
 	}
 
 	// Rules are evaluated in order, so a new order changes who gets which variation.
-	if keptBefore, keptAfter := keptKeys(b.order, a.rules), keptKeys(a.order, b.rules); !slices.Equal(
-		keptBefore, keptAfter) {
+	// Steps merge rules by name, so their order does not matter.
+	if keptBefore, keptAfter := keptKeys(b.order, a.rules), keptKeys(a.order, b.rules); !d.inStep &&
+		!slices.Equal(keptBefore, keptAfter) {
 		labels := make([]string, 0, len(a.order))
 		for _, key := range a.order {
-			labels = append(labels, ruleLabel(key))
+			labels = append(labels, d.ruleLabel(key))
 		}
-		d.add("Targeting rules reordered: %s", strings.Join(labels, ", "))
+		d.addf("Targeting rules reordered: %s", strings.Join(labels, ", "))
 	}
 }
 
@@ -177,35 +222,48 @@ func (d *describer) rule(label string, before, after flag.Rule, isDefault bool) 
 	ignored := ""
 	if isDefault {
 		ignored = " (ignored for the default rule)"
-		d.text(label+" name", before.Name, after.Name)
+		d.text(label+" name", before.Name, after.Name, "")
 	}
 	oldQuery, newQuery := derefOr(before.Query, ""), derefOr(after.Query, "")
 	switch {
 	case oldQuery == newQuery:
 	case isDefault && newQuery == "":
-		d.add("%s query removed (was `%s`)%s", label, oldQuery, ignored)
+		d.addf("%s query removed (was %s)%s", label, d.code(oldQuery), ignored)
 	case isDefault:
-		d.add("%s query set to `%s`%s", label, newQuery, ignored)
+		d.addf("%s query set to %s%s", label, d.code(newQuery), ignored)
 	case oldQuery == "":
-		d.add("%s now matches `%s` (was matching everyone)", label, newQuery)
+		d.addf("%s now matches %s (was matching everyone)", label, d.code(newQuery))
 	case newQuery == "":
-		d.add("%s now matches everyone (was `%s`)", label, oldQuery)
+		d.addf("%s now matches everyone (was %s)", label, d.code(oldQuery))
 	default:
-		d.add("%s now matches `%s` (was `%s`)", label, newQuery, oldQuery)
+		d.addf("%s now matches %s (was %s)", label, d.code(newQuery), d.code(oldQuery))
 	}
-	if oldServe, newServe := describeServe(&before), describeServe(&after); oldServe != newServe {
-		d.add("%s now serves %s (was %s)", label, newServe, oldServe)
+	if oldServe, newServe := d.describeServe(&before), d.describeServe(&after); oldServe != newServe {
+		d.addf("%s now serves %s (was %s)", label, newServe, oldServe)
 	}
 	d.toggle(label, "disable", before.Disable, after.Disable, false, "disabled"+ignored, "enabled"+ignored)
+}
+
+// patchChange describes a rule a scheduled step already updated, and now updates differently.
+func (d *describer) patchChange(label string, before, after flag.Rule) {
+	if oldPatch, newPatch := d.describePatch(before), d.describePatch(after); oldPatch != newPatch {
+		d.addf("%s now updated with %s (was %s)", label, newPatch, oldPatch)
+	}
 }
 
 func (d *describer) defaultRule(before, after *flag.Rule) {
 	switch {
 	case before == nil && after == nil:
+	case d.inStep && before == nil:
+		d.addf("Default rule updated with %s", d.describePatch(*after))
+	case d.inStep && after == nil:
+		d.addf("Default rule no longer changed")
+	case d.inStep:
+		d.patchChange("Default rule", *before, *after)
 	case before == nil:
-		d.add("Default rule set to serve %s", describeServe(after))
+		d.addf("Default rule set to serve %s", d.describeServe(after))
 	case after == nil:
-		d.add("Default rule removed (was serving %s)", describeServe(before))
+		d.addf("Default rule removed (was serving %s)", d.describeServe(before))
 	default:
 		d.rule("Default rule", *before, *after, true)
 	}
@@ -216,11 +274,13 @@ func (d *describer) experimentation(before, after *flag.ExperimentationRollout) 
 	switch {
 	case oldWindow == newWindow:
 	case before == nil:
-		d.add("Experimentation scheduled %s", newWindow)
+		d.addf("Experimentation scheduled %s", newWindow)
+	case after == nil && d.inStep:
+		d.addf("Experimentation no longer set")
 	case after == nil:
-		d.add("Experimentation removed (was %s)", oldWindow)
+		d.addf("Experimentation removed (was %s)", oldWindow)
 	default:
-		d.add("Experimentation now runs %s (was %s)", newWindow, oldWindow)
+		d.addf("Experimentation now runs %s (was %s)", newWindow, oldWindow)
 	}
 }
 
@@ -230,70 +290,50 @@ func (d *describer) scheduled(before, after *[]flag.ScheduledStep) {
 	for i := range max(len(b), len(a)) {
 		switch {
 		case i >= len(b):
-			d.add("Scheduled step %s added: %s", stepLabel(a[i], i), describeStepContent(a[i]))
-		case i >= len(a):
-			d.add("Scheduled step %s removed", stepLabel(b[i], i))
-		default:
-			label := stepLabel(a[i], i)
-			if oldDate, newDate := stepDate(b[i], i), stepDate(a[i], i); oldDate != newDate {
-				d.add("Scheduled step moved from %s to %s", oldDate, newDate)
+			step := &describer{code: d.code, inStep: true}
+			step.flag(&flag.InternalFlag{}, &a[i].InternalFlag)
+			content := "no changes"
+			if len(step.lines) > 0 {
+				content = strings.Join(step.lines, "; ")
 			}
-			step := &describer{inStep: true}
+			d.addf("Scheduled step %s added: %s", stepLabel(a[i], i), content)
+		case i >= len(a):
+			d.addf("Scheduled step %s removed", stepLabel(b[i], i))
+		default:
+			if oldDate, newDate := stepDate(b[i], i), stepDate(a[i], i); oldDate != newDate {
+				d.addf("Scheduled step moved from %s to %s", oldDate, newDate)
+			}
+			step := &describer{code: d.code, inStep: true}
 			step.flag(&b[i].InternalFlag, &a[i].InternalFlag)
 			for _, line := range step.lines {
-				d.add("Scheduled step %s: %s", label, line)
+				d.addf("Scheduled step %s: %s", stepLabel(a[i], i), line)
 			}
 		}
 	}
 }
 
-func (d *describer) metadata(before, after *map[string]any) {
+func (d *describer) metadata(before, after *map[string]any, note string) {
 	b, a := derefMap(before), derefMap(after)
 	for _, key := range unionKeys(b, a) {
 		oldValue, inBefore := b[key]
 		newValue, inAfter := a[key]
 		switch {
 		case !inBefore:
-			d.add("Metadata `%s` set to `%s`", key, ReadableValue(newValue))
+			d.addf("Metadata %s set to %s%s", d.code(key), d.code(ReadableValue(newValue)), note)
 		case !inAfter:
-			d.add("Metadata `%s` removed (was `%s`)", key, ReadableValue(oldValue))
+			d.addf("Metadata %s removed (was %s)%s", d.code(key), d.code(ReadableValue(oldValue)), note)
 		case ReadableValue(oldValue) != ReadableValue(newValue):
-			d.add("Metadata `%s` changed from `%s` to `%s`",
-				key, ReadableValue(oldValue), ReadableValue(newValue))
+			d.addf("Metadata %s changed from %s to %s%s",
+				d.code(key), d.code(ReadableValue(oldValue)), d.code(ReadableValue(newValue)), note)
 		}
 	}
 }
 
-// describeStepContent lists what a new scheduled step sets, as one line.
-func describeStepContent(newStep flag.ScheduledStep) string {
-	step := &describer{inStep: true}
-	step.flag(&flag.InternalFlag{}, &newStep.InternalFlag)
-	if len(step.lines) == 0 {
-		return "no changes"
-	}
-	return strings.Join(step.lines, "; ")
-}
-
-// stepLabel names a scheduled step by its date, or by its position when it has none.
-func stepLabel(step flag.ScheduledStep, index int) string {
-	if step.Date == nil {
-		return stepDate(step, index)
-	}
-	return "on " + stepDate(step, index)
-}
-
-func stepDate(step flag.ScheduledStep, index int) string {
-	if step.Date == nil {
-		return "#" + strconv.Itoa(index+1)
-	}
-	return formatDate(*step.Date)
-}
-
 // describeRule describes a targeting rule as a whole, for a rule that was just added.
-func describeRule(rule flag.Rule) string {
-	text := "serves " + describeServe(&rule)
+func (d *describer) describeRule(rule flag.Rule) string {
+	text := "serves " + d.describeServe(&rule)
 	if query := derefOr(rule.Query, ""); query != "" {
-		text += fmt.Sprintf(" when `%s`", query)
+		text += " when " + d.code(query)
 	}
 	if rule.IsDisable() {
 		text += " (disabled)"
@@ -302,37 +342,73 @@ func describeRule(rule flag.Rule) string {
 }
 
 // describeServe says what a rule serves, using the same precedence as Rule.Evaluate.
-func describeServe(rule *flag.Rule) string {
+func (d *describer) describeServe(rule *flag.Rule) string {
 	switch {
 	case rule.ProgressiveRollout != nil:
-		return describeProgressive(rule.ProgressiveRollout)
+		return d.describeProgressive(rule.ProgressiveRollout)
 	case len(rule.GetPercentages()) > 0:
 		percentages := rule.GetPercentages()
 		parts := make([]string, 0, len(percentages))
 		for _, name := range slices.Sorted(maps.Keys(percentages)) {
-			parts = append(parts, fmt.Sprintf("`%s` %s%%", name, formatNumber(percentages[name])))
+			parts = append(parts, d.code(name)+" "+formatNumber(percentages[name])+"%")
 		}
 		return strings.Join(parts, ", ")
 	case rule.VariationResult != nil:
-		return fmt.Sprintf("`%s`", rule.GetVariationResult())
+		return d.code(rule.GetVariationResult())
 	default:
 		return "no variation"
 	}
 }
 
-func describeProgressive(rollout *flag.ProgressiveRollout) string {
+// describePatch lists the fields a scheduled step sets on a rule, as Rule.MergeRules applies them.
+func (d *describer) describePatch(rule flag.Rule) string {
+	parts := make([]string, 0, 5)
+	if rule.Query != nil {
+		parts = append(parts, "query "+d.code(*rule.Query))
+	}
+	if rule.VariationResult != nil {
+		parts = append(parts, "variation "+d.code(*rule.VariationResult))
+	}
+	percentages := rule.GetPercentages()
+	for _, name := range slices.Sorted(maps.Keys(percentages)) {
+		// A negative percentage removes the variation from the rule's percentages.
+		if percentages[name] < 0 {
+			parts = append(parts, d.code(name)+" removed from the percentages")
+		} else {
+			parts = append(parts, d.code(name)+" "+formatNumber(percentages[name])+"%")
+		}
+	}
+	if rule.ProgressiveRollout != nil {
+		parts = append(parts, d.describeProgressive(rule.ProgressiveRollout))
+	}
+	if rule.Disable != nil {
+		parts = append(parts, d.code(fmt.Sprintf("disable: %t", *rule.Disable)))
+	}
+	if len(parts) == 0 {
+		return "nothing"
+	}
+	return strings.Join(parts, ", ")
+}
+
+func (d *describer) describeProgressive(rollout *flag.ProgressiveRollout) string {
 	step := func(s *flag.ProgressiveRolloutStep) string {
 		if s == nil {
 			return "an unset step"
 		}
-		text := "`" + derefOr(s.Variation, "?") + "`"
+		parts := make([]string, 0, 3)
+		if s.Variation != nil {
+			parts = append(parts, d.code(*s.Variation))
+		}
 		if s.Percentage != nil {
-			text += " " + formatNumber(*s.Percentage) + "%"
+			parts = append(parts, formatNumber(*s.Percentage)+"%")
 		}
 		if s.Date != nil {
-			text += " on " + formatDate(*s.Date)
+			parts = append(parts, "on "+formatDate(*s.Date))
 		}
-		return text
+		if len(parts) == 0 {
+			return "an unset step"
+		}
+		return strings.Join(parts, " ")
 	}
 	return fmt.Sprintf("a progressive rollout from %s to %s", step(rollout.Initial), step(rollout.End))
 }
@@ -353,17 +429,45 @@ func describeWindow(window *flag.ExperimentationRollout) string {
 	}
 }
 
+// stepLabel names a scheduled step by its date, or by its position when it has none.
+func stepLabel(step flag.ScheduledStep, index int) string {
+	if step.Date == nil {
+		return stepDate(step, index)
+	}
+	return "on " + stepDate(step, index)
+}
+
+func stepDate(step flag.ScheduledStep, index int) string {
+	if step.Date == nil {
+		return "#" + strconv.Itoa(index+1)
+	}
+	return formatDate(*step.Date)
+}
+
+// ruleKey identifies a rule by name, or by position when it has no name of its own.
+type ruleKey struct {
+	name     string
+	position int
+}
+
+func (d *describer) ruleLabel(key ruleKey) string {
+	if key.name == "" {
+		return "#" + strconv.Itoa(key.position)
+	}
+	return d.code(key.name)
+}
+
 type indexedRules struct {
-	order []string
-	rules map[string]flag.Rule
+	order []ruleKey
+	rules map[ruleKey]flag.Rule
 }
 
 func indexRules(rules []flag.Rule) indexedRules {
-	index := indexedRules{order: make([]string, 0, len(rules)), rules: make(map[string]flag.Rule, len(rules))}
+	index := indexedRules{order: make([]ruleKey, 0, len(rules)), rules: make(map[ruleKey]flag.Rule, len(rules))}
 	for i, rule := range rules {
-		key := "#" + strconv.Itoa(i+1)
-		if name := derefOr(rule.Name, ""); name != "" {
-			key = name
+		key := ruleKey{name: derefOr(rule.Name, "")}
+		if _, taken := index.rules[key]; key.name == "" || taken {
+			key = ruleKey{position: i + 1}
 		}
 		index.order = append(index.order, key)
 		index.rules[key] = rule
@@ -373,8 +477,8 @@ func indexRules(rules []flag.Rule) indexedRules {
 
 // findRenames returns, for each new rule key, the old key of a rule that only changed its name:
 // same position, same content, and neither key present on the other side.
-func findRenames(before, after indexedRules) map[string]string {
-	renames := map[string]string{}
+func findRenames(before, after indexedRules) map[ruleKey]ruleKey {
+	renames := map[ruleKey]ruleKey{}
 	for i, newKey := range after.order {
 		if i >= len(before.order) {
 			break
@@ -398,17 +502,9 @@ func withoutName(rule flag.Rule) string {
 	return ReadableValue(rule)
 }
 
-// ruleLabel formats a rule key: "`name`" for named rules, "#2" for unnamed ones.
-func ruleLabel(key string) string {
-	if strings.HasPrefix(key, "#") {
-		return key
-	}
-	return "`" + key + "`"
-}
-
 // keptKeys returns the keys of order that are also in other, keeping their order.
-func keptKeys(order []string, other map[string]flag.Rule) []string {
-	kept := make([]string, 0, len(order))
+func keptKeys(order []ruleKey, other map[ruleKey]flag.Rule) []ruleKey {
+	kept := make([]ruleKey, 0, len(order))
 	for _, key := range order {
 		if _, ok := other[key]; ok {
 			kept = append(kept, key)
@@ -417,8 +513,14 @@ func keptKeys(order []string, other map[string]flag.Rule) []string {
 	return kept
 }
 
+// formatDate shows a date to the minute, with seconds only when it has them,
+// so two different dates never read the same.
 func formatDate(t time.Time) string {
-	return t.UTC().Format("2006-01-02 15:04 UTC")
+	t = t.UTC()
+	if t.Second() == 0 && t.Nanosecond() == 0 {
+		return t.Format("2006-01-02 15:04 UTC")
+	}
+	return t.Format("2006-01-02 15:04:05.999999999 UTC")
 }
 
 func formatNumber(n float64) string {

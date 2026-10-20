@@ -4,7 +4,7 @@
     {
       "title": "✏️ Flag \"test-flag2\" updated",
       "color": 16753920,
-      "description": "• Flag disabled\n• Event tracking turned off\n• Version set to `1.1`\n• Variation `Default` changed from `false` to `\"strDefault\"`\n• Variation `False` changed from `false` to `\"strFalse\"`\n• Variation `True` changed from `true` to `\"strTrue\"`\n• Targeting rule `rule1` added: serves `False` 20%, `True` 80% when `key eq \"not-a-ke\"`\n• Default rule now serves `Default` (was `False` 0%, `True` 100%)\n• Experimentation removed (was from 2004-09-17 00:03 UTC to 2004-09-16 21:43 UTC)"
+      "description": "• Flag disabled\n• Event tracking turned off\n• Version set to `1.1`\n• Variation `Default` changed from `false` to `\"strDefault\"`\n• Variation `False` changed from `false` to `\"strFalse\"`\n• Variation `True` changed from `true` to `\"strTrue\"`\n• Targeting rule `rule1` added: serves `False` 20%, `True` 80% when `key eq \"not-a-ke\"`\n• Default rule now serves `Default` (was `False` 0%, `True` 100%)\n• Experimentation removed (was from 2004-09-17 00:03:20 UTC to 2004-09-16 21:43:20 UTC)"
     },
     {
       "title": "❌ Flag \"test-flag\" deleted",

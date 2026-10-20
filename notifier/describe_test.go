@@ -213,7 +213,7 @@ func TestDescribeChanges(t *testing.T) {
 			},
 			want: []string{
 				"Scheduled step on 2026-10-05 09:00 UTC: Flag: `disable: true` no longer set",
-				"Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` set: serves `on` 100%",
+				"Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` updated with `on` 100%",
 			},
 		},
 		{
@@ -282,6 +282,79 @@ func TestDescribeChanges(t *testing.T) {
 			want:   []string{"Default rule name set to `default`"},
 		},
 		{
+			name: "should show seconds so close dates do not read the same",
+			update: func(f *flag.InternalFlag) {
+				f.Version = testconvert.String("1.1")
+				f.Experimentation = &flag.ExperimentationRollout{End: testconvert.Time(start.Add(50 * time.Second))}
+			},
+			setup: func(f *flag.InternalFlag) {
+				f.Experimentation = &flag.ExperimentationRollout{End: testconvert.Time(start.Add(10 * time.Second))}
+			},
+			want: []string{
+				"Version changed from `1.0` to `1.1`",
+				"Experimentation now runs until 2026-10-05 09:00:50 UTC (was until 2026-10-05 09:00:10 UTC)",
+			},
+		},
+		{
+			name: "should keep a rule named like a position apart from the unnamed rule at that position",
+			setup: func(f *flag.InternalFlag) {
+				f.Rules = &[]flag.Rule{
+					{Name: testconvert.String("#2"), Query: testconvert.String("a eq 1"), VariationResult: testconvert.String("on")},
+					{Query: testconvert.String("b eq 1"), VariationResult: testconvert.String("on")},
+				}
+			},
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[0].VariationResult = testconvert.String("off")
+			},
+			want: []string{"Targeting rule `#2` now serves `off` (was `on`)"},
+		},
+		{
+			name: "should pair rules sharing a name by position",
+			setup: func(f *flag.InternalFlag) {
+				f.Rules = &[]flag.Rule{
+					{Name: testconvert.String("beta"), Query: testconvert.String("a eq 1"), VariationResult: testconvert.String("on")},
+					{Name: testconvert.String("beta"), Query: testconvert.String("b eq 1"), VariationResult: testconvert.String("on")},
+				}
+			},
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[1].VariationResult = testconvert.String("off")
+			},
+			want: []string{"Targeting rule #2 now serves `off` (was `on`)"},
+		},
+		{
+			name: "should describe a scheduled step as a partial update",
+			update: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					Date: &start,
+					InternalFlag: flag.InternalFlag{
+						Rules: &[]flag.Rule{{
+							Name:  testconvert.String("beta"),
+							Query: testconvert.String(`beta eq true and plan eq "pro"`),
+						}},
+						DefaultRule: &flag.Rule{Percentages: &map[string]float64{"on": 50, "off": -1}},
+						Metadata:    &map[string]any{"owner": "growth"},
+					},
+				}}
+			},
+			want: []string{
+				"Scheduled step on 2026-10-05 09:00 UTC added: " +
+					"Targeting rule `beta` updated with query `beta eq true and plan eq \"pro\"`; " +
+					"Default rule updated with `off` removed from the percentages, `on` 50%; " +
+					"Metadata `owner` set to `\"growth\"` (not applied by scheduled steps)",
+			},
+		},
+		{
+			name: "should describe a step that stops updating a rule",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					Date:         &start,
+					InternalFlag: flag.InternalFlag{Rules: &[]flag.Rule{{Name: testconvert.String("beta"), VariationResult: testconvert.String("off")}}},
+				}}
+			},
+			update: func(f *flag.InternalFlag) { (*f.Scheduled)[0].Rules = nil },
+			want:   []string{"Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` no longer changed"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
@@ -331,6 +404,12 @@ func TestChangeList(t *testing.T) {
 			want:      "• change 1\n…and 2 more changes",
 		},
 		{name: "should return nothing when there is no change", changes: []string{}, want: ""},
+		{
+			name:      "should return nothing when not even the summary fits",
+			changes:   changes(1),
+			maxLength: 1,
+			want:      "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -397,6 +476,43 @@ func TestDescribeChanges_coversEveryField(t *testing.T) {
 				}
 			}
 			assert.ElementsMatch(t, tt.handled, fields)
+		})
+	}
+}
+
+func TestDescribeChangesPlain(t *testing.T) {
+	tests := []struct {
+		name   string
+		update func(f *flag.InternalFlag)
+		want   []string
+	}{
+		{
+			name: "should describe changes without inline code",
+			update: func(f *flag.InternalFlag) {
+				f.DefaultRule = &flag.Rule{VariationResult: testconvert.String("on")}
+			},
+			want: []string{"Default rule now serves on (was off)"},
+		},
+		{
+			name:   "should keep backticks that are part of a value",
+			update: func(f *flag.InternalFlag) { f.Metadata = &map[string]any{"owner": "a`"} },
+			want:   []string{"Metadata owner changed from \"a\" to \"a`\""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			before := &flag.InternalFlag{
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("off")},
+				Metadata:    &map[string]any{"owner": "a"},
+			}
+			after := &flag.InternalFlag{
+				DefaultRule: &flag.Rule{VariationResult: testconvert.String("off")},
+				Metadata:    &map[string]any{"owner": "a"},
+			}
+			tt.update(after)
+			got, err := notifier.DescribeChangesPlain(before, after)
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
