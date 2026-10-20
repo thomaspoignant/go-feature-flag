@@ -17,6 +17,13 @@ type Context struct {
 	// DefaultTTL is the TTL applied to the flags without their own TTL.
 	// A zero or negative value means that the flags without their own TTL never expire.
 	DefaultTTL time.Duration `json:"defaultTTL,omitempty"`
+
+	// GetFlag gives access to the other flags, it is required to evaluate the dependencies between flags.
+	// Without it a flag with a dependency never has it met.
+	GetFlag func(flagName string) (Flag, bool) `json:"-"`
+
+	// dependencyChain is the list of flags being resolved, used to stop on circular dependencies.
+	dependencyChain []string
 }
 
 // AddIntoEvaluationContextEnrichment adds a key and value to the evaluation context enrichment.

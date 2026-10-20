@@ -62,7 +62,7 @@ func TestInternalFlag_IsExpired(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, tt.flag.IsExpired(tt.now, tt.defaultTTL))
+			assert.Equal(t, tt.want, tt.flag.IsExpired(tt.now, flag.Context{DefaultTTL: tt.defaultTTL}))
 		})
 	}
 }

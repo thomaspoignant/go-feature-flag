@@ -836,7 +836,8 @@ const docTemplate = `{
                 "INVALID_CONTEXT",
                 "TARGETING_KEY_MISSING",
                 "FLAG_CONFIG",
-                "FLAG_EXPIRED"
+                "FLAG_EXPIRED",
+                "FLAG_DEPENDENCY"
             ],
             "x-enum-varnames": [
                 "ErrorCodeProviderNotReady",
@@ -847,7 +848,8 @@ const docTemplate = `{
                 "ErrorCodeInvalidContext",
                 "ErrorCodeTargetingKeyMissing",
                 "ErrorFlagConfiguration",
-                "ErrorCodeFlagExpired"
+                "ErrorCodeFlagExpired",
+                "ErrorCodeFlagDependency"
             ]
         },
         "flag.Flag": {

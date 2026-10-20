@@ -392,6 +392,59 @@ A `ttl` is a duration, it does not depend on any time zone.
 The relay proxy checks the TTLs every 5 seconds, logs a warning when a flag expires and lists the expired flags
 of each flagset in the `expiredFlags` field of the `/info` endpoint.
 
+## 🔗 Flag dependencies
+
+A flag can depend on the state of another flag (the parent): a variation of the child is only served while the parent
+is in the expected state. This is typically used to make sure that a child flag cannot be turned on when its parent is off.
+
+```yaml
+parent-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+
+child-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  dependsOn:
+    - flag: parent-flag        # name of the parent flag
+      variation: enabled       # the parent must resolve to this variation...
+      # notVariation: disabled # ...or, alternatively, must not resolve to this one
+      appliesTo: [enabled]     # variations of child-flag bound by the dependency (default: all)
+      expiresWithParent: true  # child-flag expires when parent-flag expires (default: false)
+```
+
+| Field               | Description                                                                                                  |
+|---------------------|--------------------------------------------------------------------------------------------------------------|
+| `flag`              | **(mandatory)** Name of the parent flag.                                                                      |
+| `variation`         | Variation the parent must resolve to. Exactly one of `variation` and `notVariation` is mandatory.            |
+| `notVariation`      | Variation the parent must **not** resolve to.                                                                |
+| `appliesTo`         | Variations of the flag bound by the dependency. If empty, the dependency applies to all the variations.      |
+| `expiresWithParent` | If `true`, the flag expires as soon as the parent flag expires (see [Flag TTL](#-flag-ttl)). Default: `false`. |
+
+The parent is evaluated with the same evaluation context as the child.
+When the variation selected for the child is bound by a dependency that is not met, the evaluation returns the default
+value of the SDK with the error code `FLAG_DEPENDENCY` and an explicit message (for example
+`variation "enabled" of flag "child-flag" is not available: dependency on flag "parent-flag" is not met`).
+
+- A flag can have several dependencies, **all** of them must be met.
+- A dependency is not met if the parent does not exist, is disabled, is expired or fails to evaluate.
+- Dependencies can be chained (a parent can have its own parent).
+- Circular dependencies are not supported, the evaluation returns the error code `FLAG_CONFIG`.
+- The result of a flag with dependencies is never cacheable by the SDKs, since it depends on another flag.
+
+### Expiration
+
+With `expiresWithParent: true` the expiration date of the child is the earliest of its own expiration date and the
+expiration date of its parent. Expirations cascade: if the parent itself expires with its own parent, so does the child.
+The child then behaves like any expired flag (error code `FLAG_EXPIRED`) and is listed in `expiredFlags` of the `/info`
+endpoint of the relay proxy.
+
 ## Advanced configurations
 
 You can have advanced configurations for your flag for them to have specific behavior, such as:

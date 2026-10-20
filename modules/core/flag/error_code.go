@@ -20,4 +20,8 @@ const (
 
 	// ErrorCodeFlagExpired is returned when the TTL of the flag is over.
 	ErrorCodeFlagExpired ErrorCode = "FLAG_EXPIRED"
+
+	// ErrorCodeFlagDependency is returned when the selected variation depends on the state of another flag
+	// and this dependency is not met.
+	ErrorCodeFlagDependency ErrorCode = "FLAG_DEPENDENCY"
 )

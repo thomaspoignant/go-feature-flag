@@ -61,6 +61,9 @@ type DTO struct {
 
 	// ExpiresAt is the date at which the flag expires, in UTC.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty" yaml:"expiresAt,omitempty" toml:"expiresAt,omitempty" jsonschema:"title=expiresAt,description=Date at which the flag expires in UTC (for example 2026-04-15T00:00:00Z). Overrides createdAt and ttl."` // nolint: lll
+
+	// DependsOn binds the variations of the flag to the state of other flags.
+	DependsOn *[]flag.FlagDependency `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty" toml:"dependsOn,omitempty" jsonschema:"title=dependsOn,description=Binds the variations of the flag to the state of other flags."` // nolint: lll
 }
 
 // Convert is converting the DTO into a flag.InternalFlag.

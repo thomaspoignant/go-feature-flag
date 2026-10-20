@@ -28,6 +28,7 @@ func ConvertDtoToInternalFlag(dto DTO) flag.InternalFlag {
 		CreatedAt:       dto.CreatedAt,
 		TTL:             dto.TTL,
 		ExpiresAt:       dto.ExpiresAt,
+		DependsOn:       dto.DependsOn,
 	}
 }
 
@@ -52,6 +53,7 @@ func ConvertInternalFlagToDto(f flag.InternalFlag) DTO {
 		CreatedAt:       f.CreatedAt,
 		TTL:             f.TTL,
 		ExpiresAt:       f.ExpiresAt,
+		DependsOn:       f.DependsOn,
 		Experimentation: experimentation,
 		Metadata:        f.Metadata,
 	}

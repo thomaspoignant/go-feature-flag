@@ -88,3 +88,84 @@ fresh-flag:
 	g.ttlWatcher.check(context.Background(), time.Now())
 	assert.Equal(t, []string{"expired-flag"}, g.GetExpiredFlags())
 }
+
+func TestTTLWatcher_check_dependencies(t *testing.T) {
+	created := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	short := "1d"
+	follows := func(follow bool) *[]flag.FlagDependency {
+		on := "on"
+		return &[]flag.FlagDependency{{Flag: "parent", Variation: &on, ExpiresWithParent: follow}}
+	}
+	flags := map[string]flag.Flag{
+		"parent":        &flag.InternalFlag{CreatedAt: &created, TTL: &short},
+		"follower":      &flag.InternalFlag{CreatedAt: &created, DependsOn: follows(true)},
+		"not-follower":  &flag.InternalFlag{CreatedAt: &created, DependsOn: follows(false)},
+		"no-created-at": &flag.InternalFlag{DependsOn: follows(true)},
+	}
+	w := newTTLWatcher(
+		30*24*time.Hour,
+		func(context.Context) (map[string]flag.Flag, error) { return flags, nil },
+		&fflog.FFLogger{},
+	)
+
+	w.check(context.Background(), created.AddDate(0, 0, 2))
+	assert.Equal(t, []string{"follower", "no-created-at", "parent"}, w.expiredFlags())
+}
+
+func TestGoFeatureFlag_FlagDependencies(t *testing.T) {
+	flagFile := filepath.Join(t.TempDir(), "flags.yaml")
+	content := `
+parent:
+  variations: {on: true, off: false}
+  defaultRule: {variation: off}
+child:
+  variations: {on: true, off: false}
+  defaultRule: {variation: on}
+  dependsOn:
+    - flag: parent
+      variation: "on"
+      appliesTo: ["on"]
+orphan:
+  variations: {on: true, off: false}
+  defaultRule: {variation: on}
+  dependsOn:
+    - flag: unknown
+      notVariation: "off"
+expiring-child:
+  createdAt: 2020-01-01T00:00:00Z
+  ttl: 36500d
+  variations: {on: true, off: false}
+  defaultRule: {variation: on}
+  dependsOn:
+    - flag: expired-parent
+      notVariation: "off"
+      expiresWithParent: true
+expired-parent:
+  expiresAt: 2020-01-02T00:00:00Z
+  variations: {on: true, off: false}
+  defaultRule: {variation: on}
+`
+	require.NoError(t, os.WriteFile(flagFile, []byte(content), 0o600))
+	g, err := New(Config{PollingInterval: time.Minute, Retriever: &fileretriever.Retriever{Path: flagFile}})
+	require.NoError(t, err)
+	defer g.Close()
+	ctx := ffcontext.NewEvaluationContext("user")
+
+	res, _ := g.BoolVariationDetails("child", ctx, false)
+	assert.False(t, res.Value)
+	assert.Equal(t, flag.ErrorCodeFlagDependency, res.ErrorCode)
+	assert.False(t, res.Cacheable)
+
+	res, _ = g.BoolVariationDetails("orphan", ctx, false)
+	assert.Equal(t, flag.ErrorCodeFlagDependency, res.ErrorCode)
+
+	res, _ = g.BoolVariationDetails("expiring-child", ctx, false)
+	assert.Equal(t, flag.ErrorCodeFlagExpired, res.ErrorCode)
+
+	states := g.AllFlagsState(ctx)
+	assert.Equal(t, flag.ErrorCodeFlagDependency, states.GetFlags()["child"].ErrorCode)
+	assert.Equal(t, flag.ErrorCodeFlagExpired, states.GetFlags()["expiring-child"].ErrorCode)
+
+	g.ttlWatcher.check(context.Background(), time.Now())
+	assert.Equal(t, []string{"expired-parent", "expiring-child"}, g.GetExpiredFlags())
+}

@@ -301,6 +301,12 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 	return f, nil
 }
 
+// flagResolver gives the evaluation access to the other flags, to evaluate the dependencies between flags.
+func (g *GoFeatureFlag) flagResolver(flagKey string) (flag.Flag, bool) {
+	f, err := g.retrieverManager.GetFlag(flagKey)
+	return f, err == nil
+}
+
 // CollectEventData is collecting events and sending them to the data exporter to be stored.
 func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
 	if g != nil && g.featureEventDataExporter != nil {
@@ -396,6 +402,7 @@ func getVariation[T model.JSONType](
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 		DefaultTTL:                  g.config.DefaultFlagTTL,
+		GetFlag:                     g.flagResolver,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)

@@ -1,0 +1,16 @@
+parent-flag:
+  variations:
+    "on": true
+    "off": false
+  defaultRule:
+    variation: "off"
+child-flag:
+  variations:
+    "on": true
+    "off": false
+  defaultRule:
+    variation: "on"
+  dependsOn:
+    - flag: parent-flag
+      variation: "on"
+      appliesTo: ["on"]

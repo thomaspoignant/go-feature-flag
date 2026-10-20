@@ -16,7 +16,7 @@ const ttlCheckInterval = 5 * time.Second
 
 // expirable is implemented by the flags that have a TTL.
 type expirable interface {
-	IsExpired(now time.Time, defaultTTL time.Duration) bool
+	IsExpired(now time.Time, flagContext flag.Context) bool
 }
 
 // ttlWatcher detects the flags for which the TTL is over and keeps track of them.
@@ -76,9 +76,16 @@ func (w *ttlWatcher) check(ctx context.Context, now time.Time) {
 	if err != nil {
 		return
 	}
+	flagCtx := flag.Context{
+		DefaultTTL: w.defaultTTL,
+		GetFlag: func(name string) (flag.Flag, bool) {
+			f, ok := flags[name]
+			return f, ok
+		},
+	}
 	expired := make(map[string]struct{})
 	for key, f := range flags {
-		if e, ok := f.(expirable); ok && e.IsExpired(now, w.defaultTTL) {
+		if e, ok := f.(expirable); ok && e.IsExpired(now, flagCtx) {
 			expired[key] = struct{}{}
 		}
 	}

@@ -50,6 +50,7 @@ definitions:
     - TARGETING_KEY_MISSING
     - FLAG_CONFIG
     - FLAG_EXPIRED
+    - FLAG_DEPENDENCY
     type: string
     x-enum-varnames:
     - ErrorCodeProviderNotReady
@@ -61,6 +62,7 @@ definitions:
     - ErrorCodeTargetingKeyMissing
     - ErrorFlagConfiguration
     - ErrorCodeFlagExpired
+    - ErrorCodeFlagDependency
   flag.Flag:
     properties:
       defValue:

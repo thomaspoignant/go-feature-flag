@@ -57,14 +57,14 @@ func (f *InternalFlag) ExpirationDate(defaultTTL time.Duration) (time.Time, bool
 	return f.CreatedAt.UTC().Add(ttl), true
 }
 
-// IsExpired returns true if the TTL of the flag is over at the given date.
-func (f *InternalFlag) IsExpired(now time.Time, defaultTTL time.Duration) bool {
-	_, expired := f.expirationIfExpired(now, defaultTTL)
+// IsExpired returns true if the TTL of the flag, or of a parent it expires with, is over at the given date.
+func (f *InternalFlag) IsExpired(now time.Time, flagContext Context) bool {
+	_, expired := f.expirationIfExpired(now, flagContext)
 	return expired
 }
 
-func (f *InternalFlag) expirationIfExpired(now time.Time, defaultTTL time.Duration) (time.Time, bool) {
-	expiration, ok := f.ExpirationDate(defaultTTL)
+func (f *InternalFlag) expirationIfExpired(now time.Time, flagContext Context) (time.Time, bool) {
+	expiration, ok := f.effectiveExpiration(flagContext)
 	return expiration, ok && !now.Before(expiration)
 }
 
