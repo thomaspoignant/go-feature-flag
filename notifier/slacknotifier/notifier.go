@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -17,13 +18,16 @@ import (
 var _ notifier.Notifier = &Notifier{}
 
 const (
-	goFFLogo        = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	slackFooter     = "go-feature-flag"
-	colorDeleted    = "#FF0000"
-	colorUpdated    = "#FFA500"
-	colorAdded      = "#008000"
-	maxSlackChanges = 50
+	goFFLogo     = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	slackFooter  = "go-feature-flag"
+	colorDeleted = "#FF0000"
+	colorUpdated = "#FFA500"
+	colorAdded   = "#008000"
 )
+
+// slackEscaper escapes the characters Slack reserves for links and mentions, so flag values
+// such as "<!channel>" are shown as typed. See https://api.slack.com/reference/surfaces/formatting#escaping
+var slackEscaper = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;")
 
 // Notifier is the component in charge of sending flag changes to Slack.
 type Notifier struct {
@@ -119,7 +123,7 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 		if err != nil {
 			attachment.Text = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
 		} else {
-			attachment.Text = notifier.ChangeList(changes, "• ", 0)
+			attachment.Text = slackEscaper.Replace(notifier.ChangeList(changes, "• ", 0))
 		}
 		attachments = append(attachments, attachment)
 	}

@@ -241,7 +241,37 @@ func (d *describer) rule(label string, before, after flag.Rule, isDefault bool) 
 	if oldServe, newServe := d.describeServe(&before), d.describeServe(&after); oldServe != newServe {
 		d.addf("%s now serves %s (was %s)", label, newServe, oldServe)
 	}
+	d.unusedFields(label, before, after)
 	d.toggle(label, "disable", before.Disable, after.Disable, false, "disabled"+ignored, "enabled"+ignored)
+}
+
+// unusedFields describes changes to fields a rule does not serve from, before or after the change.
+// Rule.Evaluate uses the first of progressive rollout, percentages and variation that is set.
+func (d *describer) unusedFields(label string, before, after flag.Rule) {
+	percentagesUnused := func(r flag.Rule) bool { return r.ProgressiveRollout != nil || len(r.GetPercentages()) == 0 }
+	variationUnused := func(r flag.Rule) bool { return r.ProgressiveRollout != nil || len(r.GetPercentages()) > 0 }
+
+	oldPercentages, newPercentages := ReadableValue(before.Percentages), ReadableValue(after.Percentages)
+	if oldPercentages != newPercentages && percentagesUnused(before) && percentagesUnused(after) {
+		d.addf("%s percentages changed from %s to %s (not used: %s)",
+			label, d.code(oldPercentages), d.code(newPercentages), unusedReason(after, "percentages"))
+	}
+	oldVariation, newVariation := ReadableValue(before.VariationResult), ReadableValue(after.VariationResult)
+	if oldVariation != newVariation && variationUnused(before) && variationUnused(after) {
+		d.addf("%s variation changed from %s to %s (not used: %s)",
+			label, d.code(oldVariation), d.code(newVariation), unusedReason(after, "variation"))
+	}
+}
+
+func unusedReason(rule flag.Rule, field string) string {
+	switch {
+	case rule.ProgressiveRollout != nil:
+		return "the rule serves a progressive rollout"
+	case field == "variation":
+		return "the rule serves percentages"
+	default:
+		return "empty percentages are ignored"
+	}
 }
 
 // patchChange describes a rule a scheduled step already updated, and now updates differently.
@@ -270,17 +300,40 @@ func (d *describer) defaultRule(before, after *flag.Rule) {
 }
 
 func (d *describer) experimentation(before, after *flag.ExperimentationRollout) {
+	if d.inStep {
+		// Steps set the start and the end separately, keeping the flag's other date.
+		var oldStart, oldEnd, newStart, newEnd *time.Time
+		if before != nil {
+			oldStart, oldEnd = before.Start, before.End
+		}
+		if after != nil {
+			newStart, newEnd = after.Start, after.End
+		}
+		d.stepDate("Experimentation start", oldStart, newStart)
+		d.stepDate("Experimentation end", oldEnd, newEnd)
+		return
+	}
 	oldWindow, newWindow := describeWindow(before), describeWindow(after)
 	switch {
 	case oldWindow == newWindow:
 	case before == nil:
 		d.addf("Experimentation scheduled %s", newWindow)
-	case after == nil && d.inStep:
-		d.addf("Experimentation no longer set")
 	case after == nil:
 		d.addf("Experimentation removed (was %s)", oldWindow)
 	default:
 		d.addf("Experimentation now runs %s (was %s)", newWindow, oldWindow)
+	}
+}
+
+func (d *describer) stepDate(label string, before, after *time.Time) {
+	switch {
+	case before == nil && after == nil:
+	case before == nil:
+		d.addf("%s set to %s", label, formatDate(*after))
+	case after == nil:
+		d.addf("%s no longer set", label)
+	case formatDate(*before) != formatDate(*after):
+		d.addf("%s changed from %s to %s", label, formatDate(*before), formatDate(*after))
 	}
 }
 

@@ -355,6 +355,34 @@ func TestDescribeChanges(t *testing.T) {
 			want:   []string{"Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` no longer changed"},
 		},
 		{
+			name: "should describe a variation the rule does not serve from",
+			setup: func(f *flag.InternalFlag) {
+				f.DefaultRule.VariationResult = testconvert.String("on")
+			},
+			update: func(f *flag.InternalFlag) { f.DefaultRule.VariationResult = testconvert.String("off") },
+			want: []string{
+				"Default rule variation changed from `\"on\"` to `\"off\"` (not used: the rule serves percentages)",
+			},
+		},
+		{
+			name:   "should describe empty percentages",
+			setup:  func(f *flag.InternalFlag) { (*f.Rules)[0].Percentages = nil },
+			update: func(f *flag.InternalFlag) { (*f.Rules)[0].Percentages = &map[string]float64{} },
+			want: []string{
+				"Targeting rule `internal` percentages changed from `null` to `{}` (not used: empty percentages are ignored)",
+			},
+		},
+		{
+			name: "should describe a step that sets only the experimentation end",
+			update: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					Date:         &start,
+					InternalFlag: flag.InternalFlag{Experimentation: &flag.ExperimentationRollout{End: &end}},
+				}}
+			},
+			want: []string{"Scheduled step on 2026-10-05 09:00 UTC added: Experimentation end set to 2026-10-12 09:00 UTC"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
