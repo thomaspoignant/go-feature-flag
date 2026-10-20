@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sort"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -18,12 +17,12 @@ import (
 var _ notifier.Notifier = &Notifier{}
 
 const (
-	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	slackFooter         = "go-feature-flag"
-	colorDeleted        = "#FF0000"
-	colorUpdated        = "#FFA500"
-	colorAdded          = "#008000"
-	longSlackAttachment = 35
+	goFFLogo        = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	slackFooter     = "go-feature-flag"
+	colorDeleted    = "#FF0000"
+	colorUpdated    = "#FFA500"
+	colorAdded      = "#008000"
+	maxSlackChanges = 50
 )
 
 // Notifier is the component in charge of sending flag changes to Slack.
@@ -113,27 +112,15 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Color:      colorUpdated,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
-			Fields:     []Field{},
+			MrkdwnIn:   []string{"text"},
 		}
 
-		changes, err := notifier.FlagChanges(value.Before, value.After)
+		changes, err := notifier.DescribeChanges(value.Before, value.After)
 		if err != nil {
-			attachment.Fields = append(
-				attachment.Fields,
-				Field{Title: notifier.ChangesUnavailable, Value: err.Error()},
-			)
+			attachment.Text = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
+		} else {
+			attachment.Text = notifier.ChangeList(changes, "• ", 0)
 		}
-		for _, change := range changes {
-			value := fmt.Sprintf("%s => %s", change.From, change.To)
-			short := len(value) < longSlackAttachment
-			attachment.Fields = append(
-				attachment.Fields,
-				Field{Title: change.Path, Short: short, Value: value},
-			)
-		}
-
-		sort.Sort(ByTitle(attachment.Fields))
-
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -160,11 +147,13 @@ type slackMessage struct {
 }
 
 type attachment struct {
-	Color      string  `json:"color"`
-	Title      string  `json:"title"`
-	Fields     []Field `json:"fields"`
-	FooterIcon string  `json:"footer_icon,omitempty"`
-	Footer     string  `json:"footer,omitempty"`
+	Color      string   `json:"color"`
+	Title      string   `json:"title"`
+	Text       string   `json:"text,omitempty"`
+	MrkdwnIn   []string `json:"mrkdwn_in,omitempty"`
+	Fields     []Field  `json:"fields"`
+	FooterIcon string   `json:"footer_icon,omitempty"`
+	Footer     string   `json:"footer,omitempty"`
 }
 
 // Field is the representation of a field in a slack message.

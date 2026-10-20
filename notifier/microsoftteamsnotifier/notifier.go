@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
@@ -69,12 +70,14 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
 	for _, key := range updatedKeys {
 		value := diffCache.Updated[key]
 		msgText += fmt.Sprintf("\n * ✏️ Flag **%s** updated", key)
-		changes, err := notifier.FlagChanges(value.Before, value.After)
+		changes, err := notifier.DescribeChanges(value.Before, value.After)
 		if err != nil {
 			msgText += fmt.Sprintf("\n   * %s: %s", notifier.ChangesUnavailable, err)
+			continue
 		}
-		for _, change := range changes {
-			msgText += fmt.Sprintf("\n   * %s: %s => %s", change.Path, change.From, change.To)
+		if len(changes) > 0 {
+			// Adaptive Card markdown has no inline code, so backticks would show as typed.
+			msgText += "\n" + strings.ReplaceAll(notifier.ChangeList(changes, "   * ", 0), "`", "")
 		}
 	}
 	return msgText

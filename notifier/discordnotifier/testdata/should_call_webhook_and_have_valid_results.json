@@ -4,58 +4,7 @@
     {
       "title": "✏️ Flag \"test-flag2\" updated",
       "color": 16753920,
-      "fields": [
-        {
-          "name": "DefaultRule.Percentages",
-          "value": "{\"False\":0,\"True\":100} => null",
-          "inline": true
-        },
-        {
-          "name": "DefaultRule.VariationResult",
-          "value": "null => \"Default\"",
-          "inline": true
-        },
-        {
-          "name": "Disable",
-          "value": "null => true",
-          "inline": true
-        },
-        {
-          "name": "Experimentation",
-          "value": "{\"start\":\"2004-09-17T00:03:20Z\",\"end\":\"2004-09-16T21:43:20Z\"} => null",
-          "inline": false
-        },
-        {
-          "name": "Rules",
-          "value": "null => [{\"name\":\"rule1\",\"query\":\"key eq \\\"not-a-ke\\\"\",\"percentage\":{\"False\":20,\"True\":80}}]",
-          "inline": false
-        },
-        {
-          "name": "TrackEvents",
-          "value": "null => false",
-          "inline": true
-        },
-        {
-          "name": "Variations.Default",
-          "value": "false => \"strDefault\"",
-          "inline": true
-        },
-        {
-          "name": "Variations.False",
-          "value": "false => \"strFalse\"",
-          "inline": true
-        },
-        {
-          "name": "Variations.True",
-          "value": "true => \"strTrue\"",
-          "inline": true
-        },
-        {
-          "name": "Version",
-          "value": "null => \"1.1\"",
-          "inline": true
-        }
-      ]
+      "description": "• Flag disabled\n• Event tracking turned off\n• Version set to `1.1`\n• Variation `Default` changed from `false` to `\"strDefault\"`\n• Variation `False` changed from `false` to `\"strFalse\"`\n• Variation `True` changed from `true` to `\"strTrue\"`\n• Targeting rule `rule1` added: serves `False` 20%, `True` 80% when `key eq \"not-a-ke\"`\n• Default rule now serves `Default` (was `False` 0%, `True` 100%)\n• Experimentation removed (was from 2004-09-17 00:03 UTC to 2004-09-16 21:43 UTC)"
     },
     {
       "title": "❌ Flag \"test-flag\" deleted",

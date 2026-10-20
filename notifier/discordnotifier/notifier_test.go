@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -271,23 +272,22 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 	}
 }
 
-func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
+func TestConvertUpdatedFlagsToDiscordEmbed_capsDescription(t *testing.T) {
 	tests := []struct {
-		name         string
-		changes      int
-		wantSummary  bool
-		wantNotShown string
+		name        string
+		changes     int
+		valueLength int
+		wantLast    string
 	}{
-		{name: "below the limit", changes: 24},
-		{name: "at the limit", changes: 25},
-		{name: "one over the limit", changes: 26, wantSummary: true, wantNotShown: "2 more changes not shown."},
-		{name: "well over the limit", changes: 30, wantSummary: true, wantNotShown: "6 more changes not shown."},
+		{name: "should list every change below the limits", changes: 3, valueLength: 1, wantLast: "• Metadata `key02` set to `\"x\"`"},
+		{name: "should cap the number of changes", changes: 60, valueLength: 1, wantLast: "…and 10 more changes"},
+		{name: "should stay within the description length", changes: 40, valueLength: 200, wantLast: "…and 23 more changes"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			after := map[string]any{}
 			for i := 0; i < tt.changes; i++ {
-				after[fmt.Sprintf("key%02d", i)] = i
+				after[fmt.Sprintf("key%02d", i)] = strings.Repeat("x", tt.valueLength)
 			}
 			embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
 				Updated: map[string]notifier.DiffUpdated{
@@ -298,16 +298,10 @@ func TestConvertUpdatedFlagsToDiscordEmbed_capsFields(t *testing.T) {
 				},
 			})
 			require.Len(t, embeds, 1)
-			fields := embeds[0].Fields
-			assert.Equal(t, "Metadata.key00", fields[0].Name)
-			if !tt.wantSummary {
-				require.Len(t, fields, tt.changes)
-				assert.Equal(t, fmt.Sprintf("Metadata.key%02d", tt.changes-1), fields[len(fields)-1].Name)
-				return
-			}
-			require.Len(t, fields, maxDiscordFields)
-			assert.Equal(t, "Too many changes to show", fields[maxDiscordFields-1].Name)
-			assert.Equal(t, tt.wantNotShown, fields[maxDiscordFields-1].Value)
+			description := embeds[0].Description
+			assert.LessOrEqual(t, utf8.RuneCountInString(description), maxDiscordDescription)
+			lines := strings.Split(description, "\n")
+			assert.Equal(t, tt.wantLast, lines[len(lines)-1])
 		})
 	}
 }
@@ -318,7 +312,6 @@ func TestConvertUpdatedFlagsToDiscordEmbed_diffError(t *testing.T) {
 		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
 	})
 	require.Len(t, embeds, 1)
-	require.Len(t, embeds[0].Fields, 1)
-	assert.Equal(t, notifier.ChangesUnavailable, embeds[0].Fields[0].Name)
-	assert.Contains(t, embeds[0].Fields[0].Value, "impossible to compute flag changes")
+	assert.Contains(t, embeds[0].Description, notifier.ChangesUnavailable)
+	assert.Contains(t, embeds[0].Description, "impossible to compute flag changes")
 }

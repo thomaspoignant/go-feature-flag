@@ -18,11 +18,11 @@ import (
 var _ notifier.Notifier = &Notifier{}
 
 const (
-	colorDeleted     = 15158332
-	colorUpdated     = 16753920
-	colorAdded       = 32768
-	longDiscordField = 35
-	maxDiscordFields = 25
+	colorDeleted = 15158332
+	colorUpdated = 16753920
+	colorAdded   = 32768
+	// maxDiscordDescription is the longest embed description Discord accepts.
+	maxDiscordDescription = 4096
 )
 
 // Notifier is the component in charge of sending flag changes to Discord.
@@ -119,32 +119,17 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
-		changes, err := notifier.FlagChanges(value.Before, value.After)
-		fields := make([]embedField, 0, len(changes)+1)
+		description := ""
+		changes, err := notifier.DescribeChanges(value.Before, value.After)
 		if err != nil {
-			fields = append(fields, embedField{Name: notifier.ChangesUnavailable, Value: err.Error()})
-		}
-		for _, change := range changes {
-			fieldValue := fmt.Sprintf("%s => %s", change.From, change.To)
-			short := len(fieldValue) < longDiscordField
-			fields = append(fields, embedField{
-				Name:   change.Path,
-				Value:  fieldValue,
-				Inline: short,
-			})
-		}
-		sort.Sort(byTitle(fields))
-		if len(fields) > maxDiscordFields {
-			hidden := len(fields) - (maxDiscordFields - 1)
-			fields = append(fields[:maxDiscordFields-1], embedField{
-				Name:  "Too many changes to show",
-				Value: fmt.Sprintf("%d more changes not shown.", hidden),
-			})
+			description = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
+		} else {
+			description = notifier.ChangeList(changes, "• ", maxDiscordDescription)
 		}
 		embeds = append(embeds, embed{
-			Title:  fmt.Sprintf("✏️ Flag \"%s\" updated", key),
-			Color:  colorUpdated,
-			Fields: fields,
+			Title:       fmt.Sprintf("✏️ Flag \"%s\" updated", key),
+			Color:       colorUpdated,
+			Description: description,
 		})
 	}
 	return embeds
@@ -167,19 +152,7 @@ type discordMessage struct {
 }
 
 type embed struct {
-	Title  string       `json:"title"`
-	Color  int          `json:"color"`
-	Fields []embedField `json:"fields,omitempty"`
+	Title       string `json:"title"`
+	Color       int    `json:"color"`
+	Description string `json:"description,omitempty"`
 }
-
-type embedField struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Inline bool   `json:"inline"`
-}
-
-type byTitle []embedField
-
-func (a byTitle) Len() int           { return len(a) }
-func (a byTitle) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a byTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
