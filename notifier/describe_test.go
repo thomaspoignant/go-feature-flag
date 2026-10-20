@@ -2,6 +2,7 @@ package notifier_test
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -182,32 +183,108 @@ func TestDescribeChanges(t *testing.T) {
 				}
 			},
 			want: []string{
-				"Scheduled rollout added: 2 steps on 2026-10-05 09:00 UTC, 2026-10-12 09:00 UTC",
+				"Scheduled step on 2026-10-05 09:00 UTC added: Flag enabled",
+				"Scheduled step on 2026-10-12 09:00 UTC added: Flag disabled",
 			},
 		},
 		{
-			name: "should fall back to field changes for an edited scheduled rollout",
+			name: "should describe a moved scheduled step",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{
+					{Date: &start, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
+				}
+			},
+			update: func(f *flag.InternalFlag) { (*f.Scheduled)[0].Date = &end },
+			want:   []string{"Scheduled step moved from 2026-10-05 09:00 UTC to 2026-10-12 09:00 UTC"},
+		},
+		{
+			name: "should describe what an edited scheduled step sets",
 			setup: func(f *flag.InternalFlag) {
 				f.Scheduled = &[]flag.ScheduledStep{
 					{Date: &start, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
 				}
 			},
 			update: func(f *flag.InternalFlag) {
-				f.Scheduled = &[]flag.ScheduledStep{
-					{Date: &end, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
-				}
+				(*f.Scheduled)[0].Disable = nil
+				(*f.Scheduled)[0].Rules = &[]flag.Rule{{
+					Name:        testconvert.String("beta"),
+					Percentages: &map[string]float64{"on": 100},
+				}}
 			},
-			want: []string{"Scheduled.0.Date: \"2026-10-05T09:00:00Z\" => \"2026-10-12T09:00:00Z\""},
+			want: []string{
+				"Scheduled step on 2026-10-05 09:00 UTC: Flag: `disable: true` no longer set",
+				"Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` set: serves `on` 100%",
+			},
 		},
 		{
-			name:   "should fall back to field changes when no sentence covers the change",
+			name: "should describe a removed scheduled step",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{
+					{Date: &start, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
+					{Date: &end, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(false)}},
+				}
+			},
+			update: func(f *flag.InternalFlag) { *f.Scheduled = (*f.Scheduled)[:1] },
+			want:   []string{"Scheduled step on 2026-10-12 09:00 UTC removed"},
+		},
+		{
+			name: "should describe a renamed rule",
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[1].Name = testconvert.String("beta-users")
+			},
+			want: []string{"Targeting rule `beta` renamed to `beta-users`"},
+		},
+		{
+			name: "should describe naming an unnamed rule",
+			setup: func(f *flag.InternalFlag) {
+				(*f.Rules)[1].Name = nil
+			},
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[1].Name = testconvert.String("beta")
+			},
+			want: []string{"Targeting rule #2 renamed to `beta`"},
+		},
+		{
+			name:   "should describe a value written out that is already the default",
+			update: func(f *flag.InternalFlag) { f.Disable = testconvert.Bool(false) },
+			want:   []string{"Flag: `disable: false` added (already the default)"},
+		},
+		{
+			name: "should describe a default value removed from a rule",
+			setup: func(f *flag.InternalFlag) {
+				(*f.Rules)[0].Disable = testconvert.Bool(false)
+			},
+			update: func(f *flag.InternalFlag) { (*f.Rules)[0].Disable = nil },
+			want:   []string{"Targeting rule `internal`: `disable: false` removed (already the default)"},
+		},
+		{
+			name: "should describe default rule fields that evaluation ignores",
+			update: func(f *flag.InternalFlag) {
+				f.DefaultRule.Query = testconvert.String(`country eq "FR"`)
+				f.DefaultRule.Disable = testconvert.Bool(true)
+			},
+			want: []string{
+				"Default rule query set to `country eq \"FR\"` (ignored for the default rule)",
+				"Default rule disabled (ignored for the default rule)",
+			},
+		},
+		{
+			name: "should describe every change when several fields change together",
+			update: func(f *flag.InternalFlag) {
+				f.Disable = testconvert.Bool(true)
+				f.DefaultRule.Name = testconvert.String("default")
+			},
+			want: []string{"Flag disabled", "Default rule name set to `default`"},
+		},
+		{
+			name:   "should describe a renamed default rule",
 			update: func(f *flag.InternalFlag) { f.DefaultRule.Name = testconvert.String("default") },
-			want:   []string{"DefaultRule.Name: null => \"default\""},
+			want:   []string{"Default rule name set to `default`"},
 		},
 		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
-			want:   []string{},
+			want:   nil,
 		},
 	}
 
@@ -258,6 +335,68 @@ func TestChangeList(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, notifier.ChangeList(tt.changes, "• ", tt.maxLength))
+		})
+	}
+}
+
+// otherFlag is a flag.Flag that is not a *flag.InternalFlag.
+type otherFlag struct{ flag.Flag }
+
+func TestDescribeChanges_unsupportedFlag(t *testing.T) {
+	tests := []struct {
+		name          string
+		before, after flag.Flag
+	}{
+		{name: "should refuse another flag type before", before: otherFlag{}, after: &flag.InternalFlag{}},
+		{name: "should refuse another flag type after", before: &flag.InternalFlag{}, after: otherFlag{}},
+		{name: "should refuse a nil flag", before: (*flag.InternalFlag)(nil), after: &flag.InternalFlag{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := notifier.DescribeChanges(tt.before, tt.after)
+			assert.Nil(t, got)
+			assert.ErrorContains(t, err, "impossible to describe changes")
+		})
+	}
+}
+
+// DescribeChanges has no generic fallback, so a field added to the flag format must get
+// its own sentence. This test fails until the new field is handled and listed here.
+func TestDescribeChanges_coversEveryField(t *testing.T) {
+	tests := []struct {
+		name    string
+		typ     reflect.Type
+		handled []string
+	}{
+		{
+			name: "flag",
+			typ:  reflect.TypeFor[flag.InternalFlag](),
+			handled: []string{"BucketingKey", "DefaultRule", "Disable", "Experimentation", "Metadata",
+				"Rules", "Scheduled", "TrackEvents", "Variations", "Version"},
+		},
+		{
+			name:    "rule",
+			typ:     reflect.TypeFor[flag.Rule](),
+			handled: []string{"Disable", "Name", "Percentages", "ProgressiveRollout", "Query", "VariationResult"},
+		},
+		{name: "progressive rollout", typ: reflect.TypeFor[flag.ProgressiveRollout](), handled: []string{"End", "Initial"}},
+		{
+			name:    "progressive rollout step",
+			typ:     reflect.TypeFor[flag.ProgressiveRolloutStep](),
+			handled: []string{"Date", "Percentage", "Variation"},
+		},
+		{name: "experimentation", typ: reflect.TypeFor[flag.ExperimentationRollout](), handled: []string{"End", "Start"}},
+		{name: "scheduled step", typ: reflect.TypeFor[flag.ScheduledStep](), handled: []string{"Date", "InternalFlag"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fields := make([]string, 0, tt.typ.NumField())
+			for i := range tt.typ.NumField() {
+				if tt.typ.Field(i).IsExported() {
+					fields = append(fields, tt.typ.Field(i).Name)
+				}
+			}
+			assert.ElementsMatch(t, tt.handled, fields)
 		})
 	}
 }

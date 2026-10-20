@@ -306,12 +306,15 @@ func TestConvertUpdatedFlagsToDiscordEmbed_capsDescription(t *testing.T) {
 	}
 }
 
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
 func TestConvertUpdatedFlagsToDiscordEmbed_diffError(t *testing.T) {
-	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	broken := otherFlag{}
 	embeds := convertUpdatedFlagsToDiscordEmbed(notifier.DiffCache{
 		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
 	})
 	require.Len(t, embeds, 1)
 	assert.Contains(t, embeds[0].Description, notifier.ChangesUnavailable)
-	assert.Contains(t, embeds[0].Description, "impossible to compute flag changes")
+	assert.Contains(t, embeds[0].Description, "impossible to describe changes")
 }

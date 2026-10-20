@@ -216,12 +216,15 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	}
 }
 
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
 func TestConvertUpdatedFlagsToSlackMessage_diffError(t *testing.T) {
-	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	broken := otherFlag{}
 	attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
 		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
 	})
 	assert.Len(t, attachments, 1)
 	assert.Contains(t, attachments[0].Text, notifier.ChangesUnavailable)
-	assert.Contains(t, attachments[0].Text, "impossible to compute flag changes")
+	assert.Contains(t, attachments[0].Text, "impossible to describe changes")
 }
