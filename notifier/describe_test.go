@@ -383,6 +383,130 @@ func TestDescribeChanges(t *testing.T) {
 			want: []string{"Scheduled step on 2026-10-05 09:00 UTC added: Experimentation end set to 2026-10-12 09:00 UTC"},
 		},
 		{
+			name:   "should describe a removed version and bucketing key",
+			setup:  func(f *flag.InternalFlag) { f.BucketingKey = testconvert.String("teamId") },
+			update: func(f *flag.InternalFlag) { f.Version = nil; f.BucketingKey = nil },
+			want:   []string{"Version removed (was `1.0`)", "Bucketing key removed (was `teamId`)"},
+		},
+		{
+			name:   "should describe a removed metadata key",
+			update: func(f *flag.InternalFlag) { f.Metadata = nil },
+			want:   []string{"Metadata `owner` removed (was `\"payments\"`)"},
+		},
+		{
+			name:  "should describe a rule query added and removed",
+			setup: func(f *flag.InternalFlag) { (*f.Rules)[1].Query = nil },
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[0].Query = nil
+				(*f.Rules)[1].Query = testconvert.String(`plan eq "pro"`)
+			},
+			want: []string{"Targeting rule `internal` now matches everyone (was `email ew \"@example.com\"`)", "Targeting rule `beta` now matches `plan eq \"pro\"` (was matching everyone)"},
+		},
+		{
+			name: "should describe a disabled rule added with no variation",
+			update: func(f *flag.InternalFlag) {
+				*f.Rules = append(*f.Rules, flag.Rule{Name: testconvert.String("draft"), Disable: testconvert.Bool(true)})
+			},
+			want: []string{"Targeting rule `draft` added: serves no variation (disabled)"},
+		},
+		{
+			name: "should describe a removed default rule query",
+			setup: func(f *flag.InternalFlag) {
+				f.DefaultRule.Query = testconvert.String("a eq 1")
+			},
+			update: func(f *flag.InternalFlag) { f.DefaultRule.Query = nil },
+			want:   []string{"Default rule query removed (was `a eq 1`) (ignored for the default rule)"},
+		},
+		{
+			name:   "should describe a removed default rule",
+			update: func(f *flag.InternalFlag) { f.DefaultRule = nil },
+			want:   []string{"Default rule removed (was serving `off` 80%, `on` 20%)"},
+		},
+		{
+			name:   "should describe a new default rule",
+			setup:  func(f *flag.InternalFlag) { f.DefaultRule = nil },
+			update: func(f *flag.InternalFlag) { f.DefaultRule = &flag.Rule{VariationResult: testconvert.String("on")} },
+			want:   []string{"Default rule set to serve `on`"},
+		},
+		{
+			name: "should describe a variation that a progressive rollout overrides",
+			setup: func(f *flag.InternalFlag) {
+				f.DefaultRule = &flag.Rule{
+					VariationResult:    testconvert.String("on"),
+					ProgressiveRollout: &flag.ProgressiveRollout{End: &flag.ProgressiveRolloutStep{Variation: testconvert.String("on")}},
+				}
+			},
+			update: func(f *flag.InternalFlag) { f.DefaultRule.VariationResult = testconvert.String("off") },
+			want:   []string{"Default rule variation changed from `\"on\"` to `\"off\"` (not used: the rule serves a progressive rollout)"},
+		},
+		{
+			name: "should describe experimentation windows with one date or none",
+			setup: func(f *flag.InternalFlag) {
+				f.Experimentation = &flag.ExperimentationRollout{Start: &start}
+			},
+			update: func(f *flag.InternalFlag) { f.Experimentation = &flag.ExperimentationRollout{} },
+			want:   []string{"Experimentation now runs with no dates (was from 2026-10-05 09:00 UTC)"},
+		},
+		{
+			name: "should describe a step that changes rules, the default rule and variations",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					Date: &start,
+					InternalFlag: flag.InternalFlag{
+						Version:     testconvert.String("2.0"),
+						Variations:  &map[string]*any{"legacy": testconvert.Interface("x")},
+						Rules:       &[]flag.Rule{{Name: testconvert.String("beta"), VariationResult: testconvert.String("on")}},
+						DefaultRule: &flag.Rule{VariationResult: testconvert.String("on")},
+						Experimentation: &flag.ExperimentationRollout{
+							Start: &start,
+							End:   &end,
+						},
+					},
+				}}
+			},
+			update: func(f *flag.InternalFlag) {
+				step := &(*f.Scheduled)[0]
+				step.Version = nil
+				step.Variations = &map[string]*any{"next": testconvert.Interface("y")}
+				step.Rules = &[]flag.Rule{{Name: testconvert.String("beta"), VariationResult: testconvert.String("off"), Disable: testconvert.Bool(false)}}
+				step.DefaultRule = nil
+				step.Experimentation = &flag.ExperimentationRollout{End: testconvert.Time(end.Add(time.Hour))}
+			},
+			want: []string{"Scheduled step on 2026-10-05 09:00 UTC: Version no longer set", "Scheduled step on 2026-10-05 09:00 UTC: Variation `legacy` no longer set", "Scheduled step on 2026-10-05 09:00 UTC: Variation `next` set to `\"y\"`", "Scheduled step on 2026-10-05 09:00 UTC: Targeting rule `beta` now updated with variation `off`, `disable: false` (was variation `on`)", "Scheduled step on 2026-10-05 09:00 UTC: Default rule no longer changed", "Scheduled step on 2026-10-05 09:00 UTC: Experimentation start no longer set", "Scheduled step on 2026-10-05 09:00 UTC: Experimentation end changed from 2026-10-12 09:00 UTC to 2026-10-12 10:00 UTC"},
+		},
+		{
+			name: "should describe a step that starts updating the default rule",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{Date: &start, InternalFlag: flag.InternalFlag{DefaultRule: &flag.Rule{}}}}
+			},
+			update: func(f *flag.InternalFlag) {
+				(*f.Scheduled)[0].DefaultRule = &flag.Rule{
+					ProgressiveRollout: &flag.ProgressiveRollout{
+						Initial: &flag.ProgressiveRolloutStep{Percentage: testconvert.Float64(10)},
+						End:     &flag.ProgressiveRolloutStep{},
+					},
+				}
+			},
+			want: []string{"Scheduled step on 2026-10-05 09:00 UTC: Default rule now updated with a progressive rollout from 10% to an unset step (was nothing)"},
+		},
+		{
+			name: "should describe a step without a date and a nested schedule",
+			update: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					InternalFlag: flag.InternalFlag{
+						DefaultRule: &flag.Rule{},
+						Scheduled:   &[]flag.ScheduledStep{{Date: &end}},
+					},
+				}}
+			},
+			want: []string{"Scheduled step #1 added: Default rule updated with nothing; Scheduled rollout changed (not applied by scheduled steps)"},
+		},
+		{
+			name:   "should describe a variation with no value",
+			update: func(f *flag.InternalFlag) { (*f.Variations)["empty"] = nil },
+			want:   []string{"Variation `empty` added: `null`"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
