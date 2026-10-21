@@ -86,11 +86,12 @@ func FuzzPercentageRollout(f *testing.F) {
 // validation always serves the initial or the end variation, and that a user
 // who received the end variation keeps it as time goes on.
 func FuzzProgressiveRollout(f *testing.F) {
-	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
-	f.Add("user-1", 0.0, 100.0, start, int64(3600), int64(-10), int64(1800))
-	f.Add("user-2", 10.0, 50.0, start, int64(60), int64(30), int64(30))
-	f.Add("user-3", 0.0, 0.0, start, int64(86400), int64(0), int64(90000))
-	f.Fuzz(func(t *testing.T, key string, initialPct, endPct float64, startUnix, duration, offset1, offset2 int64) {
+	// Only the offsets from the initial date matter, so the initial date is fixed.
+	startUnix := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	f.Add("user-1", 0.0, 100.0, int64(3600), int64(-10), int64(1800))
+	f.Add("user-2", 10.0, 50.0, int64(60), int64(30), int64(30))
+	f.Add("user-3", 0.0, 0.0, int64(86400), int64(0), int64(90000))
+	f.Fuzz(func(t *testing.T, key string, initialPct, endPct float64, duration, offset1, offset2 int64) {
 		initialDate := time.Unix(startUnix, 0)
 		endDate := time.Unix(startUnix+duration, 0)
 		r := Rule{ProgressiveRollout: &ProgressiveRollout{
@@ -132,31 +133,28 @@ func FuzzProgressiveRollout(f *testing.F) {
 // ponytail: skips known gaps so the fuzzers keep looking for new ones, drop it
 // once the validation rejects these rules.
 func hasKnownValidationGap(r Rule) bool {
-	if r.Percentages != nil {
-		sum := 0.0
-		for _, p := range r.GetPercentages() {
-			if p < 0 || math.IsNaN(p) {
-				return true
-			}
-			sum += p
-		}
-		if sum*PercentageMultiplier < 1 {
+	return (r.Percentages != nil && hasInvalidPercentages(r.GetPercentages())) ||
+		(r.ProgressiveRollout != nil && hasInvalidProgressiveRollout(*r.ProgressiveRollout))
+}
+
+func hasInvalidPercentages(percentages map[string]float64) bool {
+	sum := 0.0
+	for _, p := range percentages {
+		if p < 0 || math.IsNaN(p) {
 			return true
 		}
+		sum += p
 	}
-	if p := r.ProgressiveRollout; p != nil {
-		if p.Initial == nil || p.End == nil {
-			return true
-		}
-		if p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date) {
-			return true
-		}
-		initialPct, endPct := p.Initial.getPercentage(), p.End.getPercentage()
-		if initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(endPct) {
-			return true
-		}
+	return sum*PercentageMultiplier < 1
+}
+
+func hasInvalidProgressiveRollout(p ProgressiveRollout) bool {
+	if p.Initial == nil || p.End == nil ||
+		p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date) {
+		return true
 	}
-	return false
+	initialPct := p.Initial.getPercentage()
+	return initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(p.End.getPercentage())
 }
 
 func fuzzVariations(names ...string) map[string]*any {
