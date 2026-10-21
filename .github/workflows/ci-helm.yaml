@@ -1,6 +1,8 @@
 name: Helm Lint and Test Charts
 on: pull_request
 
+permissions: {}
+
 jobs:
   lint-helm-chart:
     name: Lint Helm Chart
