@@ -68,12 +68,9 @@ func FuzzPercentageRollout(f *testing.F) {
 	f.Add("", "", 33.3, 33.3, 33.4)
 	f.Add("user-3", "other-flag", 0.5, 0.25, 0.25)
 	f.Fuzz(func(t *testing.T, key, flagName string, pA, pB, pC float64) {
-		if knownInvalidPercentages(pA, pB, pC) {
-			return
-		}
 		percentages := map[string]float64{"A": pA, "B": pB, "C": pC}
 		r := Rule{Percentages: &percentages}
-		if r.IsValid(true, fuzzVariations("A", "B", "C")) != nil {
+		if hasKnownValidationGap(r) || r.IsValid(true, fuzzVariations("A", "B", "C")) != nil {
 			return
 		}
 		got, err := r.EvaluatePercentageRollout(key, flagName)
@@ -102,13 +99,7 @@ func FuzzProgressiveRollout(f *testing.F) {
 				Variation: testconvert.String("B"), Percentage: &endPct, Date: &endDate,
 			},
 		}}
-		if r.IsValid(true, fuzzVariations("A", "B")) != nil {
-			return
-		}
-		if !endDate.After(initialDate) || initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(endPct) {
-			// ponytail: known gaps, the validation accepts an end date before the initial
-			// date (every evaluation fails) and a negative or NaN percentage (users flip
-			// back to the initial variation). Drop this skip once the validation rejects them.
+		if hasKnownValidationGap(r) || r.IsValid(true, fuzzVariations("A", "B")) != nil {
 			return
 		}
 		if offset1 > offset2 {
@@ -125,20 +116,43 @@ func FuzzProgressiveRollout(f *testing.F) {
 	})
 }
 
-// knownInvalidPercentages reports percentages the validation wrongly accepts
-// today: a negative or NaN share, or a sum too small to bucket anyone. The
-// rollout then serves the wrong variation or fails for every user.
+// hasKnownValidationGap reports rules that the validation wrongly accepts today,
+// and that are then served wrongly or fail for every user:
+//   - a percentage rule with a negative or NaN share, or a sum too small to bucket anyone,
+//   - a progressive rollout without initial or end step (IsValid panics),
+//   - a progressive rollout with a missing date or an end date not after the initial
+//     date (every evaluation fails with "missing params"),
+//   - a progressive rollout with a negative or NaN percentage (users flip back to
+//     the initial variation).
+//
 // ponytail: skips known gaps so the fuzzers keep looking for new ones, drop it
-// once the validation rejects these percentages.
-func knownInvalidPercentages(percentages ...float64) bool {
-	sum := 0.0
-	for _, p := range percentages {
-		if p < 0 || math.IsNaN(p) {
+// once the validation rejects these rules.
+func hasKnownValidationGap(r Rule) bool {
+	if r.Percentages != nil {
+		sum := 0.0
+		for _, p := range r.GetPercentages() {
+			if p < 0 || math.IsNaN(p) {
+				return true
+			}
+			sum += p
+		}
+		if sum*PercentageMultiplier < 1 {
 			return true
 		}
-		sum += p
 	}
-	return sum*PercentageMultiplier < 1
+	if p := r.ProgressiveRollout; p != nil {
+		if p.Initial == nil || p.End == nil {
+			return true
+		}
+		if p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date) {
+			return true
+		}
+		initialPct, endPct := p.Initial.getPercentage(), p.End.getPercentage()
+		if initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(endPct) {
+			return true
+		}
+	}
+	return false
 }
 
 func fuzzVariations(names ...string) map[string]*any {
