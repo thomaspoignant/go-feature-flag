@@ -3,6 +3,8 @@ package githubretriever_test
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -258,4 +260,106 @@ func TestGitHubAppAuth_GHESBaseURL(t *testing.T) {
 	// The access_tokens call must use the GHES base URL
 	assert.Contains(t, mock.recordedReqs[0].URL.Host, "github.enterprise.example.com")
 	assert.Contains(t, mock.recordedReqs[0].URL.Path, "access_tokens")
+}
+
+func TestGitHubAppAuth_PrivateKeyFileMissing(t *testing.T) {
+	mock := &appMockHTTP{}
+	r := githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          12345,
+		InstallationID: 67890,
+		PrivateKeyFile: "/nonexistent/path/key.pem",
+	}
+	r.SetHTTPClient(mock)
+
+	_, err := r.Retrieve(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read private key file")
+}
+
+func TestGitHubAppAuth_MalformedTokenResponse(t *testing.T) {
+	pemStr := generateTestKey(t)
+
+	mock := &appMockHTTP{tokenBody: []byte("not-valid-json")}
+	r := githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          12345,
+		InstallationID: 67890,
+		PrivateKey:     pemStr,
+	}
+	r.SetHTTPClient(mock)
+
+	_, err := r.Retrieve(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to parse token response")
+}
+
+func TestGitHubAppAuth_EmptyTokenInResponse(t *testing.T) {
+	pemStr := generateTestKey(t)
+
+	emptyBody, _ := json.Marshal(map[string]string{
+		"token":      "",
+		"expires_at": time.Now().Add(1 * time.Hour).Format(time.RFC3339),
+	})
+	mock := &appMockHTTP{tokenBody: emptyBody}
+	r := githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          12345,
+		InstallationID: 67890,
+		PrivateKey:     pemStr,
+	}
+	r.SetHTTPClient(mock)
+
+	_, err := r.Retrieve(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "token response contained no token")
+}
+
+func TestGitHubAppAuth_InvalidBaseURL(t *testing.T) {
+	pemStr := generateTestKey(t)
+
+	mock := &appMockHTTP{}
+	r := githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          12345,
+		InstallationID: 67890,
+		PrivateKey:     pemStr,
+		BaseURL:        ":invalid:url",
+	}
+	r.SetHTTPClient(mock)
+
+	_, err := r.Retrieve(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid base URL")
+}
+
+func TestGitHubAppAuth_PrivateKeyWrongType(t *testing.T) {
+	// Generate an EC key and encode it as a PKCS1 block — the PEM decodes
+	// but x509.ParsePKCS1PrivateKey will fail on the non-RSA bytes.
+	ecKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	der, err := x509.MarshalECPrivateKey(ecKey)
+	require.NoError(t, err)
+	wrongTypePEM := string(pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY", // deliberately wrong type to fool the PEM check
+		Bytes: der,
+	}))
+
+	mock := &appMockHTTP{}
+	r := githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          12345,
+		InstallationID: 67890,
+		PrivateKey:     wrongTypePEM,
+	}
+	r.SetHTTPClient(mock)
+
+	_, err = r.Retrieve(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to parse RSA private key")
 }
