@@ -70,10 +70,11 @@ type RetrieverConf struct {
 	// Mutually exclusive with token / githubToken.
 	// AppID and InstallationID are required; supply the private key either inline
 	// (GitHubAppPrivateKey) or as a file path (GitHubAppPrivateKeyFile).
-	GitHubAppID             int64  `mapstructure:"githubAppId"             koanf:"githubappid"`
-	GitHubInstallationID    int64  `mapstructure:"githubInstallationId"    koanf:"githubinstallationid"`
-	GitHubAppPrivateKey     string `mapstructure:"githubAppPrivateKey"     koanf:"githubappprivatekey"`     //nolint:gosec // G117
-	GitHubAppPrivateKeyFile string `mapstructure:"githubAppPrivateKeyFile" koanf:"githubappprivatekeyfile"` //nolint:gosec // G117
+	GitHubAppID          int64 `mapstructure:"githubAppId"             koanf:"githubappid"`
+	GitHubInstallationID int64 `mapstructure:"githubInstallationId"    koanf:"githubinstallationid"`
+	// nolint:gosec // G117 - these fields hold operator-supplied config, not hardcoded secrets
+	GitHubAppPrivateKey     string `mapstructure:"githubAppPrivateKey"     koanf:"githubappprivatekey"`
+	GitHubAppPrivateKeyFile string `mapstructure:"githubAppPrivateKeyFile" koanf:"githubappprivatekeyfile"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -164,7 +165,7 @@ func (c *RetrieverConf) validateGitHubAuth() error {
 
 	if hasToken && hasAppFields {
 		return fmt.Errorf(
-			"invalid retriever: token and GitHub App fields (githubAppId, githubInstallationId, " +
+			"invalid retriever: token and GitHub App fields (githubAppId, githubInstallationId, "+
 				"githubAppPrivateKey / githubAppPrivateKeyFile) are mutually exclusive for kind %q",
 			string(c.Kind),
 		)

@@ -49,9 +49,9 @@ type appMockHTTP struct {
 	// contentsStatus is the HTTP status returned for the contents endpoint.
 	contentsStatus int
 	// first401ThenOK makes the first contents request return 401, then 200.
-	first401ThenOK  bool
-	contentsCalls   int
-	recordedReqs    []*http.Request
+	first401ThenOK bool
+	contentsCalls  int
+	recordedReqs   []*http.Request
 }
 
 func (m *appMockHTTP) Do(req *http.Request) (*http.Response, error) {
@@ -93,8 +93,8 @@ func (m *appMockHTTP) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// generateTestKey generates a throwaway RSA key for tests.
-func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
+// generateTestKey generates a throwaway RSA key for tests and returns its PEM encoding.
+func generateTestKey(t *testing.T) string {
 	t.Helper()
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
@@ -102,11 +102,11 @@ func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
-	return key, string(pemBytes)
+	return string(pemBytes)
 }
 
 func TestGitHubAppAuth_Success(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	mock := &appMockHTTP{}
 	r := githubretriever.Retriever{
@@ -132,7 +132,7 @@ func TestGitHubAppAuth_Success(t *testing.T) {
 }
 
 func TestGitHubAppAuth_TokenCached(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	mock := &appMockHTTP{}
 	r := githubretriever.Retriever{
@@ -160,7 +160,7 @@ func TestGitHubAppAuth_TokenCached(t *testing.T) {
 }
 
 func TestGitHubAppAuth_401TriggersRetry(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	mock := &appMockHTTP{first401ThenOK: true}
 	r := githubretriever.Retriever{
@@ -181,7 +181,7 @@ func TestGitHubAppAuth_401TriggersRetry(t *testing.T) {
 }
 
 func TestGitHubAppAuth_TokenExchangeFailure(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	mock := &appMockHTTP{tokenStatus: http.StatusUnauthorized}
 	r := githubretriever.Retriever{
@@ -199,7 +199,7 @@ func TestGitHubAppAuth_TokenExchangeFailure(t *testing.T) {
 }
 
 func TestGitHubAppAuth_PrivateKeyFile(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	f, err := os.CreateTemp(t.TempDir(), "test-key-*.pem")
 	require.NoError(t, err)
@@ -239,7 +239,7 @@ func TestGitHubAppAuth_InvalidPrivateKey(t *testing.T) {
 }
 
 func TestGitHubAppAuth_GHESBaseURL(t *testing.T) {
-	_, pemStr := generateTestKey(t)
+	pemStr := generateTestKey(t)
 
 	mock := &appMockHTTP{}
 	r := githubretriever.Retriever{
