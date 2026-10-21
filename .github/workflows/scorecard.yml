@@ -25,8 +25,6 @@ jobs:
     permissions:
       # Declare default permissions as read only.
       contents: read
-      # Needed to upload the results to code-scanning dashboard.
-      security-events: write
       # Needed to publish results and get a badge (see publish_results below).
       id-token: write
       # Uncomment the permissions below if installing in a private repository.
@@ -61,25 +59,37 @@ jobs:
           # (Optional) Uncomment file_mode if you have a .gitattributes with files marked export-ignore
           # file_mode: git
 
-      # Filter out results from website/ and examples/ before uploading SARIF
-      - name: "Filter out website/ and examples/ paths from SARIF"
-        run: |
-          jq '.runs[0].results |= map(select(
-            (.locations[0].physicalLocation.artifactLocation.uri // "") | 
-            (startswith("website/") or startswith("examples/")) | not
-          ))' results.sarif > results-filtered.sarif
-
-      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
-      # format to the repository Actions tab.
+      # Upload the results as artifacts so the code-scanning job can filter them.
       - name: "Upload artifact"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: SARIF file
-          path: results-filtered.sarif
+          path: results.sarif
           retention-days: 5
 
-      # Upload the results to GitHub's code scanning dashboard (optional).
-      # Commenting out will disable upload of results to your repo's Code Scanning dashboard
+  # Filtering runs in its own job: publish_results rejects any `run:` step in the
+  # scorecard job (https://github.com/ossf/scorecard-action#workflow-restrictions).
+  code-scanning:
+    name: Upload to code-scanning
+    needs: analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+    steps:
+      - name: "Download artifact"
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: SARIF file
+
+      # Filter out results from website/ and examples/ before uploading SARIF
+      - name: "Filter out website/ and examples/ paths from SARIF"
+        run: |
+          jq '.runs[0].results |= map(select(
+            (.locations[0].physicalLocation.artifactLocation.uri // "") |
+            (startswith("website/") or startswith("examples/")) | not
+          ))' results.sarif > results-filtered.sarif
+
       - name: "Upload to code-scanning"
         uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
