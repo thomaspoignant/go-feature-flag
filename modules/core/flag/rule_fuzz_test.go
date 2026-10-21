@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"math"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -54,4 +57,94 @@ func FuzzEvaluateRule(f *testing.F) {
 			_, _ = ev.process(mapCtx)
 		}
 	})
+}
+
+// FuzzPercentageRollout checks that a percentage rule accepted by the
+// validation always serves one of its variations, and never one with a
+// non-positive share.
+func FuzzPercentageRollout(f *testing.F) {
+	f.Add("user-1", "my-flag", 10.0, 80.0, 10.0)
+	f.Add("user-2", "my-flag", 100.0, 0.0, 0.0)
+	f.Add("", "", 33.3, 33.3, 33.4)
+	f.Add("user-3", "other-flag", 0.5, 0.25, 0.25)
+	f.Fuzz(func(t *testing.T, key, flagName string, pA, pB, pC float64) {
+		if knownInvalidPercentages(pA, pB, pC) {
+			return
+		}
+		percentages := map[string]float64{"A": pA, "B": pB, "C": pC}
+		r := Rule{Percentages: &percentages}
+		if r.IsValid(true, fuzzVariations("A", "B", "C")) != nil {
+			return
+		}
+		got, err := r.EvaluatePercentageRollout(key, flagName)
+		require.NoError(t, err, "percentages: %v", percentages)
+		require.Contains(t, percentages, got)
+		assert.Positive(t, percentages[got], "served a variation with no share: %v", percentages)
+	})
+}
+
+// FuzzProgressiveRollout checks that a progressive rollout accepted by the
+// validation always serves the initial or the end variation, and that a user
+// who received the end variation keeps it as time goes on.
+func FuzzProgressiveRollout(f *testing.F) {
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	f.Add("user-1", 0.0, 100.0, start, int64(3600), int64(-10), int64(1800))
+	f.Add("user-2", 10.0, 50.0, start, int64(60), int64(30), int64(30))
+	f.Add("user-3", 0.0, 0.0, start, int64(86400), int64(0), int64(90000))
+	f.Fuzz(func(t *testing.T, key string, initialPct, endPct float64, startUnix, duration, offset1, offset2 int64) {
+		initialDate := time.Unix(startUnix, 0)
+		endDate := time.Unix(startUnix+duration, 0)
+		r := Rule{ProgressiveRollout: &ProgressiveRollout{
+			Initial: &ProgressiveRolloutStep{
+				Variation: testconvert.String("A"), Percentage: &initialPct, Date: &initialDate,
+			},
+			End: &ProgressiveRolloutStep{
+				Variation: testconvert.String("B"), Percentage: &endPct, Date: &endDate,
+			},
+		}}
+		if r.IsValid(true, fuzzVariations("A", "B")) != nil {
+			return
+		}
+		if !endDate.After(initialDate) || initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(endPct) {
+			// ponytail: known gaps, the validation accepts an end date before the initial
+			// date (every evaluation fails) and a negative or NaN percentage (users flip
+			// back to the initial variation). Drop this skip once the validation rejects them.
+			return
+		}
+		if offset1 > offset2 {
+			offset1, offset2 = offset2, offset1
+		}
+		first, err := r.EvaluateProgressiveRollout(key, "my-flag", time.Unix(startUnix+offset1, 0))
+		require.NoError(t, err)
+		later, err := r.EvaluateProgressiveRollout(key, "my-flag", time.Unix(startUnix+offset2, 0))
+		require.NoError(t, err)
+		require.Contains(t, []string{"A", "B"}, first)
+		if first == "B" {
+			assert.Equal(t, "B", later, "user went back to the initial variation")
+		}
+	})
+}
+
+// knownInvalidPercentages reports percentages the validation wrongly accepts
+// today: a negative or NaN share, or a sum too small to bucket anyone. The
+// rollout then serves the wrong variation or fails for every user.
+// ponytail: skips known gaps so the fuzzers keep looking for new ones, drop it
+// once the validation rejects these percentages.
+func knownInvalidPercentages(percentages ...float64) bool {
+	sum := 0.0
+	for _, p := range percentages {
+		if p < 0 || math.IsNaN(p) {
+			return true
+		}
+		sum += p
+	}
+	return sum*PercentageMultiplier < 1
+}
+
+func fuzzVariations(names ...string) map[string]*any {
+	variations := make(map[string]*any, len(names))
+	for _, name := range names {
+		variations[name] = testconvert.Interface(name)
+	}
+	return variations
 }
