@@ -15,6 +15,7 @@
     <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <br/>
     <a href="https://www.bestpractices.dev/projects/6290"><img src="https://www.bestpractices.dev/projects/6290/badge"></a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/thomaspoignant/go-feature-flag"><img src="https://api.scorecard.dev/projects/github.com/thomaspoignant/go-feature-flag/badge" alt="OSSF Score card"></a>
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"></a>
