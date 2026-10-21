@@ -9,6 +9,8 @@ on:
     paths:
       - "cmd/relayproxy/helm-charts/**"
 
+permissions: {}
+
 jobs:
   helm-docs:
     runs-on: ubuntu-latest
