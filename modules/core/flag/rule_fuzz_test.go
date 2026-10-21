@@ -104,12 +104,14 @@ func FuzzProgressiveRollout(f *testing.F) {
 		if hasKnownValidationGap(r) || r.IsValid(true, fuzzVariations("A", "B")) != nil {
 			return
 		}
-		if offset1 > offset2 {
-			offset1, offset2 = offset2, offset1
+		// sort the dates, not the offsets: startUnix+offset can overflow and wrap.
+		firstDate, laterDate := time.Unix(startUnix+offset1, 0), time.Unix(startUnix+offset2, 0)
+		if laterDate.Before(firstDate) {
+			firstDate, laterDate = laterDate, firstDate
 		}
-		first, err := r.EvaluateProgressiveRollout(key, "my-flag", time.Unix(startUnix+offset1, 0))
+		first, err := r.EvaluateProgressiveRollout(key, "my-flag", firstDate)
 		require.NoError(t, err)
-		later, err := r.EvaluateProgressiveRollout(key, "my-flag", time.Unix(startUnix+offset2, 0))
+		later, err := r.EvaluateProgressiveRollout(key, "my-flag", laterDate)
 		require.NoError(t, err)
 		require.Contains(t, []string{"A", "B"}, first)
 		if first == "B" {
