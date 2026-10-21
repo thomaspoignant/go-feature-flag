@@ -25,6 +25,10 @@ type Config struct {
 	// It is enabled when OfrepEventStream.BaseURL is set.
 	OfrepEventStream OfrepEventStream `mapstructure:"ofrepEventStream" koanf:"ofrepeventstream"`
 
+	// FlagHistory (optional) records every modification of the flags (added, updated, deleted)
+	// with its author in PostgreSQL, to be displayed by a history page.
+	FlagHistory FlagHistory `mapstructure:"flagHistory" koanf:"flaghistory"`
+
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 

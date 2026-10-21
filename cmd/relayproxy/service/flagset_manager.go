@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
+	"github.com/thomaspoignant/go-feature-flag/internal/flaghistory"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
@@ -75,6 +76,9 @@ type flagsetManagerImpl struct {
 	// runtime. It can be nil.
 	sseService stream.SSEService
 
+	// history records the modifications of the flags, it is nil when the feature is disabled.
+	history *flaghistory.History
+
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
 	config *config.Config
@@ -92,18 +96,22 @@ type flagsetManagerImpl struct {
 // so that flag-change events are scoped to the correct flagset.
 func NewFlagsetManager(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, opts ...FlagsetManagerOption,
 ) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
+	}
+	var options flagsetManagerOptions
+	for _, opt := range opts {
+		opt(&options)
 	}
 
 	var flagsetMngr FlagsetManager
 	var err error
 	if config.IsUsingFlagsets() {
-		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers, sseService)
+		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers, sseService, options.history)
 	} else {
-		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers, sseService)
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers, sseService, options.history)
 	}
 	if err != nil {
 		return nil, err
@@ -114,7 +122,7 @@ func NewFlagsetManager(
 
 func newFlagsetManagerWithDefaultConfig(
 	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, history *flaghistory.History,
 ) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: utils.DefaultFlagSetName,
@@ -133,15 +141,18 @@ func newFlagsetManagerWithDefaultConfig(
 			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
 		},
 	}
-	allNotifiers := appendSSENotifier(notifiers, sseService, utils.DefaultFlagSetName)
+	allNotifiers := appendHistoryNotifier(
+		appendSSENotifier(notifiers, sseService, utils.DefaultFlagSetName), history, utils.DefaultFlagSetName)
 	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, allNotifiers)
 	if err != nil {
 		return nil, err
 	}
+	reconcileHistory(history, utils.DefaultFlagSetName, client, logger)
 	return &flagsetManagerImpl{
 		DefaultFlagSet: client,
 		notifiers:      notifiers,
 		sseService:     sseService,
+		history:        history,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
 		logger:         logger,
@@ -150,7 +161,7 @@ func newFlagsetManagerWithDefaultConfig(
 
 func newFlagsetManagerWithFlagsets(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, history *flaghistory.History,
 ) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
@@ -169,7 +180,13 @@ func newFlagsetManagerWithFlagsets(
 			logger.Warn(logMessage, zap.String("flagset", flagSetName))
 		}
 
-		allNotifiers := appendSSENotifier(notifiers, sseService, flagSetName)
+		// the generated name changes at every start, so the history uses a stable one.
+		historyName := flagset.Name
+		if !isNamedFlagset(flagset) {
+			historyName = fmt.Sprintf("unnamed-%d", index)
+		}
+		allNotifiers := appendHistoryNotifier(
+			appendSSENotifier(notifiers, sseService, flagSetName), history, historyName)
 		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
 		if err != nil {
 			logger.Error(
@@ -180,6 +197,7 @@ func newFlagsetManagerWithFlagsets(
 			)
 			continue
 		}
+		reconcileHistory(history, historyName, client, logger)
 
 		flagsets[flagSetName] = client
 		for _, apiKey := range flagset.APIKeys {
@@ -196,6 +214,7 @@ func newFlagsetManagerWithFlagsets(
 		APIKeysToFlagSetName: apiKeysToFlagSet,
 		notifiers:            notifiers,
 		sseService:           sseService,
+		history:              history,
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
 		logger:               logger,
@@ -395,7 +414,8 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 // addFlagset creates a new GoFeatureFlag client for the given flagset and registers it so it
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
-	allNotifiers := appendSSENotifier(m.notifiers, m.sseService, flagset.Name)
+	allNotifiers := appendHistoryNotifier(
+		appendSSENotifier(m.notifiers, m.sseService, flagset.Name), m.history, flagset.Name)
 	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
 	if err != nil {
 		m.logger.Error(
@@ -406,6 +426,8 @@ func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 		)
 		return
 	}
+
+	reconcileHistory(m.history, flagset.Name, client, m.logger)
 
 	// Register in the authoritative config first. The API-key routing is rebuilt from the config
 	// by rebuildNamedAPIKeysMapping, so a client that is not in the config would run without any
@@ -651,4 +673,46 @@ func appendSSENotifier(
 	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+1)
 	copy(out, notifiers)
 	return append(out, proxynotifier.NewNotifierSSE(sseService, flagsetName))
+}
+
+// FlagsetManagerOption configures the flagset manager.
+type FlagsetManagerOption func(*flagsetManagerOptions)
+
+type flagsetManagerOptions struct {
+	history *flaghistory.History
+}
+
+// WithFlagHistory records the modifications of the flags of every flagset in the history.
+func WithFlagHistory(history *flaghistory.History) FlagsetManagerOption {
+	return func(o *flagsetManagerOptions) { o.history = history }
+}
+
+// appendHistoryNotifier adds the notifier recording the modifications of the flagset.
+func appendHistoryNotifier(
+	notifiers []notifier.Notifier, history *flaghistory.History, flagsetName string,
+) []notifier.Notifier {
+	if history == nil {
+		return notifiers
+	}
+	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+1)
+	copy(out, notifiers)
+	return append(out, history.NotifierFor(flagsetName))
+}
+
+// reconcileHistory records the modifications made while the relay proxy was stopped.
+// It is skipped when the flags could not be loaded: an empty cache would be seen as a deletion
+// of every flag.
+func reconcileHistory(
+	history *flaghistory.History, flagsetName string, client *ffclient.GoFeatureFlag, logger *zap.Logger,
+) {
+	if history == nil {
+		return
+	}
+	flags, err := client.GetFlagsFromCache()
+	if err != nil {
+		logger.Warn("flag history not reconciled, the flags are not loaded",
+			zap.String("flagset", flagsetName), zap.Error(err))
+		return
+	}
+	history.Reconcile(flagsetName, flags)
 }

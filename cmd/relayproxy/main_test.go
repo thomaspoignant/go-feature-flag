@@ -29,6 +29,7 @@ func TestShutdown(t *testing.T) {
 		stream.NewWebsocketService(),
 		stream.NewSSEService(),
 		recordingFlagsetManager{calls: &calls},
+		nil,
 	)
 	// The flagsets must be closed (flushing the exporters) after the server stopped accepting requests.
 	assert.Equal(t, []string{"api.Stop", "flagsets.Close"}, calls)

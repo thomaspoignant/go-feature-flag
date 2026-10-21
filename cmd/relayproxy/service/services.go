@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
+	"github.com/thomaspoignant/go-feature-flag/internal/flaghistory"
 )
 
 type Services struct {
@@ -16,4 +17,6 @@ type Services struct {
 	Metrics metric.Metrics
 	// FlagsetManager is the service in charge of managing the flagsets
 	FlagsetManager FlagsetManager
+	// FlagHistory records the modifications of the flags, it is nil when the feature is disabled
+	FlagHistory *flaghistory.History
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
@@ -22,6 +23,17 @@ type Retriever interface {
 // "json", "yaml", or "toml" (case-insensitive).
 type FormatHinter interface {
 	OutputFormat() string
+}
+
+// ChangeInfo describes who made the last change on the flag configuration.
+type ChangeInfo = notifier.ChangeInfo
+
+// ChangeInfoProvider is an optional interface a Retriever can implement to tell who made the
+// last change on the flag configuration it retrieves.
+// It is called only when a difference has been detected in the flags, so it can safely
+// call a remote API (git provider, database...).
+type ChangeInfoProvider interface {
+	LastChange(ctx context.Context) (*ChangeInfo, error)
 }
 
 // InitializableRetrieverLegacy is an extended version of the retriever that can be initialized and shutdown.

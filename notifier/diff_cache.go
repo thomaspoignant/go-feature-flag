@@ -10,6 +10,9 @@ type DiffCache struct {
 	Deleted map[string]flag.Flag   `json:"deleted"`
 	Added   map[string]flag.Flag   `json:"added"`
 	Updated map[string]DiffUpdated `json:"updated"`
+	// Change is the origin of the modification (author, reference...).
+	// It is nil when none of the retrievers is able to provide it.
+	Change *ChangeInfo `json:"change,omitempty"`
 }
 
 // HasDiff check if we have differences

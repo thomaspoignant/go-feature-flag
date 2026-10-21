@@ -17,6 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	stream "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
+	"github.com/thomaspoignant/go-feature-flag/internal/flaghistory"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -107,11 +108,15 @@ func main() {
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
+	flagHistory := newFlagHistory(proxyConf, logger.ZapLogger)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
-	}, sseService)
+	}, sseService, service.WithFlagHistory(flagHistory))
 	if err != nil {
+		if flagHistory != nil {
+			flagHistory.Close()
+		}
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
 			zap.Error(err),
@@ -124,11 +129,12 @@ func main() {
 		SSEService:        sseService,
 		FlagsetManager:    flagsetManager,
 		Metrics:           metricsV2,
+		FlagHistory:       flagHistory,
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
 
-	defer shutdown(logger.ZapLogger, &apiServer, wsService, sseService, flagsetManager)
+	defer shutdown(logger.ZapLogger, &apiServer, wsService, sseService, flagsetManager, flagHistory)
 	apiServer.StartWithContext(context.Background())
 }
 
@@ -140,6 +146,7 @@ func shutdown(
 	wsService stream.WebsocketService,
 	sseService stream.SSEService,
 	flagsetManager service.FlagsetManager,
+	flagHistory *flaghistory.History,
 ) {
 	logger.Info("Stopping API server")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -149,4 +156,36 @@ func shutdown(
 	apiServer.Stop(ctx)
 	// Closing the flagsets flushes the exporters, once the server no longer accepts requests.
 	flagsetManager.Close()
+	// The history is closed last: closing the flagsets can still produce notifications.
+	if flagHistory != nil {
+		flagHistory.Close()
+	}
+}
+
+// newFlagHistory starts the history of the flag modifications, nil when it is disabled.
+// The relay proxy starts even if the database is down, the modifications are kept in memory
+// and written as soon as it is back.
+func newFlagHistory(proxyConf *config.Config, logger *zap.Logger) *flaghistory.History {
+	c := proxyConf.FlagHistory
+	if !c.IsEnabled() {
+		if c.URI == "" && (c.Enabled == nil || *c.Enabled) {
+			logger.Info("flag history is inactive: set flagHistory.uri (PostgreSQL) to record the flag modifications")
+		}
+		return nil
+	}
+	source, err := os.Hostname()
+	if err != nil {
+		source = "unknown"
+	}
+	h := flaghistory.New(flaghistory.Config{
+		Connect: func(ctx context.Context) (flaghistory.Store, error) {
+			return flaghistory.NewPostgresStore(ctx, c.URI, c.Table)
+		},
+		Retention: c.RetentionDuration(),
+		Source:    source,
+		QueueSize: c.QueueSize,
+		Logger:    logger,
+	})
+	h.Start()
+	return h
 }
