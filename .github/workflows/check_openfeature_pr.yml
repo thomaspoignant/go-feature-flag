@@ -4,6 +4,8 @@ on:
     - cron: "0 10 */3 * *"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   check_prs:
     runs-on: ubuntu-latest
