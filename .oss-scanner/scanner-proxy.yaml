@@ -1,0 +1,15 @@
+# Offline relay proxy config for the scanner: out/bin/relayproxy --config .oss-scanner/scanner-proxy.yaml
+server:
+  mode: http
+  port: 1031
+pollingInterval: 1000
+retriever:
+  kind: file
+  path: cmd/relayproxy/testdata/dockerhub-example/flags.goff.yaml
+exporter:
+  kind: log
+authorizedKeys:
+  evaluation:
+    - eval-key
+  admin:
+    - admin-key
