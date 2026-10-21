@@ -188,7 +188,9 @@ func selectEvaluationReason(
 
 func (f *InternalFlag) isCacheable() bool {
 	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
-	return !isDynamic && len(f.GetDependsOn()) == 0
+	// a flag that can expire can't be cached, the SDK would keep serving it after the expiration.
+	canExpire := f.ExpiresAt != nil || f.CreatedAt != nil
+	return !isDynamic && !canExpire && len(f.GetDependsOn()) == 0
 }
 
 // GetDependsOn is the getter for the field DependsOn

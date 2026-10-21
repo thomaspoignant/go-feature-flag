@@ -30,6 +30,7 @@ type ttlWatcher struct {
 	mutex   sync.RWMutex
 	expired map[string]struct{}
 	stop    chan struct{}
+	stopOne sync.Once
 	done    chan struct{}
 }
 
@@ -66,7 +67,7 @@ func (w *ttlWatcher) start(ctx context.Context) {
 }
 
 func (w *ttlWatcher) stopAndWait() {
-	close(w.stop)
+	w.stopOne.Do(func() { close(w.stop) })
 	<-w.done
 }
 
@@ -82,7 +83,7 @@ func (w *ttlWatcher) check(ctx context.Context, now time.Time) {
 			f, ok := flags[name]
 			return f, ok
 		},
-	}
+	}.WithMemo()
 	expired := make(map[string]struct{})
 	for key, f := range flags {
 		if e, ok := f.(expirable); ok && e.IsExpired(now, flagCtx) {

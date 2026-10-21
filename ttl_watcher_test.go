@@ -52,6 +52,7 @@ func TestTTLWatcher_startStop(t *testing.T) {
 		&fflog.FFLogger{})
 	w.start(context.Background())
 	w.stopAndWait()
+	assert.NotPanics(t, w.stopAndWait)
 }
 
 func TestGoFeatureFlag_ExpiredFlag(t *testing.T) {

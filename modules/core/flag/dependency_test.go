@@ -1,6 +1,7 @@
 package flag_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -40,10 +41,11 @@ func resolverOf(flags map[string]flag.Flag) flag.Context {
 	}
 }
 
+func dep(parent string, variation, notVariation *string, appliesTo ...string) flag.FlagDependency {
+	return flag.FlagDependency{Flag: parent, Variation: variation, NotVariation: notVariation, AppliesTo: appliesTo}
+}
+
 func TestInternalFlag_Value_Dependencies(t *testing.T) {
-	dep := func(parent string, variation, notVariation *string, appliesTo ...string) flag.FlagDependency {
-		return flag.FlagDependency{Flag: parent, Variation: variation, NotVariation: notVariation, AppliesTo: appliesTo}
-	}
 	disabled := true
 	expired := time.Now().Add(-time.Hour)
 
@@ -159,7 +161,7 @@ func TestInternalFlag_Value_Dependencies(t *testing.T) {
 			flags: map[string]flag.Flag{
 				"other": boolFlag("enabled", dep("child", strPtr("enabled"), nil)),
 			},
-			wantValue: false, wantVariant: flag.VariationSDKDefault, wantErrorCode: flag.ErrorCodeFlagDependency,
+			wantValue: false, wantVariant: flag.VariationSDKDefault, wantErrorCode: flag.ErrorFlagConfiguration,
 		},
 	}
 	for _, tt := range tests {
@@ -310,4 +312,70 @@ func TestInternalFlag_IsValid_Dependencies(t *testing.T) {
 			assert.NoError(t, f.IsValid())
 		})
 	}
+}
+
+func TestInternalFlag_Value_CycleErrorIsKeptThroughTheChain(t *testing.T) {
+	flags := map[string]flag.Flag{
+		"a": boolFlag("enabled", dep("b", strPtr("enabled"), nil)),
+		"b": boolFlag("enabled", dep("c", strPtr("enabled"), nil)),
+		"c": boolFlag("enabled", dep("a", strPtr("enabled"), nil)),
+	}
+	got, details := flags["a"].Value("a", ffcontext.NewEvaluationContext("user"), resolverOf(flags))
+	assert.Equal(t, false, got)
+	assert.Equal(t, flag.ErrorFlagConfiguration, details.ErrorCode)
+	assert.Contains(t, details.ErrorMessage, "circular dependency")
+}
+
+func TestInternalFlag_Value_SharedParentsAreResolvedOnce(t *testing.T) {
+	const layers = 12
+	flags := map[string]flag.Flag{}
+	name := func(layer, i int) string { return fmt.Sprintf("flag-%d-%d", layer, i) }
+	for layer := 0; layer < layers; layer++ {
+		for i := 0; i < 2; i++ {
+			if layer == layers-1 {
+				flags[name(layer, i)] = boolFlag("enabled")
+				continue
+			}
+			flags[name(layer, i)] = boolFlag("enabled",
+				dep(name(layer+1, 0), strPtr("enabled"), nil),
+				dep(name(layer+1, 1), strPtr("enabled"), nil))
+		}
+	}
+	lookups := 0
+	flagCtx := flag.Context{
+		DefaultSdkValue: false,
+		GetFlag: func(n string) (flag.Flag, bool) {
+			lookups++
+			f, ok := flags[n]
+			return f, ok
+		},
+	}
+	got, details := flags[name(0, 0)].Value(name(0, 0), ffcontext.NewEvaluationContext("user"), flagCtx)
+	assert.Equal(t, true, got)
+	assert.Empty(t, details.ErrorCode)
+	assert.Less(t, lookups, 4*layers)
+}
+
+func TestInternalFlag_IsExpired_SharedParentsAreResolvedOnce(t *testing.T) {
+	past := time.Now().Add(-time.Hour)
+	follows := ptrTo([]flag.FlagDependency{
+		{Flag: "left", Variation: strPtr("enabled"), ExpiresWithParent: true},
+		{Flag: "right", Variation: strPtr("enabled"), ExpiresWithParent: true},
+	})
+	flags := map[string]flag.Flag{
+		"left":   &flag.InternalFlag{DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
+		"right":  &flag.InternalFlag{DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
+		"root":   &flag.InternalFlag{ExpiresAt: &past},
+		"parent": &flag.InternalFlag{DependsOn: follows},
+	}
+	rootLookups := 0
+	flagCtx := flag.Context{GetFlag: func(n string) (flag.Flag, bool) {
+		if n == "root" {
+			rootLookups++
+		}
+		f, ok := flags[n]
+		return f, ok
+	}}
+	assert.True(t, flags["parent"].(*flag.InternalFlag).IsExpired(time.Now(), flagCtx))
+	assert.LessOrEqual(t, rootLookups, 2)
 }

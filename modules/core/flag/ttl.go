@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,9 @@ const (
 	DefaultFlagTTL = 90 * 24 * time.Hour
 
 	hoursPerDay = 24
+
+	// maxTTLDays is the biggest number of days that fits in a time.Duration.
+	maxTTLDays = math.MaxInt64 / int64(hoursPerDay*time.Hour)
 )
 
 // ParseTTL parses a TTL such as "90d", "12h" or "1h30m".
@@ -20,7 +24,7 @@ func ParseTTL(ttl string) (time.Duration, error) {
 	ttl = strings.TrimSpace(ttl)
 	if days, ok := strings.CutSuffix(ttl, "d"); ok {
 		n, err := strconv.Atoi(days)
-		if err != nil || n <= 0 {
+		if err != nil || n <= 0 || int64(n) > maxTTLDays {
 			return 0, fmt.Errorf("invalid ttl %q", ttl)
 		}
 		return time.Duration(n) * hoursPerDay * time.Hour, nil

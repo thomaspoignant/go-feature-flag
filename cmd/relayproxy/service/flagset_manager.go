@@ -406,8 +406,10 @@ func withInheritedDefaultFlagTTL(flagset config.FlagSet, globalTTL string) confi
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 	allNotifiers := appendSSENotifier(m.notifiers, m.sseService, flagset.Name)
-	flagset = withInheritedDefaultFlagTTL(flagset, m.config.DefaultFlagTTL)
-	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
+	// The inheritance only applies to the client: the config keeps the flagset as it was written,
+	// otherwise the next reload would see a change in the flagset and reject it.
+	clientFlagset := withInheritedDefaultFlagTTL(flagset, m.config.DefaultFlagTTL)
+	client, err := NewGoFeatureFlagClient(&clientFlagset, m.logger, allNotifiers)
 	if err != nil {
 		m.logger.Error(
 			"failed to create the flagset added at runtime, it will not be available until the "+

@@ -23,6 +23,8 @@ func TestParseTTL(t *testing.T) {
 		{name: "garbage", ttl: "abc", wantErr: true},
 		{name: "negative days", ttl: "-1d", wantErr: true},
 		{name: "zero", ttl: "0h", wantErr: true},
+		{name: "days overflowing a duration", ttl: "200000d", wantErr: true},
+		{name: "biggest days", ttl: "106751d", want: 106751 * 24 * time.Hour},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

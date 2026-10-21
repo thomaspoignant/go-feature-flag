@@ -53,6 +53,7 @@ class EngineErrorCode(str, Enum):
     INVALID_CONTEXT = "INVALID_CONTEXT"
     PARSE_ERROR = "PARSE_ERROR"
     GENERAL = "GENERAL"
+    FLAG_DEPENDENCY = "FLAG_DEPENDENCY"
 
 
 # Raw engine codes where the provider, rather than the flag, looks to be at
@@ -64,11 +65,19 @@ class EngineErrorCode(str, Enum):
 # returns for anything a newer relay proxy understands and it does not. Both can
 # therefore succeed remotely.
 #
+# FLAG_DEPENDENCY is a fallback too: the module evaluates one flag at a time and
+# has no access to its parent flags, so only the relay proxy can tell if a
+# dependency is met.
+#
 # FLAG_CONFIG is deliberately absent: it names the flag itself as invalid, a
 # verdict the relay proxy reaches from the same configuration, so a fallback
 # would only add latency to the same wrong answer.
 _FALLBACK_ERROR_CODES = frozenset(
-    {EngineErrorCode.PARSE_ERROR, EngineErrorCode.GENERAL}
+    {
+        EngineErrorCode.PARSE_ERROR,
+        EngineErrorCode.GENERAL,
+        EngineErrorCode.FLAG_DEPENDENCY,
+    }
 )
 
 # Flag metadata marking a result that came from the relay proxy rather than the

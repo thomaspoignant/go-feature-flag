@@ -135,6 +135,16 @@ func (c *cacheManagerImpl) AllFlags() (map[string]flag.Flag, error) {
 	return c.inMemoryCache.All(), nil
 }
 
+func (c *cacheManagerImpl) Snapshot() (Snapshot, error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	if c.inMemoryCache == nil {
+		return Snapshot{}, errors.New("impossible to read the flag before the initialisation")
+	}
+	cache := c.inMemoryCache
+	return NewSnapshot(cache.getFlag, func() (map[string]flag.Flag, error) { return cache.All(), nil }), nil
+}
+
 func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()

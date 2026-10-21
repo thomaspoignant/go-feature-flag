@@ -3,6 +3,7 @@ package flag
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -26,6 +27,19 @@ type FlagDependency struct {
 
 	// ExpiresWithParent makes the flag expire when the parent flag expires.
 	ExpiresWithParent bool `json:"expiresWithParent,omitempty" yaml:"expiresWithParent,omitempty" toml:"expiresWithParent,omitempty"` // nolint: lll
+}
+
+const circularDependencyMessage = "circular dependency between flags"
+
+// dependencyMemo is not safe for concurrent use, it belongs to one evaluation or one watcher pass.
+type dependencyMemo struct {
+	parents     map[string]ResolutionDetails
+	expirations map[string]expiration
+}
+
+type expiration struct {
+	date time.Time
+	ok   bool
 }
 
 func (d FlagDependency) appliesTo(variation string) bool {
@@ -71,14 +85,14 @@ func (f *InternalFlag) unmetDependency(
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
 ) (ErrorCode, string) {
-	parentCtx := flagContext.withDependencyChain(flagName)
+	parentCtx := flagContext.WithMemo().withDependencyChain(flagName)
 	for _, dep := range f.GetDependsOn() {
 		if !dep.appliesTo(variation) {
 			continue
 		}
 		if slices.Contains(parentCtx.dependencyChain, dep.Flag) {
 			return ErrorFlagConfiguration,
-				fmt.Sprintf("circular dependency between flags %q and %q", flagName, dep.Flag)
+				fmt.Sprintf("%s %q and %q", circularDependencyMessage, flagName, dep.Flag)
 		}
 		var parent Flag
 		found := false
@@ -89,7 +103,18 @@ func (f *InternalFlag) unmetDependency(
 			return ErrorCodeFlagDependency,
 				fmt.Sprintf("flag %q depends on flag %q which does not exist", flagName, dep.Flag)
 		}
-		_, details := parent.Value(dep.Flag, evaluationCtx, parentCtx)
+		details, resolved := parentCtx.memo.parents[dep.Flag]
+		if !resolved {
+			_, details = parent.Value(dep.Flag, evaluationCtx, parentCtx)
+			if parentCtx.memo.parents == nil {
+				parentCtx.memo.parents = map[string]ResolutionDetails{}
+			}
+			parentCtx.memo.parents[dep.Flag] = details
+		}
+		if details.ErrorCode == ErrorFlagConfiguration &&
+			strings.HasPrefix(details.ErrorMessage, circularDependencyMessage) {
+			return details.ErrorCode, details.ErrorMessage
+		}
 		if details.Reason == ReasonError || details.Reason == ReasonDisabled ||
 			!dep.isSatisfiedBy(details.Variant) {
 			return ErrorCodeFlagDependency,
@@ -103,14 +128,15 @@ func (f *InternalFlag) unmetDependency(
 // effectiveExpiration is the expiration date of the flag, taking into account the parents
 // the flag expires with. The earliest date wins.
 func (f *InternalFlag) effectiveExpiration(flagContext Context) (time.Time, bool) {
-	expiration, ok := f.ExpirationDate(flagContext.DefaultTTL)
+	expirationDate, ok := f.ExpirationDate(flagContext.DefaultTTL)
 	if flagContext.GetFlag == nil {
-		return expiration, ok
+		return expirationDate, ok
 	}
 	for _, dep := range f.GetDependsOn() {
 		if !dep.ExpiresWithParent || slices.Contains(flagContext.dependencyChain, dep.Flag) {
 			continue
 		}
+		flagContext = flagContext.WithMemo()
 		parent, found := flagContext.GetFlag(dep.Flag)
 		if !found {
 			continue
@@ -121,10 +147,17 @@ func (f *InternalFlag) effectiveExpiration(flagContext Context) (time.Time, bool
 		if !isExpirable {
 			continue
 		}
-		parentExpiration, parentOk := p.effectiveExpiration(flagContext.withDependencyChain(dep.Flag))
-		if parentOk && (!ok || parentExpiration.Before(expiration)) {
-			expiration, ok = parentExpiration, true
+		parentExp, memoized := flagContext.memo.expirations[dep.Flag]
+		if !memoized {
+			parentExp.date, parentExp.ok = p.effectiveExpiration(flagContext.withDependencyChain(dep.Flag))
+			if flagContext.memo.expirations == nil {
+				flagContext.memo.expirations = map[string]expiration{}
+			}
+			flagContext.memo.expirations[dep.Flag] = parentExp
+		}
+		if parentExp.ok && (!ok || parentExp.date.Before(expirationDate)) {
+			expirationDate, ok = parentExp.date, true
 		}
 	}
-	return expiration, ok
+	return expirationDate, ok
 }

@@ -69,6 +69,10 @@
                             "expiresWithParent": {"type": "boolean", "description": "The flag expires when the parent flag expires."}
                         },
                         "required": ["flag"],
+                        "oneOf": [
+                            {"required": ["variation"], "not": {"required": ["notVariation"]}},
+                            {"required": ["notVariation"], "not": {"required": ["variation"]}}
+                        ],
                         "additionalProperties": false
                     }
                 },
@@ -253,17 +257,6 @@
                 },
                 "metadata": {
                     "type": "object"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "ttl": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "type": "string",
-                    "format": "date-time"
                 },
                 "date": {
                     "type": "string",
