@@ -21,23 +21,19 @@ import (
 func signAppJWT(appID int64, key *rsa.PrivateKey) (string, error) {
 	now := time.Now()
 
-	headerJSON, err := json.Marshal(map[string]string{"alg": "RS256", "typ": "JWT"})
-	if err != nil {
-		return "", fmt.Errorf("github app jwt: failed to marshal header: %w", err)
-	}
-	claimsJSON, err := json.Marshal(map[string]int64{
+	// json.Marshal on map[string]string and map[string]int64 cannot fail;
+	// errors are intentionally ignored.
+	headerJSON, _ := json.Marshal(map[string]string{"alg": "RS256", "typ": "JWT"})
+	claimsJSON, _ := json.Marshal(map[string]int64{
 		"iss": appID,
 		"iat": now.Add(-60 * time.Second).Unix(),
 		"exp": now.Add(9 * time.Minute).Unix(),
 	})
-	if err != nil {
-		return "", fmt.Errorf("github app jwt: failed to marshal claims: %w", err)
-	}
 
 	signingInput := jwtBase64(headerJSON) + "." + jwtBase64(claimsJSON)
 
 	digest := sha256.Sum256([]byte(signingInput))
-	// GitHub App JWTs require RS256 (PKCS#1 v1.5 + SHA-256); PSS/PS256 is not accepted.
+	// GitHub App JWTs require RS256 (PKCS#1 v1.5 + SHA-256); PSS/PS256 is not accepted by GitHub.
 	// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/
 	// generating-a-json-web-token-jwt-for-a-github-app
 	sig, err := rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA256, digest[:]) //nolint:gosec //NOSONAR
