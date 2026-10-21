@@ -10,9 +10,9 @@ on:
   # To guarantee Maintained check is occasionally updated. See
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#maintained
   schedule:
-    - cron: '36 10 * * 4'
+    - cron: "36 10 * * 4"
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   analysis:
@@ -59,13 +59,21 @@ jobs:
           # (Optional) Uncomment file_mode if you have a .gitattributes with files marked export-ignore
           # file_mode: git
 
+      # Filter out results from website/ and examples/ before uploading SARIF
+      - name: "Filter out website/ and examples/ paths from SARIF"
+        run: |
+          jq '.runs[0].results |= map(select(
+            (.locations[0].physicalLocation.artifactLocation.uri // "") | 
+            (startswith("website/") or startswith("examples/")) | not
+          ))' results.sarif > results-filtered.sarif
+
       # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
       # format to the repository Actions tab.
       - name: "Upload artifact"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: SARIF file
-          path: results.sarif
+          path: results-filtered.sarif
           retention-days: 5
 
       # Upload the results to GitHub's code scanning dashboard (optional).
@@ -73,4 +81,4 @@ jobs:
       - name: "Upload to code-scanning"
         uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
-          sarif_file: results.sarif
+          sarif_file: results-filtered.sarif
