@@ -6,20 +6,14 @@ FROM golang:1.26-bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 # curl to talk to a running relay proxy.
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home --uid 10001 scanner \
-    && git config --system --add safe.directory /src
+    && rm -rf /var/lib/apt/lists/*
 
-# scanner contract: the checkout lives inside the image, at /src. The scanner needs the whole checkout (the build
-# context is the public git repository, nothing else), so the recursive copy is intended.
-COPY --chown=scanner:scanner . /src
+# scanner contract: the checkout lives inside the image, at /src
+COPY . /src
 WORKDIR /src
-USER scanner
 
 # GOWORK=off mirrors CI (see Makefile): the root module resolves modules/core from the module proxy.
-# GOCACHE lives under the world-writable /go so the build cache is reused whichever user runs go later.
-ENV GOWORK=off \
-    GOCACHE=/go/cache
+ENV GOWORK=off
 
 RUN go mod download && (cd modules/core && go mod download)
 
