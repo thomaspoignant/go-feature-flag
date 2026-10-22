@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/cmd/wasm
 
-go 1.26.0
+go 1.25.0
 
 require (
 	github.com/stretchr/testify v1.12.1
@@ -16,7 +16,7 @@ require (
 	github.com/diegoholiveira/jsonlogic/v3 v3.10.1 // indirect
 	github.com/nikunjy/rules v1.5.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297 // indirect
 )
 
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available

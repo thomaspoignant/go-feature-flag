@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/modules/core
 
-go 1.26.0
+go 1.25.0
 
 require (
 	github.com/diegoholiveira/jsonlogic/v3 v3.10.1
@@ -16,5 +16,5 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297 // indirect
 )
