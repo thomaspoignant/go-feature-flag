@@ -40,7 +40,49 @@ export AWS_DEFAULT_REGION=eu-west-1
 |------------|:-------------:|--------|----------|------------------------------------------------------------------------------------------------------|
 | `kind`     | <Mandatory /> | string | **none** | **Value should be `s3`**.<br/>_This field is mandatory and describes which retriever you are using._ |
 | `bucket`   | <Mandatory /> | string | **none** | This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
-| `item`     | <Mandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                              |
+| `item`     | <Mandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.<br/>_Mandatory unless `prefix` is set, mutually exclusive with `prefix`._ |
+| `prefix`   | <NotMandatory /> | string | **none** | Key prefix _(ex: `flags/`)_. All the matching files under this prefix are merged into a single flag set.<br/>_Mutually exclusive with `item`, see [Load several files from a prefix](#load-several-files-from-a-prefix)._ |
+| `pattern`  | <NotMandatory /> | string | **none** | Optional glob matched against the file name _(ex: `*.yaml`)_. Only used with `prefix`. If empty, every file under the prefix is used. |
+| `recursive` | <NotMandatory /> | bool  | `false`  | If `true`, files in nested "folders" of the prefix are also loaded. Only used with `prefix`.        |
+
+Exactly one of `item` or `prefix` must be set. `pattern` and `recursive` can only be used with `prefix`.
+
+### Load several files from a prefix
+
+Instead of a single file, you can point the retriever to a prefix _(a "folder")_ of your bucket. Every file found
+under this prefix is downloaded and the flags are merged into a single flag set. It is useful when several teams
+publish their own flag files to the same bucket without writing to one huge file.
+
+```yaml title="goff-proxy.yaml"
+retrievers:
+  - kind: s3
+    bucket: my-featureflag-bucket
+    prefix: flags/
+    pattern: "*.yaml"
+    recursive: true
+```
+
+How it works:
+- **Format**: it is derived from the file extension _(`.json`, `.yaml`/`.yml`, `.toml`)_. All the files must have the
+  same format, otherwise the retrieval fails with an error naming the offending files. Use `pattern` to select only one
+  format when your prefix contains several. A file with another extension is also an error.
+- **Merge**: the top-level flag keys of every file are merged. If the same flag key is defined in 2 files, the
+  retrieval fails with an error naming the flag and both files.
+- **Polling**: the retriever lists the objects at each poll and only downloads the files whose `ETag` changed (or
+  that are new). The other ones are served from memory.
+- **Deletion**: if a file is removed from the bucket, its flags disappear from the flag set at the next poll. If no
+  file matches, the flag set is empty _(this is not an error, but a warning is logged)_.
+- Keys ending with `/` _(folder markers)_ are ignored. Without `recursive`, only the direct children of the prefix
+  are used.
+- A trailing `/` is added to the prefix when missing, so `flags` and `flags/` are equivalent and `flags-old/...` is
+  never matched.
+- Empty files are accepted and contribute no flag, whatever their format.
+- Files are parsed exactly like a single `item` file, so any file valid as an `item` is valid under a prefix.
+
+:::info IAM permissions
+In prefix mode the identity used by GO Feature Flag needs `s3:ListBucket` on the bucket _(`arn:aws:s3:::my-featureflag-bucket`)_
+in addition to `s3:GetObject` on the objects _(`arn:aws:s3:::my-featureflag-bucket/flags/*`)_.
+:::
 
 ### Compatibility with S3-Compatible Solutions
 
@@ -77,9 +119,24 @@ err := ffclient.Init(ffclient.Config{
 defer ffclient.Close()
 ```
 
+To load several files from a prefix:
+
+```go title="example_prefix.go"
+Retriever: &s3retrieverv2.Retriever{
+    Bucket:    "my-featureflag-bucket",
+    Prefix:    "flags/",
+    Pattern:   "*.yaml",
+    Recursive: true,
+    AwsConfig: &awsConfig,
+},
+```
+
 
 | Field           | Mandatory     | Description                                                                                                                                                                                    |
 |-----------------|:-------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Bucket`**    | <Mandatory /> | The name of your bucket.                                                                                                                                                                       |
-| **`Item`**      | <Mandatory /> | The location of your file in the bucket.                                                                                                                                                       |
+| **`Item`**      | <Mandatory /> | The location of your file in the bucket. _Mandatory unless `Prefix` is set, mutually exclusive with `Prefix`._                                                                                 |
+| **`Prefix`**    | <NotMandatory /> | Key prefix _(ex: `flags/`)_: all the matching files under it are merged into one flag set (see [above](#load-several-files-from-a-prefix)). Mutually exclusive with `Item`. Requires the `s3:ListBucket` permission. |
+| **`Pattern`**   | <NotMandatory /> | Glob matched against the file name _(ex: `*.yaml`)_. Only used with `Prefix`.                                                                                                                  |
+| **`Recursive`** | <NotMandatory /> | If `true`, files in nested "folders" of `Prefix` are also loaded. Defaults to `false`. Only used with `Prefix`.                                                                                |
 | **`AwsConfig`** | <NotMandatory /> | An instance of `aws.Config` that configure your access to AWS <br/>*check [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)*.<br/>If not set, `config.LoadDefaultConfig()` is called for you, which reads the standard AWS environment variables and shared config files. |

@@ -69,7 +69,51 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"item\" property found for kind \"s3\"",
+			errValue: "invalid retriever: no \"item\" or \"prefix\" property found for kind \"s3\"",
+		},
+		{
+			name: "kind S3Retriever with item and prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Bucket: "testBucket",
+				Item:   "test.yaml",
+				Prefix: "flags/",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: \"item\" and \"prefix\" are mutually exclusive for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with item and pattern",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Pattern: "*.yaml",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used with \"prefix\" for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with item and recursive",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Recursive: true,
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used with \"prefix\" for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with invalid pattern",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Prefix: "flags/", Pattern: "[a-",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: invalid \"pattern\" for kind \"s3\": syntax error in pattern",
+		},
+		{
+			name: "kind s3 with prefix and no bucket",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Prefix: "flags/",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"bucket\" property found for kind \"s3\"",
 		},
 		{
 			name: "kind HTTPRetriever without URL",
@@ -181,6 +225,16 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind:   "s3",
 				Item:   "test.yaml",
 				Bucket: "testBucket",
+			},
+		},
+		{
+			name: "valid s3 with prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:      "s3",
+				Prefix:    "flags/",
+				Pattern:   "*.yaml",
+				Recursive: true,
+				Bucket:    "testBucket",
 			},
 		},
 		{
