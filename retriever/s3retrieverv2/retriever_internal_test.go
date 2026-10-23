@@ -4,6 +4,7 @@ package s3retrieverv2
 // downloader and lister fields. Not parallel because the subtests use t.Setenv.
 
 import (
+	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -23,6 +24,12 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 		wantLister bool
 		// wantAccelerate is the expected UseAccelerate option of the built S3 client.
 		wantAccelerate bool
+		// nilCtx calls Init with a nil context.
+		nilCtx bool
+		// env sets extra environment variables for the test.
+		env map[string]string
+		// wantErr expects Init to fail while loading the default AWS configuration.
+		wantErr bool
 	}{
 		{
 			name:       "item mode with no AwsConfig",
@@ -48,17 +55,42 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 			wantLister:     true,
 			wantAccelerate: true,
 		},
+		{
+			name:       "nil context",
+			r:          func() *Retriever { return &Retriever{Bucket: "b", Item: "i"} },
+			nilCtx:     true,
+			wantRegion: "us-west-2",
+		},
+		{
+			name:    "default AWS config cannot be loaded",
+			r:       func() *Retriever { return &Retriever{Bucket: "b", Item: "i"} },
+			env:     map[string]string{"AWS_PROFILE": "profile-that-does-not-exist"},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("AWS_REGION", "us-west-2")
+			for k, v := range tt.env {
+				t.Setenv(k, v)
+			}
 			r := tt.r()
 			if tt.awsConfig {
 				awsConfig, err := config.LoadDefaultConfig(t.Context(), config.WithRegion("us-east-1"))
 				require.NoError(t, err)
 				r.AwsConfig = &awsConfig
 			}
-			require.NoError(t, r.Init(t.Context(), nil))
+			var ctx context.Context = t.Context()
+			if tt.nilCtx {
+				ctx = nil
+			}
+			err := r.Init(ctx, nil)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Equal(t, retriever.RetrieverError, r.Status())
+				return
+			}
+			require.NoError(t, err)
 			assert.NotNil(t, r.downloader)
 			assert.Equal(t, tt.wantLister, r.lister != nil)
 			assert.Equal(t, tt.wantRegion, r.AwsConfig.Region)
