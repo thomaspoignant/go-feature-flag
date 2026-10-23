@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -20,22 +21,21 @@ type Retriever struct {
 	Bucket string
 
 	// Item is the path to your flag file in your bucket.
+	// If it is not set, the retriever is in folder mode: all the files selected by Prefix, Pattern
+	// and Recursive are merged into a single flag set.
 	Item string
 
-	// Prefix is the key prefix (ex: "flags/") under which all the flag files are stored.
-	// A trailing "/" is added if missing.
-	// All the matching files are merged into a single flag set.
-	// Exactly one of Item and Prefix must be set.
+	// Prefix is a key prefix (ex: "flags/") restricting the files loaded in folder mode.
+	// Empty (or "/") is the root of the bucket. Leading "/" are trimmed and a trailing "/" is added
+	// if missing. Can't be used with Item.
 	Prefix string
 
 	// Pattern is an optional glob (see path.Match) applied to the base name of each object found
-	// under Prefix (ex: "*.yaml"). If empty, all the objects under Prefix are used.
-	// Only used with Prefix.
+	// in folder mode (ex: "*.yaml"). If empty, all the objects are used. Can't be used with Item.
 	Pattern string
 
-	// Recursive makes the retriever also look into the "sub folders" of Prefix.
-	// If false only the direct children of Prefix are used.
-	// Only used with Prefix.
+	// Recursive makes the folder mode also look into the "sub folders" of Prefix.
+	// If false only the direct children of Prefix are used. Can't be used with Item.
 	Recursive bool
 
 	// AwsConfig is the AWS SDK configuration object we will use to
@@ -54,6 +54,8 @@ type Retriever struct {
 	lister     ListerAPI
 	status     retriever.Status
 	logger     *fflog.FFLogger
+	// format is the format of the last prefix retrieval, read by OutputFormat.
+	format atomic.Value
 
 	// mu protects downloader, lister and cache, and serializes Retrieve calls.
 	mu    sync.Mutex
@@ -74,8 +76,8 @@ func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.logger = logger
-	// Item mode only needs a downloader, prefix mode needs a lister too.
-	needLister := s.Prefix != ""
+	// Item mode only needs a downloader, folder mode needs a lister too.
+	needLister := s.Item == ""
 	if s.downloader == nil || (needLister && s.lister == nil) {
 		if s.AwsConfig == nil {
 			cfg, err := config.LoadDefaultConfig(ctx)
@@ -125,7 +127,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("downloader is not initialized")
 	}
 
-	if s.Prefix != "" {
+	if s.Item == "" {
 		return s.retrievePrefix(ctx)
 	}
 
@@ -151,13 +153,18 @@ func (s *Retriever) download(ctx context.Context, key string) ([]byte, error) {
 }
 
 // OutputFormat declares the format of the bytes returned by Retrieve.
-// In prefix mode the merged flag set is always JSON, in item mode the format is the
-// one of the file so we return an empty string to let the global file format apply.
+// In item mode it is the format of the file, unknown here, so we return an empty string to let
+// the global file format apply.
+// In folder mode the merged flag set is encoded in the format of the files found by the last
+// Retrieve ("json" for an empty flag set). Before the first Retrieve it is guessed from Pattern.
 func (s *Retriever) OutputFormat() string {
-	if s.Prefix != "" {
-		return "json"
+	if s.Item != "" {
+		return ""
 	}
-	return ""
+	if f, ok := s.format.Load().(string); ok {
+		return f
+	}
+	return formatOf(s.Pattern)
 }
 
 func (s *Retriever) SetDownloader(downloader DownloaderAPI) {

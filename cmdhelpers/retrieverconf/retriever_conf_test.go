@@ -64,12 +64,12 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"repositorySlug\" property found for kind \"bitbucket\"",
 		},
 		{
-			name: "kind S3Retriever without item",
+			name: "kind S3Retriever without bucket",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "s3",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"item\" or \"prefix\" property found for kind \"s3\"",
+			errValue: "invalid retriever: no \"bucket\" property found for kind \"s3\"",
 		},
 		{
 			name: "kind S3Retriever with item and prefix",
@@ -88,7 +88,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Pattern: "*.yaml",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used with \"prefix\" for kind \"s3\"",
+			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with item and recursive",
@@ -96,7 +96,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Recursive: true,
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used with \"prefix\" for kind \"s3\"",
+			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with invalid pattern",
@@ -228,11 +228,27 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			},
 		},
 		{
+			name: "valid s3 without item nor prefix (bucket root)",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Bucket: "testBucket",
+			},
+		},
+		{
 			name: "valid s3 with prefix",
 			fields: retrieverconf.RetrieverConf{
 				Kind:      "s3",
 				Prefix:    "flags/",
 				Pattern:   "*.yaml",
+				Recursive: true,
+				Bucket:    "testBucket",
+			},
+		},
+		{
+			name: "valid s3 with root prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:      "s3",
+				Prefix:    "/",
 				Recursive: true,
 				Bucket:    "testBucket",
 			},

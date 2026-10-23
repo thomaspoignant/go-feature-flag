@@ -21,6 +21,8 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 		awsConfig  bool // set an explicit AwsConfig in us-east-1
 		wantRegion string
 		wantLister bool
+		// wantAccelerate is the expected UseAccelerate option of the built S3 client.
+		wantAccelerate bool
 	}{
 		{
 			name:       "item mode with no AwsConfig",
@@ -40,9 +42,11 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 			wantRegion: "us-east-1",
 		},
 		{
-			name:       "with S3 client options",
-			r:          func() *Retriever { return &Retriever{Bucket: "b", Item: "i", S3ClientOptions: useAccelerate} },
-			wantRegion: "us-west-2",
+			name:           "with S3 client options",
+			r:              func() *Retriever { return &Retriever{Bucket: "b", Prefix: "f/", S3ClientOptions: useAccelerate} },
+			wantRegion:     "us-west-2",
+			wantLister:     true,
+			wantAccelerate: true,
 		},
 	}
 	for _, tt := range tests {
@@ -59,7 +63,11 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 			assert.Equal(t, tt.wantLister, r.lister != nil)
 			assert.Equal(t, tt.wantRegion, r.AwsConfig.Region)
 			assert.Equal(t, retriever.RetrieverReady, r.Status())
-			assert.Len(t, r.S3ClientOptions, len(r.S3ClientOptions))
+			if tt.wantLister {
+				client, ok := r.lister.(*s3.Client)
+				require.True(t, ok, "the lister should be a real S3 client")
+				assert.Equal(t, tt.wantAccelerate, client.Options().UseAccelerate)
+			}
 		})
 	}
 }

@@ -110,23 +110,15 @@ func (m *S3PrefixMock) ListObjectsV2(
 	delimiter := aws.ToString(params.Delimiter)
 	after := aws.ToString(params.ContinuationToken)
 
-	keys := make([]string, 0, len(m.objects))
-	for k := range m.objects {
-		if strings.HasPrefix(k, prefix) {
-			keys = append(keys, k)
-		}
-	}
-	sort.Strings(keys)
-
 	pageSize := m.PageSize
 	if pageSize <= 0 {
 		pageSize = 1000
 	}
-	out := &s3.ListObjectsV2Output{}
+	out := &s3.ListObjectsV2Output{IsTruncated: aws.Bool(false)}
 	seenPrefixes := map[string]bool{}
 	count := 0
-	for _, k := range keys {
-		if after != "" && k <= after {
+	for _, k := range m.sortedKeys(prefix) {
+		if k <= after {
 			continue
 		}
 		if count == pageSize {
@@ -135,28 +127,48 @@ func (m *S3PrefixMock) ListObjectsV2(
 		}
 		count++
 		out.NextContinuationToken = aws.String(k)
-		if delimiter != "" {
-			rest := strings.TrimPrefix(k, prefix)
-			if i := strings.Index(rest, delimiter); i >= 0 {
-				cp := prefix + rest[:i+len(delimiter)]
-				if !seenPrefixes[cp] {
-					seenPrefixes[cp] = true
-					out.CommonPrefixes = append(out.CommonPrefixes, s3types.CommonPrefix{Prefix: aws.String(cp)})
-				}
-				continue
+		if cp := commonPrefix(k, prefix, delimiter); cp != "" {
+			if !seenPrefixes[cp] {
+				seenPrefixes[cp] = true
+				out.CommonPrefixes = append(out.CommonPrefixes, s3types.CommonPrefix{Prefix: aws.String(cp)})
 			}
+			continue
 		}
 		out.Contents = append(out.Contents, s3types.Object{
 			Key:  aws.String(k),
 			ETag: aws.String(etagOf(m.objects[k])),
 		})
 	}
-	if out.IsTruncated == nil {
-		out.IsTruncated = aws.Bool(false)
+	if !aws.ToBool(out.IsTruncated) {
 		out.NextContinuationToken = nil
 	}
 	out.KeyCount = aws.Int32(int32(count)) //nolint:gosec // small test values
 	return out, nil
+}
+
+// sortedKeys returns the sorted keys starting with prefix.
+func (m *S3PrefixMock) sortedKeys(prefix string) []string {
+	keys := make([]string, 0, len(m.objects))
+	for k := range m.objects {
+		if strings.HasPrefix(k, prefix) {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// commonPrefix returns the "folder" the key is rolled up into when a delimiter is used, or "".
+func commonPrefix(key, prefix, delimiter string) string {
+	if delimiter == "" {
+		return ""
+	}
+	rest := strings.TrimPrefix(key, prefix)
+	i := strings.Index(rest, delimiter)
+	if i < 0 {
+		return ""
+	}
+	return prefix + rest[:i+len(delimiter)]
 }
 
 // DownloadObject writes the content of the object in the WriterAt of the input.

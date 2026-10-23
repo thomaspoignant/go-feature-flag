@@ -40,18 +40,19 @@ export AWS_DEFAULT_REGION=eu-west-1
 |------------|:-------------:|--------|----------|------------------------------------------------------------------------------------------------------|
 | `kind`     | <Mandatory /> | string | **none** | **Value should be `s3`**.<br/>_This field is mandatory and describes which retriever you are using._ |
 | `bucket`   | <Mandatory /> | string | **none** | This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
-| `item`     | <Mandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.<br/>_Mandatory unless `prefix` is set, mutually exclusive with `prefix`._ |
-| `prefix`   | <NotMandatory /> | string | **none** | Key prefix _(ex: `flags/`)_. All the matching files under this prefix are merged into a single flag set.<br/>_Mutually exclusive with `item`, see [Load several files from a prefix](#load-several-files-from-a-prefix)._ |
-| `pattern`  | <NotMandatory /> | string | **none** | Optional glob matched against the file name _(ex: `*.yaml`)_. Only used with `prefix`. If empty, every file under the prefix is used. |
-| `recursive` | <NotMandatory /> | bool  | `false`  | If `true`, files in nested "folders" of the prefix are also loaded. Only used with `prefix`.        |
+| `item`     | <NotMandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.<br/>_Set it to load one file; leave it out to load a folder, see [Load several files from a folder](#load-several-files-from-a-folder)._ |
+| `prefix`   | <NotMandatory /> | string | **none** | _Folder mode only._ Key prefix _(ex: `flags/`)_ restricting the files loaded. Empty or `/` is the root of the bucket. |
+| `pattern`  | <NotMandatory /> | string | **none** | _Folder mode only._ Optional glob matched against the file name _(ex: `*.yaml`)_. If empty, every file is used. |
+| `recursive` | <NotMandatory /> | bool  | `false`  | _Folder mode only._ If `true`, files in nested "folders" are also loaded, otherwise only the direct children of the prefix. |
 
-Exactly one of `item` or `prefix` must be set. `pattern` and `recursive` can only be used with `prefix`.
+**Set `item` to load a single file, leave it out to load a folder.** `prefix`, `pattern` and `recursive` can only be
+used without `item`.
 
-### Load several files from a prefix
+### Load several files from a folder
 
-Instead of a single file, you can point the retriever to a prefix _(a "folder")_ of your bucket. Every file found
-under this prefix is downloaded and the flags are merged into a single flag set. It is useful when several teams
-publish their own flag files to the same bucket without writing to one huge file.
+When `item` is not set, the retriever lists the objects of the bucket _(restricted by `prefix`, `pattern` and
+`recursive`)_, downloads them and merges the flags into a single flag set. It is useful when several teams publish
+their own flag files to the same bucket without writing to one huge file.
 
 ```yaml title="goff-proxy.yaml"
 retrievers:
@@ -61,6 +62,12 @@ retrievers:
     pattern: "*.yaml"
     recursive: true
 ```
+
+:::warning
+Without `item` **and** without `prefix`, the **root of the bucket** is read _(everything below it with
+`recursive: true`)_. Set a `pattern` when other files live there. Also beware that a typo in the `item` key
+silently switches the retriever to folder mode.
+:::
 
 How it works:
 - **Format**: it is derived from the file extension _(`.json`, `.yaml`/`.yml`, `.toml`)_. All the files must have the
@@ -74,13 +81,16 @@ How it works:
   file matches, the flag set is empty _(this is not an error, but a warning is logged)_.
 - Keys ending with `/` _(folder markers)_ are ignored. Without `recursive`, only the direct children of the prefix
   are used.
+- Without `prefix` _(or with `prefix: /`)_ the root of the bucket is used: top-level files only, or the whole bucket
+  with `recursive: true`. Leading `/` of a prefix are trimmed _(`/flags/` is `flags/`)_ because S3 keys never start
+  with a `/`.
 - A trailing `/` is added to the prefix when missing, so `flags` and `flags/` are equivalent and `flags-old/...` is
   never matched.
 - Empty files are accepted and contribute no flag, whatever their format.
-- Files are parsed exactly like a single `item` file, so any file valid as an `item` is valid under a prefix.
+- Files are parsed exactly like a single `item` file, so any file valid as an `item` is valid in folder mode.
 
 :::info IAM permissions
-In prefix mode the identity used by GO Feature Flag needs `s3:ListBucket` on the bucket _(`arn:aws:s3:::my-featureflag-bucket`)_
+In folder mode the identity used by GO Feature Flag needs `s3:ListBucket` on the bucket _(`arn:aws:s3:::my-featureflag-bucket`)_
 in addition to `s3:GetObject` on the objects _(`arn:aws:s3:::my-featureflag-bucket/flags/*`)_.
 :::
 
@@ -119,7 +129,7 @@ err := ffclient.Init(ffclient.Config{
 defer ffclient.Close()
 ```
 
-To load several files from a prefix:
+To load several files from a folder _(leave `Item` empty)_:
 
 ```go title="example_prefix.go"
 Retriever: &s3retrieverv2.Retriever{
@@ -135,8 +145,8 @@ Retriever: &s3retrieverv2.Retriever{
 | Field           | Mandatory     | Description                                                                                                                                                                                    |
 |-----------------|:-------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Bucket`**    | <Mandatory /> | The name of your bucket.                                                                                                                                                                       |
-| **`Item`**      | <Mandatory /> | The location of your file in the bucket. _Mandatory unless `Prefix` is set, mutually exclusive with `Prefix`._                                                                                 |
-| **`Prefix`**    | <NotMandatory /> | Key prefix _(ex: `flags/`)_: all the matching files under it are merged into one flag set (see [above](#load-several-files-from-a-prefix)). Mutually exclusive with `Item`. Requires the `s3:ListBucket` permission. |
-| **`Pattern`**   | <NotMandatory /> | Glob matched against the file name _(ex: `*.yaml`)_. Only used with `Prefix`.                                                                                                                  |
-| **`Recursive`** | <NotMandatory /> | If `true`, files in nested "folders" of `Prefix` are also loaded. Defaults to `false`. Only used with `Prefix`.                                                                                |
+| **`Item`**      | <NotMandatory /> | The location of your file in the bucket. If not set, the retriever is in folder mode and merges several files (see [above](#load-several-files-from-a-folder)). |
+| **`Prefix`**    | <NotMandatory /> | _Folder mode only._ Key prefix _(ex: `flags/`)_. Empty or `/` is the root of the bucket. Requires the `s3:ListBucket` permission. |
+| **`Pattern`**   | <NotMandatory /> | _Folder mode only._ Glob matched against the file name _(ex: `*.yaml`)_. |
+| **`Recursive`** | <NotMandatory /> | _Folder mode only._ If `true`, files in nested "folders" are also loaded. Defaults to `false`. |
 | **`AwsConfig`** | <NotMandatory /> | An instance of `aws.Config` that configure your access to AWS <br/>*check [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)*.<br/>If not set, `config.LoadDefaultConfig()` is called for you, which reads the standard AWS environment variables and shared config files. |

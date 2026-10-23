@@ -10,11 +10,13 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"gopkg.in/yaml.v3"
 )
 
 // cachedObject is the last parsed version of an object.
@@ -23,12 +25,15 @@ type cachedObject struct {
 	flags map[string]dto.DTO
 }
 
-// normalizedPrefix returns the prefix with a trailing "/" so that "flags" is a folder, like "flags/".
+// normalizedPrefix returns the prefix as sent to S3: S3 keys never start with "/", so leading
+// slashes are trimmed, and a trailing "/" is added if missing so that "flags" is a folder like
+// "flags/". The prefix "/" (or "") is the root of the bucket and gives an empty prefix.
 func (s *Retriever) normalizedPrefix() string {
-	if s.Prefix != "" && !strings.HasSuffix(s.Prefix, "/") {
-		return s.Prefix + "/"
+	p := strings.TrimLeft(s.Prefix, "/")
+	if p != "" && !strings.HasSuffix(p, "/") {
+		p += "/"
 	}
-	return s.Prefix
+	return p
 }
 
 // validate checks the configuration of the retriever.
@@ -36,10 +41,8 @@ func (s *Retriever) validate() error {
 	switch {
 	case s.Item != "" && s.Prefix != "":
 		return errors.New("impossible to init S3 retriever v2: Item and Prefix are mutually exclusive")
-	case s.Item == "" && s.Prefix == "":
-		return errors.New("impossible to init S3 retriever v2: one of Item or Prefix is required")
 	case s.Item != "" && (s.Pattern != "" || s.Recursive):
-		return errors.New("impossible to init S3 retriever v2: Pattern and Recursive can only be used with Prefix")
+		return errors.New("impossible to init S3 retriever v2: Pattern and Recursive can only be used without Item")
 	}
 	if s.Pattern != "" {
 		if _, err := path.Match(s.Pattern, ""); err != nil {
@@ -50,7 +53,8 @@ func (s *Retriever) validate() error {
 }
 
 // retrievePrefix lists the matching objects, downloads and parses the ones that changed since the
-// last call and merges all of them into a single JSON flag set.
+// last call and merges all of them into a single flag set, encoded in the format of the files
+// (see OutputFormat) so that the flag manager decodes it exactly like a single file.
 // The caller must hold s.mu.
 func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 	if s.lister == nil {
@@ -62,13 +66,7 @@ func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to list objects from S3 with prefix %q, %v", s.Prefix, err)
 	}
-
-	keys := make([]string, 0, len(objects))
-	for k := range objects {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
+	keys := sortedKeys(objects)
 	if err := checkFormats(keys); err != nil {
 		return nil, err
 	}
@@ -76,38 +74,66 @@ func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 		s.logger.Warn("S3 retriever: no file matches the prefix, the flag set is empty",
 			"bucket", s.Bucket, "prefix", s.normalizedPrefix(), "pattern", s.Pattern)
 	}
+	if err := s.refreshCache(ctx, keys, objects); err != nil {
+		return nil, err
+	}
 
-	// working only keeps the listed keys (deleted files are dropped). It is committed even if a
-	// download fails, so the files already fetched are not downloaded again.
+	merged, err := s.mergeFlags(keys)
+	if err != nil {
+		return nil, err
+	}
+	format := "json" // an empty flag set is "{}", valid in JSON
+	if len(keys) > 0 {
+		format = formatOf(keys[0])
+	}
+	s.format.Store(format)
+	return marshalFlags(format, merged)
+}
+
+func sortedKeys(objects map[string]string) []string {
+	keys := make([]string, 0, len(objects))
+	for k := range objects {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// refreshCache downloads and parses the objects whose ETag changed. The cache only keeps the
+// listed keys (deleted files are dropped) and is committed even if a download fails, so the files
+// already fetched are not downloaded again.
+func (s *Retriever) refreshCache(ctx context.Context, keys []string, objects map[string]string) error {
 	working := make(map[string]cachedObject, len(keys))
 	for _, key := range keys {
 		if c, ok := s.cache[key]; ok {
 			working[key] = c
 		}
 	}
+	defer func() { s.cache = working }()
+
 	for _, key := range keys {
-		etag := objects[key]
-		if c, ok := working[key]; ok && c.etag == etag {
+		if c, ok := working[key]; ok && c.etag == objects[key] {
 			continue
 		}
 		content, err := s.download(ctx, key)
 		if err != nil {
-			s.cache = working
-			return nil, fmt.Errorf("unable to download item from S3 %q, %v", key, err)
+			return fmt.Errorf("unable to download item from S3 %q, %v", key, err)
 		}
 		flags, err := parseFile(key, content)
 		if err != nil {
-			s.cache = working
-			return nil, err
+			return err
 		}
-		working[key] = cachedObject{etag: etag, flags: flags}
+		working[key] = cachedObject{etag: objects[key], flags: flags}
 	}
-	s.cache = working
+	return nil
+}
 
+// mergeFlags merges the flags of all the files, a flag defined twice is an error.
+func (s *Retriever) mergeFlags(keys []string) (map[string]dto.DTO, error) {
 	merged := make(map[string]dto.DTO)
 	origin := make(map[string]string)
 	for _, key := range keys {
-		for flagKey, flag := range working[key].flags {
+		for flagKey, flag := range s.cache[key].flags {
 			if prev, dup := origin[flagKey]; dup {
 				return nil, fmt.Errorf(
 					"duplicate flag %q found in files %q and %q", flagKey, prev, key)
@@ -116,8 +142,24 @@ func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 			merged[flagKey] = flag
 		}
 	}
+	return merged, nil
+}
 
-	out, err := json.Marshal(merged)
+// marshalFlags encodes the flags in the given format. The encoding is the same family as the one
+// used to decode the files, which keeps the value types (ex: big integers) intact.
+func marshalFlags(format string, flags map[string]dto.DTO) ([]byte, error) {
+	var out []byte
+	var err error
+	switch format {
+	case "yaml":
+		out, err = yaml.Marshal(flags)
+	case "toml":
+		buf := &bytes.Buffer{}
+		err = toml.NewEncoder(buf).Encode(flags)
+		out = buf.Bytes()
+	default:
+		out, err = json.Marshal(flags)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("unable to marshal the merged flags: %v", err)
 	}
@@ -126,9 +168,9 @@ func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 
 // list returns the eligible object keys with their ETag.
 func (s *Retriever) list(ctx context.Context) (map[string]string, error) {
-	input := &s3.ListObjectsV2Input{
-		Bucket: aws.String(s.Bucket),
-		Prefix: aws.String(s.normalizedPrefix()),
+	input := &s3.ListObjectsV2Input{Bucket: aws.String(s.Bucket)}
+	if p := s.normalizedPrefix(); p != "" {
+		input.Prefix = aws.String(p)
 	}
 	if !s.Recursive {
 		input.Delimiter = aws.String("/")
@@ -141,19 +183,24 @@ func (s *Retriever) list(ctx context.Context) (map[string]string, error) {
 			return nil, err
 		}
 		for _, obj := range page.Contents {
-			key := aws.ToString(obj.Key)
-			if key == "" || strings.HasSuffix(key, "/") {
-				continue
+			if key := aws.ToString(obj.Key); s.isEligible(key) {
+				res[key] = aws.ToString(obj.ETag)
 			}
-			if s.Pattern != "" {
-				if ok, _ := path.Match(s.Pattern, path.Base(key)); !ok {
-					continue
-				}
-			}
-			res[key] = aws.ToString(obj.ETag)
 		}
 	}
 	return res, nil
+}
+
+// isEligible tells if an object key must be loaded: not a folder marker and matching the pattern.
+func (s *Retriever) isEligible(key string) bool {
+	if key == "" || strings.HasSuffix(key, "/") {
+		return false
+	}
+	if s.Pattern == "" {
+		return true
+	}
+	ok, _ := path.Match(s.Pattern, path.Base(key))
+	return ok
 }
 
 func formatOf(key string) string {

@@ -227,18 +227,15 @@ func (r RetrieverKind) IsValid() error {
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
 }
 
-// validateS3Retriever validates the item/prefix settings of the S3 retriever.
+// validateS3Retriever validates the item/prefix settings (no item means folder mode) of the S3 retriever.
 func (c *RetrieverConf) validateS3Retriever() error {
 	switch {
 	case c.Item != "" && c.Prefix != "":
 		return fmt.Errorf(
 			"invalid retriever: \"item\" and \"prefix\" are mutually exclusive for kind \"%s\"", c.Kind)
-	case c.Item == "" && c.Prefix == "":
-		return fmt.Errorf(
-			"invalid retriever: no \"item\" or \"prefix\" property found for kind \"%s\"", c.Kind)
 	case c.Item != "" && (c.Pattern != "" || c.Recursive):
 		return fmt.Errorf(
-			"invalid retriever: \"pattern\" and \"recursive\" can only be used with \"prefix\" for kind \"%s\"",
+			"invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"%s\"",
 			c.Kind)
 	}
 	if c.Pattern != "" {
