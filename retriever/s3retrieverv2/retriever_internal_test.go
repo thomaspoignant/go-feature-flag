@@ -75,16 +75,7 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 				t.Setenv(k, v)
 			}
 			r := tt.r()
-			if tt.awsConfig {
-				awsConfig, err := config.LoadDefaultConfig(t.Context(), config.WithRegion("us-east-1"))
-				require.NoError(t, err)
-				r.AwsConfig = &awsConfig
-			}
-			var ctx context.Context = t.Context()
-			if tt.nilCtx {
-				ctx = nil
-			}
-			err := r.Init(ctx, nil)
+			err := initRetriever(t, r, tt.awsConfig, tt.nilCtx)
 			if tt.wantErr {
 				require.Error(t, err)
 				assert.Equal(t, retriever.RetrieverError, r.Status())
@@ -95,11 +86,34 @@ func TestRetriever_Init_RealClients(t *testing.T) {
 			assert.Equal(t, tt.wantLister, r.lister != nil)
 			assert.Equal(t, tt.wantRegion, r.AwsConfig.Region)
 			assert.Equal(t, retriever.RetrieverReady, r.Status())
-			if tt.wantLister {
-				client, ok := r.lister.(*s3.Client)
-				require.True(t, ok, "the lister should be a real S3 client")
-				assert.Equal(t, tt.wantAccelerate, client.Options().UseAccelerate)
-			}
+			assertListerClient(t, r, tt.wantLister, tt.wantAccelerate)
 		})
 	}
+}
+
+// initRetriever calls Init, optionally with an explicit us-east-1 AwsConfig or a nil context.
+func initRetriever(t *testing.T, r *Retriever, awsConfig, nilCtx bool) error {
+	t.Helper()
+	if awsConfig {
+		cfg, err := config.LoadDefaultConfig(t.Context(), config.WithRegion("us-east-1"))
+		require.NoError(t, err)
+		r.AwsConfig = &cfg
+	}
+	var ctx context.Context = t.Context()
+	if nilCtx {
+		ctx = nil
+	}
+	return r.Init(ctx, nil)
+}
+
+// assertListerClient checks that the lister built by Init is a real S3 client with the expected
+// UseAccelerate option.
+func assertListerClient(t *testing.T, r *Retriever, wantLister, wantAccelerate bool) {
+	t.Helper()
+	if !wantLister {
+		return
+	}
+	client, ok := r.lister.(*s3.Client)
+	require.True(t, ok, "the lister should be a real S3 client")
+	assert.Equal(t, wantAccelerate, client.Options().UseAccelerate)
 }
