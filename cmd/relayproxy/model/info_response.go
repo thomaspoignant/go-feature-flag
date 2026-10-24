@@ -11,4 +11,9 @@ type InfoResponse struct {
 	// Flagsets contains the cache refresh dates for each flagset when using multiple flagsets.
 	// The format is {"flagset name": "2022-06-13T11:22:55.941628+02:00"}
 	Flagsets map[string]time.Time `json:"flagsets,omitempty" example:"default:2022-06-13T11:22:55.941628+02:00,feature-flags:2022-06-13T11:22:55.941628+02:00"` //nolint: lll
+
+	// ExpiredFlags contains, for each flagset having some, the names of the flags with an expired TTL.
+	// Evaluating an expired flag always returns an error.
+	// The format is {"flagset name": ["flag-1", "flag-2"]}
+	ExpiredFlags map[string][]string `json:"expiredFlags,omitempty"`
 }

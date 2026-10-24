@@ -131,6 +131,7 @@ func newFlagsetManagerWithDefaultConfig(
 			DisableNotifierOnInit:           c.DisableNotifierOnInit,
 			EvaluationContextEnrichment:     c.EvaluationContextEnrichment,
 			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
+			DefaultFlagTTL:                  c.DefaultFlagTTL,
 		},
 	}
 	allNotifiers := appendSSENotifier(notifiers, sseService, utils.DefaultFlagSetName)
@@ -170,6 +171,7 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		allNotifiers := appendSSENotifier(notifiers, sseService, flagSetName)
+		flagset = withInheritedDefaultFlagTTL(flagset, config.DefaultFlagTTL)
 		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
 		if err != nil {
 			logger.Error(
@@ -392,10 +394,19 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 	return out
 }
 
+// withInheritedDefaultFlagTTL applies the global default TTL to a flagset that does not define its own.
+func withInheritedDefaultFlagTTL(flagset config.FlagSet, globalTTL string) config.FlagSet {
+	if flagset.DefaultFlagTTL == "" {
+		flagset.DefaultFlagTTL = globalTTL
+	}
+	return flagset
+}
+
 // addFlagset creates a new GoFeatureFlag client for the given flagset and registers it so it
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 	allNotifiers := appendSSENotifier(m.notifiers, m.sseService, flagset.Name)
+	flagset = withInheritedDefaultFlagTTL(flagset, m.config.DefaultFlagTTL)
 	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
 	if err != nil {
 		m.logger.Error(
