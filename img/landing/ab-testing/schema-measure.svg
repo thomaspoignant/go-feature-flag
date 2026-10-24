@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <marker id="measure-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- variation A panel (mint) -->
+  <rect x="70" y="60" width="250" height="230" rx="22" fill="#cdf7e7" stroke="#64748b" stroke-width="4"/>
+  <path d="M150 105 L240 105 L205 150 L205 185 L185 185 L185 150 Z" fill="#9fbeb3" stroke="#64748b" stroke-width="3"/>
+  <rect x="175" y="215" width="40" height="55" rx="6" fill="#9fbeb3" stroke="#64748b" stroke-width="3"/>
+
+  <!-- variation B panel (coral) -->
+  <rect x="480" y="60" width="250" height="230" rx="22" fill="#f9d2c4" stroke="#64748b" stroke-width="4"/>
+  <path d="M560 105 L650 105 L615 150 L615 185 L595 185 L595 150 Z" fill="#f4845f" stroke="#64748b" stroke-width="3"/>
+  <rect x="585" y="230" width="40" height="40" rx="6" fill="#f4845f" stroke="#64748b" stroke-width="3"/>
+
+  <!-- join / analyze connectors down to comparison chart -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M195 290 C 220 380, 300 380, 350 415" marker-end="url(#measure-arrow)"/>
+    <path d="M605 290 C 580 390, 500 400, 452 455" marker-end="url(#measure-arrow)"/>
+  </g>
+
+  <!-- comparison chart -->
+  <path d="M300 540 L520 540" stroke="#64748b" stroke-width="4"/>
+  <rect x="330" y="400" width="70" height="140" rx="6" fill="#9fbeb3" stroke="#64748b" stroke-width="4"/>
+  <rect x="430" y="455" width="70" height="85" rx="6" fill="#f4845f" stroke="#64748b" stroke-width="4"/>
+
+  <!-- winner badge on the taller (mint) bar -->
+  <circle cx="365" cy="375" r="26" fill="#43a047" stroke="#64748b" stroke-width="3"/>
+  <path d="M352 375 L362 386 L380 364" stroke="#ffffff" stroke-width="5"/>
+</svg>
