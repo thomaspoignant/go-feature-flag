@@ -37,5 +37,9 @@
   "RedisPrefix": "",
   "AccountName": "",
   "AccountKey": "",
-  "Container": ""
+  "Container": "",
+  "GitHubAppID": 0,
+  "GitHubInstallationID": 0,
+  "GitHubAppPrivateKey": "",
+  "GitHubAppPrivateKeyFile": ""
 }

@@ -29,5 +29,9 @@
   "RedisPrefix": "",
   "AccountName": "goff-user",
   "AccountKey": "goff-key",
-  "Container": "goff-container"
+  "Container": "goff-container",
+  "GitHubAppID": 0,
+  "GitHubInstallationID": 0,
+  "GitHubAppPrivateKey": "",
+  "GitHubAppPrivateKeyFile": ""
 }
