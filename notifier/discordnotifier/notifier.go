@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"sync"
+	"unicode/utf8"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -18,11 +19,14 @@ import (
 var _ notifier.Notifier = &Notifier{}
 
 const (
-	colorDeleted     = 15158332
-	colorUpdated     = 16753920
-	colorAdded       = 32768
-	longDiscordField = 35
-	maxDiscordFields = 25
+	colorDeleted = 15158332
+	colorUpdated = 16753920
+	colorAdded   = 32768
+	// Discord limits, see https://discord.com/developers/docs/resources/message#embed-object-embed-limits
+	maxDiscordEmbeds      = 10
+	maxDiscordTitle       = 256
+	maxDiscordDescription = 4096
+	maxDiscordTotal       = 6000
 )
 
 // Notifier is the component in charge of sending flag changes to Discord.
@@ -91,13 +95,17 @@ func convertToDiscordMessage(diffCache notifier.DiffCache) discordMessage {
 		return embeds[i].Title < embeds[j].Title
 	})
 
-	if len(embeds) > 10 {
-		embeds = embeds[:9]
+	if len(embeds) > maxDiscordEmbeds {
+		embeds = embeds[:maxDiscordEmbeds-1]
 		embeds = append(embeds, embed{
 			Title: "Wow, lots of updates!\nToo many to fit here. 😔\n\nCheck the logs for the full list.",
 			Color: colorDeleted,
 		})
 	}
+	for i := range embeds {
+		embeds[i].Title = truncate(embeds[i].Title, maxDiscordTitle)
+	}
+	fitTotalLength(embeds)
 
 	return discordMessage{
 		Content: fmt.Sprintf("Changes detected in your feature flag file on: **%s**", hostname),
@@ -119,33 +127,15 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
-		changes, err := notifier.FlagChanges(value.Before, value.After)
-		fields := make([]embedField, 0, len(changes)+1)
+		e := embed{Title: fmt.Sprintf("✏️ Flag \"%s\" updated", key), Color: colorUpdated}
+		changes, err := notifier.DescribeChanges(value.Before, value.After)
 		if err != nil {
-			fields = append(fields, embedField{Name: notifier.ChangesUnavailable, Value: err.Error()})
+			e.Description = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
+		} else {
+			e.changes = changes
+			e.Description = notifier.ChangeList(changes, "• ", maxDiscordDescription)
 		}
-		for _, change := range changes {
-			fieldValue := fmt.Sprintf("%s => %s", change.From, change.To)
-			short := len(fieldValue) < longDiscordField
-			fields = append(fields, embedField{
-				Name:   change.Path,
-				Value:  fieldValue,
-				Inline: short,
-			})
-		}
-		sort.Sort(byTitle(fields))
-		if len(fields) > maxDiscordFields {
-			hidden := len(fields) - (maxDiscordFields - 1)
-			fields = append(fields[:maxDiscordFields-1], embedField{
-				Name:  "Too many changes to show",
-				Value: fmt.Sprintf("%d more changes not shown.", hidden),
-			})
-		}
-		embeds = append(embeds, embed{
-			Title:  fmt.Sprintf("✏️ Flag \"%s\" updated", key),
-			Color:  colorUpdated,
-			Fields: fields,
-		})
+		embeds = append(embeds, e)
 	}
 	return embeds
 }
@@ -167,19 +157,43 @@ type discordMessage struct {
 }
 
 type embed struct {
-	Title  string       `json:"title"`
-	Color  int          `json:"color"`
-	Fields []embedField `json:"fields,omitempty"`
+	Title       string `json:"title"`
+	Color       int    `json:"color"`
+	Description string `json:"description,omitempty"`
+
+	// changes are the changes listed in Description, kept to shorten the list if the message is too long.
+	changes []string
 }
 
-type embedField struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Inline bool   `json:"inline"`
+// fitTotalLength shortens change lists so all embeds fit in the characters Discord accepts
+// in one message. The budget is shared evenly: short lists stay whole and the longest are cut first.
+func fitTotalLength(embeds []embed) {
+	budget := maxDiscordTotal
+	lists := make([]int, 0, len(embeds))
+	for i, e := range embeds {
+		budget -= utf8.RuneCountInString(e.Title)
+		if len(e.changes) == 0 {
+			budget -= utf8.RuneCountInString(e.Description)
+			continue
+		}
+		lists = append(lists, i)
+	}
+	sort.SliceStable(lists, func(a, b int) bool {
+		return utf8.RuneCountInString(embeds[lists[a]].Description) < utf8.RuneCountInString(embeds[lists[b]].Description)
+	})
+	for n, i := range lists {
+		share := max(budget/(len(lists)-n), 1)
+		if utf8.RuneCountInString(embeds[i].Description) > share {
+			embeds[i].Description = notifier.ChangeList(embeds[i].changes, "• ", share)
+		}
+		budget -= utf8.RuneCountInString(embeds[i].Description)
+	}
 }
 
-type byTitle []embedField
-
-func (a byTitle) Len() int           { return len(a) }
-func (a byTitle) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a byTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func truncate(text string, maxLength int) string {
+	runes := []rune(text)
+	if len(runes) <= maxLength {
+		return text
+	}
+	return string(runes[:maxLength-1]) + "…"
+}
