@@ -25,6 +25,8 @@ type S3PrefixMock struct {
 	ListErr error
 	// DownloadErr, if set, is returned by every DownloadObject call.
 	DownloadErr error
+	// NoETag lists the objects with an empty ETag, like some S3 compatible stores do.
+	NoETag bool
 	// DownloadErrKeys makes the download of the given keys fail. Guarded by the mock, use SetDownloadErrKey.
 	downloadErrKeys map[string]error
 
@@ -134,10 +136,11 @@ func (m *S3PrefixMock) ListObjectsV2(
 			}
 			continue
 		}
-		out.Contents = append(out.Contents, s3types.Object{
-			Key:  aws.String(k),
-			ETag: aws.String(etagOf(m.objects[k])),
-		})
+		obj := s3types.Object{Key: aws.String(k)}
+		if !m.NoETag {
+			obj.ETag = aws.String(etagOf(m.objects[k]))
+		}
+		out.Contents = append(out.Contents, obj)
 	}
 	if !aws.ToBool(out.IsTruncated) {
 		out.NextContinuationToken = nil

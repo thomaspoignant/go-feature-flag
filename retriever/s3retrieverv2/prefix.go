@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -36,27 +37,11 @@ func (s *Retriever) normalizedPrefix() string {
 	return p
 }
 
-// validate checks the configuration of the retriever.
-func (s *Retriever) validate() error {
-	switch {
-	case s.Item != "" && s.Prefix != "":
-		return errors.New("impossible to init S3 retriever v2: Item and Prefix are mutually exclusive")
-	case s.Item != "" && (s.Pattern != "" || s.Recursive):
-		return errors.New("impossible to init S3 retriever v2: Pattern and Recursive can only be used without Item")
-	}
-	if s.Pattern != "" {
-		if _, err := path.Match(s.Pattern, ""); err != nil {
-			return fmt.Errorf("impossible to init S3 retriever v2: invalid Pattern %q: %v", s.Pattern, err)
-		}
-	}
-	return nil
-}
-
-// retrievePrefix lists the matching objects, downloads and parses the ones that changed since the
+// loadFolder lists the matching objects, downloads and parses the ones that changed since the
 // last call and merges all of them into a single flag set, encoded in the format of the files
 // (see OutputFormat) so that the flag manager decodes it exactly like a single file.
 // The caller must hold s.mu.
-func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
+func (s *Retriever) loadFolder(ctx context.Context) ([]byte, error) {
 	if s.lister == nil {
 		s.status = retriever.RetrieverError
 		return nil, errors.New("lister is not initialized")
@@ -71,7 +56,7 @@ func (s *Retriever) retrievePrefix(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	if len(keys) == 0 {
-		s.logger.Warn("S3 retriever: no file matches the prefix, the flag set is empty",
+		s.logger.Warn("S3 retriever: no supported file matches the prefix, the flag set is empty",
 			"bucket", s.Bucket, "prefix", s.normalizedPrefix(), "pattern", s.Pattern)
 	}
 	if err := s.refreshCache(ctx, keys, objects); err != nil {
@@ -112,7 +97,8 @@ func (s *Retriever) refreshCache(ctx context.Context, keys []string, objects map
 	defer func() { s.cache = working }()
 
 	for _, key := range keys {
-		if c, ok := working[key]; ok && c.etag == objects[key] {
+		// an empty ETag can't tell if the content changed, so it never hits the cache
+		if c, ok := working[key]; ok && c.etag != "" && c.etag == objects[key] {
 			continue
 		}
 		content, err := s.download(ctx, key)
@@ -166,7 +152,8 @@ func marshalFlags(format string, flags map[string]dto.DTO) ([]byte, error) {
 	return out, nil
 }
 
-// list returns the eligible object keys with their ETag.
+// list returns the object keys to load with their ETag. The keys matching the pattern but with an
+// unsupported extension are skipped with a warning (see warnSkipped).
 func (s *Retriever) list(ctx context.Context) (map[string]string, error) {
 	input := &s3.ListObjectsV2Input{Bucket: aws.String(s.Bucket)}
 	if p := s.normalizedPrefix(); p != "" {
@@ -176,19 +163,50 @@ func (s *Retriever) list(ctx context.Context) (map[string]string, error) {
 		input.Delimiter = aws.String("/")
 	}
 	res := make(map[string]string)
+	skipped := make(map[string]struct{})
 	paginator := s3.NewListObjectsV2Paginator(s.lister, input)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, obj := range page.Contents {
-			if key := aws.ToString(obj.Key); s.isEligible(key) {
-				res[key] = aws.ToString(obj.ETag)
-			}
+		s.collect(page.Contents, res, skipped)
+	}
+	s.warnSkipped(skipped)
+	return res, nil
+}
+
+// collect sorts the objects of a page between the ones to load (res) and the ones skipped because
+// of their extension (skipped).
+func (s *Retriever) collect(objects []s3types.Object, res map[string]string, skipped map[string]struct{}) {
+	for _, obj := range objects {
+		key := aws.ToString(obj.Key)
+		switch {
+		case !s.isEligible(key):
+		case formatOf(key) == "":
+			skipped[key] = struct{}{}
+		default:
+			res[key] = aws.ToString(obj.ETag)
 		}
 	}
-	return res, nil
+}
+
+// warnSkipped logs the keys newly skipped, and remembers the skipped keys of this poll. A key is
+// logged once while it stays skipped, and again if it disappears and comes back.
+// The caller must hold s.mu.
+func (s *Retriever) warnSkipped(skipped map[string]struct{}) {
+	newKeys := make([]string, 0, len(skipped))
+	for key := range skipped {
+		if _, known := s.skipped[key]; !known {
+			newKeys = append(newKeys, key)
+		}
+	}
+	sort.Strings(newKeys)
+	for _, key := range newKeys {
+		s.logger.Warn("S3 retriever: file skipped because of its unsupported extension "+
+			"(supported: .json, .yaml, .yml, .toml)", "bucket", s.Bucket, "key", key)
+	}
+	s.skipped = skipped
 }
 
 // isEligible tells if an object key must be loaded: not a folder marker and matching the pattern.
@@ -215,15 +233,12 @@ func formatOf(key string) string {
 	return ""
 }
 
-// checkFormats ensures that all the files are of the same, supported, format.
+// checkFormats ensures that all the files are of the same format. The keys must have a supported
+// extension, the others are skipped by list.
 func checkFormats(keys []string) error {
 	var firstKey, firstFormat string
 	for _, key := range keys {
 		f := formatOf(key)
-		if f == "" {
-			return fmt.Errorf(
-				"unsupported file extension for %q (supported: .json, .yaml, .yml, .toml)", key)
-		}
 		if firstFormat == "" {
 			firstKey, firstFormat = key, f
 			continue

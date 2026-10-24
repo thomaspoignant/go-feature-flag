@@ -2,6 +2,7 @@ package s3retrieverv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -11,8 +12,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/thomaspoignant/go-feature-flag/internal/s3folder"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+)
+
+// retrieverMode is how the retriever reads the bucket, it is derived from the configuration by Init.
+type retrieverMode string
+
+const (
+	// singleFileMode downloads the file set in Item. It is the zero value so a Retriever
+	// used without calling Init keeps its original behavior.
+	singleFileMode retrieverMode = ""
+	// folderMode merges the files selected by Prefix, Pattern and Recursive (Item is not set).
+	folderMode retrieverMode = "folder"
 )
 
 // Retriever is a configuration struct for a S3 retriever.
@@ -30,8 +43,9 @@ type Retriever struct {
 	// if missing. Can't be used with Item.
 	Prefix string
 
-	// Pattern is an optional glob (see path.Match) applied to the base name of each object found
-	// in folder mode (ex: "*.yaml"). If empty, all the objects are used. Can't be used with Item.
+	// Pattern is an optional glob (see path.Match) matched against the file name only (the last
+	// element of the key, not the whole path) of each object found in folder mode (ex: "*.yaml").
+	// It can't contain a "/". If empty, all the objects are used. Can't be used with Item.
 	Pattern string
 
 	// Recursive makes the folder mode also look into the "sub folders" of Prefix.
@@ -54,12 +68,17 @@ type Retriever struct {
 	lister     ListerAPI
 	status     retriever.Status
 	logger     *fflog.FFLogger
-	// format is the format of the last prefix retrieval, read by OutputFormat.
+	// format is the format of the last folder retrieval, read by OutputFormat.
 	format atomic.Value
+	// mode is set once by Init, from Item.
+	mode retrieverMode
 
-	// mu protects downloader, lister and cache, and serializes Retrieve calls.
+	// mu protects downloader, lister, cache and skipped, and serializes Retrieve calls.
 	mu    sync.Mutex
 	cache map[string]cachedObject
+	// skipped is the set of the keys skipped because of their unsupported extension at the last
+	// poll, so that each of them is only logged once.
+	skipped map[string]struct{}
 }
 
 // Init is initializing the retriever to start fetching the flags configuration.
@@ -68,16 +87,20 @@ func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 		ctx = context.Background()
 	}
 	s.status = retriever.RetrieverNotReady
-	if err := s.validate(); err != nil {
+	if err := s3folder.Validate(s.Item, s.Prefix, s.Pattern, s.Recursive); err != nil {
 		s.status = retriever.RetrieverError
-		return err
+		return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
 	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.logger = logger
-	// Item mode only needs a downloader, folder mode needs a lister too.
-	needLister := s.Item == ""
+	s.mode = singleFileMode
+	if s.Item == "" {
+		s.mode = folderMode
+	}
+	// Single file mode only needs a downloader, folder mode needs a lister too.
+	needLister := s.mode == folderMode
 	if s.downloader == nil || (needLister && s.lister == nil) {
 		if s.AwsConfig == nil {
 			cfg, err := config.LoadDefaultConfig(ctx)
@@ -107,6 +130,7 @@ func (s *Retriever) Shutdown(_ context.Context) error {
 	s.downloader = nil
 	s.lister = nil
 	s.cache = nil
+	s.skipped = nil
 	return nil
 }
 
@@ -127,8 +151,12 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("downloader is not initialized")
 	}
 
+	if s.mode == folderMode {
+		return s.loadFolder(ctx)
+	}
+
 	if s.Item == "" {
-		return s.retrievePrefix(ctx)
+		return nil, errors.New("S3 retriever not initialized: call Init (Item is empty means folder mode)")
 	}
 
 	content, err := s.download(ctx, s.Item)
@@ -153,18 +181,20 @@ func (s *Retriever) download(ctx context.Context, key string) ([]byte, error) {
 }
 
 // OutputFormat declares the format of the bytes returned by Retrieve.
-// In item mode it is the format of the file, unknown here, so we return an empty string to let
-// the global file format apply.
+// In single file mode it is the format of the file, unknown here, so we return an empty string to
+// let the global file format apply.
 // In folder mode the merged flag set is encoded in the format of the files found by the last
 // Retrieve ("json" for an empty flag set). Before the first Retrieve it is guessed from Pattern.
 func (s *Retriever) OutputFormat() string {
-	if s.Item != "" {
+	switch s.mode {
+	case folderMode:
+		if f, ok := s.format.Load().(string); ok {
+			return f
+		}
+		return formatOf(s.Pattern)
+	default:
 		return ""
 	}
-	if f, ok := s.format.Load().(string); ok {
-		return f
-	}
-	return formatOf(s.Pattern)
 }
 
 func (s *Retriever) SetDownloader(downloader DownloaderAPI) {
@@ -173,7 +203,7 @@ func (s *Retriever) SetDownloader(downloader DownloaderAPI) {
 	s.downloader = downloader
 }
 
-// SetLister overrides the component used to list the objects of the bucket (prefix mode).
+// SetLister overrides the component used to list the objects of the bucket (folder mode).
 func (s *Retriever) SetLister(lister ListerAPI) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

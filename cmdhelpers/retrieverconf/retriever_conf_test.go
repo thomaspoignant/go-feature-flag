@@ -80,7 +80,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Prefix: "flags/",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: \"item\" and \"prefix\" are mutually exclusive for kind \"s3\"",
+			errValue: "invalid retriever: item and prefix are mutually exclusive for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with item and pattern",
@@ -88,7 +88,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Pattern: "*.yaml",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"s3\"",
+			errValue: "invalid retriever: pattern and recursive can only be used without item for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with item and recursive",
@@ -96,7 +96,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Recursive: true,
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"s3\"",
+			errValue: "invalid retriever: pattern and recursive can only be used without item for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with invalid pattern",
@@ -104,7 +104,15 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind: "s3", Bucket: "testBucket", Prefix: "flags/", Pattern: "[a-",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: invalid \"pattern\" for kind \"s3\": syntax error in pattern",
+			errValue: "invalid retriever: invalid pattern \"[a-\": syntax error in pattern for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with pattern containing a slash",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Prefix: "flags/", Pattern: "sub/*.yaml",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: invalid pattern \"sub/*.yaml\": it is matched against the file name only and can't contain \"/\" for kind \"s3\"",
 		},
 		{
 			name: "kind s3 with prefix and no bucket",

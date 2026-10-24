@@ -3,10 +3,10 @@ package retrieverconf
 import (
 	"fmt"
 	"net/http"
-	"path"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
+	"github.com/thomaspoignant/go-feature-flag/internal/s3folder"
 )
 
 var DefaultRetrieverConfig = struct {
@@ -229,19 +229,8 @@ func (r RetrieverKind) IsValid() error {
 
 // validateS3Retriever validates the item/prefix settings (no item means folder mode) of the S3 retriever.
 func (c *RetrieverConf) validateS3Retriever() error {
-	switch {
-	case c.Item != "" && c.Prefix != "":
-		return fmt.Errorf(
-			"invalid retriever: \"item\" and \"prefix\" are mutually exclusive for kind \"%s\"", c.Kind)
-	case c.Item != "" && (c.Pattern != "" || c.Recursive):
-		return fmt.Errorf(
-			"invalid retriever: \"pattern\" and \"recursive\" can only be used without \"item\" for kind \"%s\"",
-			c.Kind)
-	}
-	if c.Pattern != "" {
-		if _, mErr := path.Match(c.Pattern, ""); mErr != nil {
-			return fmt.Errorf("invalid retriever: invalid \"pattern\" for kind \"%s\": %v", c.Kind, mErr)
-		}
+	if err := s3folder.Validate(c.Item, c.Prefix, c.Pattern, c.Recursive); err != nil {
+		return fmt.Errorf("invalid retriever: %v for kind \"%s\"", err, c.Kind)
 	}
 	return nil
 }

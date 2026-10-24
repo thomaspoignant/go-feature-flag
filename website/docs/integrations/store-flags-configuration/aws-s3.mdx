@@ -42,7 +42,7 @@ export AWS_DEFAULT_REGION=eu-west-1
 | `bucket`   | <Mandatory /> | string | **none** | This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
 | `item`     | <NotMandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.<br/>_Set it to load one file; leave it out to load a folder, see [Load several files from a folder](#load-several-files-from-a-folder)._ |
 | `prefix`   | <NotMandatory /> | string | **none** | _Folder mode only._ Key prefix _(ex: `flags/`)_ restricting the files loaded. Empty or `/` is the root of the bucket. |
-| `pattern`  | <NotMandatory /> | string | **none** | _Folder mode only._ Optional glob matched against the file name _(ex: `*.yaml`)_. If empty, every file is used. |
+| `pattern`  | <NotMandatory /> | string | **none** | _Folder mode only._ Optional glob matched against the file name only, not the whole path _(ex: `*.yaml`)_, so it can't contain a `/`. If empty, every file is used. |
 | `recursive` | <NotMandatory /> | bool  | `false`  | _Folder mode only._ If `true`, files in nested "folders" are also loaded, otherwise only the direct children of the prefix. |
 
 **Set `item` to load a single file, leave it out to load a folder.** `prefix`, `pattern` and `recursive` can only be
@@ -72,11 +72,12 @@ silently switches the retriever to folder mode.
 How it works:
 - **Format**: it is derived from the file extension _(`.json`, `.yaml`/`.yml`, `.toml`)_. All the files must have the
   same format, otherwise the retrieval fails with an error naming the offending files. Use `pattern` to select only one
-  format when your prefix contains several. A file with another extension is also an error.
+  format when your prefix contains several. A file with another extension is skipped with a warning in the logs
+  _(once, as long as it stays there)_, it does not make the retrieval fail.
 - **Merge**: the top-level flag keys of every file are merged. If the same flag key is defined in 2 files, the
   retrieval fails with an error naming the flag and both files.
 - **Polling**: the retriever lists the objects at each poll and only downloads the files whose `ETag` changed (or
-  that are new). The other ones are served from memory.
+  that are new). An object listed without an `ETag` is downloaded at every poll. The other ones are served from memory.
 - **Deletion**: if a file is removed from the bucket, its flags disappear from the flag set at the next poll. If no
   file matches, the flag set is empty _(this is not an error, but a warning is logged)_.
 - Keys ending with `/` _(folder markers)_ are ignored. Without `recursive`, only the direct children of the prefix
@@ -147,6 +148,6 @@ Retriever: &s3retrieverv2.Retriever{
 | **`Bucket`**    | <Mandatory /> | The name of your bucket.                                                                                                                                                                       |
 | **`Item`**      | <NotMandatory /> | The location of your file in the bucket. If not set, the retriever is in folder mode and merges several files (see [above](#load-several-files-from-a-folder)). |
 | **`Prefix`**    | <NotMandatory /> | _Folder mode only._ Key prefix _(ex: `flags/`)_. Empty or `/` is the root of the bucket. Requires the `s3:ListBucket` permission. |
-| **`Pattern`**   | <NotMandatory /> | _Folder mode only._ Glob matched against the file name _(ex: `*.yaml`)_. |
+| **`Pattern`**   | <NotMandatory /> | _Folder mode only._ Glob matched against the file name only, it can't contain a `/` _(ex: `*.yaml`)_. |
 | **`Recursive`** | <NotMandatory /> | _Folder mode only._ If `true`, files in nested "folders" are also loaded. Defaults to `false`. |
 | **`AwsConfig`** | <NotMandatory /> | An instance of `aws.Config` that configure your access to AWS <br/>*check [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)*.<br/>If not set, `config.LoadDefaultConfig()` is called for you, which reads the standard AWS environment variables and shared config files. |
