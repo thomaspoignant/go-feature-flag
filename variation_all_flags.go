@@ -41,10 +41,20 @@ func (g *GoFeatureFlag) GetFlagStates(
 		return flagstate.NewAllFlags()
 	}
 
+	snapshot, err := g.retrieverManager.Snapshot()
+	if err != nil {
+		if len(flagsToEvaluate) != 0 {
+			return flagstate.NewAllFlags()
+		}
+		return flagstate.AllFlags{}
+	}
+
 	// prepare evaluation context enrichment
 	flagCtx := flag.Context{
 		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 		DefaultSdkValue:             nil,
+		DefaultTTL:                  g.config.DefaultFlagTTL,
+		GetFlag:                     flagResolver(snapshot),
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
@@ -54,7 +64,7 @@ func (g *GoFeatureFlag) GetFlagStates(
 	if len(flagsToEvaluate) != 0 {
 		flagStates := flagstate.NewAllFlags()
 		for _, key := range flagsToEvaluate {
-			currentFlag, err := g.retrieverManager.GetFlag(key)
+			currentFlag, err := snapshot.GetFlag(key)
 			if err != nil {
 				// We ignore flags in error
 				continue
@@ -68,7 +78,7 @@ func (g *GoFeatureFlag) GetFlagStates(
 	}
 
 	// Evaluate all the flags
-	flags, err := g.GetFlagsFromCache()
+	flags, err := snapshot.All()
 	if err != nil {
 		return flagstate.AllFlags{}
 	}

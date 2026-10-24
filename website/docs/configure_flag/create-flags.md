@@ -245,6 +245,42 @@ It means that for a specific `targetingKey` the user will always see the same fl
     </tr>
     <tr>
       <td>
+        <code>createdAt</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Creation date of the flag, <b>in UTC</b> (RFC 3339, for example <code>2026-01-15T00:00:00Z</code>), it is the starting point of the TTL. <i>A flag without <code>createdAt</code> never expires, unless <code>expiresAt</code> is set.</i>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>ttl</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Time to live of the flag, for example <code>90d</code>, <code>12h</code> or <code>1h30m</code>. The flag expires at <code>createdAt</code> + <code>ttl</code>. It overrides the default TTL.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>expiresAt</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          Date at which the flag expires, <b>in UTC</b> (RFC 3339, for example <code>2026-04-15T00:00:00Z</code>). It overrides <code>createdAt</code> and <code>ttl</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>version</code>
         <br />
         <sup><sup>optional</sup></sup>
@@ -318,6 +354,96 @@ It means that for a specific `targetingKey` the user will always see the same fl
 
   </tbody>
 </table>
+
+## ⏳ Flag TTL
+
+Feature flags are meant to be short-lived. Each flag has a time to live (TTL), and when it is over the flag becomes **expired**:
+it is not deleted, but every evaluation returns the default value of the SDK with the error code `FLAG_EXPIRED` and
+an explicit message (for example `flag "my-flag" expired on 2026-04-15T00:00:00Z`).
+
+The expiration date of a flag is the first of:
+
+1. `expiresAt` if the flag defines it.
+2. `createdAt` + `ttl` if the flag defines a `ttl`.
+3. `createdAt` + the default TTL of the flagset (`defaultFlagTTL` in the relay proxy flagset configuration).
+4. `createdAt` + the global default TTL (`defaultFlagTTL` in the relay proxy configuration or `DefaultFlagTTL` in the Go module). **Default: 90 days.**
+
+```yaml
+my-flag:
+  createdAt: 2026-01-15T00:00:00Z
+  ttl: 30d
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: disabled
+```
+
+:::note
+A flag without `createdAt` (and without `expiresAt`) never expires, there is no date to compute the TTL from.
+:::
+
+:::info
+`createdAt` and `expiresAt` must be written in **UTC** (the `Z` suffix). If a date is written with another offset it is
+converted to UTC, and the expiration date shown in the error message is always in UTC.
+A `ttl` is a duration, it does not depend on any time zone.
+:::
+
+The relay proxy checks the TTLs every 5 seconds, logs a warning when a flag expires and lists the expired flags
+of each flagset in the `expiredFlags` field of the `/info` endpoint.
+
+## 🔗 Flag dependencies
+
+A flag can depend on the state of another flag (the parent): a variation of the child is only served while the parent
+is in the expected state. This is typically used to make sure that a child flag cannot be turned on when its parent is off.
+
+```yaml
+parent-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+
+child-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  dependsOn:
+    - flag: parent-flag        # name of the parent flag
+      variation: enabled       # the parent must resolve to this variation...
+      # notVariation: disabled # ...or, alternatively, must not resolve to this one
+      appliesTo: [enabled]     # variations of child-flag bound by the dependency (default: all)
+      expiresWithParent: true  # child-flag expires when parent-flag expires (default: false)
+```
+
+| Field               | Description                                                                                                  |
+|---------------------|--------------------------------------------------------------------------------------------------------------|
+| `flag`              | **(mandatory)** Name of the parent flag.                                                                      |
+| `variation`         | Variation the parent must resolve to. Exactly one of `variation` and `notVariation` is mandatory.            |
+| `notVariation`      | Variation the parent must **not** resolve to.                                                                |
+| `appliesTo`         | Variations of the flag bound by the dependency. If empty, the dependency applies to all the variations.      |
+| `expiresWithParent` | If `true`, the flag expires as soon as the parent flag expires (see [Flag TTL](#-flag-ttl)). Default: `false`. |
+
+The parent is evaluated with the same evaluation context as the child.
+When the variation selected for the child is bound by a dependency that is not met, the evaluation returns the default
+value of the SDK with the error code `FLAG_DEPENDENCY` and an explicit message (for example
+`variation "enabled" of flag "child-flag" is not available: dependency on flag "parent-flag" is not met`).
+
+- A flag can have several dependencies, **all** of them must be met.
+- A dependency is not met if the parent does not exist, is disabled, is expired or fails to evaluate.
+- Dependencies can be chained (a parent can have its own parent).
+- Circular dependencies are not supported, the evaluation returns the error code `FLAG_CONFIG`.
+- The result of a flag with dependencies is never cacheable by the SDKs, since it depends on another flag.
+
+### Expiration
+
+With `expiresWithParent: true` the expiration date of the child is the earliest of its own expiration date and the
+expiration date of its parent. Expirations cascade: if the parent itself expires with its own parent, so does the child.
+The child then behaves like any expired flag (error code `FLAG_EXPIRED`) and is listed in `expiredFlags` of the `/info`
+endpoint of the relay proxy.
 
 ## Advanced configurations
 

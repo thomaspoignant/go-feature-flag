@@ -1,0 +1,8 @@
+expired-flag:
+  createdAt: 2020-01-01T00:00:00Z
+  ttl: 1d
+  variations:
+    "on": true
+    "off": false
+  defaultRule:
+    variation: "on"

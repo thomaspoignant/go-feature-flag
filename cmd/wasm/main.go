@@ -106,6 +106,12 @@ func localEvaluation(input string) string {
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
 
+	// The host does not know the default TTL of the flag set, apply the default one so the local
+	// evaluation expires the flags like the relay proxy does when it is not customized.
+	if evaluateInput.FlagContext.DefaultTTL == 0 {
+		evaluateInput.FlagContext.DefaultTTL = flag.DefaultFlagTTL
+	}
+
 	// we don't care about the error here because the errorCode and errorDetails
 	// contains information about the type of the error directly, no need to check the Go error.
 	c, _ := evaluation.Evaluate[any](

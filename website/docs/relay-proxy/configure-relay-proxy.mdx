@@ -366,6 +366,19 @@ If in the evaluation context you have a field with the same name, it will be ove
 - default: **none**
 - mandatory: <NotMandatory />
 
+### `defaultFlagTTL`
+
+Time to live applied to the flags that do not define their own `ttl`, for example `90d`, `12h` or `1h30m`.
+When the TTL of a flag (counted from its `createdAt`) is over, the flag expires and every evaluation returns an error.
+See [flag TTL](../configure_flag/create-flags.md#-flag-ttl).
+
+It can be overridden for a flag set with [`flagSet.defaultFlagTTL`](#flagsetdefaultflagttl).
+
+- option name: `defaultFlagTTL`
+- type: **string**
+- default: **`90d`**
+- mandatory: <NotMandatory />
+
 ### `openTelemetryOtlpEndpoint`
 
 Endpoint of your **OpenTelemetry OTLP collector**, used to send traces.
@@ -738,6 +751,12 @@ Set to true if you do not want to call any notifier when the flags are loaded fo
 Additional context data to merge with all evaluation requests for this flag set.
 
 - [_see `evaluationContextEnrichment`_](#evaluationcontextenrichment)
+
+#### `flagSet.defaultFlagTTL`
+
+Default TTL of the flags of this flag set, it overrides the global `defaultFlagTTL`.
+
+- [_see `defaultFlagTTL`_](#defaultflagttl)
 
 #### `flagSet.persistentFlagConfigurationFile`
 

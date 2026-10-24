@@ -25,6 +25,10 @@ func ConvertDtoToInternalFlag(dto DTO) flag.InternalFlag {
 		Scheduled:       dto.Scheduled,
 		Experimentation: experimentation,
 		Metadata:        dto.Metadata,
+		CreatedAt:       dto.CreatedAt,
+		TTL:             dto.TTL,
+		ExpiresAt:       dto.ExpiresAt,
+		DependsOn:       dto.DependsOn,
 	}
 }
 
@@ -46,6 +50,10 @@ func ConvertInternalFlagToDto(f flag.InternalFlag) DTO {
 		BucketingKey:    f.BucketingKey,
 		DefaultRule:     f.DefaultRule,
 		Scheduled:       f.Scheduled,
+		CreatedAt:       f.CreatedAt,
+		TTL:             f.TTL,
+		ExpiresAt:       f.ExpiresAt,
+		DependsOn:       f.DependsOn,
 		Experimentation: experimentation,
 		Metadata:        f.Metadata,
 	}

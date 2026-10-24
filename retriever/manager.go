@@ -270,6 +270,16 @@ func (m *Manager) GetFlag(flagKey string) (flag.Flag, error) {
 	return m.cacheManager.GetFlag(flagKey)
 }
 
+// Snapshot returns a frozen version of the cache, all the reads on it come from the same configuration.
+func (m *Manager) Snapshot() (cache.Snapshot, error) {
+	if s, ok := m.cacheManager.(interface {
+		Snapshot() (cache.Snapshot, error)
+	}); ok {
+		return s.Snapshot()
+	}
+	return cache.NewSnapshot(m.cacheManager.GetFlag, m.cacheManager.AllFlags), nil
+}
+
 // GetFlagsFromCache returns all the flags present in the cache with their
 // current state when calling this method. If cache hasn't been initialized, an
 // error reporting this is returned.

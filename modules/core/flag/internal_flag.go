@@ -58,6 +58,19 @@ type InternalFlag struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
+
+	// CreatedAt is the date used as the starting point of the TTL, it should be in UTC.
+	// A flag without CreatedAt (and without ExpiresAt) never expires.
+	CreatedAt *time.Time `json:"createdAt,omitempty" yaml:"createdAt,omitempty" toml:"createdAt,omitempty"`
+
+	// TTL is the time to live of the flag, such as "90d" or "12h". It overrides the default TTL.
+	TTL *string `json:"ttl,omitempty" yaml:"ttl,omitempty" toml:"ttl,omitempty"`
+
+	// ExpiresAt is the date at which the flag expires, it should be in UTC. It overrides CreatedAt and TTL.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty" yaml:"expiresAt,omitempty" toml:"expiresAt,omitempty"`
+
+	// DependsOn binds the variations of the flag to the state of other flags.
+	DependsOn *[]FlagDependency `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty" toml:"dependsOn,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -73,6 +86,16 @@ func (f *InternalFlag) Value(
 	}
 
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
+	if expiration, expired := f.expirationIfExpired(evaluationDate, flagContext); expired {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeFlagExpired,
+			ErrorMessage: fmt.Sprintf("flag %q expired on %s", flagName, expiration.Format(time.RFC3339)),
+			Metadata:     f.GetMetadata(),
+		}
+	}
+
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
 	if err != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
@@ -119,6 +142,17 @@ func (f *InternalFlag) Value(
 			}
 	}
 
+	if errorCode, message := flag.unmetDependency(
+		flagName, variationSelection.name, evaluationCtx, flagContext); errorCode != "" {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    errorCode,
+			ErrorMessage: message,
+			Metadata:     f.GetMetadata(),
+		}
+	}
+
 	return flag.GetVariationValue(variationSelection.name), ResolutionDetails{
 		Variant:   variationSelection.name,
 		Reason:    variationSelection.reason,
@@ -154,7 +188,17 @@ func selectEvaluationReason(
 
 func (f *InternalFlag) isCacheable() bool {
 	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
-	return !isDynamic
+	// a flag that can expire can't be cached, the SDK would keep serving it after the expiration.
+	canExpire := f.ExpiresAt != nil || f.CreatedAt != nil
+	return !isDynamic && !canExpire && len(f.GetDependsOn()) == 0
+}
+
+// GetDependsOn is the getter for the field DependsOn
+func (f *InternalFlag) GetDependsOn() []FlagDependency {
+	if f.DependsOn == nil {
+		return nil
+	}
+	return *f.DependsOn
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
@@ -309,6 +353,15 @@ func (f *InternalFlag) IsValid() error {
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	if err := f.validateTTL(); err != nil {
+		return err
+	}
+	for _, dep := range f.GetDependsOn() {
+		if err := dep.validate(f.GetVariations()); err != nil {
+			return err
 		}
 	}
 

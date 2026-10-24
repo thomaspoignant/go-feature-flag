@@ -1143,7 +1143,9 @@ def _evaluator_with_fallback(flag_dict=None, remote_result=None, remote_error=No
     return evaluator, mock_wasm, fallback
 
 
-@pytest.mark.parametrize("engine_error_code", ["PARSE_ERROR", "GENERAL"])
+@pytest.mark.parametrize(
+    "engine_error_code", ["PARSE_ERROR", "GENERAL", "FLAG_DEPENDENCY"]
+)
 def test_engine_failure_falls_back_to_remote_evaluation(engine_error_code):
     """The relay proxy is authoritative, so a provider-side failure re-evaluates there."""
     evaluator, mock_wasm, fallback = _evaluator_with_fallback()
