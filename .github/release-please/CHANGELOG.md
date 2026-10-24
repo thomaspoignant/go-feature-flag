@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.57.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.57.1...v1.57.2) (2026-10-24)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump labstack/echo/v5 to v5.4.2 ([#6340](https://github.com/thomaspoignant/go-feature-flag/issues/6340)) ([8d9cd2a](https://github.com/thomaspoignant/go-feature-flag/commit/8d9cd2abee56c20a18594cdff33c66d57c780af2))
+* **sonar:** resolve SonarCloud issues reported on main ([#6333](https://github.com/thomaspoignant/go-feature-flag/issues/6333)) ([8fbe60b](https://github.com/thomaspoignant/go-feature-flag/commit/8fbe60bb716b9a587b2867ba4cd2744ce4c59a48))
+
+
+### 🔧 Chores
+
+* Bump @typescript-eslint/eslint-plugin ([#6324](https://github.com/thomaspoignant/go-feature-flag/issues/6324)) ([3661403](https://github.com/thomaspoignant/go-feature-flag/commit/3661403188d3abd1d4fe993ccc0a2c3e83112ede))
+* Bump actions/setup-java from 6.0.1 to 6.1.0 ([#6332](https://github.com/thomaspoignant/go-feature-flag/issues/6332)) ([4222de9](https://github.com/thomaspoignant/go-feature-flag/commit/4222de9cb03cb15f22ef9aa5fa4854ec962c7c7c))
+* Bump anthropics/claude-code-action from 1.0.248 to 1.0.252 ([#6329](https://github.com/thomaspoignant/go-feature-flag/issues/6329)) ([333d17c](https://github.com/thomaspoignant/go-feature-flag/commit/333d17ce4cbb0314d6e258b1c55e5a2ebfd855a7))
+* Bump dev.openfeature.contrib.providers:go-feature-flag ([#6319](https://github.com/thomaspoignant/go-feature-flag/issues/6319)) ([c286955](https://github.com/thomaspoignant/go-feature-flag/commit/c2869554ec0f6d06425ccfb51ae1c01fc51adf36))
+* Bump dev.openfeature.contrib.providers:go-feature-flag ([#6328](https://github.com/thomaspoignant/go-feature-flag/issues/6328)) ([a53975d](https://github.com/thomaspoignant/go-feature-flag/commit/a53975daf299ed7dd80422c8c246cdcd27614c61))
+* Bump github/codeql-action/upload-sarif from 4.38.3 to 4.39.0 ([#6331](https://github.com/thomaspoignant/go-feature-flag/issues/6331)) ([dc876c8](https://github.com/thomaspoignant/go-feature-flag/commit/dc876c8fe380b419def8e20fd77a31fe9fc80ca0))
+* Bump postcss in /examples/openfeature_react/react-app ([#6322](https://github.com/thomaspoignant/go-feature-flag/issues/6322)) ([836b91b](https://github.com/thomaspoignant/go-feature-flag/commit/836b91b02bfdc13f1837910666224528cd740825))
+* Bump react in /examples/openfeature_react/react-app ([#6323](https://github.com/thomaspoignant/go-feature-flag/issues/6323)) ([46d343d](https://github.com/thomaspoignant/go-feature-flag/commit/46d343d07879eb7f26a476be4808f91d3e6c7489))
+* Bump react-dom in /examples/openfeature_react/react-app ([#6326](https://github.com/thomaspoignant/go-feature-flag/issues/6326)) ([836a851](https://github.com/thomaspoignant/go-feature-flag/commit/836a85144d818057311edd9772087c47426e9490))
+* Bump sass in /examples/openfeature_web/webapp ([#6321](https://github.com/thomaspoignant/go-feature-flag/issues/6321)) ([e7125ad](https://github.com/thomaspoignant/go-feature-flag/commit/e7125ad0e1f496abc659d5740b0d6c21eb529f41))
+* Bump webpack in /examples/openfeature_web/webapp ([#6320](https://github.com/thomaspoignant/go-feature-flag/issues/6320)) ([662933a](https://github.com/thomaspoignant/go-feature-flag/commit/662933ac74e10300f05408fc57787adb69cc5ece))
+* Bump zizmorcore/zizmor-action from 0.6.4 to 0.7.1 ([#6330](https://github.com/thomaspoignant/go-feature-flag/issues/6330)) ([40e9e8f](https://github.com/thomaspoignant/go-feature-flag/commit/40e9e8fa840e8ea633f7d00065538408d3bd2b41))
+
 ## [1.57.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.57.0...v1.57.1) (2026-10-22)
 
 
