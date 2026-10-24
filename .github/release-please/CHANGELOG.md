@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.57.3](https://github.com/thomaspoignant/go-feature-flag/compare/v1.57.2...v1.57.3) (2026-10-24)
+
+
+### 🐛 Bug Fixes
+
+* **bench:** restore benchmark fixture and fail on setup/evaluation errors ([#6342](https://github.com/thomaspoignant/go-feature-flag/issues/6342)) ([d089bab](https://github.com/thomaspoignant/go-feature-flag/commit/d089bab87ace7b9bae0d3d8b95da9fbf92735c6b)), closes [#6338](https://github.com/thomaspoignant/go-feature-flag/issues/6338)
+
 ## [1.57.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.57.1...v1.57.2) (2026-10-24)
 
 
