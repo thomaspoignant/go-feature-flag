@@ -18,6 +18,190 @@
     },
     "basePath": "/",
     "paths": {
+        "/admin/v1/flag-history": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
+                    }
+                ],
+                "description": "Every modification (added, updated, deleted) of a flag is recorded with its author and\nthe list of the fields that changed. The result is paginated with a cursor.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin API to manage GO Feature Flag"
+                ],
+                "summary": "List the modifications made on the flags.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Only the modifications of this flagset",
+                        "name": "flagset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "added",
+                            "updated",
+                            "deleted"
+                        ],
+                        "type": "string",
+                        "description": "Only this kind of modification",
+                        "name": "action",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications made by this author",
+                        "name": "author",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications after this date (RFC 3339)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications before this date (RFC 3339)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default 50, max 500)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "nextCursor returned by the previous page",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/flaghistory.Page"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "503": {
+                        "description": "The history database is not reachable",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/v1/flag-history/{flagKey}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
+                    }
+                ],
+                "description": "Every modification (added, updated, deleted) of a flag is recorded with its author and\nthe list of the fields that changed. The result is paginated with a cursor.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin API to manage GO Feature Flag"
+                ],
+                "summary": "List the modifications made on the flags.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Only the modifications of this flag (only on /admin/v1/flag-history/{flagKey})",
+                        "name": "flagKey",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications of this flagset",
+                        "name": "flagset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "added",
+                            "updated",
+                            "deleted"
+                        ],
+                        "type": "string",
+                        "description": "Only this kind of modification",
+                        "name": "action",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications made by this author",
+                        "name": "author",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications after this date (RFC 3339)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only the modifications before this date (RFC 3339)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default 50, max 500)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "nextCursor returned by the previous page",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/flaghistory.Page"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "503": {
+                        "description": "The history database is not reachable",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/v1/retriever/refresh": {
             "post": {
                 "security": [
@@ -860,6 +1044,100 @@
                 }
             }
         },
+        "flaghistory.Action": {
+            "type": "string",
+            "enum": [
+                "added",
+                "updated",
+                "deleted"
+            ],
+            "x-enum-varnames": [
+                "ActionAdded",
+                "ActionUpdated",
+                "ActionDeleted"
+            ]
+        },
+        "flaghistory.Diff": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "description": "Changes is the list of fields modified (updated flags).",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flaghistory.FieldChange"
+                    }
+                },
+                "reconciled": {
+                    "description": "Reconciled is true when the change was detected at startup, by comparing the flags\nwith the latest recorded state, so the detail of the fields is not available.",
+                    "type": "boolean"
+                },
+                "summary": {
+                    "description": "Summary is a minimal description of the flag (added and deleted flags).",
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "flaghistory.Entry": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/flaghistory.Action"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "authorEmail": {
+                    "type": "string"
+                },
+                "changeRef": {
+                    "type": "string"
+                },
+                "detectedAt": {
+                    "type": "string"
+                },
+                "diff": {
+                    "$ref": "#/definitions/flaghistory.Diff"
+                },
+                "flagKey": {
+                    "type": "string"
+                },
+                "flagset": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "flaghistory.FieldChange": {
+            "type": "object",
+            "properties": {
+                "new": {},
+                "old": {},
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "flaghistory.Page": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flaghistory.Entry"
+                    }
+                },
+                "nextCursor": {
+                    "description": "NextCursor is the cursor to use to get the next page, 0 when there is no more entry.",
+                    "type": "integer"
+                }
+            }
+        },
         "model.AllFlagRequest": {
             "type": "object",
             "properties": {
@@ -1263,6 +1541,27 @@
                 }
             }
         },
+        "notifier.ChangeInfo": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "description": "Author is the name of the person (or the system) who made the change.",
+                    "type": "string"
+                },
+                "changedAt": {
+                    "description": "ChangedAt is the date of the change in the source system.",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "Email is the email of the author.",
+                    "type": "string"
+                },
+                "reference": {
+                    "description": "Reference identifies the change in the source system (commit sha, version...).",
+                    "type": "string"
+                }
+            }
+        },
         "notifier.DiffCache": {
             "type": "object",
             "properties": {
@@ -1271,6 +1570,14 @@
                     "additionalProperties": {
                         "$ref": "#/definitions/flag.Flag"
                     }
+                },
+                "change": {
+                    "description": "Change is the origin of the modification (author, reference...).\nIt is nil when none of the retrievers is able to provide it.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/notifier.ChangeInfo"
+                        }
+                    ]
                 },
                 "deleted": {
                     "type": "object",

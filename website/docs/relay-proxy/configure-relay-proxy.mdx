@@ -312,6 +312,17 @@ It is enabled when [`ofrepEventStream.baseUrl`](#ofrepeventstreambaseurl) is set
 - default: **none**
 - mandatory: <NotMandatory />
 
+### `flagHistory`
+
+Records every modification of the flags (added, updated, deleted) in a PostgreSQL database, with its author when it is known, and exposes them through the [`/admin/v1/flag-history`](#flag-history-api) endpoint.
+
+The history survives restarts of the relay proxy and is shared by all the instances using the same database.
+
+- option name: `flagHistory`
+- type: **[flagHistory](#type-flaghistory)**
+- default: **enabled as soon as [`flagHistory.uri`](#flaghistoryuri) is set**
+- mandatory: <NotMandatory />
+
 ### `disableVersionHeader`
 
 If `disableVersionHeader` is set to **`true`**, the relay proxy will not add the header `x-gofeatureflag-version` with the GO Feature Flag version in the HTTP response.
@@ -845,6 +856,120 @@ The delay in seconds advertised to the client, after which it should consider th
 - type: **integer**
 - default: **`0`**
 - mandatory: <NotMandatory />
+
+### type `flagHistory`
+
+Configuration of the persistent history of the flag modifications.
+
+The history is **on by default**, but it only works with a database: it stays inactive (and the relay proxy logs an info message) until you set [`uri`](#flaghistoryuri). Nothing changes for existing setups that don't configure it.
+
+```yaml
+flagHistory:
+  uri: postgres://user:password@localhost:5432/goff?sslmode=disable
+  table: flag_history
+  retention: 8760h
+```
+
+The table is created at startup if it does not exist. Only the **diff** of each modification is stored (the fields that changed), never the full flag.
+
+How it behaves when something goes wrong:
+
+- **Database down at startup or later:** the relay proxy keeps serving flags. The modifications are kept in memory ([`queueSize`](#flaghistoryqueuesize)) and written, in order, as soon as the database is back. The history endpoint answers `503` in the meantime.
+- **Several relay proxy instances:** each modification is recorded once, whatever the number of instances.
+- **Changes made while the relay proxy was stopped:** they are recorded at startup, flagged `reconciled` (the detail of the fields is not available).
+- **Graceful shutdown:** the modifications still in memory are written before exiting.
+
+#### Who made the change
+
+The author is available when the retriever knows it:
+
+| Retriever | Author |
+|---|---|
+| GitHub, GitLab, Bitbucket | author of the last commit touching the flag file |
+| PostgreSQL | configure the `updated_by` and `updated_at` columns (`columns: { updated_by: ..., updated_at: ... }`), the author is the `updated_by` of the most recent row |
+| Others | `unknown` |
+
+The author is looked up only when a modification is detected, so it does not add any call to the git provider on each polling.
+
+#### `flagHistory.enabled`
+
+Set it to `false` to turn the history off even if a `uri` is configured. Setting it to `true` without a `uri` is a configuration error.
+
+- option name: `enabled`
+- type: **boolean**
+- default: **`true`** (active only when `uri` is set)
+- mandatory: <NotMandatory />
+
+#### `flagHistory.uri`
+
+The PostgreSQL connection string, the same format as the [PostgreSQL retriever](../integrations/store-flags-configuration/postgresql). The history is active only when it is set.
+
+- option name: `uri`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `flagHistory.table`
+
+The name of the table containing the history.
+
+- option name: `table`
+- type: **string**
+- default: **`flag_history`**
+- mandatory: <NotMandatory />
+
+#### `flagHistory.retention`
+
+How long the history is kept, a purge runs every 24 hours. The latest entry of each existing flag is always kept. A negative value keeps the history forever.
+
+- option name: `retention`
+- type: **duration**
+- default: **`8760h`** (1 year)
+- mandatory: <NotMandatory />
+
+#### `flagHistory.queueSize`
+
+The number of modifications kept in memory while the database is not reachable. When the queue is full, the new modifications are dropped and an error is logged.
+
+- option name: `queueSize`
+- type: **integer**
+- default: **`1000`**
+- mandatory: <NotMandatory />
+
+### Flag history API
+
+`GET /admin/v1/flag-history` and `GET /admin/v1/flag-history/{flagKey}` return the modifications, most recent first. They require an **admin** API key.
+
+| Query parameter | Description |
+|---|---|
+| `flagset` | only this flagset (flagsets without a name are `unnamed-<index>`) |
+| `action` | `added`, `updated` or `deleted` |
+| `author` | only this author |
+| `from`, `to` | RFC 3339 dates |
+| `limit` | page size, 50 by default, 500 max |
+| `cursor` | the `nextCursor` of the previous page |
+
+```json
+{
+  "entries": [
+    {
+      "id": 42,
+      "flagset": "default",
+      "flagKey": "my-flag",
+      "action": "updated",
+      "diff": { "changes": [{ "path": "defaultRule.variation", "old": "on", "new": "off" }] },
+      "author": "jane",
+      "authorEmail": "jane@example.com",
+      "changeRef": "3f2a1c0",
+      "source": "relayproxy-7c9f",
+      "detectedAt": "2026-10-21T09:00:00Z"
+    }
+  ],
+  "nextCursor": 41
+}
+```
+
+`detectedAt` is the date the relay proxy detected the change, which can be later than the commit date (polling interval).
 
 ## Use multiple flag sets
 

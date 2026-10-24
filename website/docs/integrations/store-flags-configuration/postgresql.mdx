@@ -111,6 +111,21 @@ retrievers:
 
 The `columns` field, is a map of the default column names to the custom column names in your postgres table.
 
+### Track who modified the flags
+If you use the relay proxy [flag history](../../relay-proxy/configure-relay-proxy.mdx#type-flaghistory), you can tell
+which user made the last modification by adding two optional columns to your table and mapping them in `columns`:
+`updated_by` (the author) and `updated_at` (the date of the modification).
+
+```yaml
+retriever:
+  kind: postgresql
+  uri: postgres://user:password@localhost:5432/dbname
+  table: go_feature_flag
+  columns:
+    updated_by: "modified_by"
+    updated_at: "modified_at"
+```
+
 
 ## Configure the GO Module
 To configure your GO module to use the {retrieverName} retriever, you need to add the following

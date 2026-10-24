@@ -1,8 +1,10 @@
 package notification
 
 import (
+	"context"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
@@ -17,16 +19,37 @@ type Service interface {
 	Notify(oldCache, newCache map[string]flag.Flag, log *fflog.FFLogger)
 }
 
-func NewService(notifiers []notifier.Notifier) Service {
-	return &notificationService{
+// changeInfoTimeout is the maximum time we wait for the origin of a change.
+const changeInfoTimeout = 5 * time.Second
+
+// ChangeInfoResolver returns who made the last change on the flag configuration.
+// It returns nil when the information is not available.
+type ChangeInfoResolver func(ctx context.Context) (*notifier.ChangeInfo, error)
+
+// Option configures the notification service.
+type Option func(*notificationService)
+
+// WithChangeInfoResolver sets the function used to find the origin of a change.
+// The resolver is called only when a difference is detected.
+func WithChangeInfoResolver(r ChangeInfoResolver) Option {
+	return func(n *notificationService) { n.changeInfoResolver = r }
+}
+
+func NewService(notifiers []notifier.Notifier, opts ...Option) Service {
+	svc := &notificationService{
 		Notifiers: notifiers,
 		waitGroup: &sync.WaitGroup{},
 	}
+	for _, opt := range opts {
+		opt(svc)
+	}
+	return svc
 }
 
 type notificationService struct {
-	Notifiers []notifier.Notifier
-	waitGroup *sync.WaitGroup
+	Notifiers          []notifier.Notifier
+	waitGroup          *sync.WaitGroup
+	changeInfoResolver ChangeInfoResolver
 }
 
 // Notify is sending the notification to the notifiers.
@@ -36,6 +59,7 @@ type notificationService struct {
 func (c *notificationService) Notify(oldCache, newCache map[string]flag.Flag, log *fflog.FFLogger) {
 	diff := c.getDifferences(oldCache, newCache)
 	if diff.HasDiff() {
+		diff.Change = c.resolveChangeInfo(log)
 		for _, n := range c.Notifiers {
 			c.waitGroup.Add(1)
 			notif := n
@@ -48,6 +72,21 @@ func (c *notificationService) Notify(oldCache, newCache map[string]flag.Flag, lo
 			}()
 		}
 	}
+}
+
+// resolveChangeInfo finds the origin of the change, a failure never blocks the notifications.
+func (c *notificationService) resolveChangeInfo(log *fflog.FFLogger) *notifier.ChangeInfo {
+	if c.changeInfoResolver == nil {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), changeInfoTimeout)
+	defer cancel()
+	info, err := c.changeInfoResolver(ctx)
+	if err != nil {
+		log.Warn("impossible to find the origin of the change", slog.Any("error", err.Error()))
+		return nil
+	}
+	return info
 }
 
 func (c *notificationService) Close() {

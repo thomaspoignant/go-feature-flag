@@ -137,7 +137,11 @@ func (s *Server) initRoutes() {
 	s.addOFREPRoutes(cFlagEvalOFREP, userAuth)
 	s.addStreamRoutes()
 	s.addMonitoringRoutes()
-	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
+	var cFlagHistory controller.Controller
+	if s.services.FlagHistory != nil {
+		cFlagHistory = controller.NewFlagHistory(s.services.FlagHistory)
+	}
+	s.addAdminRoutes(cRetrieverRefresh, cFlagHistory, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)
 }
 

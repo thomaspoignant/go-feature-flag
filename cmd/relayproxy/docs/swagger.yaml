@@ -73,6 +73,75 @@ definitions:
       value:
         description: value as set
     type: object
+  flaghistory.Action:
+    enum:
+    - added
+    - updated
+    - deleted
+    type: string
+    x-enum-varnames:
+    - ActionAdded
+    - ActionUpdated
+    - ActionDeleted
+  flaghistory.Diff:
+    properties:
+      changes:
+        description: Changes is the list of fields modified (updated flags).
+        items:
+          $ref: '#/definitions/flaghistory.FieldChange'
+        type: array
+      reconciled:
+        description: |-
+          Reconciled is true when the change was detected at startup, by comparing the flags
+          with the latest recorded state, so the detail of the fields is not available.
+        type: boolean
+      summary:
+        additionalProperties: {}
+        description: Summary is a minimal description of the flag (added and deleted
+          flags).
+        type: object
+    type: object
+  flaghistory.Entry:
+    properties:
+      action:
+        $ref: '#/definitions/flaghistory.Action'
+      author:
+        type: string
+      authorEmail:
+        type: string
+      changeRef:
+        type: string
+      detectedAt:
+        type: string
+      diff:
+        $ref: '#/definitions/flaghistory.Diff'
+      flagKey:
+        type: string
+      flagset:
+        type: string
+      id:
+        type: integer
+      source:
+        type: string
+    type: object
+  flaghistory.FieldChange:
+    properties:
+      new: {}
+      old: {}
+      path:
+        type: string
+    type: object
+  flaghistory.Page:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/flaghistory.Entry'
+        type: array
+      nextCursor:
+        description: NextCursor is the cursor to use to get the next page, 0 when
+          there is no more entry.
+        type: integer
+    type: object
   model.AllFlagRequest:
     properties:
       evaluationContext:
@@ -368,12 +437,35 @@ definitions:
         example: An error occurred
         type: string
     type: object
+  notifier.ChangeInfo:
+    properties:
+      author:
+        description: Author is the name of the person (or the system) who made the
+          change.
+        type: string
+      changedAt:
+        description: ChangedAt is the date of the change in the source system.
+        type: string
+      email:
+        description: Email is the email of the author.
+        type: string
+      reference:
+        description: Reference identifies the change in the source system (commit
+          sha, version...).
+        type: string
+    type: object
   notifier.DiffCache:
     properties:
       added:
         additionalProperties:
           $ref: '#/definitions/flag.Flag'
         type: object
+      change:
+        allOf:
+        - $ref: '#/definitions/notifier.ChangeInfo'
+        description: |-
+          Change is the origin of the modification (author, reference...).
+          It is nil when none of the retrievers is able to provide it.
       deleted:
         additionalProperties:
           $ref: '#/definitions/flag.Flag'
@@ -406,6 +498,128 @@ info:
   x-logo:
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png
 paths:
+  /admin/v1/flag-history:
+    get:
+      description: |-
+        Every modification (added, updated, deleted) of a flag is recorded with its author and
+        the list of the fields that changed. The result is paginated with a cursor.
+      parameters:
+      - description: Only the modifications of this flagset
+        in: query
+        name: flagset
+        type: string
+      - description: Only this kind of modification
+        enum:
+        - added
+        - updated
+        - deleted
+        in: query
+        name: action
+        type: string
+      - description: Only the modifications made by this author
+        in: query
+        name: author
+        type: string
+      - description: Only the modifications after this date (RFC 3339)
+        in: query
+        name: from
+        type: string
+      - description: Only the modifications before this date (RFC 3339)
+        in: query
+        name: to
+        type: string
+      - description: Page size (default 50, max 500)
+        in: query
+        name: limit
+        type: integer
+      - description: nextCursor returned by the previous page
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/flaghistory.Page'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "503":
+          description: The history database is not reachable
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      - XApiKeyAuth: []
+      summary: List the modifications made on the flags.
+      tags:
+      - Admin API to manage GO Feature Flag
+  /admin/v1/flag-history/{flagKey}:
+    get:
+      description: |-
+        Every modification (added, updated, deleted) of a flag is recorded with its author and
+        the list of the fields that changed. The result is paginated with a cursor.
+      parameters:
+      - description: Only the modifications of this flag (only on /admin/v1/flag-history/{flagKey})
+        in: path
+        name: flagKey
+        type: string
+      - description: Only the modifications of this flagset
+        in: query
+        name: flagset
+        type: string
+      - description: Only this kind of modification
+        enum:
+        - added
+        - updated
+        - deleted
+        in: query
+        name: action
+        type: string
+      - description: Only the modifications made by this author
+        in: query
+        name: author
+        type: string
+      - description: Only the modifications after this date (RFC 3339)
+        in: query
+        name: from
+        type: string
+      - description: Only the modifications before this date (RFC 3339)
+        in: query
+        name: to
+        type: string
+      - description: Page size (default 50, max 500)
+        in: query
+        name: limit
+        type: integer
+      - description: nextCursor returned by the previous page
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/flaghistory.Page'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "503":
+          description: The history database is not reachable
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      - XApiKeyAuth: []
+      summary: List the modifications made on the flags.
+      tags:
+      - Admin API to manage GO Feature Flag
   /admin/v1/retriever/refresh:
     post:
       description: |-

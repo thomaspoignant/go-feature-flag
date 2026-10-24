@@ -84,10 +84,13 @@ func New(config Config) (*GoFeatureFlag, error) {
 }
 
 // initializeNotificationService is a function that will initialize the notification service with the notifiers
-func initializeNotificationService(config Config) notification.Service {
+func initializeNotificationService(config Config, retrievers []retriever.Retriever) notification.Service {
 	notifiers := config.Notifiers
 	notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
-	return notification.NewService(notifiers)
+	return notification.NewService(
+		notifiers,
+		notification.WithChangeInfoResolver(retriever.NewChangeInfoResolver(retrievers)),
+	)
 }
 
 // initializeRetrieverManager is a function that will initialize the retriever manager with the retrievers
@@ -106,7 +109,7 @@ func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
 		Name:                            config.Name,
 	}
 
-	notificationService := initializeNotificationService(config)
+	notificationService := initializeNotificationService(config, retrievers)
 	// init internal cache
 	cacheMngr := cache.New(
 		notificationService,
