@@ -554,6 +554,33 @@ func TestRetriever_Init_KeepsLoader(t *testing.T) {
 	assert.Equal(t, 1, m.DownloadCalls("f/a.yaml"))
 }
 
+func TestRetriever_Init_ChangedSelection(t *testing.T) {
+	t.Parallel()
+	m := &testutils.S3PrefixMock{}
+	m.Put("f/a.yaml", yamlA)
+	m.Put("g/b.yaml", yamlB)
+	r := cfg{Prefix: "f/"}.build()
+	r.SetDownloader(m)
+	r.SetLister(m)
+	require.NoError(t, r.Init(t.Context(), nil))
+	got, err := r.Retrieve(t.Context())
+	require.NoError(t, err)
+	assert.Contains(t, string(got), "flagA")
+
+	r.Prefix = "g/"
+	require.NoError(t, r.Init(t.Context(), nil))
+	got, err = r.Retrieve(t.Context())
+	require.NoError(t, err)
+	assert.Contains(t, string(got), "flagB")
+	assert.NotContains(t, string(got), "flagA")
+
+	// switching to single file mode drops the folder output format
+	r.Prefix = ""
+	r.Item = "g/b.yaml"
+	require.NoError(t, r.Init(t.Context(), nil))
+	assert.Equal(t, "", r.OutputFormat())
+}
+
 func TestRetriever_SetLister(t *testing.T) {
 	t.Parallel()
 	m := &testutils.S3PrefixMock{}

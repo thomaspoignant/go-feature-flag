@@ -839,3 +839,57 @@ func TestLoader_Reset(t *testing.T) {
 	assert.Equal(t, 2, s.calls("f/a.yaml"))
 	assert.Equal(t, 2, strings.Count(logs.String(), "key=f/readme.txt"))
 }
+
+func TestReuse(t *testing.T) {
+	t.Parallel()
+	logger := &fflog.FFLogger{}
+	base := folderloader.Options{Prefix: "f/", Pattern: "a.*", Recursive: true, Logger: logger, Location: "b"}
+	tests := []struct {
+		name      string
+		nilLoader bool
+		opts      func(o folderloader.Options) folderloader.Options
+		wantSame  bool
+	}{
+		{name: "nil loader", nilLoader: true},
+		{name: "same options", opts: func(o folderloader.Options) folderloader.Options { return o }, wantSame: true},
+		{name: "prefix changed", opts: func(o folderloader.Options) folderloader.Options { o.Prefix = "g/"; return o }},
+		{name: "pattern changed", opts: func(o folderloader.Options) folderloader.Options { o.Pattern = "*.yaml"; return o }},
+		{name: "recursive changed", opts: func(o folderloader.Options) folderloader.Options { o.Recursive = false; return o }},
+		{
+			name: "logger changed",
+			opts: func(o folderloader.Options) folderloader.Options { o.Logger = &fflog.FFLogger{}; return o },
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &fakeStore{}
+			s.put("f/a.yaml", yamlA)
+			s.put("g/a.yaml", yamlA)
+			old := folderloader.New(s, base)
+			_, err := old.Load(t.Context())
+			require.NoError(t, err)
+
+			var prev *folderloader.Loader
+			if !tt.nilLoader {
+				prev = old
+			}
+			opts := base
+			if tt.opts != nil {
+				opts = tt.opts(base)
+			}
+			got := folderloader.Reuse(prev, s, opts)
+			require.NotNil(t, got)
+			if tt.wantSame {
+				assert.Same(t, old, got)
+				assert.Equal(t, "yaml", got.OutputFormat())
+				return
+			}
+			assert.NotSame(t, old, got)
+			// a new loader starts with an empty cache: the file is downloaded again
+			_, err = got.Load(t.Context())
+			require.NoError(t, err)
+			assert.Equal(t, 2, s.calls("f/a.yaml")+s.calls("g/a.yaml"))
+		})
+	}
+}

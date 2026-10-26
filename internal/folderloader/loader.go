@@ -134,6 +134,17 @@ func normalizeVersion(v string) string {
 	return strings.Trim(v, `"`)
 }
 
+// Reuse returns l if it is not nil and was built with the same options, so the cache and the last
+// output format are kept (ex: when a retriever is initialized again with the same settings).
+// Otherwise it returns a new Loader on store, which starts clean because the selection of files
+// changed. The store of l is kept as is when l is reused, it must be equivalent to store.
+func Reuse(l *Loader, store Store, opts Options) *Loader {
+	if l != nil && l.opts == opts {
+		return l
+	}
+	return New(store, opts)
+}
+
 // Reset drops the cache and the skipped files.
 func (l *Loader) Reset() {
 	l.cache = nil
