@@ -95,33 +95,48 @@ func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	s.mode = singleFileMode
 	if s.Item == "" {
 		s.mode = folderMode
-		if s.loader == nil {
-			s.loader = folderloader.New(&s3Store{r: s}, folderloader.Options{
-				Prefix: s.Prefix, Pattern: s.Pattern, Recursive: s.Recursive,
-				Logger: logger, Location: s.Bucket, LocationKey: "bucket", Provider: "S3",
-			})
-		}
+		s.initLoader(logger)
 	}
 	// Single file mode only needs a downloader, folder mode needs a lister too.
-	needLister := s.mode == folderMode
-	if s.downloader == nil || (needLister && s.lister == nil) {
-		if s.AwsConfig == nil {
-			cfg, err := config.LoadDefaultConfig(ctx)
-			if err != nil {
-				s.status = retriever.RetrieverError
-				return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
-			}
-			s.AwsConfig = &cfg
-		}
-		client := s3.NewFromConfig(*s.AwsConfig, s.S3ClientOptions...)
-		if s.downloader == nil {
-			s.downloader = transfermanager.New(client)
-		}
-		if needLister && s.lister == nil {
-			s.lister = client
-		}
+	if err := s.initClients(ctx, s.mode == folderMode); err != nil {
+		s.status = retriever.RetrieverError
+		return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
 	}
 	s.status = retriever.RetrieverReady
+	return nil
+}
+
+// initLoader creates the folder loader, once. The caller must hold s.mu.
+func (s *Retriever) initLoader(logger *fflog.FFLogger) {
+	if s.loader != nil {
+		return
+	}
+	s.loader = folderloader.New(&s3Store{r: s}, folderloader.Options{
+		Prefix: s.Prefix, Pattern: s.Pattern, Recursive: s.Recursive,
+		Logger: logger, Location: s.Bucket, LocationKey: "bucket", Provider: "S3",
+	})
+}
+
+// initClients builds the S3 clients that were not provided (see SetDownloader and SetLister).
+// The caller must hold s.mu.
+func (s *Retriever) initClients(ctx context.Context, needLister bool) error {
+	if s.downloader != nil && (!needLister || s.lister != nil) {
+		return nil
+	}
+	if s.AwsConfig == nil {
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			return err
+		}
+		s.AwsConfig = &cfg
+	}
+	client := s3.NewFromConfig(*s.AwsConfig, s.S3ClientOptions...)
+	if s.downloader == nil {
+		s.downloader = transfermanager.New(client)
+	}
+	if needLister && s.lister == nil {
+		s.lister = client
+	}
 	return nil
 }
 
