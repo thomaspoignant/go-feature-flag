@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
-	"github.com/thomaspoignant/go-feature-flag/internal/s3folder"
+	"github.com/thomaspoignant/go-feature-flag/internal/folderloader"
 )
 
 var DefaultRetrieverConfig = struct {
@@ -229,7 +229,7 @@ func (r RetrieverKind) IsValid() error {
 
 // validateS3Retriever validates the item/prefix settings (no item means folder mode) of the S3 retriever.
 func (c *RetrieverConf) validateS3Retriever() error {
-	if err := s3folder.Validate(c.Item, c.Prefix, c.Pattern, c.Recursive); err != nil {
+	if err := folderloader.Validate("item", c.Item, c.Prefix, c.Pattern, c.Recursive); err != nil {
 		return fmt.Errorf("invalid retriever: %v for kind \"%s\"", err, c.Kind)
 	}
 	return nil

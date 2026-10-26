@@ -5,14 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/thomaspoignant/go-feature-flag/internal/s3folder"
+	"github.com/thomaspoignant/go-feature-flag/internal/folderloader"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
@@ -68,17 +67,15 @@ type Retriever struct {
 	lister     ListerAPI
 	status     retriever.Status
 	logger     *fflog.FFLogger
-	// format is the format of the last folder retrieval, read by OutputFormat.
-	format atomic.Value
 	// mode is set once by Init, from Item.
 	mode retrieverMode
 
-	// mu protects downloader, lister, cache and skipped, and serializes Retrieve calls.
-	mu    sync.Mutex
-	cache map[string]cachedObject
-	// skipped is the set of the keys skipped because of their unsupported extension at the last
-	// poll, so that each of them is only logged once.
-	skipped map[string]struct{}
+	// loader is the folder mode engine, built by the first Init in folder mode and kept after.
+	// Like mode, it is never reassigned once set, so OutputFormat reads both without the lock.
+	loader *folderloader.Loader
+
+	// mu protects downloader, lister and loader, and serializes Retrieve calls.
+	mu sync.Mutex
 }
 
 // Init is initializing the retriever to start fetching the flags configuration.
@@ -87,7 +84,7 @@ func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 		ctx = context.Background()
 	}
 	s.status = retriever.RetrieverNotReady
-	if err := s3folder.Validate(s.Item, s.Prefix, s.Pattern, s.Recursive); err != nil {
+	if err := folderloader.Validate("item", s.Item, s.Prefix, s.Pattern, s.Recursive); err != nil {
 		s.status = retriever.RetrieverError
 		return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
 	}
@@ -98,6 +95,12 @@ func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	s.mode = singleFileMode
 	if s.Item == "" {
 		s.mode = folderMode
+		if s.loader == nil {
+			s.loader = folderloader.New(&s3Store{r: s}, folderloader.Options{
+				Prefix: s.Prefix, Pattern: s.Pattern, Recursive: s.Recursive,
+				Logger: logger, Location: s.Bucket, LocationKey: "bucket", Provider: "S3",
+			})
+		}
 	}
 	// Single file mode only needs a downloader, folder mode needs a lister too.
 	needLister := s.mode == folderMode
@@ -129,8 +132,9 @@ func (s *Retriever) Shutdown(_ context.Context) error {
 	s.status = retriever.RetrieverNotReady
 	s.downloader = nil
 	s.lister = nil
-	s.cache = nil
-	s.skipped = nil
+	if s.loader != nil {
+		s.loader.Reset()
+	}
 	return nil
 }
 
@@ -152,32 +156,36 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	if s.mode == folderMode {
-		return s.loadFolder(ctx)
+		if s.lister == nil {
+			s.status = retriever.RetrieverError
+			return nil, errors.New("lister is not initialized")
+		}
+		return s.loader.Load(ctx)
 	}
 
 	if s.Item == "" {
 		return nil, errors.New("S3 retriever not initialized: call Init (Item is empty means folder mode)")
 	}
 
-	content, err := s.download(ctx, s.Item)
+	content, _, err := s.downloadWithETag(ctx, s.Item)
 	if err != nil {
 		return nil, fmt.Errorf("unable to download item from S3 %q, %v", s.Item, err)
 	}
 	return content, nil
 }
 
-// download fetches the content of a single object.
-func (s *Retriever) download(ctx context.Context, key string) ([]byte, error) {
+// downloadWithETag fetches the content of a single object, with the ETag of the downloaded version.
+func (s *Retriever) downloadWithETag(ctx context.Context, key string) ([]byte, string, error) {
 	writerAt := types.NewWriteAtBuffer([]byte{})
-	_, err := s.downloader.DownloadObject(ctx, &transfermanager.DownloadObjectInput{
+	out, err := s.downloader.DownloadObject(ctx, &transfermanager.DownloadObjectInput{
 		Bucket:   aws.String(s.Bucket),
 		Key:      aws.String(key),
 		WriterAt: writerAt,
 	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return writerAt.Bytes(), nil
+	return writerAt.Bytes(), aws.ToString(out.ETag), nil
 }
 
 // OutputFormat declares the format of the bytes returned by Retrieve.
@@ -186,15 +194,10 @@ func (s *Retriever) download(ctx context.Context, key string) ([]byte, error) {
 // In folder mode the merged flag set is encoded in the format of the files found by the last
 // Retrieve ("json" for an empty flag set). Before the first Retrieve it is guessed from Pattern.
 func (s *Retriever) OutputFormat() string {
-	switch s.mode {
-	case folderMode:
-		if f, ok := s.format.Load().(string); ok {
-			return f
-		}
-		return formatOf(s.Pattern)
-	default:
-		return ""
+	if s.mode == folderMode {
+		return s.loader.OutputFormat()
 	}
+	return ""
 }
 
 func (s *Retriever) SetDownloader(downloader DownloaderAPI) {
