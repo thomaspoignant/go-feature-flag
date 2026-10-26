@@ -552,6 +552,23 @@ func TestDescribeChanges(t *testing.T) {
 			want: []string{"Targeting rule `beta` now serves `off` (was `on`) (the rule is disabled)"},
 		},
 		{
+			name: "should describe rules reordered in a scheduled step",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{{
+					Date: &start,
+					InternalFlag: flag.InternalFlag{Rules: &[]flag.Rule{
+						{Name: testconvert.String("a"), Query: testconvert.String("a eq 1"), VariationResult: testconvert.String("on")},
+						{Name: testconvert.String("b"), Query: testconvert.String("b eq 1"), VariationResult: testconvert.String("off")},
+					}},
+				}}
+			},
+			update: func(f *flag.InternalFlag) {
+				rules := (*f.Scheduled)[0].Rules
+				(*rules)[0], (*rules)[1] = (*rules)[1], (*rules)[0]
+			},
+			want: []string{"Scheduled step on 2026-10-05 09:00 UTC: Targeting rules reordered: `b`, `a`"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,

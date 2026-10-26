@@ -230,10 +230,9 @@ func (d *describer) targeting(before, after []flag.Rule) {
 		}
 	}
 
-	// Rules are evaluated in order, so a new order changes who gets which variation.
-	// Steps merge rules by name, so their order does not matter.
-	if keptBefore, keptAfter := keptKeys(b.order, a.rules), keptKeys(a.order, b.rules); !d.inStep &&
-		!slices.Equal(keptBefore, keptAfter) {
+	// Rules are evaluated in order, and steps append new rules in order, so a new order can change the result.
+	keptBefore, keptAfter := keptKeys(b.order, a.rules), keptKeys(a.order, b.rules)
+	if !slices.Equal(keptBefore, keptAfter) {
 		labels := make([]string, 0, len(a.order))
 		for _, key := range a.order {
 			labels = append(labels, d.ruleLabel(key))
