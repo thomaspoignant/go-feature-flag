@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
+	"github.com/thomaspoignant/go-feature-flag/internal/s3folder"
 )
 
 var DefaultRetrieverConfig = struct {
@@ -37,6 +38,9 @@ type RetrieverConf struct {
 	Bucket             string              `mapstructure:"bucket"        koanf:"bucket"`
 	Object             string              `mapstructure:"object"        koanf:"object"`
 	Item               string              `mapstructure:"item"          koanf:"item"`
+	Prefix             string              `mapstructure:"prefix"        koanf:"prefix"`
+	Pattern            string              `mapstructure:"pattern"       koanf:"pattern"`
+	Recursive          bool                `mapstructure:"recursive"     koanf:"recursive"`
 	Namespace          string              `mapstructure:"namespace"     koanf:"namespace"`
 	ConfigMap          string              `mapstructure:"configmap"     koanf:"configmap"`
 	Key                string              `mapstructure:"key"           koanf:"key"`
@@ -89,8 +93,10 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever || c.Kind == BitbucketRetriever {
 		return c.validateGitRetriever()
 	}
-	if c.Kind == S3Retriever && c.Item == "" {
-		return err.NewRetrieverConfError("item", string(c.Kind))
+	if c.Kind == S3Retriever {
+		if err := c.validateS3Retriever(); err != nil {
+			return err
+		}
 	}
 	if c.Kind == HTTPRetriever {
 		return c.validateHTTPRetriever()
@@ -264,4 +270,12 @@ func (r RetrieverKind) IsValid() error {
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
+}
+
+// validateS3Retriever validates the item/prefix settings (no item means folder mode) of the S3 retriever.
+func (c *RetrieverConf) validateS3Retriever() error {
+	if err := s3folder.Validate(c.Item, c.Prefix, c.Pattern, c.Recursive); err != nil {
+		return fmt.Errorf("invalid retriever: %v for kind \"%s\"", err, c.Kind)
+	}
+	return nil
 }

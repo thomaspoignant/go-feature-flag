@@ -36,5 +36,8 @@
   "GitHubAppID": 0,
   "GitHubInstallationID": 0,
   "GitHubAppPrivateKey": "",
-  "GitHubAppPrivateKeyFile": ""
+  "GitHubAppPrivateKeyFile": "",
+  "Pattern": "",
+  "Prefix": "",
+  "Recursive": false
 }

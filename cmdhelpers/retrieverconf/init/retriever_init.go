@@ -123,7 +123,14 @@ func createFileRetriever(c *retrieverconf.RetrieverConf, _ time.Duration) (retri
 
 func createS3Retriever(c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
 	awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
-	return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
+	return &s3retrieverv2.Retriever{
+		Bucket:    c.Bucket,
+		Item:      c.Item,
+		Prefix:    c.Prefix,
+		Pattern:   c.Pattern,
+		Recursive: c.Recursive,
+		AwsConfig: &awsConfig,
+	}, err
 }
 
 func createHTTPRetriever(
