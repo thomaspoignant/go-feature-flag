@@ -68,7 +68,7 @@ type Retriever struct {
 	lister     ListerAPI
 	status     retriever.Status
 	logger     *fflog.FFLogger
-	// mode is set once by Init, from Item.
+	// mode is set by Init, from Item, and only read under mu.
 	mode retrieverMode
 
 	// loader is the folder mode engine, set by Init (nil in single file mode). It is atomic so
@@ -82,6 +82,8 @@ type Retriever struct {
 // Init is initializing the retriever to start fetching the flags configuration.
 // Calling it again keeps the cache of the folder mode only if the folder settings (Bucket, Prefix,
 // Pattern, Recursive) and the logger are unchanged, otherwise it starts clean.
+// The S3 clients are only built once: AwsConfig and S3ClientOptions changed after a first Init
+// are ignored until Shutdown.
 func (s *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	if ctx == nil {
 		ctx = context.Background()
