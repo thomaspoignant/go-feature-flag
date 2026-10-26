@@ -172,6 +172,25 @@ func Test_InitRetriever(t *testing.T) {
 			skipCompleteValidation: true,
 		},
 		{
+			name:    "Convert S3 Retriever with prefix",
+			wantErr: assert.NoError,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:      "s3",
+				Bucket:    "my-bucket-name",
+				Prefix:    "flags/",
+				Pattern:   "*.yaml",
+				Recursive: true,
+			},
+			want: &s3retrieverv2.Retriever{
+				Bucket:    "my-bucket-name",
+				Prefix:    "flags/",
+				Pattern:   "*.yaml",
+				Recursive: true,
+			},
+			wantType:               &s3retrieverv2.Retriever{},
+			skipCompleteValidation: true,
+		},
+		{
 			name:    "Convert HTTP Retriever",
 			wantErr: assert.NoError,
 			conf: &retrieverconf.RetrieverConf{

@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
@@ -692,4 +694,58 @@ func Test_safeEvaluation_recovers_from_panic(t *testing.T) {
 	assert.NoError(t, json.Unmarshal([]byte(got), &result))
 	assert.Equal(t, "GENERAL", result["errorCode"])
 	assert.Contains(t, result["errorDetails"], "boom during evaluation")
+}
+
+// jsonShape returns the real nesting depth and largest array length of a valid
+// JSON document. It walks the document with json.Decoder.Token, which is not
+// recursive, so it is a trustworthy reference for the hand-rolled scanners.
+func jsonShape(t *testing.T, input string) (depth, largestArray int) {
+	dec := json.NewDecoder(strings.NewReader(input))
+	dec.UseNumber() // valid numbers like 1E700 overflow float64
+	// -1 marks an open object, n >= 0 is the item count of an open array.
+	var stack []int
+	for {
+		tok, err := dec.Token()
+		if errors.Is(err, io.EOF) {
+			return depth, largestArray
+		}
+		require.NoError(t, err)
+		if len(stack) > 0 && stack[len(stack)-1] >= 0 && tok != json.Delim(']') {
+			stack[len(stack)-1]++
+		}
+		switch tok {
+		case json.Delim('{'):
+			stack = append(stack, -1)
+			depth = max(depth, len(stack))
+		case json.Delim('['):
+			stack = append(stack, 0)
+			depth = max(depth, len(stack))
+		case json.Delim('}'), json.Delim(']'):
+			largestArray = max(largestArray, stack[len(stack)-1])
+			stack = stack[:len(stack)-1]
+		}
+	}
+}
+
+// FuzzScanJSON checks that the JSON guards never under-estimate a document:
+// an under-count would let a too-deep input reach the recursive decoder and
+// trap the WASM instance.
+func FuzzScanJSON(f *testing.F) {
+	f.Add(`{"a": [{"b": {"c": 1}}]}`)
+	f.Add(`{"a": "x\"{[y"}`)
+	f.Add(`{"in":[{"var":"age"},[1,2,3]]}`)
+	f.Add(`{"in":[{"var":"a"},[]]}`)
+	f.Add(`[[["\\"],"\u005b"],{}]`)
+	f.Add(`"just a string"`)
+	f.Fuzz(func(t *testing.T, input string) {
+		gotDepth := scanJSONDepth(input)
+		gotArray := scanJSONMaxArrayLength(input)
+		if !json.Valid([]byte(input)) {
+			// invalid JSON is rejected by json.Unmarshal before decoding.
+			return
+		}
+		wantDepth, wantArray := jsonShape(t, input)
+		assert.Equal(t, wantDepth, gotDepth, "nesting depth")
+		assert.GreaterOrEqual(t, gotArray, wantArray, "largest array")
+	})
 }
