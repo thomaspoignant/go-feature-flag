@@ -463,7 +463,7 @@ func (d *describer) describeServe(rule *flag.Rule) string {
 	case rule.ProgressiveRollout != nil:
 		return d.describeProgressive(rule.ProgressiveRollout)
 	case len(rule.GetPercentages()) > 0:
-		return strings.Join(d.percentageParts(rule.GetPercentages()), ", ")
+		return strings.Join(d.percentageParts(rule.GetPercentages(), false), ", ")
 	case rule.VariationResult != nil:
 		return d.code(rule.GetVariationResult())
 	default:
@@ -480,7 +480,7 @@ func (d *describer) describePatch(rule flag.Rule) string {
 	if rule.VariationResult != nil {
 		parts = append(parts, "variation "+d.code(*rule.VariationResult))
 	}
-	parts = append(parts, d.percentageParts(rule.GetPercentages())...)
+	parts = append(parts, d.percentageParts(rule.GetPercentages(), true)...)
 	if rule.ProgressiveRollout != nil {
 		parts = append(parts, d.describeProgressive(rule.ProgressiveRollout))
 	}
@@ -494,11 +494,11 @@ func (d *describer) describePatch(rule flag.Rule) string {
 }
 
 // percentageParts describes each variation's percentage, sorted by name.
-// A negative percentage, which a scheduled step uses to remove a variation, reads as removed.
-func (d *describer) percentageParts(percentages map[string]float64) []string {
+// In a scheduled step a negative percentage removes the variation, so it reads as removed.
+func (d *describer) percentageParts(percentages map[string]float64, inPatch bool) []string {
 	parts := make([]string, 0, len(percentages))
 	for _, name := range slices.Sorted(maps.Keys(percentages)) {
-		if percentages[name] < 0 {
+		if inPatch && percentages[name] < 0 {
 			parts = append(parts, d.code(name)+" removed from the percentages")
 		} else {
 			parts = append(parts, d.code(name)+" "+formatNumber(percentages[name])+"%")

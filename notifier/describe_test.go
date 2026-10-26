@@ -569,6 +569,13 @@ func TestDescribeChanges(t *testing.T) {
 			want: []string{"Scheduled step on 2026-10-05 09:00 UTC: Targeting rules reordered: `b`, `a`"},
 		},
 		{
+			name: "should show negative percentages outside scheduled steps",
+			update: func(f *flag.InternalFlag) {
+				f.DefaultRule.Percentages = &map[string]float64{"on": -1, "off": 101}
+			},
+			want: []string{"Default rule now serves `off` 101%, `on` -1% (was `off` 80%, `on` 20%)"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
