@@ -1,0 +1,45 @@
+suite: test lifecycle and termination grace period
+templates:
+  - deployment.yaml
+  - configmap.yaml
+tests:
+  - it: should not set lifecycle or terminationGracePeriodSeconds by default
+    template: deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].lifecycle
+      - notExists:
+          path: spec.template.spec.terminationGracePeriodSeconds
+
+  - it: should set the container lifecycle when provided
+    template: deployment.yaml
+    set:
+      lifecycle:
+        preStop:
+          sleep:
+            seconds: 10
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].lifecycle
+          value:
+            preStop:
+              sleep:
+                seconds: 10
+
+  - it: should set terminationGracePeriodSeconds when provided
+    template: deployment.yaml
+    set:
+      terminationGracePeriodSeconds: 45
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 45
+
+  - it: should allow terminationGracePeriodSeconds to be 0
+    template: deployment.yaml
+    set:
+      terminationGracePeriodSeconds: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 0
