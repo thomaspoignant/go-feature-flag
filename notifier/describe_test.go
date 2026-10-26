@@ -170,7 +170,7 @@ func TestDescribeChanges(t *testing.T) {
 			want: []string{
 				"Version changed from `1.0` to `1.1`",
 				"Bucketing key set to `teamId`",
-				"Metadata `jira` set to `\"PAY-123\"`",
+				"Metadata `jira` added: `\"PAY-123\"`",
 				"Metadata `owner` changed from `\"payments\"` to `\"growth\"`",
 			},
 		},
@@ -507,6 +507,51 @@ func TestDescribeChanges(t *testing.T) {
 			want:   []string{"Variation `empty` added: `null`"},
 		},
 		{
+			name: "should pair scheduled steps by date when one is inserted before the others",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{
+					{Date: &end, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
+				}
+			},
+			update: func(f *flag.InternalFlag) {
+				*f.Scheduled = append([]flag.ScheduledStep{
+					{Date: &start, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(false)}},
+				}, *f.Scheduled...)
+			},
+			want: []string{"Scheduled step on 2026-10-05 09:00 UTC added: Flag enabled"},
+		},
+		{
+			name: "should pair reordered scheduled steps by date",
+			setup: func(f *flag.InternalFlag) {
+				f.Scheduled = &[]flag.ScheduledStep{
+					{Date: &start, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(false)}},
+					{Date: &end, InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(true)}},
+				}
+			},
+			update: func(f *flag.InternalFlag) {
+				(*f.Scheduled)[0], (*f.Scheduled)[1] = (*f.Scheduled)[1], (*f.Scheduled)[0]
+			},
+			want: nil,
+		},
+		{
+			name:   "should keep backticks in a value inside the inline code",
+			update: func(f *flag.InternalFlag) { (*f.Rules)[1].Query = testconvert.String("name eq `x`") },
+			want:   []string{"Targeting rule `beta` now matches `` name eq `x` `` (was `beta eq true`)"},
+		},
+		{
+			name:   "should pad inline code when a value starts with a backtick",
+			update: func(f *flag.InternalFlag) { f.Version = testconvert.String("`1.1``") },
+			want:   []string{"Version changed from `1.0` to ``` `1.1`` ```"},
+		},
+		{
+			name:  "should say a rule that stays disabled is disabled when what it serves changes",
+			setup: func(f *flag.InternalFlag) { (*f.Rules)[1].Disable = testconvert.Bool(true) },
+			update: func(f *flag.InternalFlag) {
+				(*f.Rules)[1].VariationResult = testconvert.String("off")
+			},
+			want: []string{"Targeting rule `beta` now serves `off` (was `on`) (the rule is disabled)"},
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
@@ -547,7 +592,7 @@ func TestChangeList(t *testing.T) {
 		{
 			name:    "should count changes over the limit",
 			changes: changes(51),
-			want:    notifier.ChangeList(changes(50), "• ", 0) + "\n…and 1 more changes",
+			want:    notifier.ChangeList(changes(50), "• ", 0) + "\n…and 1 more change",
 		},
 		{
 			name:      "should drop changes to stay within the maximum length",

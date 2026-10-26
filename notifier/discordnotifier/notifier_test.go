@@ -279,7 +279,7 @@ func TestConvertUpdatedFlagsToDiscordEmbed_capsDescription(t *testing.T) {
 		valueLength int
 		wantLast    string
 	}{
-		{name: "should list every change below the limits", changes: 3, valueLength: 1, wantLast: "• Metadata `key02` set to `\"x\"`"},
+		{name: "should list every change below the limits", changes: 3, valueLength: 1, wantLast: "• Metadata `key02` added: `\"x\"`"},
 		{name: "should cap the number of changes", changes: 60, valueLength: 1, wantLast: "…and 10 more changes"},
 		{name: "should stay within the description length", changes: 40, valueLength: 200, wantLast: "…and 23 more changes"},
 	}

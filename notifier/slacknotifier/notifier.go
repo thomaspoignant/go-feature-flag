@@ -166,10 +166,3 @@ type Field struct {
 	Value string `json:"value"`
 	Short bool   `json:"short"`
 }
-
-// ByTitle implements sort.Interface for []Field based on the Title field.
-type ByTitle []Field
-
-func (a ByTitle) Len() int           { return len(a) }
-func (a ByTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
-func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
