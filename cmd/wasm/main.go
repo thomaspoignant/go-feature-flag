@@ -100,8 +100,26 @@ func localEvaluation(input string) string {
 		return errorResult(flag.ErrorCodeParseError, err.Error())
 	}
 
+	for name, parent := range evaluateInput.ParentFlags {
+		if detail, over := firstQueryViolation(&parent); over {
+			return errorResult(flag.ErrorCodeParseError, fmt.Sprintf("flag %q: %s", name, detail))
+		}
+	}
 	if detail, over := firstQueryViolation(&evaluateInput.Flag); over {
 		return errorResult(flag.ErrorCodeParseError, detail)
+	}
+
+	// The host sends the current flag and its transitive parents, wire the resolver
+	// the evaluation needs to check the dependencies between flags.
+	flags := make(map[string]flag.Flag, len(evaluateInput.ParentFlags)+1)
+	for name, parent := range evaluateInput.ParentFlags {
+		parent := parent
+		flags[name] = &parent
+	}
+	flags[evaluateInput.FlagKey] = &evaluateInput.Flag
+	evaluateInput.FlagContext.GetFlag = func(name string) (flag.Flag, bool) {
+		f, ok := flags[name]
+		return f, ok
 	}
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)

@@ -15,5 +15,8 @@ class WasmInput(BaseModel):
 
     flagKey: str
     flag: dict[str, Any]
+    # Transitive parents of the flag, so the engine can evaluate the
+    # `dependsOn` dependencies locally without a round trip.
+    parentFlags: dict[str, dict[str, Any]] = {}
     evalContext: dict[str, Any]
     flagContext: WasmFlagContext

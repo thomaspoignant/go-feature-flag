@@ -402,6 +402,79 @@ def test_resolve_boolean_type_mismatch_raises():
 
 
 # ---------------------------------------------------------------------------
+# Flag dependencies
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_sends_the_transitive_parents_to_the_engine():
+    """parentFlags holds every flag reachable through dependsOn, not the flag itself."""
+    grandparent = {
+        "variations": {"on": True, "off": False},
+        "defaultRule": {"variation": "on"},
+    }
+    parent = {
+        "variations": {"on": True, "off": False},
+        "defaultRule": {"variation": "on"},
+        "dependsOn": [{"flag": "grandparent", "variation": "on"}],
+    }
+    child = {
+        "variations": {"on": True, "off": False},
+        "defaultRule": {"variation": "on"},
+        "dependsOn": [{"flag": "parent", "variation": "on"}],
+    }
+    evaluator, mock_wasm = _setup_evaluator_with_flag(child)
+    evaluator._flags = {"child": child, "parent": parent, "grandparent": grandparent}
+    mock_wasm.evaluate.return_value = _wasm_ok_response(value=True, variationType="on")
+
+    evaluator.resolve_boolean_details("child", False, _DEFAULT_CTX)
+
+    call_args = mock_wasm.evaluate.call_args[0][0]
+    assert call_args.parentFlags == {"parent": parent, "grandparent": grandparent}
+    evaluator.shutdown()
+
+
+def test_resolve_skips_parents_missing_from_the_configuration():
+    """An unknown parent is absent from parentFlags, the engine reports it as not met."""
+    child = {
+        "variations": {"on": True, "off": False},
+        "defaultRule": {"variation": "on"},
+        "dependsOn": [{"flag": "unknown-parent", "variation": "on"}],
+    }
+    evaluator, mock_wasm = _setup_evaluator_with_flag(child)
+    evaluator._flags = {"child": child}
+    mock_wasm.evaluate.return_value = _wasm_ok_response(value=True, variationType="on")
+
+    evaluator.resolve_boolean_details("child", False, _DEFAULT_CTX)
+
+    call_args = mock_wasm.evaluate.call_args[0][0]
+    assert call_args.parentFlags == {}
+    evaluator.shutdown()
+
+
+def test_flag_dependency_error_is_raised_locally_without_remote_fallback():
+    """FLAG_DEPENDENCY is answered by the engine: no remote re-evaluation."""
+    child = {
+        "variations": {"on": True, "off": False},
+        "defaultRule": {"variation": "on"},
+        "dependsOn": [{"flag": "parent", "variation": "on"}],
+    }
+    evaluator, mock_wasm = _setup_evaluator_with_flag(child)
+    evaluator._flags = {"child": child}
+    mock_wasm.evaluate.return_value = WasmEvaluationResponse(
+        errorCode="FLAG_DEPENDENCY",
+        errorDetails="dependency on flag \"parent\" is not met",
+        trackEvents=True,
+        reason="ERROR",
+        variationType="SdkDefault",
+        value=False,
+    )
+
+    with pytest.raises(GeneralError):
+        evaluator.resolve_boolean_details("child", False, _DEFAULT_CTX)
+    evaluator.shutdown()
+
+
+# ---------------------------------------------------------------------------
 # String resolution
 # ---------------------------------------------------------------------------
 
@@ -1144,7 +1217,7 @@ def _evaluator_with_fallback(flag_dict=None, remote_result=None, remote_error=No
 
 
 @pytest.mark.parametrize(
-    "engine_error_code", ["PARSE_ERROR", "GENERAL", "FLAG_DEPENDENCY"]
+    "engine_error_code", ["PARSE_ERROR", "GENERAL"]
 )
 def test_engine_failure_falls_back_to_remote_evaluation(engine_error_code):
     """The relay proxy is authoritative, so a provider-side failure re-evaluates there."""
@@ -1173,6 +1246,8 @@ def test_engine_failure_falls_back_to_remote_evaluation(engine_error_code):
         # A deterministic misconfiguration the relay proxy would reproduce
         # identically, so a fallback would only add latency.
         ("FLAG_CONFIG", GeneralError),
+        # The dependency is answered locally from the parents in the payload.
+        ("FLAG_DEPENDENCY", GeneralError),
         ("FLAG_NOT_FOUND", FlagNotFoundError),
         ("TYPE_MISMATCH", TypeMismatchError),
     ],
