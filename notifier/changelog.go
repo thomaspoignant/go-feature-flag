@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -44,9 +45,13 @@ func FlagChanges(before, after any) ([]FieldChange, error) {
 
 // ReadableValue renders a value for humans: JSON for anything JSON can encode,
 // so pointers and time internals are not shown, and Go syntax otherwise.
+// Characters such as "<" and "&" are kept as typed, not escaped for HTML.
 func ReadableValue(value any) string {
-	if out, err := json.Marshal(value); err == nil {
-		return string(out)
+	var out bytes.Buffer
+	encoder := json.NewEncoder(&out)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(value); err == nil {
+		return strings.TrimSuffix(out.String(), "\n")
 	}
 	return render.Render(value)
 }

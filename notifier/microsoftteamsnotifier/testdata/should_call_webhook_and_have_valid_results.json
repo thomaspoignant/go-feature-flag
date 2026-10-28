@@ -18,7 +18,7 @@
           },
           {
             "type": "TextBlock",
-            "text": "Changes detected in your feature flag file on: **{{hostname}}**\n * ❌ Flag **test-flag** deleted\n * 🆕 Flag **test-flag3** created\n * ✏️ Flag **test-flag2** updated\n   * DefaultRule.Percentages: {\"False\":0,\"True\":100} => null\n   * DefaultRule.VariationResult: null => \"Default\"\n   * Disable: null => true\n   * Experimentation: {\"start\":\"2004-09-17T00:03:20Z\",\"end\":\"2004-09-16T21:43:20Z\"} => null\n   * Rules: null => [{\"name\":\"rule1\",\"query\":\"key eq \\\"not-a-ke\\\"\",\"percentage\":{\"False\":20,\"True\":80}}]\n   * TrackEvents: null => false\n   * Variations.Default: false => true\n   * Version: null => \"1.1\"",
+            "text": "Changes detected in your feature flag file on: **{{hostname}}**\n * ❌ Flag **test-flag** deleted\n * 🆕 Flag **test-flag3** created\n * ✏️ Flag **test-flag2** updated\n   * Flag disabled\n   * Event tracking turned off\n   * Version set to 1.1\n   * Variation Default changed from false to true\n   * Targeting rule rule1 added: serves False 20%, True 80% when key eq \"not-a-ke\"\n   * Default rule now serves Default (was False 0%, True 100%)\n   * Experimentation removed (was from 2004-09-17 00:03:20 UTC to 2004-09-16 21:43:20 UTC)",
             "wrap": true
           }
         ],

@@ -82,12 +82,12 @@ jobs:
         with:
           name: SARIF file
 
-      # Filter out results from website/ and examples/ before uploading SARIF
-      - name: "Filter out website/ and examples/ paths from SARIF"
+      # Filter out results from website/, examples/ and testdata/ (dev tools) before uploading SARIF
+      - name: "Filter out website/, examples/ and testdata/ paths from SARIF"
         run: |
           jq '.runs[0].results |= map(select(
             (.locations[0].physicalLocation.artifactLocation.uri // "") |
-            (startswith("website/") or startswith("examples/")) | not
+            (startswith("website/") or startswith("examples/") or contains("testdata/")) | not
           ))' results.sarif > results-filtered.sarif
 
       - name: "Upload to code-scanning"
