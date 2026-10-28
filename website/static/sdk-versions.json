@@ -10,8 +10,8 @@
         "core": "1.12.0",
         "serverSDK": "1.23.0",
         "webSDK": "1.10.0",
-        "providerServer": "2.0.0",
-        "providerWeb": "0.2.10"
+        "providerServer": "2.1.0",
+        "providerWeb": "0.2.11"
     },
     "pypi": {
         "sdk": "0.10.0",
