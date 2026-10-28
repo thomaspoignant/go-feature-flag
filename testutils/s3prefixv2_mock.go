@@ -27,6 +27,10 @@ type S3PrefixMock struct {
 	DownloadErr error
 	// NoETag lists the objects with an empty ETag, like some S3 compatible stores do.
 	NoETag bool
+	// BeforeDownload, if set, is called with the key at the start of every DownloadObject call,
+	// without the mock lock held, so it can call Put and Delete to swap an object between the list
+	// and the download.
+	BeforeDownload func(key string)
 	// DownloadErrKeys makes the download of the given keys fail. Guarded by the mock, use SetDownloadErrKey.
 	downloadErrKeys map[string]error
 
@@ -180,6 +184,9 @@ func (m *S3PrefixMock) DownloadObject(
 	input *transfermanager.DownloadObjectInput,
 	_ ...func(*transfermanager.Options),
 ) (*transfermanager.DownloadObjectOutput, error) {
+	if m.BeforeDownload != nil {
+		m.BeforeDownload(aws.ToString(input.Key))
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.downloadCalls == nil {
@@ -201,5 +208,9 @@ func (m *S3PrefixMock) DownloadObject(
 		return nil, fmt.Errorf("NoSuchKey: %s", key)
 	}
 	_, _ = input.WriterAt.WriteAt(content, 0)
-	return &transfermanager.DownloadObjectOutput{}, nil
+	out := &transfermanager.DownloadObjectOutput{}
+	if !m.NoETag {
+		out.ETag = aws.String(etagOf(content))
+	}
+	return out, nil
 }
