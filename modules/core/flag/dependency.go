@@ -25,7 +25,8 @@ type FlagDependency struct {
 	// When empty, the dependency applies to all the variations.
 	AppliesTo []string `json:"appliesTo,omitempty" yaml:"appliesTo,omitempty" toml:"appliesTo,omitempty"`
 
-	// ExpiresWithParent makes the flag expire when the parent flag expires.
+	// ExpiresWithParent makes the flag disabled as soon as the parent flag is disabled,
+	// either by its own disable field or by one of its due scheduled rollout steps.
 	ExpiresWithParent bool `json:"expiresWithParent,omitempty" yaml:"expiresWithParent,omitempty" toml:"expiresWithParent,omitempty"` // nolint: lll
 }
 
@@ -33,13 +34,8 @@ const circularDependencyMessage = "circular dependency between flags"
 
 // dependencyMemo is not safe for concurrent use, it belongs to one evaluation or one watcher pass.
 type dependencyMemo struct {
-	parents     map[string]ResolutionDetails
-	expirations map[string]expiration
-}
-
-type expiration struct {
-	date time.Time
-	ok   bool
+	parents         map[string]ResolutionDetails
+	parentsDisabled map[string]bool
 }
 
 func (d FlagDependency) appliesTo(variation string) bool {
@@ -125,39 +121,82 @@ func (f *InternalFlag) unmetDependency(
 	return "", ""
 }
 
-// effectiveExpiration is the expiration date of the flag, taking into account the parents
-// the flag expires with. The earliest date wins.
-func (f *InternalFlag) effectiveExpiration(flagContext Context) (time.Time, bool) {
-	expirationDate, ok := f.ExpirationDate(flagContext.DefaultTTL)
+// isDisabledByParents returns true when a parent the flag expires with is disabled at the
+// evaluation date, either by its own disable field or by one of its due scheduled rollout steps.
+// The results of the parents reached without skipping a dependency (no cycle) are memoized,
+// the ones computed on an incomplete walk (cycle guard) are not, they could be wrong for a
+// later evaluation.
+func (f *InternalFlag) isDisabledByParents(
+	flagName string,
+	evaluationDate time.Time,
+	flagContext Context,
+) bool {
 	if flagContext.GetFlag == nil {
-		return expirationDate, ok
+		return false
 	}
+	disabled, _ := f.isDisabledByParentsWalk(
+		flagContext.WithMemo().withDependencyChain(flagName), evaluationDate)
+	return disabled
+}
+
+// isDisabledByParentsWalk returns the disablement of the flag and whether the result is complete,
+// a result computed after skipping a dependency of the current path (cycle guard) is not complete.
+func (f *InternalFlag) isDisabledByParentsWalk(
+	flagContext Context,
+	evaluationDate time.Time,
+) (bool, bool) {
+	complete := true
 	for _, dep := range f.GetDependsOn() {
 		if !dep.ExpiresWithParent || slices.Contains(flagContext.dependencyChain, dep.Flag) {
 			continue
 		}
-		flagContext = flagContext.WithMemo()
 		parent, found := flagContext.GetFlag(dep.Flag)
 		if !found {
 			continue
 		}
-		p, isExpirable := parent.(interface {
-			effectiveExpiration(Context) (time.Time, bool)
-		})
-		if !isExpirable {
+		if disabled, memoized := flagContext.memo.parentsDisabled[dep.Flag]; memoized {
+			if disabled {
+				return true, true
+			}
 			continue
 		}
-		parentExp, memoized := flagContext.memo.expirations[dep.Flag]
-		if !memoized {
-			parentExp.date, parentExp.ok = p.effectiveExpiration(flagContext.withDependencyChain(dep.Flag))
-			if flagContext.memo.expirations == nil {
-				flagContext.memo.expirations = map[string]expiration{}
-			}
-			flagContext.memo.expirations[dep.Flag] = parentExp
+		parentDisabled, parentComplete := isParentDisabled(parent, dep.Flag, flagContext, evaluationDate)
+		if !parentComplete {
+			complete = false
 		}
-		if parentExp.ok && (!ok || parentExp.date.Before(expirationDate)) {
-			expirationDate, ok = parentExp.date, true
+		if parentDisabled {
+			if parentComplete {
+				if flagContext.memo.parentsDisabled == nil {
+					flagContext.memo.parentsDisabled = map[string]bool{}
+				}
+				flagContext.memo.parentsDisabled[dep.Flag] = true
+			}
+			return true, complete
+		}
+		if parentComplete {
+			if flagContext.memo.parentsDisabled == nil {
+				flagContext.memo.parentsDisabled = map[string]bool{}
+			}
+			flagContext.memo.parentsDisabled[dep.Flag] = false
 		}
 	}
-	return expirationDate, ok
+	return false, complete
+}
+
+// isParentDisabled returns the disablement of the parent at the evaluation date and whether
+// the result is complete, see isDisabledByParentsWalk.
+func isParentDisabled(parent Flag, flagName string, flagContext Context, evaluationDate time.Time) (bool, bool) {
+	p, ok := parent.(*InternalFlag)
+	if !ok {
+		return false, true
+	}
+	effective, err := p.applyScheduledRolloutSteps(evaluationDate)
+	if err != nil {
+		return false, true
+	}
+	if effective.IsDisable() {
+		return true, true
+	}
+	return p.isDisabledByParentsWalk(
+		flagContext.WithMemo().withDependencyChain(flagName), evaluationDate)
 }

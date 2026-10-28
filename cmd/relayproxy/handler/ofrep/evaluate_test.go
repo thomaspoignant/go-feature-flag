@@ -361,18 +361,6 @@ func Test_Evaluate(t *testing.T) {
 			},
 		},
 		{
-			name: "Expired flag returns the expiration message",
-			args: args{
-				bodyFile:            testdataDir + "/ofrep/valid_request.json",
-				configFlagsLocation: testdataDir + "/goff/config_flags_expired.yaml",
-				flagKey:             "expired-flag",
-			},
-			want: want{
-				httpCode: http.StatusBadRequest,
-				bodyFile: testdataDir + "/ofrep/responses/expired_flag.json",
-			},
-		},
-		{
 			name: "Flag with an unmet dependency returns the dependency message",
 			args: args{
 				bodyFile:            testdataDir + "/ofrep/valid_request.json",

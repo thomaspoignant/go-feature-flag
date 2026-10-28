@@ -45,8 +45,6 @@ type GoFeatureFlag struct {
 	retrieverManager          *retriever.Manager
 	// evalExporterWg is a wait group to wait for the evaluation exporter to finish the export before closing GOFF
 	evalExporterWg sync.WaitGroup
-	// ttlWatcher tracks the flags with an expired TTL
-	ttlWatcher *ttlWatcher
 }
 
 // ff is the default object for go-feature-flag
@@ -81,11 +79,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 	goFF.retrieverManager = retrieverManager
 	goFF.featureEventDataExporter, goFF.trackingEventDataExporter = initializeDataExporters(
 		config, goFF.config.internalLogger)
-	if retrieverManager != nil {
-		goFF.ttlWatcher = newTTLWatcher(
-			config.DefaultFlagTTL, retrieverManager.GetFlagsFromCache, config.internalLogger)
-		goFF.ttlWatcher.start(config.Context)
-	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
 }
@@ -166,9 +159,6 @@ func initializeDataExporters(config Config, logger *fflog.FFLogger) (
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
 	if g != nil {
-		if g.ttlWatcher != nil {
-			g.ttlWatcher.stopAndWait()
-		}
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)
 		}
@@ -182,14 +172,6 @@ func (g *GoFeatureFlag) Close() {
 			g.trackingEventDataExporter.Stop()
 		}
 	}
-}
-
-// GetExpiredFlags returns the sorted names of the flags for which the TTL is over.
-func (g *GoFeatureFlag) GetExpiredFlags() []string {
-	if g == nil || g.ttlWatcher == nil {
-		return []string{}
-	}
-	return g.ttlWatcher.expiredFlags()
 }
 
 // GetCacheRefreshDate gives the last refresh date of the cache

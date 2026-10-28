@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 )
 
@@ -50,7 +49,6 @@ func (m *monitoringImpl) Info() (model.InfoResponse, error) {
 		cacheRefreshDate := m.flagsetManager.Default().GetCacheRefreshDate()
 		return model.InfoResponse{
 			LatestCacheRefresh: &cacheRefreshDate,
-			ExpiredFlags:       expiredFlagsByFlagset(flagSets),
 		}, nil
 	}
 
@@ -65,20 +63,5 @@ func (m *monitoringImpl) Info() (model.InfoResponse, error) {
 	return model.InfoResponse{
 		Flagsets:           refreshDates,
 		LatestCacheRefresh: &latestRefreshDate,
-		ExpiredFlags:       expiredFlagsByFlagset(flagSets),
 	}, nil
-}
-
-// expiredFlagsByFlagset lists the expired flags of each flagset, flagsets without expired flag are omitted.
-func expiredFlagsByFlagset(flagSets map[string]*ffclient.GoFeatureFlag) map[string][]string {
-	expired := make(map[string][]string)
-	for flagsetName, flagset := range flagSets {
-		if flags := flagset.GetExpiredFlags(); len(flags) > 0 {
-			expired[flagsetName] = flags
-		}
-	}
-	if len(expired) == 0 {
-		return nil
-	}
-	return expired
 }

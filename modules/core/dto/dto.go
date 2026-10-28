@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"time"
-
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
@@ -52,15 +50,6 @@ type DTO struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty" jsonschema:"title=metadata,description=A field containing information about your flag such as an issue tracker link a description etc..."` // nolint: lll
-
-	// CreatedAt is the date used as the starting point of the TTL of the flag, in UTC.
-	CreatedAt *time.Time `json:"createdAt,omitempty" yaml:"createdAt,omitempty" toml:"createdAt,omitempty" jsonschema:"title=createdAt,description=Creation date of the flag in UTC (for example 2026-01-15T00:00:00Z), starting point of its TTL. A flag without createdAt never expires."` // nolint: lll
-
-	// TTL is the time to live of the flag, such as 90d or 12h.
-	TTL *string `json:"ttl,omitempty" yaml:"ttl,omitempty" toml:"ttl,omitempty" jsonschema:"title=ttl,description=Time to live of the flag (for example 90d or 12h). Overrides the default TTL."` // nolint: lll
-
-	// ExpiresAt is the date at which the flag expires, in UTC.
-	ExpiresAt *time.Time `json:"expiresAt,omitempty" yaml:"expiresAt,omitempty" toml:"expiresAt,omitempty" jsonschema:"title=expiresAt,description=Date at which the flag expires in UTC (for example 2026-04-15T00:00:00Z). Overrides createdAt and ttl."` // nolint: lll
 
 	// DependsOn binds the variations of the flag to the state of other flags.
 	DependsOn *[]flag.FlagDependency `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty" toml:"dependsOn,omitempty" jsonschema:"title=dependsOn,description=Binds the variations of the flag to the state of other flags."` // nolint: lll

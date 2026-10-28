@@ -1,7 +1,5 @@
 package flag
 
-import "time"
-
 // Context is copied on purpose by the dependency helpers (value receivers), the pointer receiver is only a setter.
 //
 //nolint:recvcheck
@@ -16,10 +14,6 @@ type Context struct {
 
 	// DefaultSdkValue is the default value of the SDK when calling the variation.
 	DefaultSdkValue any `json:"defaultSdkValue,omitempty"`
-
-	// DefaultTTL is the TTL applied to the flags without their own TTL.
-	// A zero or negative value means that the flags without their own TTL never expire.
-	DefaultTTL time.Duration `json:"defaultTTL,omitempty"`
 
 	// GetFlag gives access to the other flags, it is required to evaluate the dependencies between flags.
 	// Without it a flag with a dependency never has it met.

@@ -49,7 +49,6 @@ definitions:
     - INVALID_CONTEXT
     - TARGETING_KEY_MISSING
     - FLAG_CONFIG
-    - FLAG_EXPIRED
     - FLAG_DEPENDENCY
     type: string
     x-enum-varnames:
@@ -61,7 +60,6 @@ definitions:
     - ErrorCodeInvalidContext
     - ErrorCodeTargetingKeyMissing
     - ErrorFlagConfiguration
-    - ErrorCodeFlagExpired
     - ErrorCodeFlagDependency
   flag.Flag:
     properties:
@@ -164,16 +162,6 @@ definitions:
           This field is used for backward compatibility when using the default flagset.
         example: "2022-06-13T11:22:55.941628+02:00"
         type: string
-      expiredFlags:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        description: |-
-          ExpiredFlags contains, for each flagset having some, the names of the flags with an expired TTL.
-          Evaluating an expired flag always returns an error.
-          The format is {"flagset name": ["flag-1", "flag-2"]}
-        type: object
       flagsets:
         additionalProperties:
           type: string

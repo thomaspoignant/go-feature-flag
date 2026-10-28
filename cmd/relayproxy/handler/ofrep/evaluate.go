@@ -109,7 +109,7 @@ func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
 			httpStatus = http.StatusNotFound
 		}
 		errorMessage := fmt.Sprintf("Error while evaluating the flag: %s", flagKey)
-		if flagValue.ErrorCode == flag.ErrorCodeFlagExpired || flagValue.ErrorCode == flag.ErrorCodeFlagDependency {
+		if flagValue.ErrorCode == flag.ErrorCodeFlagDependency {
 			errorMessage = flagValue.ErrorDetails
 		}
 		return c.JSON(httpStatus, NewEvaluateError(flagKey, flagValue.ErrorCode, errorMessage))

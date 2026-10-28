@@ -47,7 +47,19 @@ func dep(parent string, variation, notVariation *string, appliesTo ...string) fl
 
 func TestInternalFlag_Value_Dependencies(t *testing.T) {
 	disabled := true
-	expired := time.Now().Add(-time.Hour)
+	past := time.Now().Add(-time.Hour)
+
+	// scheduledDisabledParent returns a parent flag disabled by a due scheduled rollout step.
+	scheduledDisabledParent := func() *flag.InternalFlag {
+		return &flag.InternalFlag{
+			Variations:  boolVariations(),
+			DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			Scheduled: &[]flag.ScheduledStep{{
+				InternalFlag: flag.InternalFlag{Disable: &disabled},
+				Date:         &past,
+			}},
+		}
+	}
 
 	tests := []struct {
 		name          string
@@ -129,12 +141,9 @@ func TestInternalFlag_Value_Dependencies(t *testing.T) {
 			wantValue: false, wantVariant: flag.VariationSDKDefault, wantErrorCode: flag.ErrorCodeFlagDependency,
 		},
 		{
-			name:  "expired parent is not met",
-			child: boolFlag("enabled", dep("parent", strPtr("enabled"), nil)),
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
-				Variations: boolVariations(), ExpiresAt: &expired,
-				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
-			}},
+			name:      "parent disabled by a scheduled rollout step is not met",
+			child:     boolFlag("enabled", dep("parent", strPtr("enabled"), nil)),
+			flags:     map[string]flag.Flag{"parent": scheduledDisabledParent()},
 			wantValue: false, wantVariant: flag.VariationSDKDefault, wantErrorCode: flag.ErrorCodeFlagDependency,
 		},
 		{
@@ -195,97 +204,167 @@ func TestInternalFlag_Value_SelfDependencyIsAConfigError(t *testing.T) {
 	assert.Equal(t, flag.ErrorFlagConfiguration, details.ErrorCode)
 }
 
-func TestInternalFlag_IsExpired_Dependencies(t *testing.T) {
+// evaluationCtxAt returns an evaluation context evaluated at the given date.
+func evaluationCtxAt(date time.Time) ffcontext.Context {
+	ctx := ffcontext.NewEvaluationContext("user")
+	ctx.AddCustomAttribute("gofeatureflag", map[string]any{"currentDateTime": date})
+	return ctx
+}
+
+func TestInternalFlag_Value_ParentScheduleDisablesChild(t *testing.T) {
 	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
 	past := now.Add(-time.Hour)
 	future := now.Add(time.Hour)
-	farFuture := now.Add(24 * time.Hour)
+	disabled := true
 	follows := func(follow bool, parent string) *[]flag.FlagDependency {
 		return &[]flag.FlagDependency{{Flag: parent, Variation: strPtr("enabled"), ExpiresWithParent: follow}}
+	}
+	disableStepAt := func(date time.Time) *[]flag.ScheduledStep {
+		return &[]flag.ScheduledStep{{
+			InternalFlag: flag.InternalFlag{Disable: &disabled},
+			Date:         &date,
+		}}
 	}
 
 	tests := []struct {
 		name  string
-		child flag.InternalFlag
+		child *flag.InternalFlag
 		flags map[string]flag.Flag
-		want  bool
+		want  flag.ResolutionReason
 	}{
 		{
-			name:  "parent expired, child follows",
-			child: flag.InternalFlag{ExpiresAt: &farFuture, DependsOn: follows(true, "parent")},
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &past}},
-			want:  true,
+			name:  "parent disabled by a due step without expiresWithParent is a dependency error",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled")}),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations: boolVariations(), Scheduled: disableStepAt(past),
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			}},
+			want: flag.ReasonError,
 		},
 		{
-			name:  "parent expired, child not configured to follow",
-			child: flag.InternalFlag{ExpiresAt: &farFuture, DependsOn: follows(false, "parent")},
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &past}},
+			name:  "parent disabled by a due step, child follows",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations: boolVariations(), Scheduled: disableStepAt(past),
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			}},
+			want: flag.ReasonDisabled,
 		},
 		{
-			name:  "child expired before parent",
-			child: flag.InternalFlag{ExpiresAt: &past, DependsOn: follows(true, "parent")},
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &farFuture}},
-			want:  true,
+			name:  "parent disabled by its disable field, child follows",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations: boolVariations(), Disable: &disabled,
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			}},
+			want: flag.ReasonDisabled,
 		},
 		{
-			name:  "parent not expired yet",
-			child: flag.InternalFlag{ExpiresAt: &farFuture, DependsOn: follows(true, "parent")},
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &future}},
+			name:  "parent not disabled yet",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations: boolVariations(), Scheduled: disableStepAt(future),
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			}},
+			want: flag.ReasonStatic,
 		},
 		{
-			name:  "child without own expiration follows parent",
-			child: flag.InternalFlag{DependsOn: follows(true, "parent")},
-			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &past}},
-			want:  true,
+			name:  "child not following still gets the dependency error",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: false}),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations: boolVariations(), Scheduled: disableStepAt(past),
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+			}},
+			want: flag.ReasonError,
 		},
 		{
-			name:  "grandparent expiration cascades",
-			child: flag.InternalFlag{DependsOn: follows(true, "parent")},
+			name:  "grandparent schedule cascades",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
 			flags: map[string]flag.Flag{
-				"parent":      &flag.InternalFlag{DependsOn: follows(true, "grandparent")},
-				"grandparent": &flag.InternalFlag{ExpiresAt: &past},
+				"parent": &flag.InternalFlag{
+					Variations:  boolVariations(),
+					DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+					DependsOn:   follows(true, "grandparent"),
+				},
+				"grandparent": &flag.InternalFlag{
+					Variations: boolVariations(), Scheduled: disableStepAt(past),
+					DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+				},
 			},
-			want: true,
+			want: flag.ReasonDisabled,
 		},
 		{
-			name:  "cascade stops at a flag not following its parent",
-			child: flag.InternalFlag{DependsOn: follows(true, "parent")},
+			name:  "a disabled grandparent breaks the chain even without expiresWithParent",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
 			flags: map[string]flag.Flag{
-				"parent":      &flag.InternalFlag{DependsOn: follows(false, "grandparent")},
-				"grandparent": &flag.InternalFlag{ExpiresAt: &past},
+				"parent": &flag.InternalFlag{
+					Variations:  boolVariations(),
+					DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+					DependsOn:   follows(false, "grandparent"),
+				},
+				"grandparent": &flag.InternalFlag{
+					Variations: boolVariations(), Scheduled: disableStepAt(past),
+					DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+				},
 			},
+			want: flag.ReasonError,
 		},
 		{
-			name:  "missing parent is ignored",
-			child: flag.InternalFlag{DependsOn: follows(true, "parent")},
+			name:  "missing parent is a dependency error",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}),
 			flags: map[string]flag.Flag{},
+			want:  flag.ReasonError,
 		},
 		{
-			name:  "circular expiration dependency terminates",
-			child: flag.InternalFlag{DependsOn: follows(true, "other")},
+			name:  "circular schedule dependency terminates",
+			child: boolFlag("enabled", flag.FlagDependency{Flag: "other", Variation: strPtr("enabled"), ExpiresWithParent: true}),
 			flags: map[string]flag.Flag{
-				"other": &flag.InternalFlag{DependsOn: follows(true, "child"), ExpiresAt: &past},
+				"other": &flag.InternalFlag{
+					Variations: boolVariations(), Scheduled: disableStepAt(past),
+					DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+					DependsOn:   follows(true, "child"),
+				},
 			},
-			want: true,
+			want: flag.ReasonDisabled,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.flags["child"] = &tt.child
-			assert.Equal(t, tt.want, tt.child.IsExpired(now, resolverOf(tt.flags)))
+			tt.flags["child"] = tt.child
+			got, details := tt.child.Value("child", evaluationCtxAt(now), resolverOf(tt.flags))
+			assert.Equal(t, tt.want, details.Reason)
+			if tt.want == flag.ReasonDisabled {
+				assert.Equal(t, false, got)
+				assert.Equal(t, flag.VariationSDKDefault, details.Variant)
+			}
 		})
 	}
 }
 
-func TestInternalFlag_Value_ExpiredParentExpiresChild(t *testing.T) {
-	past := time.Now().Add(-time.Hour)
-	child := boolFlag("enabled")
-	child.DependsOn = ptrTo([]flag.FlagDependency{{Flag: "parent", Variation: strPtr("enabled"), ExpiresWithParent: true}})
-	flags := map[string]flag.Flag{"parent": &flag.InternalFlag{ExpiresAt: &past}, "child": child}
+func TestInternalFlag_Value_ParentScheduleDisablesUngatedVariations(t *testing.T) {
+	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	past := now.Add(-time.Hour)
+	disabled := true
+	child := boolFlag("enabled", flag.FlagDependency{
+		Flag: "parent", Variation: strPtr("enabled"), AppliesTo: []string{"disabled"}, ExpiresWithParent: true,
+	})
+	flags := map[string]flag.Flag{
+		"parent": &flag.InternalFlag{
+			Variations: boolVariations(), Scheduled: &[]flag.ScheduledStep{{
+				InternalFlag: flag.InternalFlag{Disable: &disabled}, Date: &past,
+			}},
+			DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+		},
+		"child": child,
+	}
 
-	got, details := child.Value("child", ffcontext.NewEvaluationContext("user"), resolverOf(flags))
+	// the variation "enabled" of the child is not gated by the dependency, but the
+	// parent is disabled, the whole child is disabled.
+	got, details := child.Value("child", evaluationCtxAt(now), resolverOf(flags))
 	assert.Equal(t, false, got)
-	assert.Equal(t, flag.ErrorCodeFlagExpired, details.ErrorCode)
+	assert.Equal(t, flag.VariationSDKDefault, details.Variant)
+	assert.Equal(t, flag.ReasonDisabled, details.Reason)
+	assert.Empty(t, details.ErrorCode)
 }
 
 func TestInternalFlag_IsValid_Dependencies(t *testing.T) {
@@ -356,17 +435,25 @@ func TestInternalFlag_Value_SharedParentsAreResolvedOnce(t *testing.T) {
 	assert.Less(t, lookups, 4*layers)
 }
 
-func TestInternalFlag_IsExpired_SharedParentsAreResolvedOnce(t *testing.T) {
-	past := time.Now().Add(-time.Hour)
+func TestInternalFlag_Value_SharedExpiringParentsAreResolvedOnce(t *testing.T) {
+	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	past := now.Add(-time.Hour)
+	disabled := true
 	follows := ptrTo([]flag.FlagDependency{
 		{Flag: "left", Variation: strPtr("enabled"), ExpiresWithParent: true},
 		{Flag: "right", Variation: strPtr("enabled"), ExpiresWithParent: true},
 	})
+	scheduledDisabled := &flag.InternalFlag{
+		Variations: boolVariations(), Scheduled: &[]flag.ScheduledStep{{
+			InternalFlag: flag.InternalFlag{Disable: &disabled}, Date: &past,
+		}},
+		DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+	}
 	flags := map[string]flag.Flag{
-		"left":   &flag.InternalFlag{DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
-		"right":  &flag.InternalFlag{DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
-		"root":   &flag.InternalFlag{ExpiresAt: &past},
-		"parent": &flag.InternalFlag{DependsOn: follows},
+		"left":   &flag.InternalFlag{Variations: boolVariations(), DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")}, DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
+		"right":  &flag.InternalFlag{Variations: boolVariations(), DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")}, DependsOn: ptrTo([]flag.FlagDependency{{Flag: "root", ExpiresWithParent: true}})},
+		"root":   scheduledDisabled,
+		"parent": &flag.InternalFlag{Variations: boolVariations(), DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")}, DependsOn: follows},
 	}
 	rootLookups := 0
 	flagCtx := flag.Context{GetFlag: func(n string) (flag.Flag, bool) {
@@ -376,6 +463,7 @@ func TestInternalFlag_IsExpired_SharedParentsAreResolvedOnce(t *testing.T) {
 		f, ok := flags[n]
 		return f, ok
 	}}
-	assert.True(t, flags["parent"].(*flag.InternalFlag).IsExpired(time.Now(), flagCtx))
+	_, details := flags["parent"].(*flag.InternalFlag).Value("parent", evaluationCtxAt(now), flagCtx)
+	assert.Equal(t, flag.ReasonDisabled, details.Reason)
 	assert.LessOrEqual(t, rootLookups, 2)
 }

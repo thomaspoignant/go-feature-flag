@@ -836,7 +836,6 @@ const docTemplate = `{
                 "INVALID_CONTEXT",
                 "TARGETING_KEY_MISSING",
                 "FLAG_CONFIG",
-                "FLAG_EXPIRED",
                 "FLAG_DEPENDENCY"
             ],
             "x-enum-varnames": [
@@ -848,7 +847,6 @@ const docTemplate = `{
                 "ErrorCodeInvalidContext",
                 "ErrorCodeTargetingKeyMissing",
                 "ErrorFlagConfiguration",
-                "ErrorCodeFlagExpired",
                 "ErrorCodeFlagDependency"
             ]
         },
@@ -988,16 +986,6 @@ const docTemplate = `{
                     "description": "LatestCacheRefresh is the last time when your flag file was read and stored in the internal cache.\nThis field is used for backward compatibility when using the default flagset.",
                     "type": "string",
                     "example": "2022-06-13T11:22:55.941628+02:00"
-                },
-                "expiredFlags": {
-                    "description": "ExpiredFlags contains, for each flagset having some, the names of the flags with an expired TTL.\nEvaluating an expired flag always returns an error.\nThe format is {\"flagset name\": [\"flag-1\", \"flag-2\"]}",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
                 },
                 "flagsets": {
                     "description": "Flagsets contains the cache refresh dates for each flagset when using multiple flagsets.\nThe format is {\"flagset name\": \"2022-06-13T11:22:55.941628+02:00\"}",

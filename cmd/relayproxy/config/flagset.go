@@ -89,13 +89,6 @@ type CommonFlagSet struct {
 
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
-
-	// DefaultFlagTTL (optional) is the TTL applied to the flags that don't define their own (for example 90d).
-	// At the root of the configuration it is the global default, in a flagset it overrides the global default.
-	// A flag expires when its createdAt + TTL is over, an expired flag always returns an evaluation error.
-	// Flags without createdAt never expire.
-	// Default: 90d
-	DefaultFlagTTL string `mapstructure:"defaultFlagTTL" koanf:"defaultflagttl"`
 }
 
 // GetFlagSets returns a shallow copy of the configured flag sets.

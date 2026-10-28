@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -110,13 +109,6 @@ type Config struct {
 	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
 	PersistentFlagConfigurationFile string
 
-	// DefaultFlagTTL (optional) is the TTL applied to the flags that don't define their own.
-	// A flag expires when its createdAt + TTL is over, an expired flag always returns an evaluation error.
-	// Flags without createdAt never expire.
-	// Set a negative value to disable the default TTL.
-	// Default: 90 days
-	DefaultFlagTTL time.Duration
-
 	// Name (optional) is the name of the flagset, this is used to identify the flagset inside the
 	// GO Feature Flag instance. This allow to identify the flagset.
 	// Default: nil
@@ -137,9 +129,6 @@ func (config *Config) Initialize() {
 	}
 
 	config.PollingInterval = adjustPollingInterval(config.PollingInterval)
-	if config.DefaultFlagTTL == 0 {
-		config.DefaultFlagTTL = flag.DefaultFlagTTL
-	}
 	if config.offlineMutex == nil {
 		config.offlineMutex = &sync.RWMutex{}
 	}

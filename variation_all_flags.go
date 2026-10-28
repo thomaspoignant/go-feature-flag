@@ -59,7 +59,6 @@ func (g *GoFeatureFlag) GetFlagStates(
 	flagCtx := flag.Context{
 		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 		DefaultSdkValue:             nil,
-		DefaultTTL:                  g.config.DefaultFlagTTL,
 		GetFlag:                     resolve,
 	}
 	if g.config.Environment != "" {

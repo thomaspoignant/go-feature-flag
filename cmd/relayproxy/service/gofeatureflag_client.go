@@ -27,7 +27,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
-	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
@@ -77,16 +76,7 @@ func NewGoFeatureFlagClient(
 	// end of backward compatibility for the notifier field in version v1.66.0
 	notif = append(notif, notifiers...)
 
-	defaultFlagTTL := time.Duration(0)
-	if cFlagSet.DefaultFlagTTL != "" {
-		defaultFlagTTL, err = flag.ParseTTL(cFlagSet.DefaultFlagTTL)
-		if err != nil {
-			return nil, fmt.Errorf("defaultFlagTTL: %w", err)
-		}
-	}
-
 	f := ffclient.Config{
-		DefaultFlagTTL: defaultFlagTTL,
 		PollingInterval: time.Duration(
 			cFlagSet.PollingInterval,
 		) * time.Millisecond,

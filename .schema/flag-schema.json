@@ -66,7 +66,7 @@
                             "variation": {"type": "string", "description": "Variation the parent flag must resolve to."},
                             "notVariation": {"type": "string", "description": "Variation the parent flag must not resolve to."},
                             "appliesTo": {"type": "array", "items": {"type": "string"}, "description": "Variations of this flag bound by the dependency (default: all)."},
-                            "expiresWithParent": {"type": "boolean", "description": "The flag expires when the parent flag expires."}
+                            "expiresWithParent": {"type": "boolean", "description": "The flag is disabled as soon as the parent flag is disabled, either by its own disable field or by one of its due scheduled rollout steps."}
                         },
                         "required": ["flag"],
                         "oneOf": [
@@ -75,23 +75,6 @@
                         ],
                         "additionalProperties": false
                     }
-                },
-                "createdAt": {
-                    "type": "string",
-                    "format": "date-time",
-                    "title": "createdAt",
-                    "description": "Creation date of the flag in UTC (for example 2026-01-15T00:00:00Z)"
-                },
-                "ttl": {
-                    "type": "string",
-                    "title": "ttl",
-                    "description": "Time to live of the flag (for example 90d or 12h). Overrides the default TTL."
-                },
-                "expiresAt": {
-                    "type": "string",
-                    "format": "date-time",
-                    "title": "expiresAt",
-                    "description": "Date at which the flag expires in UTC (for example 2026-04-15T00:00:00Z). Overrides createdAt and ttl."
                 }
             },
             "additionalProperties": false,

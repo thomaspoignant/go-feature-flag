@@ -1,5 +1,0 @@
-{
-  "key": "expired-flag",
-  "errorCode": "FLAG_EXPIRED",
-  "errorDetails": "flag \"expired-flag\" expired on 2020-01-02T00:00:00Z"
-}
