@@ -69,6 +69,21 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 }
 ```
 
+To describe an updated flag the same way the built-in notifiers do, use `notifier.DescribeChanges`.
+It returns one sentence per change, with names and values formatted as markdown inline code.
+Use `notifier.DescribeChangesPlain` if your destination cannot display inline code, and
+`notifier.ChangeList` to render the sentences as a list.
+
+```go title="notifier.go"
+for key, update := range diff.Updated {
+    changes, err := notifier.DescribeChanges(update.Before, update.After)
+    if err != nil {
+        // ...
+    }
+    fmt.Printf("Flag %s updated\n%s\n", key, notifier.ChangeList(changes, "• ", 0))
+}
+```
+
 :::note
 If you think your custom notifier could be useful for others, feel free to open a [pull request](https://github.com/thomaspoignant/go-feature-flag/pulls) to add it to the list of available notifiers.
 :::
