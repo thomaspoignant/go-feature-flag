@@ -41,12 +41,18 @@ func (g *GoFeatureFlag) GetFlagStates(
 		return flagstate.NewAllFlags()
 	}
 
-	snapshot, err := g.retrieverManager.Snapshot()
+	flags, err := g.retrieverManager.GetFlagsFromCache(context.Background())
 	if err != nil {
 		if len(flagsToEvaluate) != 0 {
 			return flagstate.NewAllFlags()
 		}
 		return flagstate.AllFlags{}
+	}
+	// The resolver gives the evaluation access to the other flags of the same
+	// version of the cache, to evaluate the dependencies between flags.
+	resolve := func(name string) (flag.Flag, bool) {
+		f, ok := flags[name]
+		return f, ok
 	}
 
 	// prepare evaluation context enrichment
@@ -54,7 +60,7 @@ func (g *GoFeatureFlag) GetFlagStates(
 		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 		DefaultSdkValue:             nil,
 		DefaultTTL:                  g.config.DefaultFlagTTL,
-		GetFlag:                     flagResolver(snapshot),
+		GetFlag:                     resolve,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
@@ -64,8 +70,8 @@ func (g *GoFeatureFlag) GetFlagStates(
 	if len(flagsToEvaluate) != 0 {
 		flagStates := flagstate.NewAllFlags()
 		for _, key := range flagsToEvaluate {
-			currentFlag, err := snapshot.GetFlag(key)
-			if err != nil {
+			currentFlag, ok := flags[key]
+			if !ok {
 				// We ignore flags in error
 				continue
 			}
@@ -78,10 +84,6 @@ func (g *GoFeatureFlag) GetFlagStates(
 	}
 
 	// Evaluate all the flags
-	flags, err := snapshot.All()
-	if err != nil {
-		return flagstate.AllFlags{}
-	}
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
 		allFlags.AddFlag(

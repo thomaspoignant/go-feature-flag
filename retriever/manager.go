@@ -270,14 +270,16 @@ func (m *Manager) GetFlag(flagKey string) (flag.Flag, error) {
 	return m.cacheManager.GetFlag(flagKey)
 }
 
-// Snapshot returns a frozen version of the cache, all the reads on it come from the same configuration.
-func (m *Manager) Snapshot() (cache.Snapshot, error) {
-	if s, ok := m.cacheManager.(interface {
-		Snapshot() (cache.Snapshot, error)
-	}); ok {
-		return s.Snapshot()
+// GetFlagsWithDependency returns the flag and a resolver giving access to the other flags
+// of the cache, to evaluate the dependencies between flags. The flag and the resolver read
+// the same version of the cache.
+func (m *Manager) GetFlagsWithDependency(
+	flagKey string,
+) (flag.Flag, func(string) (flag.Flag, bool), error) {
+	if m == nil || m.cacheManager == nil {
+		return nil, nil, fmt.Errorf("cache is not initialized")
 	}
-	return cache.NewSnapshot(m.cacheManager.GetFlag, m.cacheManager.AllFlags), nil
+	return m.cacheManager.GetFlagsWithDependency(flagKey)
 }
 
 // GetFlagsFromCache returns all the flags present in the cache with their

@@ -6,7 +6,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
@@ -294,26 +293,16 @@ func (g *GoFeatureFlag) RawVariation(
 
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
-// The snapshot is the version of the cache the flag has been read from, the other flags
-// needed by the evaluation must be read from it.
-func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, cache.Snapshot, error) {
-	snapshot, err := g.retrieverManager.Snapshot()
+// The resolver gives access to the other flags of the same version of the cache, the other
+// flags needed by the evaluation must be read from it.
+func (g *GoFeatureFlag) getFlagFromCache(
+	flagKey string,
+) (flag.Flag, func(string) (flag.Flag, bool), error) {
+	f, resolve, err := g.retrieverManager.GetFlagsWithDependency(flagKey)
 	if err != nil {
-		return nil, snapshot, fmt.Errorf(errorFlagNotAvailable, flagKey)
+		return f, resolve, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
-	f, err := snapshot.GetFlag(flagKey)
-	if err != nil {
-		return f, snapshot, fmt.Errorf(errorFlagNotAvailable, flagKey)
-	}
-	return f, snapshot, nil
-}
-
-// flagResolver gives the evaluation access to the other flags, to evaluate the dependencies between flags.
-func flagResolver(snapshot cache.Snapshot) func(flagKey string) (flag.Flag, bool) {
-	return func(flagKey string) (flag.Flag, bool) {
-		f, err := snapshot.GetFlag(flagKey)
-		return f, err == nil
-	}
+	return f, resolve, nil
 }
 
 // CollectEventData is collecting events and sending them to the data exporter to be stored.
@@ -389,7 +378,7 @@ func getVariation[T model.JSONType](
 		}, nil
 	}
 
-	f, snapshot, err := g.getFlagFromCache(flagKey)
+	f, resolve, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		varResult := model.VariationResult[T]{
 			Value:         sdkDefaultValue,
@@ -411,7 +400,7 @@ func getVariation[T model.JSONType](
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 		DefaultTTL:                  g.config.DefaultFlagTTL,
-		GetFlag:                     flagResolver(snapshot),
+		GetFlag:                     resolve,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)

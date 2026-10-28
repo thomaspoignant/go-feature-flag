@@ -351,6 +351,26 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
       </td>
     </tr>
+    <tr>
+      <td>
+        <code>dependsOn</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          List of dependencies on other flags. A variation of the flag is only
+          served while all the parents it is bound to are in the expected
+          state.
+        </p>
+        <p>
+          <i>
+            See <a href="#-flag-dependencies">Flag dependencies</a> to have
+            more info on how to use it.
+          </i>
+        </p>
+      </td>
+    </tr>
 
   </tbody>
 </table>
