@@ -1,0 +1,8 @@
+services:
+  relay-proxy:
+    image: gofeatureflag/go-feature-flag:latest
+    ports:
+      - "1033:1031"
+    volumes:
+      - ./relay-proxy:/goff
+    command: ["/go-feature-flag", "--config", "/goff/goff-proxy.yaml"]

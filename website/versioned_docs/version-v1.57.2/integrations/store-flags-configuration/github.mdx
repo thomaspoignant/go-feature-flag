@@ -1,0 +1,101 @@
+---
+sidebar_position: 70
+description: How to configure a GitHub retriever.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const retrieverName = 'GitHub';
+export const info = integrations.retrievers.find((r) => r.name === retrieverName)
+
+# GitHub
+
+## Overview
+{info.longDescription ?? info.description}
+
+:::info
+GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+
+**If the rate limit is reached, the retriever will log an error and will stop polling until GitHub allows it again.**
+:::
+## Configure the relay proxy
+
+To configure your relay proxy to use the {retrieverName} retriever, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: github
+    repositorySlug: thomaspoignant/go-feature-flag
+    path: config/flag/my-flags.yaml
+# ...
+```
+
+| Field name       |    Mandatory     | Type   | Default  | Description                                                                                                                                                                                                                        |
+|------------------|:----------------:|--------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`           |  <Mandatory />   | string | **none** | **Value should be `github`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                                           |
+| `repositorySlug` |  <Mandatory />   | string | **none** | The repository slug of the GitHub repository where your file is located _(ex: `thomaspoignant/go-feature-flag`)_.                                                                                                                  |
+| `path`           |  <Mandatory />   | string | **none** | Path to the file inside the repository _(ex: `config/flag/my-flags.yaml`)_.                                                                                                                                                        |
+| `branch`         | <NotMandatory /> | string | `main`   | The branch we should check in the repository.                                                                                                                                                                                      |
+| `token`          | <NotMandatory /> | string | **none** | Github token used to access a private repository, you need the repo permission ([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)). |
+| `baseUrl`        | <NotMandatory /> | string | `none`   | The base URL for the GitHub API. Use this for GitHub Enterprise or self-hosted instances _(ex: `https://github.acme.com/api/v3`)_. If not specified, defaults to `https://api.github.com`.                                         |
+| `timeout`        | <NotMandatory /> | string | `10000`  | Timeout in millisecond used when calling GitHub.                                                                                                                                                                                   |
+
+## Configure the GO Module
+To configure your GO module to use the {retrieverName} retriever, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+err := ffclient.Init(ffclient.Config{
+    PollingInterval: 3 * time.Second,
+    Retriever: &githubretriever.Retriever{
+        RepositorySlug: "thomaspoignant/go-feature-flag",
+        Branch: "main",
+        FilePath: "testdata/flag-config.goff.yaml",
+        GithubToken: "XXXX",
+        Timeout: 2 * time.Second,
+    },
+})
+defer ffclient.Close()
+```
+
+| Field                |    Mandatory     | Description                                                                                                                                                                                                                               |
+|----------------------|:----------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`RepositorySlug`** |  <Mandatory />   | Your GitHub slug `org/repo-name`.                                                                                                                                                                                                         |
+| **`FilePath`**       |  <Mandatory />   | The path of your file.                                                                                                                                                                                                                    |
+| **`Branch`**         | <NotMandatory /> | The branch where your file is.<br/>Default: `main`                                                                                                                                                                                        |
+| **`GithubToken`**    | <NotMandatory /> | Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*. |
+| **`BaseURL`**        | <NotMandatory /> | The base URL for the GitHub API. Use this for GitHub Enterprise or self-hosted instances _(ex: `https://github.acme.com/api/v3`)_. If not specified, defaults to `https://api.github.com`.                                                |
+| **`Timeout`**        | <NotMandatory /> | Timeout for the HTTP call <br/>Default: 10 seconds                                                                                                                                                                                        |
+
+## GitHub Enterprise / Self-hosted instances
+
+If you are using a GitHub Enterprise or self-hosted instance, you can configure the `baseUrl` field to point to your instance's API endpoint.
+
+### Relay Proxy Configuration
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: github
+    repositorySlug: myorg/myrepo
+    path: config/flag/my-flags.yaml
+    baseUrl: "https://github.acme.com/api/v3"
+# ...
+```
+
+### GO Module Configuration
+
+```go title="example.go"
+err := ffclient.Init(ffclient.Config{
+    PollingInterval: 3 * time.Second,
+    Retriever: &githubretriever.Retriever{
+        RepositorySlug: "myorg/myrepo",
+        Branch: "main",
+        FilePath: "config/flag/my-flags.yaml",
+        BaseURL: "https://github.acme.com/api/v3",
+        GithubToken: "XXXX",
+    },
+})
+defer ffclient.Close()
+```

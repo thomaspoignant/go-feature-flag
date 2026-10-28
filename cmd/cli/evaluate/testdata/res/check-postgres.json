@@ -32,5 +32,8 @@
   "RedisPrefix": "",
   "AccountName": "",
   "AccountKey": "",
-  "Container": ""
+  "Container": "",
+  "Pattern": "",
+  "Prefix": "",
+  "Recursive": false
 }
