@@ -3,6 +3,8 @@ on:
   schedule:
     - cron: "0 9 * * *"
 
+permissions: {}
+
 jobs:
   sdk-versions:
     runs-on: ubuntu-latest

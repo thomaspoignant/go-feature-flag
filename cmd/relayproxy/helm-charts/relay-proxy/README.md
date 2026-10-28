@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.57.0](https://img.shields.io/badge/Version-1.57.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.57.0](https://img.shields.io/badge/AppVersion-v1.57.0-informational?style=flat-square)
+![Version: 1.57.2](https://img.shields.io/badge/Version-1.57.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.57.2](https://img.shields.io/badge/AppVersion-v1.57.2-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -94,7 +94,7 @@ relayproxy:
 	<tbody>
 		<tr>
 			<td id="affinity">
-				<a href="./values.yaml#L150">affinity</a>
+				<a href="./values.yaml#L163">affinity</a>
             </td>
 			<td>
 object
@@ -112,7 +112,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling">
-				<a href="./values.yaml#L131">autoscaling</a>
+				<a href="./values.yaml#L144">autoscaling</a>
             </td>
 			<td>
 object
@@ -136,7 +136,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling--enabled">
-				<a href="./values.yaml#L133">autoscaling.enabled</a>
+				<a href="./values.yaml#L146">autoscaling.enabled</a>
             </td>
 			<td>
 bool
@@ -154,7 +154,7 @@ false
 		</tr>
 		<tr>
 			<td id="autoscaling--maxReplicas">
-				<a href="./values.yaml#L137">autoscaling.maxReplicas</a>
+				<a href="./values.yaml#L150">autoscaling.maxReplicas</a>
             </td>
 			<td>
 int
@@ -172,7 +172,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--minReplicas">
-				<a href="./values.yaml#L135">autoscaling.minReplicas</a>
+				<a href="./values.yaml#L148">autoscaling.minReplicas</a>
             </td>
 			<td>
 int
@@ -190,7 +190,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetCPUUtilizationPercentage">
-				<a href="./values.yaml#L139">autoscaling.targetCPUUtilizationPercentage</a>
+				<a href="./values.yaml#L152">autoscaling.targetCPUUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -208,7 +208,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetMemoryUtilizationPercentage">
-				<a href="./values.yaml#L141">autoscaling.targetMemoryUtilizationPercentage</a>
+				<a href="./values.yaml#L154">autoscaling.targetMemoryUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -262,7 +262,7 @@ object
 		</tr>
 		<tr>
 			<td id="extraManifests">
-				<a href="./values.yaml#L153">extraManifests</a>
+				<a href="./values.yaml#L166">extraManifests</a>
             </td>
 			<td>
 list
@@ -388,7 +388,7 @@ list
 		</tr>
 		<tr>
 			<td id="ingress">
-				<a href="./values.yaml#L104">ingress</a>
+				<a href="./values.yaml#L117">ingress</a>
             </td>
 			<td>
 object
@@ -422,7 +422,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--annotations">
-				<a href="./values.yaml#L110">ingress.annotations</a>
+				<a href="./values.yaml#L123">ingress.annotations</a>
             </td>
 			<td>
 object
@@ -440,7 +440,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--className">
-				<a href="./values.yaml#L108">ingress.className</a>
+				<a href="./values.yaml#L121">ingress.className</a>
             </td>
 			<td>
 string
@@ -458,7 +458,7 @@ string
 		</tr>
 		<tr>
 			<td id="ingress--enabled">
-				<a href="./values.yaml#L106">ingress.enabled</a>
+				<a href="./values.yaml#L119">ingress.enabled</a>
             </td>
 			<td>
 bool
@@ -472,6 +472,24 @@ false
 			</td>
 			<td>
 				Enable ingress
+			</td>
+		</tr>
+		<tr>
+			<td id="lifecycle">
+				<a href="./values.yaml#L101">lifecycle</a>
+            </td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td>
+				Lifecycle hooks for the relay proxy container. A `preStop` sleep keeps the pod serving while its endpoint is removed from Services and ingress controllers, avoiding failed requests during rollouts and node drains. Use the native `sleep` action (Kubernetes 1.30+): the default image is distroless and has no shell for `exec` hooks.
 			</td>
 		</tr>
 		<tr>
@@ -494,7 +512,7 @@ string
 		</tr>
 		<tr>
 			<td id="nodeSelector">
-				<a href="./values.yaml#L144">nodeSelector</a>
+				<a href="./values.yaml#L157">nodeSelector</a>
             </td>
 			<td>
 object
@@ -674,7 +692,7 @@ int
 		</tr>
 		<tr>
 			<td id="resources--requests--cpu">
-				<a href="./values.yaml#L128">resources.requests.cpu</a>
+				<a href="./values.yaml#L141">resources.requests.cpu</a>
             </td>
 			<td>
 string
@@ -692,7 +710,7 @@ string
 		</tr>
 		<tr>
 			<td id="resources--requests--memory">
-				<a href="./values.yaml#L126">resources.requests.memory</a>
+				<a href="./values.yaml#L139">resources.requests.memory</a>
             </td>
 			<td>
 string
@@ -728,7 +746,7 @@ object
 		</tr>
 		<tr>
 			<td id="service--port">
-				<a href="./values.yaml#L101">service.port</a>
+				<a href="./values.yaml#L114">service.port</a>
             </td>
 			<td>
 int
@@ -746,7 +764,7 @@ int
 		</tr>
 		<tr>
 			<td id="service--type">
-				<a href="./values.yaml#L99">service.type</a>
+				<a href="./values.yaml#L112">service.type</a>
             </td>
 			<td>
 string
@@ -817,8 +835,26 @@ string
 			</td>
 		</tr>
 		<tr>
+			<td id="terminationGracePeriodSeconds">
+				<a href="./values.yaml#L108">terminationGracePeriodSeconds</a>
+            </td>
+			<td>
+int
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+null
+</pre>
+</div>
+			</td>
+			<td>
+				Time in seconds given to the pod to terminate gracefully, including any `preStop` hook. Uses the Kubernetes default (30s) when not set.
+			</td>
+		</tr>
+		<tr>
 			<td id="tolerations">
-				<a href="./values.yaml#L147">tolerations</a>
+				<a href="./values.yaml#L160">tolerations</a>
             </td>
 			<td>
 list
