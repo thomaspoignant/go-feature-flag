@@ -2,9 +2,9 @@
   background: none;
 }
 
-.ruleGroup-body {
+.ruleGroup .ruleGroup-body {
   padding: 0.6rem 0;
-  gap: 1.2rem !important;
+  gap: 1.2rem;
 }
 
 .ruleGroup button {

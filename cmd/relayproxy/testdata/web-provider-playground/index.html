@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GOFF web provider playground</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font: 13px/1.4 ui-monospace, Menlo, monospace; margin: 0; padding: 16px; background: #0f1115; color: #d7dae0; }
+      h1 { font-size: 16px; margin: 0 0 12px; }
+      h2 { font-size: 13px; margin: 0 0 8px; color: #8ab4f8; text-transform: uppercase; letter-spacing: .05em; }
+      .grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; }
+      section { background: #171a21; border: 1px solid #262b36; border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+      label { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 6px; margin-bottom: 6px; }
+      input, select, textarea, button { font: inherit; background: #0f1115; color: inherit; border: 1px solid #333a48; border-radius: 4px; padding: 4px 6px; }
+      textarea { width: 100%; min-height: 90px; }
+      button { cursor: pointer; background: #24304a; }
+      button:hover { background: #2f3e60; }
+      button:disabled { opacity: .4; cursor: default; }
+      .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #262b36; vertical-align: top; }
+      th { color: #8b93a5; font-weight: normal; }
+      .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #333a48; }
+      .ok { background: #1e4d2b; } .warn { background: #5c4813; } .err { background: #5c1f1f; }
+      #log { height: 420px; overflow: auto; white-space: pre-wrap; word-break: break-all; background: #0b0d10; padding: 8px; border-radius: 4px; }
+      .l-debug { color: #6b7280; } .l-info { color: #d7dae0; } .l-warn { color: #f5c26b; } .l-error { color: #ff7b72; } .l-event { color: #7ee787; }
+      .flash { animation: flash 1.2s; }
+      @keyframes flash { from { background: #3d5a1e; } to { background: transparent; } }
+    </style>
+  </head>
+  <body>
+    <h1>GO Feature Flag web provider playground <span id="branch" style="color:#6b7280"></span></h1>
+    <div class="grid">
+      <div>
+        <section>
+          <h2>Provider options</h2>
+          <form id="opts">
+            <label>endpoint <input name="endpoint" value="http://localhost:1033" /></label>
+            <label>mode
+              <select name="mode"><option value="sse" selected>sse</option><option value="ws">ws</option></select>
+            </label>
+            <label>apiKey <input name="apiKey" placeholder="(none)" /></label>
+            <label>pollingIntervalMs <input name="pollingIntervalMs" type="number" value="5000" /></label>
+            <label>maxRetries <input name="maxRetries" type="number" value="3" /></label>
+            <label>retryInitialDelay <input name="retryInitialDelay" type="number" value="100" /></label>
+            <label>retryDelayMultiplier <input name="retryDelayMultiplier" type="number" value="2" /></label>
+            <label>apiTimeout <input name="apiTimeout" type="number" value="10000" /></label>
+            <label>dataFlushInterval <input name="dataFlushInterval" type="number" value="10000" /></label>
+            <label>disableDataCollection <input name="disableDataCollection" type="checkbox" /></label>
+          </form>
+          <div class="row">
+            <button id="connect">Connect</button>
+            <button id="disconnect" disabled>Disconnect</button>
+          </div>
+        </section>
+        <section>
+          <h2>Evaluation context</h2>
+          <label>targetingKey <input id="targetingKey" value="user-123" /></label>
+          <textarea id="ctx">{ "email": "john@gofeatureflag.org" }</textarea>
+          <div class="row"><button id="setCtx">setContext()</button></div>
+        </section>
+        <section>
+          <h2>Status</h2>
+          <div class="row">SDK status <span id="sdkStatus" class="badge">-</span></div>
+          <div class="row" style="margin-top:6px">Last event <span id="lastEvent" class="badge">-</span></div>
+          <div class="row" style="margin-top:6px">Change strategy <span id="strategyStatus" class="badge">-</span></div>
+        </section>
+        <section>
+          <h2>Polling fallback (stream-blocker :1032)</h2>
+          <div class="row">Streams <span id="blockerStatus" class="badge">-</span></div>
+          <div class="row" style="margin-top:6px">
+            <button id="blockStreams">Block SSE/WS</button>
+            <button id="allowStreams">Allow SSE/WS</button>
+          </div>
+        </section>
+      </div>
+      <div>
+        <section>
+          <h2>Flags</h2>
+          <div class="row" style="margin-bottom:8px">
+            <input id="newKey" placeholder="flag key" />
+            <select id="newType">
+              <option>boolean</option><option>string</option><option>number</option><option>object</option>
+            </select>
+            <button id="addFlag">Add</button>
+            <button id="evalAll">Re-evaluate</button>
+          </div>
+          <table>
+            <thead><tr><th>key</th><th>type</th><th>value</th><th>variant</th><th>reason</th><th>error</th><th></th></tr></thead>
+            <tbody id="flags"></tbody>
+          </table>
+        </section>
+        <section>
+          <div class="row" style="justify-content:space-between"><h2>Log (events + provider logger)</h2>
+            <div class="row"><label style="display:flex;margin:0">debug <input id="showDebug" type="checkbox" checked /></label><button id="clearLog">Clear</button></div>
+          </div>
+          <div id="log"></div>
+        </section>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

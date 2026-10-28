@@ -38,22 +38,22 @@
     "browser-sync": "^3.0.4",
     "eslint": "^10.12.0",
     "eslint-webpack-plugin": "^6.0.0",
-    "htmlnano": "^3.5.1",
+    "htmlnano": "^3.6.1",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.1.0",
     "postcss-cli": "^12.0.0",
     "postcss-scss": "^4.0.9",
     "posthtml": "^0.16.7",
     "posthtml-modules": "^0.9.1",
-    "sass": "^1.105.1",
+    "sass": "^1.105.2",
     "stylelint": "^17.16.0",
-    "webpack": "^5.111.1",
+    "webpack": "^5.112.0",
     "webpack-cli": "^7.2.3"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
     "@openfeature/web-sdk": "^1.10.0",
     "highlight.js": "^11.12.0",
-    "uuid": "^14.0.2"
+    "uuid": "^14.0.3"
   }
 }

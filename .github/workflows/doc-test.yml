@@ -4,6 +4,8 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   test-doc-build:
     name: Test documentation build

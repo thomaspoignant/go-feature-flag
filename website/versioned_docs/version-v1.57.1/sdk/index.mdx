@@ -1,0 +1,76 @@
+---
+description: Use GO Feature Flag with Openfeature SDKs
+---
+import { Card } from "@site/src/components/doc/cardv3";
+import { sdk } from "@site/data/sdk";
+import ofLogo from "@site/static/docs/openfeature/logo.png";
+
+# 🧩 SDKs (with OpenFeature)
+
+## Overview
+**GO Feature Flag** stands out as a feature flag solution, distinct from others, due to our decision to fully support the [`OpenFeature`](https://openfeature.dev) CNCF project.
+
+The benefit of choosing OpenFeature lies in its framework-agnostic nature. When utilizing OpenFeature SDKs, you minimize the effort required for switching to a different feature flag provider. This flexibility empowers you to make changes without being tied down to a particular vendor.
+
+To show our commitment to this initiative, **GO Feature Flag has opted not to develop any custom SDKs and instead relies entirely on OpenFeature SDKs**.
+In order to seamlessly integrate with our solution, we offer [`providers`](https://docs.openfeature.dev/docs/reference/concepts/provider) for GO Feature Flag in multiple programming languages.
+
+Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers is as straightforward as using any other feature flag solution.  
+The added advantage is that you now adhere to a standard approach and avoid any vendor lock-in 🎉!
+
+:::info
+To be able to use GO Feature Flag with OpenFeature SDKs, you need to have the [`relay-proxy`](./relay-proxy) running in your infrastructure.
+:::
+
+## Difference between Server-side SDKs & Client-side SDKs
+The primary difference between these two paradigms has to do with the way they model evaluation context.  
+In server usage, the evaluation context changes frequently, as often as every evaluation, while in client-side usage, the evaluation context changes less frequently, often in response to user actions or UI events.
+
+This is the reason why we have different SDKs for server and client-side usage.
+
+[_More in depth about the differences between server and client-side SDKs_](./concepts/sdk-paradigms)
+
+## Supported Languages
+GO Feature Flag support both paradigms, and the SDKs are designed to make it easy to use the same feature flags in both server and client applications.
+
+### Client-side Languages
+<div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+{ sdk.filter(it => it.paradigm.includes('Client')).map((item) => (
+  <Card
+    key={item.name}
+    name={item.name}
+    cssLogo={item.faLogo}
+    link={`sdk/${item.docLink}`}
+    badge={item.badgeUrl}
+    featureList={item.featureList}
+  />
+))}
+</div>
+
+
+### Server-side Languages
+<div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+  { sdk.filter(it => it.paradigm.includes('Server')).map((item) => (
+    <Card
+      key={item.name}
+      name={item.name}
+      cssLogo={item.faLogo}
+      link={`sdk/${item.docLink}`}
+      badge={item.badgeUrl}
+      featureList={item.featureList}
+    />
+  ))}
+</div>
+
+### OpenFeature Remote Evaluation Protocol (OFREP)
+In addition to the GO Feature Flag specific providers, we also support the OpenFeature Remote Evaluation Protocol (OFREP) which is a standard protocol for feature flag evaluation.
+
+<Card
+  name={"OFREP"}
+  logo={ofLogo}
+  link={`sdk/ofrep`}
+  featureList={[{
+    status: "done",
+    name: "OpenFeature (OFREP) API",
+  }]}
+/>
