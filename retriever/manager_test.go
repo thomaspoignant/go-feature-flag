@@ -348,3 +348,12 @@ func TestManagerStopPollingWithPollingDisabled(t *testing.T) {
 		_ = manager.Shutdown(ctx)
 	})
 }
+
+func TestManagerGetFlagsWithDependencyNotInitialized(t *testing.T) {
+	var m *retriever.Manager
+	_, _, err := m.GetFlagsWithDependency("flag")
+	assert.Error(t, err)
+
+	_, _, err = (&retriever.Manager{}).GetFlagsWithDependency("flag")
+	assert.Error(t, err)
+}

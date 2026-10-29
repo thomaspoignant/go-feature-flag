@@ -467,3 +467,68 @@ func TestInternalFlag_Value_SharedExpiringParentsAreResolvedOnce(t *testing.T) {
 	assert.Equal(t, flag.ReasonDisabled, details.Reason)
 	assert.LessOrEqual(t, rootLookups, 2)
 }
+
+type foreignFlag struct{ flag.InternalFlag }
+
+func TestInternalFlag_Value_ExpiringParentEdgeCases(t *testing.T) {
+	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	follow := func(parents ...string) *[]flag.FlagDependency {
+		deps := make([]flag.FlagDependency, 0, len(parents))
+		for _, p := range parents {
+			deps = append(deps, flag.FlagDependency{Flag: p, Variation: strPtr("enabled"), ExpiresWithParent: true})
+		}
+		return &deps
+	}
+	withDeps := func(deps *[]flag.FlagDependency) *flag.InternalFlag {
+		return &flag.InternalFlag{
+			Variations: boolVariations(), DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")}, DependsOn: deps,
+		}
+	}
+
+	tests := []struct {
+		name  string
+		child *flag.InternalFlag
+		flags map[string]flag.Flag
+		want  flag.ResolutionReason
+	}{
+		{
+			name:  "shared enabled root is read from the memo",
+			child: withDeps(follow("left", "right")),
+			flags: map[string]flag.Flag{
+				"left":  withDeps(follow("root")),
+				"right": withDeps(follow("root")),
+				"root":  withDeps(nil),
+			},
+			want: flag.ReasonStatic,
+		},
+		{
+			name:  "parent that is not an internal flag is never disabled",
+			child: withDeps(follow("parent")),
+			flags: map[string]flag.Flag{"parent": &foreignFlag{*withDeps(nil)}},
+			want:  flag.ReasonStatic,
+		},
+		{
+			name:  "parent with an unreadable schedule is never disabled",
+			child: withDeps(follow("parent")),
+			flags: map[string]flag.Flag{"parent": &flag.InternalFlag{
+				Variations:  boolVariations(),
+				DefaultRule: &flag.Rule{VariationResult: strPtr("enabled")},
+				Scheduled:   &[]flag.ScheduledStep{},
+				Metadata:    &map[string]any{"bad": make(chan int)},
+			}},
+			want: flag.ReasonError,
+		},
+		{
+			name:  "dependency without variation condition is not satisfied",
+			child: withDeps(&[]flag.FlagDependency{{Flag: "parent"}}),
+			flags: map[string]flag.Flag{"parent": withDeps(nil)},
+			want:  flag.ReasonError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, details := tt.child.Value("child", evaluationCtxAt(now), resolverOf(tt.flags))
+			assert.Equal(t, tt.want, details.Reason)
+		})
+	}
+}

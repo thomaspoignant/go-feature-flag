@@ -70,3 +70,26 @@ scheduled-parent:
 	assert.Equal(t, flag.ErrorCodeFlagDependency, states.GetFlags()["child"].ErrorCode)
 	assert.Equal(t, flag.ReasonDisabled, states.GetFlags()["expiring-child"].Reason)
 }
+
+func TestGoFeatureFlag_GetFlagStatesSelection(t *testing.T) {
+	flagFile := filepath.Join(t.TempDir(), "flags.yaml")
+	require.NoError(t, os.WriteFile(flagFile, []byte(`
+parent:
+  variations: {on: true, off: false}
+  defaultRule: {variation: on}
+`), 0o600))
+	g, err := New(Config{
+		PollingInterval: 0,
+		Retriever:       &fileretriever.Retriever{Path: flagFile},
+	})
+	require.NoError(t, err)
+	ctx := ffcontext.NewEvaluationContext("user")
+
+	states := g.GetFlagStates(ctx, []string{"parent", "unknown"})
+	assert.Contains(t, states.GetFlags(), "parent")
+	assert.NotContains(t, states.GetFlags(), "unknown")
+
+	g.Close()
+	closed := g.GetFlagStates(ctx, []string{"parent"})
+	assert.Empty(t, closed.GetFlags())
+}
