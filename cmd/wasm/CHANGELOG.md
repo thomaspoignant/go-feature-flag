@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.4...cmd/wasm/v0.3.0) (2026-10-30)
+
+
+### 🚀 New Features
+
+* migrate the relay proxy from echo v4 to v5 ([#6000](https://github.com/thomaspoignant/go-feature-flag/issues/6000)) ([27ef744](https://github.com/thomaspoignant/go-feature-flag/commit/27ef744d94cc3700e5f6c38f3b17de49b5f91db3))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.46.0 to 1.47.0 ([#6067](https://github.com/thomaspoignant/go-feature-flag/issues/6067)) ([04cba7c](https://github.com/thomaspoignant/go-feature-flag/commit/04cba7c83b5a097df1fb460daa0364ceadb75baf))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.47.0 to 1.47.1 ([#6154](https://github.com/thomaspoignant/go-feature-flag/issues/6154)) ([2f54b43](https://github.com/thomaspoignant/go-feature-flag/commit/2f54b43bc3ce4535fa7236a2a494cd4f2b7e82bc))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.33.4 to 1.33.5 ([#6096](https://github.com/thomaspoignant/go-feature-flag/issues/6096)) ([83f71d5](https://github.com/thomaspoignant/go-feature-flag/commit/83f71d5f2987a77621c32035b80aee880dfbbaf3))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6091](https://github.com/thomaspoignant/go-feature-flag/issues/6091)) ([9488035](https://github.com/thomaspoignant/go-feature-flag/commit/94880359b2e96d799edd58486b9edfb21ebba5c2))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6123](https://github.com/thomaspoignant/go-feature-flag/issues/6123)) ([ba87b8d](https://github.com/thomaspoignant/go-feature-flag/commit/ba87b8d4d84e4a9bdf3d9f05016cb3ebf0b9b0c1))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6230](https://github.com/thomaspoignant/go-feature-flag/issues/6230)) ([8f5654d](https://github.com/thomaspoignant/go-feature-flag/commit/8f5654d56cec20414c651a47dd5fc65f7945a135))
+* Bump go.opentelemetry.io/otel/sdk from 1.46.0 to 1.47.0 ([#6216](https://github.com/thomaspoignant/go-feature-flag/issues/6216)) ([031d419](https://github.com/thomaspoignant/go-feature-flag/commit/031d4191f0ab8be2094afd83452b6c208021bcd0))
+* Bump go.opentelemetry.io/otel/trace from 1.46.0 to 1.47.0 ([#6218](https://github.com/thomaspoignant/go-feature-flag/issues/6218)) ([6540241](https://github.com/thomaspoignant/go-feature-flag/commit/6540241b3ee985a1db38608b30b75fc440b36cf5))
+
 ## [0.2.4](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.3...cmd/wasm/v0.2.4) (2026-08-03)
 
 
