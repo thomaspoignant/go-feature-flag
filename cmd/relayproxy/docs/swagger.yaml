@@ -49,6 +49,7 @@ definitions:
     - INVALID_CONTEXT
     - TARGETING_KEY_MISSING
     - FLAG_CONFIG
+    - FLAG_DEPENDENCY
     type: string
     x-enum-varnames:
     - ErrorCodeProviderNotReady
@@ -59,6 +60,7 @@ definitions:
     - ErrorCodeInvalidContext
     - ErrorCodeTargetingKeyMissing
     - ErrorFlagConfiguration
+    - ErrorCodeFlagDependency
   flag.Flag:
     properties:
       defValue:

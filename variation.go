@@ -293,12 +293,16 @@ func (g *GoFeatureFlag) RawVariation(
 
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
-func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
-	f, err := g.retrieverManager.GetFlag(flagKey)
+// The resolver gives access to the other flags of the same version of the cache, the other
+// flags needed by the evaluation must be read from it.
+func (g *GoFeatureFlag) getFlagFromCache(
+	flagKey string,
+) (flag.Flag, func(string) (flag.Flag, bool), error) {
+	f, resolve, err := g.retrieverManager.GetFlagsWithDependency(flagKey)
 	if err != nil {
-		return f, fmt.Errorf(errorFlagNotAvailable, flagKey)
+		return f, resolve, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
-	return f, nil
+	return f, resolve, nil
 }
 
 // CollectEventData is collecting events and sending them to the data exporter to be stored.
@@ -374,7 +378,7 @@ func getVariation[T model.JSONType](
 		}, nil
 	}
 
-	f, err := g.getFlagFromCache(flagKey)
+	f, resolve, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		varResult := model.VariationResult[T]{
 			Value:         sdkDefaultValue,
@@ -395,6 +399,7 @@ func getVariation[T model.JSONType](
 	flagCtx := flag.Context{
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
+		GetFlag:                     resolve,
 	}
 	if g.config.Environment != "" {
 		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)

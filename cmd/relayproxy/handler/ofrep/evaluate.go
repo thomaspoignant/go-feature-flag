@@ -108,10 +108,11 @@ func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
 		if flagValue.ErrorCode == flag.ErrorCodeFlagNotFound {
 			httpStatus = http.StatusNotFound
 		}
-		return c.JSON(
-			httpStatus,
-			NewEvaluateError(flagKey, flagValue.ErrorCode,
-				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)))
+		errorMessage := fmt.Sprintf("Error while evaluating the flag: %s", flagKey)
+		if flagValue.ErrorCode == flag.ErrorCodeFlagDependency {
+			errorMessage = flagValue.ErrorDetails
+		}
+		return c.JSON(httpStatus, NewEvaluateError(flagKey, flagValue.ErrorCode, errorMessage))
 	}
 
 	span.SetAttributes(

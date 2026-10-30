@@ -654,3 +654,41 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 		})
 	}
 }
+
+func Test_GetFlagsWithDependency(t *testing.T) {
+	t.Run("cache not initialised", func(t *testing.T) {
+		fCache := cache.New(nil, "", nil)
+		fCache.Close()
+		_, _, err := fCache.GetFlagsWithDependency("test-flag")
+		assert.Error(t, err)
+	})
+
+	t.Run("flag and resolver read the cache", func(t *testing.T) {
+		fCache := cache.New(notification.NewService([]notifier.Notifier{}), "",
+			&fflog.FFLogger{LeveledLogger: slog.Default()})
+		flags, err := cache.ConvertToFlagStruct([]byte(`
+parent:
+  variations: {a: true}
+  defaultRule: {variation: a}
+child:
+  variations: {a: true}
+  defaultRule: {variation: a}
+`), "yaml")
+		assert.NoError(t, err)
+		assert.NoError(t, fCache.UpdateCache(flags, nil, true))
+
+		f, resolve, err := fCache.GetFlagsWithDependency("child")
+		assert.NoError(t, err)
+		assert.NotNil(t, f)
+		parent, found := resolve("parent")
+		assert.True(t, found)
+		assert.NotNil(t, parent)
+		_, found = resolve("unknown")
+		assert.False(t, found)
+
+		_, resolve, err = fCache.GetFlagsWithDependency("unknown")
+		assert.Error(t, err)
+		_, found = resolve("parent")
+		assert.True(t, found)
+	})
+}

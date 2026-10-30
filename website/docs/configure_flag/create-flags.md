@@ -315,9 +315,104 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
       </td>
     </tr>
+    <tr>
+      <td>
+        <code>dependsOn</code>
+        <br />
+        <sup><sup>optional</sup></sup>
+      </td>
+      <td>
+        <p>
+          List of dependencies on other flags. A variation of the flag is only
+          served while all the parents it is bound to are in the expected
+          state.
+        </p>
+        <p>
+          <i>
+            See <a href="#-flag-dependencies">Flag dependencies</a> to have
+            more info on how to use it.
+          </i>
+        </p>
+      </td>
+    </tr>
 
   </tbody>
 </table>
+
+## 🔗 Flag dependencies
+
+A flag can depend on the state of another flag (the parent): a variation of the child is only served while the parent
+is in the expected state. This is typically used to make sure that a child flag cannot be turned on when its parent is off.
+
+```yaml
+parent-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+
+child-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  dependsOn:
+    - flag: parent-flag        # name of the parent flag
+      variation: enabled       # the parent must resolve to this variation...
+      # notVariation: disabled # ...or, alternatively, must not resolve to this one
+      appliesTo: [enabled]     # variations of child-flag bound by the dependency (default: all)
+      expiresWithParent: true  # child-flag is disabled when parent-flag is disabled (default: false)
+```
+
+| Field               | Description                                                                                                          |
+|---------------------|----------------------------------------------------------------------------------------------------------------------|
+| `flag`              | **(mandatory)** Name of the parent flag.                                                                              |
+| `variation`         | Variation the parent must resolve to. Exactly one of `variation` and `notVariation` is mandatory.                    |
+| `notVariation`      | Variation the parent must **not** resolve to.                                                                        |
+| `appliesTo`         | Variations of the flag bound by the dependency. If empty, the dependency applies to all the variations.              |
+| `expiresWithParent` | If `true`, the flag is disabled as soon as the parent flag is disabled (see [Expiration](#expiration)). Default: `false`. |
+
+The parent is evaluated with the same evaluation context as the child.
+When the variation selected for the child is bound by a dependency that is not met, the evaluation returns the default
+value of the SDK with the error code `FLAG_DEPENDENCY` and an explicit message (for example
+`variation "enabled" of flag "child-flag" is not available: dependency on flag "parent-flag" is not met`).
+
+- A flag can have several dependencies, **all** of them must be met.
+- A dependency is not met if the parent does not exist, is disabled or fails to evaluate.
+- Dependencies can be chained (a parent can have its own parent).
+- Circular dependencies are not supported, the evaluation returns the error code `FLAG_CONFIG`.
+- The result of a flag with dependencies is never cacheable by the SDKs, since it depends on another flag.
+
+### Expiration
+
+With `expiresWithParent: true` the flag is disabled as soon as the parent is disabled, either by its own `disable`
+field or by one of its due [scheduled rollout](./rollout-strategies/scheduled/) steps. This is the recommended way to
+retire a flag and all its children at a given date:
+
+```yaml
+parent-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  scheduledRollout:
+    - date: 2026-12-31T00:00:00Z
+      disable: true
+
+child-flag:
+  dependsOn:
+    - flag: parent-flag
+      variation: enabled
+      expiresWithParent: true
+  # ...
+```
+
+Disabling cascades: if the parent is itself disabled with its own parent, so is the child. Unlike the dependency gate
+(which only applies to the variations listed in `appliesTo`), the expiration applies to the whole child flag: it then
+behaves like any disabled flag (reason `DISABLED`, default value of the SDK, no error).
 
 ## Advanced configurations
 

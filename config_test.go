@@ -276,3 +276,9 @@ func TestConfig_GetDataExporters(t *testing.T) {
 		})
 	}
 }
+
+func TestSetOfflineWithoutMutex(t *testing.T) {
+	c := &ffClient.Config{}
+	c.SetOffline(true)
+	assert.True(t, c.IsOffline())
+}

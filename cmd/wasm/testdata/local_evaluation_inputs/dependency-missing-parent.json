@@ -1,0 +1,25 @@
+{
+  "flagKey": "child-flag",
+  "flag": {
+    "variations": {
+      "enable": true,
+      "disable": false
+    },
+    "defaultRule": {
+      "variation": "enable"
+    },
+    "dependsOn": [
+      {
+        "flag": "unknown-parent",
+        "variation": "enable"
+      }
+    ]
+  },
+  "parentFlags": {},
+  "evalContext": {
+    "targetingKey": "random-key"
+  },
+  "flagContext": {
+    "defaultSdkValue": false
+  }
+}

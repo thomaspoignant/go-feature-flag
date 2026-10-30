@@ -835,7 +835,8 @@ const docTemplate = `{
                 "GENERAL",
                 "INVALID_CONTEXT",
                 "TARGETING_KEY_MISSING",
-                "FLAG_CONFIG"
+                "FLAG_CONFIG",
+                "FLAG_DEPENDENCY"
             ],
             "x-enum-varnames": [
                 "ErrorCodeProviderNotReady",
@@ -845,7 +846,8 @@ const docTemplate = `{
                 "ErrorCodeGeneral",
                 "ErrorCodeInvalidContext",
                 "ErrorCodeTargetingKeyMissing",
-                "ErrorFlagConfiguration"
+                "ErrorFlagConfiguration",
+                "ErrorCodeFlagDependency"
             ]
         },
         "flag.Flag": {

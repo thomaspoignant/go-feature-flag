@@ -52,6 +52,12 @@ func (c *cacheMock) Close() {}
 func (c *cacheMock) GetFlag(_ string) (flag.Flag, error) {
 	return c.flag, c.err
 }
+func (c *cacheMock) GetFlagsWithDependency(_ string) (flag.Flag, func(string) (flag.Flag, bool), error) {
+	return c.flag, func(_ string) (flag.Flag, bool) {
+		f, err := c.GetFlag("")
+		return f, err == nil
+	}, c.err
+}
 func (c *cacheMock) AllFlags() (map[string]flag.Flag, error) { return nil, nil }
 
 // assertExpectedLog waits for the async logger to flush and asserts that a log

@@ -118,6 +118,8 @@ linters:
     gosimple:
       checks: ["all", "-S1023"]
     gomoddirectives:
+      # TODO: remove once modules/core is released with the flag dependency and TTL changes
+      replace-local: true
       replace-allow-list:
         # remove once https://github.com/nikunjy/rules/pull/43 is merged
         - github.com/nikunjy/rules

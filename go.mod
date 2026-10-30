@@ -320,3 +320,6 @@ replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0
 // This fix is needed to resolve semver comparison issues with prerelease versions.
 // Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
 replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+
+// TODO: remove this once modules/core is released with the flag dependencies and TTL, and bump the version above.
+replace github.com/thomaspoignant/go-feature-flag/modules/core => ./modules/core

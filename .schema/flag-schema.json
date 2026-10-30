@@ -54,6 +54,27 @@
                     "type": "object",
                     "title": "metadata",
                     "description": "A field containing information about your flag such as an issue tracker link a description etc..."
+                },
+                "dependsOn": {
+                    "type": "array",
+                    "title": "dependsOn",
+                    "description": "Binds the variations of the flag to the state of other flags.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "flag": {"type": "string", "description": "Name of the parent flag."},
+                            "variation": {"type": "string", "description": "Variation the parent flag must resolve to."},
+                            "notVariation": {"type": "string", "description": "Variation the parent flag must not resolve to."},
+                            "appliesTo": {"type": "array", "items": {"type": "string"}, "description": "Variations of this flag bound by the dependency (default: all)."},
+                            "expiresWithParent": {"type": "boolean", "description": "The flag is disabled as soon as the parent flag is disabled, either by its own disable field or by one of its due scheduled rollout steps."}
+                        },
+                        "required": ["flag"],
+                        "oneOf": [
+                            {"required": ["variation"], "not": {"required": ["notVariation"]}},
+                            {"required": ["notVariation"], "not": {"required": ["variation"]}}
+                        ],
+                        "additionalProperties": false
+                    }
                 }
             },
             "additionalProperties": false,
