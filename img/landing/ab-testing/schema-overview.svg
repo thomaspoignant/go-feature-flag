@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <marker id="ov-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- users -->
+  <g fill="#9fbeb3" stroke="#64748b" stroke-width="3">
+    <circle cx="65" cy="150" r="18"/>
+    <circle cx="112" cy="180" r="18"/>
+    <circle cx="65" cy="215" r="18"/>
+    <circle cx="112" cy="248" r="18"/>
+  </g>
+
+  <!-- users -> fork -->
+  <path d="M135 200 L152 202" stroke="#64748b" stroke-width="3" marker-end="url(#ov-arrow)"/>
+
+  <!-- fork / evaluation node -->
+  <rect x="156" y="172" width="60" height="60" rx="14" fill="#ffffff" stroke="#64748b" stroke-width="4"/>
+  <path d="M180 190 L200 202 L180 214" stroke="#64748b" stroke-width="4"/>
+
+  <!-- fork -> lanes -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M220 190 C 244 162, 250 158, 256 158" marker-end="url(#ov-arrow)"/>
+    <path d="M220 216 C 244 250, 250 254, 256 254" marker-end="url(#ov-arrow)"/>
+  </g>
+
+  <!-- variation A lane (mint) -->
+  <rect x="260" y="118" width="220" height="80" rx="16" fill="#cdf7e7" stroke="#64748b" stroke-width="4"/>
+  <rect x="288" y="136" width="62" height="45" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="3"/>
+  <path d="M288 150 L350 150" stroke="#64748b" stroke-width="3"/>
+  <circle cx="332" cy="168" r="7" fill="#43a047" stroke="#64748b" stroke-width="2"/>
+
+  <!-- variation B lane (coral) -->
+  <rect x="260" y="214" width="220" height="80" rx="16" fill="#f9d2c4" stroke="#64748b" stroke-width="4"/>
+  <rect x="288" y="232" width="62" height="45" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="3"/>
+  <path d="M288 246 L350 246" stroke="#64748b" stroke-width="3"/>
+  <rect x="300" y="256" width="38" height="13" rx="4" fill="#f4845f" stroke="#64748b" stroke-width="2"/>
+
+  <!-- lanes -> event stack -->
+  <g stroke="#64748b" stroke-width="3">
+    <path d="M480 168 C 500 330, 470 380, 448 402" marker-end="url(#ov-arrow)"/>
+    <path d="M480 262 C 495 340, 475 390, 452 438" marker-end="url(#ov-arrow)"/>
+  </g>
+
+  <!-- collected event records -->
+  <g stroke="#64748b" stroke-width="3">
+    <rect x="330" y="392" width="110" height="30" rx="8" fill="#cdf7e7"/>
+    <rect x="345" y="428" width="110" height="30" rx="8" fill="#f4845f"/>
+    <rect x="330" y="464" width="110" height="30" rx="8" fill="#cdf7e7"/>
+  </g>
+
+  <!-- events -> storage -->
+  <path d="M460 448 L500 440" stroke="#64748b" stroke-width="3" marker-end="url(#ov-arrow)"/>
+
+  <!-- database cylinder -->
+  <g stroke="#64748b" stroke-width="4">
+    <path d="M508 400 a52 16 0 0 0 104 0 l0 78 a52 16 0 0 1 -104 0 Z" fill="#cdf7e7"/>
+    <ellipse cx="560" cy="400" rx="52" ry="16" fill="#cdf7e7"/>
+  </g>
+
+  <!-- storage -> results -->
+  <path d="M618 440 L652 440" stroke="#64748b" stroke-width="3" marker-end="url(#ov-arrow)"/>
+
+  <!-- results: winning variation -->
+  <path d="M650 505 L790 505" stroke="#64748b" stroke-width="4"/>
+  <rect x="668" y="368" width="42" height="137" rx="6" fill="#9fbeb3" stroke="#64748b" stroke-width="4"/>
+  <rect x="728" y="415" width="42" height="90" rx="6" fill="#f4845f" stroke="#64748b" stroke-width="4"/>
+  <circle cx="689" cy="345" r="24" fill="#43a047" stroke="#64748b" stroke-width="3"/>
+  <path d="M677 345 L686 355 L703 335" stroke="#ffffff" stroke-width="5"/>
+</svg>
