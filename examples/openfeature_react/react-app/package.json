@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@openfeature/core": "^1.12.0",
-    "@openfeature/go-feature-flag-web-provider": "^0.2.9",
+    "@openfeature/go-feature-flag-web-provider": "^0.2.10",
     "@openfeature/react-sdk": "^1.4.1",
     "@openfeature/web-sdk": "^1.10.0",
     "react": "^19.3.1",
