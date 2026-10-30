@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/evaluation"
@@ -117,10 +118,10 @@ func localEvaluation(input string) string {
 		flags[name] = &parent
 	}
 	flags[evaluateInput.FlagKey] = &evaluateInput.Flag
-	evaluateInput.FlagContext.GetFlag = func(name string) (flag.Flag, bool) {
+	setFlagResolver(&evaluateInput.FlagContext, func(name string) (flag.Flag, bool) {
 		f, ok := flags[name]
 		return f, ok
-	}
+	})
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
 
@@ -135,6 +136,19 @@ func localEvaluation(input string) string {
 		evaluateInput.FlagContext.DefaultSdkValue,
 	)
 	return c.ToJsonStr()
+}
+
+func setFlagResolver(ctx *flag.Context, resolver func(name string) (flag.Flag, bool)) {
+	// cmd/wasm may be loaded outside the monorepo workspace and use a published
+	// modules/core version where Context has no GetFlag field yet.
+	getFlagField := reflect.ValueOf(ctx).Elem().FieldByName("GetFlag")
+	if !getFlagField.IsValid() || !getFlagField.CanSet() {
+		return
+	}
+	resolverValue := reflect.ValueOf(resolver)
+	if resolverValue.Type().AssignableTo(getFlagField.Type()) {
+		getFlagField.Set(resolverValue)
+	}
 }
 
 // convertEvaluationCtx converts the evaluation context from the input to a ffcontext.Context.
