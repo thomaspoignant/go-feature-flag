@@ -486,3 +486,116 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		})
 	}
 }
+
+func TestRetrieverConf_validateGitHubAuth(t *testing.T) {
+	tests := []struct {
+		name     string
+		fields   retrieverconf.RetrieverConf
+		wantErr  bool
+		errValue string
+	}{
+		{
+			name: "valid: App auth with inline PEM key",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: App auth with key file",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                    "github",
+				RepositorySlug:          "myorg/myrepo",
+				Path:                    "flags/config.yaml",
+				GitHubAppID:             12345,
+				GitHubInstallationID:    67890,
+				GitHubAppPrivateKeyFile: "/var/secrets/app.pem",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: PAT auth (no App fields)",
+			fields: retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "flags/config.yaml",
+				AuthToken:      "ghp_xxxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: no auth",
+			fields: retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "flags/config.yaml",
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid: token and App fields together",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				AuthToken:            "ghp_xxxx",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: token and GitHub App fields (githubAppId, githubInstallationId, githubAppPrivateKey / githubAppPrivateKeyFile) are mutually exclusive for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing AppID",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubAppId" property found for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing InstallationID",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                "github",
+				RepositorySlug:      "myorg/myrepo",
+				Path:                "flags/config.yaml",
+				GitHubAppID:         12345,
+				GitHubAppPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubInstallationId" property found for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing private key",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubAppPrivateKey or githubAppPrivateKeyFile" property found for kind "github"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := tt.fields
+			err := c.IsValid()
+			assert.Equal(t, tt.wantErr, err != nil)
+			if tt.wantErr {
+				assert.Equal(t, tt.errValue, err.Error())
+			}
+		})
+	}
+}

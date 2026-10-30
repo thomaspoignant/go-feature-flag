@@ -30,6 +30,10 @@
   "AccountName": "",
   "AccountKey": "",
   "Container": "",
+  "GitHubAppID": 0,
+  "GitHubInstallationID": 0,
+  "GitHubAppPrivateKey": "",
+  "GitHubAppPrivateKeyFile": "",
   "Pattern": "",
   "Prefix": "",
   "Recursive": false
