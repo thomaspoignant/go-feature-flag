@@ -113,8 +113,8 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 
 // queryContext is the evaluation context as targeting queries read it. The map is built on
 // first use and shared by every rule of a flag, so a flag with several targeting rules
-// converts the context once per evaluation instead of once per rule. The query engines
-// only read the map.
+// converts the context once per evaluation instead of once per rule. Because it is shared,
+// the query engines must only read the map, never modify it.
 type queryContext struct {
 	ctx    ffcontext.Context
 	mapped map[string]any
@@ -144,6 +144,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 		}
 	}()
 
+	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
 	switch queryFormat {
 	case JSONLogicQueryFormat:
 		strCtx, err := json.Marshal(mapCtx)
