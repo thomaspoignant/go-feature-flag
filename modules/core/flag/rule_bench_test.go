@@ -82,3 +82,37 @@ func BenchmarkInternalFlagValue_MultiRule(b *testing.B) {
 		_, _ = f.Value("multi-rule", ctx, flagCtx)
 	}
 }
+
+// BenchmarkInternalFlagValue_MultiRuleJSONLogic is BenchmarkInternalFlagValue_MultiRule
+// with JsonLogic queries, which read the evaluation context as JSON.
+func BenchmarkInternalFlagValue_MultiRuleJSONLogic(b *testing.B) {
+	rules := make([]flag.Rule, 0, 5)
+	for _, tenant := range []string{"tenant-a", "tenant-b", "tenant-c", "tenant-d", "tenant-e"} {
+		rules = append(rules, flag.Rule{
+			Query: testconvert.String(
+				`{"and": [{"==": [{"var": "tenantId"}, "` + tenant + `"]}, {"==": [{"var": "plan"}, "pro"]}]}`,
+			),
+			VariationResult: testconvert.String("on"),
+		})
+	}
+	f := flag.InternalFlag{
+		Variations: &map[string]*any{
+			"on":  testconvert.Interface(true),
+			"off": testconvert.Interface(false),
+		},
+		Rules:       &rules,
+		DefaultRule: &flag.Rule{VariationResult: testconvert.String("off")},
+	}
+	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
+		AddCustom("tenantId", "tenant-e").
+		AddCustom("plan", "pro").
+		AddCustom("region", "eu").
+		AddCustom("beta", true).
+		Build()
+	flagCtx := flag.Context{DefaultSdkValue: false}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = f.Value("multi-rule-jsonlogic", ctx, flagCtx)
+	}
+}
