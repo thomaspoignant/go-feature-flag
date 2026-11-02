@@ -9,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestQueryContext_AsMap(t *testing.T) {
+func TestQueryContext_MapOnce(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  ffcontext.Context
@@ -30,8 +30,8 @@ func TestQueryContext_AsMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			queryCtx := &queryContext{ctx: tt.ctx}
 
-			first := queryCtx.asMap()
-			second := queryCtx.asMap()
+			first := queryCtx.mapOnce()
+			second := queryCtx.mapOnce()
 
 			assert.Equal(t, tt.want, first)
 			assert.Equal(t, reflect.ValueOf(first).Pointer(), reflect.ValueOf(second).Pointer(), "the map must be built once")

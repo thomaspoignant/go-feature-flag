@@ -120,7 +120,7 @@ type queryContext struct {
 	mapped map[string]any
 }
 
-func (q *queryContext) asMap() map[string]any {
+func (q *queryContext) mapOnce() map[string]any {
 	if q.mapped == nil {
 		q.mapped = utils.ContextToMap(q.ctx)
 	}
@@ -131,7 +131,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 	if query == "" {
 		return true
 	}
-	mapCtx := queryCtx.asMap()
+	mapCtx := queryCtx.mapOnce()
 
 	// Catch any panics that may occur during evaluation
 	defer func() {
