@@ -114,17 +114,29 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 // queryContext is the evaluation context as targeting queries read it. The map is built on
 // first use and shared by every rule of a flag, so a flag with several targeting rules
 // converts the context once per evaluation instead of once per rule. Because it is shared,
-// the query engines must only read the map, never modify it.
+// the query engines must only read the map, never modify it. The JSON form JsonLogic reads
+// is shared the same way.
 type queryContext struct {
-	ctx    ffcontext.Context
-	mapped map[string]any
+	ctx                  ffcontext.Context
+	parsedEvalCtxAsMap   map[string]any
+	parsedEvalCtxAsBytes []byte
 }
 
 func (q *queryContext) mapOnce() map[string]any {
-	if q.mapped == nil {
-		q.mapped = utils.ContextToMap(q.ctx)
+	if q.parsedEvalCtxAsMap == nil {
+		q.parsedEvalCtxAsMap = utils.ContextToMap(q.ctx)
 	}
-	return q.mapped
+	return q.parsedEvalCtxAsMap
+}
+
+func (q *queryContext) jsonOnce() ([]byte, error) {
+	if q.parsedEvalCtxAsBytes == nil {
+		var err error
+		if q.parsedEvalCtxAsBytes, err = json.Marshal(q.mapOnce()); err != nil {
+			return nil, err
+		}
+	}
+	return q.parsedEvalCtxAsBytes, nil
 }
 
 func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
@@ -147,7 +159,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
 	switch queryFormat {
 	case JSONLogicQueryFormat:
-		strCtx, err := json.Marshal(mapCtx)
+		strCtx, err := queryCtx.jsonOnce()
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
