@@ -39,6 +39,44 @@ func TestQueryContext_MapOnce(t *testing.T) {
 	}
 }
 
+func TestRule_EvaluateBuildsTheMapOnlyForAQuery(t *testing.T) {
+	tests := []struct {
+		name       string
+		rule       Rule
+		isDefault  bool
+		wantMapped bool
+	}{
+		{
+			name:       "rule with a query",
+			rule:       Rule{Query: testconvert.String(`key eq "user-1"`), VariationResult: testconvert.String("A")},
+			wantMapped: true,
+		},
+		{
+			name: "rule without a query",
+			rule: Rule{VariationResult: testconvert.String("A")},
+		},
+		{
+			name: "percentage rollout without a query",
+			rule: Rule{Percentages: &map[string]float64{"A": 50, "B": 50}},
+		},
+		{
+			name:      "default rule with a query",
+			rule:      Rule{Query: testconvert.String(`key eq "user-1"`), VariationResult: testconvert.String("A")},
+			isDefault: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			queryCtx := &queryContext{ctx: ffcontext.NewEvaluationContext("user-1")}
+
+			_, err := tt.rule.evaluate("user-1", queryCtx, "my-flag", tt.isDefault)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantMapped, queryCtx.mapped != nil)
+		})
+	}
+}
+
 func TestInternalFlag_RulesOfBothQueryFormatsShareTheQueryContext(t *testing.T) {
 	f := InternalFlag{
 		Variations: &map[string]*any{
