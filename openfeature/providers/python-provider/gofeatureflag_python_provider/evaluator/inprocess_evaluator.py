@@ -53,6 +53,7 @@ class EngineErrorCode(str, Enum):
     INVALID_CONTEXT = "INVALID_CONTEXT"
     PARSE_ERROR = "PARSE_ERROR"
     GENERAL = "GENERAL"
+    FLAG_DEPENDENCY = "FLAG_DEPENDENCY"
 
 
 # Raw engine codes where the provider, rather than the flag, looks to be at
@@ -67,8 +68,14 @@ class EngineErrorCode(str, Enum):
 # FLAG_CONFIG is deliberately absent: it names the flag itself as invalid, a
 # verdict the relay proxy reaches from the same configuration, so a fallback
 # would only add latency to the same wrong answer.
+#
+# FLAG_DEPENDENCY is absent too: the parents of the flag travel in the payload,
+# so the engine answers dependencies locally.
 _FALLBACK_ERROR_CODES = frozenset(
-    {EngineErrorCode.PARSE_ERROR, EngineErrorCode.GENERAL}
+    {
+        EngineErrorCode.PARSE_ERROR,
+        EngineErrorCode.GENERAL,
+    }
 )
 
 # Flag metadata marking a result that came from the relay proxy rather than the
@@ -320,6 +327,32 @@ class InProcessEvaluator(AbstractEvaluator):
     # ------------------------------------------------------------------
 
     @staticmethod
+    def _collect_parents(
+        flags: dict[str, Any], flag_key: str
+    ) -> dict[str, Any]:
+        """Collect the transitive parents of a flag from the local configuration.
+
+        The engine needs every flag reachable through `dependsOn` to evaluate
+        the dependencies locally. A parent missing from the configuration is
+        skipped: the engine answers FLAG_DEPENDENCY for it, like the relay
+        proxy would.
+        """
+        parents: dict[str, Any] = {}
+        pending = [flag_key]
+        while pending:
+            current = pending.pop()
+            flag_config = flags.get(current)
+            if flag_config is None or current in parents:
+                continue
+            parents[current] = flag_config
+            for dependency in flag_config.get("dependsOn") or []:
+                parent_key = dependency.get("flag") if isinstance(dependency, dict) else None
+                if parent_key and parent_key not in parents:
+                    pending.append(parent_key)
+        parents.pop(flag_key, None)
+        return parents
+
+    @staticmethod
     def _build_eval_context(
         evaluation_context: Optional[EvaluationContext],
     ) -> dict[str, Any]:
@@ -436,6 +469,7 @@ class InProcessEvaluator(AbstractEvaluator):
         wasm_input = WasmInput(
             flagKey=flag_key,
             flag=flag,
+            parentFlags=self._collect_parents(flags, flag_key),
             evalContext=self._build_eval_context(evaluation_context),
             flagContext=WasmFlagContext(
                 defaultSdkValue=default_value,

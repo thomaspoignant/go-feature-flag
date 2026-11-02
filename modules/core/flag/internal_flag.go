@@ -58,6 +58,9 @@ type InternalFlag struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
+
+	// DependsOn binds the variations of the flag to the state of other flags.
+	DependsOn *[]FlagDependency `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty" toml:"dependsOn,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -98,7 +101,8 @@ func (f *InternalFlag) Value(
 		}
 	}
 
-	if flag.IsDisable() || flag.isExperimentationOver(evaluationDate) {
+	if flag.IsDisable() || flag.isExperimentationOver(evaluationDate) ||
+		f.isDisabledByParents(flagName, evaluationDate, flagContext) {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
@@ -117,6 +121,17 @@ func (f *InternalFlag) Value(
 				ErrorMessage: err.Error(),
 				Metadata:     flag.GetMetadata(),
 			}
+	}
+
+	if errorCode, message := flag.unmetDependency(
+		flagName, variationSelection.name, evaluationCtx, flagContext); errorCode != "" {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    errorCode,
+			ErrorMessage: message,
+			Metadata:     f.GetMetadata(),
+		}
 	}
 
 	return flag.GetVariationValue(variationSelection.name), ResolutionDetails{
@@ -154,7 +169,15 @@ func selectEvaluationReason(
 
 func (f *InternalFlag) isCacheable() bool {
 	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
-	return !isDynamic
+	return !isDynamic && len(f.GetDependsOn()) == 0
+}
+
+// GetDependsOn is the getter for the field DependsOn
+func (f *InternalFlag) GetDependsOn() []FlagDependency {
+	if f.DependsOn == nil {
+		return nil
+	}
+	return *f.DependsOn
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
@@ -309,6 +332,12 @@ func (f *InternalFlag) IsValid() error {
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	for _, dep := range f.GetDependsOn() {
+		if err := dep.validate(f.GetVariations()); err != nil {
+			return err
 		}
 	}
 

@@ -270,6 +270,18 @@ func (m *Manager) GetFlag(flagKey string) (flag.Flag, error) {
 	return m.cacheManager.GetFlag(flagKey)
 }
 
+// GetFlagsWithDependency returns the flag and a resolver giving access to the other flags
+// of the cache, to evaluate the dependencies between flags. The flag and the resolver read
+// the same version of the cache.
+func (m *Manager) GetFlagsWithDependency(
+	flagKey string,
+) (flag.Flag, func(string) (flag.Flag, bool), error) {
+	if m == nil || m.cacheManager == nil {
+		return nil, nil, fmt.Errorf("cache is not initialized")
+	}
+	return m.cacheManager.GetFlagsWithDependency(flagKey)
+}
+
 // GetFlagsFromCache returns all the flags present in the cache with their
 // current state when calling this method. If cache hasn't been initialized, an
 // error reporting this is returned.

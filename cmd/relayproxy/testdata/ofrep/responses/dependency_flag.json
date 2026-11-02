@@ -1,0 +1,5 @@
+{
+  "key": "child-flag",
+  "errorCode": "FLAG_DEPENDENCY",
+  "errorDetails": "variation \"on\" of flag \"child-flag\" is not available: dependency on flag \"parent-flag\" is not met"
+}

@@ -361,6 +361,18 @@ func Test_Evaluate(t *testing.T) {
 			},
 		},
 		{
+			name: "Flag with an unmet dependency returns the dependency message",
+			args: args{
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
+				configFlagsLocation: testdataDir + "/goff/config_flags_dependency.yaml",
+				flagKey:             "child-flag",
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+				bodyFile: testdataDir + "/ofrep/responses/dependency_flag.json",
+			},
+		},
+		{
 			name: "Empty flag key",
 			args: args{
 				bodyFile:            testdataDir + "/ofrep/valid_request.json",

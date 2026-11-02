@@ -28,9 +28,24 @@ func Test_localEvaluation(t *testing.T) {
 			wantLocation:  "testdata/local_evaluation_outputs/invalid.json",
 		},
 		{
-			name:          "Test with invalid json input",
+			name:          "Test with missing targeting key",
 			inputLocation: "testdata/local_evaluation_inputs/missing-targeting-key.json",
 			wantLocation:  "testdata/local_evaluation_outputs/missing-targeting-key.json",
+		},
+		{
+			name:          "Dependency met",
+			inputLocation: "testdata/local_evaluation_inputs/dependency-met.json",
+			wantLocation:  "testdata/local_evaluation_outputs/dependency-met.json",
+		},
+		{
+			name:          "Dependency not met",
+			inputLocation: "testdata/local_evaluation_inputs/dependency-not-met.json",
+			wantLocation:  "testdata/local_evaluation_outputs/dependency-not-met.json",
+		},
+		{
+			name:          "Missing parent flag",
+			inputLocation: "testdata/local_evaluation_inputs/dependency-missing-parent.json",
+			wantLocation:  "testdata/local_evaluation_outputs/dependency-missing-parent.json",
 		},
 	}
 	for _, tt := range tests {

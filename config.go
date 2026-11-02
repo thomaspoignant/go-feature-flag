@@ -123,20 +123,20 @@ type Config struct {
 }
 
 // Initialize assigns defaults to the configuration.
-func (c *Config) Initialize() {
-	if c.Context == nil {
-		c.Context = context.Background()
+func (config *Config) Initialize() {
+	if config.Context == nil {
+		config.Context = context.Background()
 	}
 
-	c.PollingInterval = adjustPollingInterval(c.PollingInterval)
-	if c.offlineMutex == nil {
-		c.offlineMutex = &sync.RWMutex{}
+	config.PollingInterval = adjustPollingInterval(config.PollingInterval)
+	if config.offlineMutex == nil {
+		config.offlineMutex = &sync.RWMutex{}
 	}
 
 	// initialize internal logger
-	c.internalLogger = &fflog.FFLogger{
-		LeveledLogger: c.LeveledLogger,
-		LegacyLogger:  c.Logger,
+	config.internalLogger = &fflog.FFLogger{
+		LeveledLogger: config.LeveledLogger,
+		LegacyLogger:  config.Logger,
 	}
 }
 
@@ -156,53 +156,53 @@ func adjustPollingInterval(pollingInterval time.Duration) time.Duration {
 }
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
-func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
-	if c.Retriever == nil && len(c.Retrievers) == 0 {
+func (config *Config) GetRetrievers() ([]retriever.Retriever, error) {
+	if config.Retriever == nil && len(config.Retrievers) == 0 {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
 
 	retrievers := make([]retriever.Retriever, 0)
 	// If we have both Retriever and Retrievers fields configured, we are 1st looking at what is available
 	// in Retriever before looking at what is in Retrievers.
-	if c.Retriever != nil {
-		retrievers = append(retrievers, c.Retriever)
+	if config.Retriever != nil {
+		retrievers = append(retrievers, config.Retriever)
 	}
-	if len(c.Retrievers) > 0 {
-		retrievers = append(retrievers, c.Retrievers...)
+	if len(config.Retrievers) > 0 {
+		retrievers = append(retrievers, config.Retrievers...)
 	}
 	return retrievers, nil
 }
 
 // GetDataExporters returns the list of DataExporter configured.
-func (c *Config) GetDataExporters() []DataExporter {
+func (config *Config) GetDataExporters() []DataExporter {
 	dataExporters := make([]DataExporter, 0)
 	// If we have both DataExporter and DataExporters fields configured, we are first looking at what is available
 	// in DataExporter before looking at what is in DataExporters.
-	if c.DataExporter != (DataExporter{}) {
-		dataExporters = append(dataExporters, c.DataExporter)
+	if config.DataExporter != (DataExporter{}) {
+		dataExporters = append(dataExporters, config.DataExporter)
 	}
-	if len(c.DataExporters) > 0 {
-		dataExporters = append(dataExporters, c.DataExporters...)
+	if len(config.DataExporters) > 0 {
+		dataExporters = append(dataExporters, config.DataExporters...)
 	}
 	return dataExporters
 }
 
 // SetOffline set GO Feature Flag in offline mode.
-func (c *Config) SetOffline(control bool) {
-	if c.offlineMutex == nil {
-		c.offlineMutex = &sync.RWMutex{}
+func (config *Config) SetOffline(control bool) {
+	if config.offlineMutex == nil {
+		config.offlineMutex = &sync.RWMutex{}
 	}
-	c.offlineMutex.Lock()
-	defer c.offlineMutex.Unlock()
-	c.Offline = control
+	config.offlineMutex.Lock()
+	defer config.offlineMutex.Unlock()
+	config.Offline = control
 }
 
 // IsOffline return if the GO Feature Flag is in offline mode.
-func (c *Config) IsOffline() bool {
-	if c.offlineMutex == nil {
-		c.offlineMutex = &sync.RWMutex{}
+func (config *Config) IsOffline() bool {
+	if config.offlineMutex == nil {
+		config.offlineMutex = &sync.RWMutex{}
 	}
-	c.offlineMutex.RLock()
-	defer c.offlineMutex.RUnlock()
-	return c.Offline
+	config.offlineMutex.RLock()
+	defer config.offlineMutex.RUnlock()
+	return config.Offline
 }

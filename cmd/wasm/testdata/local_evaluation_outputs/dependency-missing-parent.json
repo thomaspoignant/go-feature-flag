@@ -1,0 +1,11 @@
+{
+  "cacheable": false,
+  "errorCode": "FLAG_DEPENDENCY",
+  "errorDetails": "flag \"child-flag\" depends on flag \"unknown-parent\" which does not exist",
+  "failed": true,
+  "reason": "ERROR",
+  "trackEvents": true,
+  "value": false,
+  "variationType": "SdkDefault",
+  "version": ""
+}

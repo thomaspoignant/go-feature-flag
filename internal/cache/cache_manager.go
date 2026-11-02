@@ -24,6 +24,7 @@ type Manager interface {
 	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
+	GetFlagsWithDependency(key string) (flag.Flag, func(flagName string) (flag.Flag, bool), error)
 	AllFlags() (map[string]flag.Flag, error)
 	GetLatestUpdateDate() time.Time
 }
@@ -133,6 +134,29 @@ func (c *cacheManagerImpl) AllFlags() (map[string]flag.Flag, error) {
 		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
 	return c.inMemoryCache.All(), nil
+}
+
+// GetFlagsWithDependency returns the flag and a resolver giving access to the other flags
+// of the cache, to evaluate the dependencies between flags. The flag and the resolver read
+// the same version of the cache: a refresh of the flags is not visible through them (the
+// cache is replaced, never modified, when the flags are refreshed).
+func (c *cacheManagerImpl) GetFlagsWithDependency(
+	key string,
+) (flag.Flag, func(flagName string) (flag.Flag, bool), error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	if c.inMemoryCache == nil {
+		return nil, nil, errors.New("impossible to read the flag before the initialisation")
+	}
+	cache := c.inMemoryCache
+	f, err := cache.getFlag(key)
+	return f, func(flagName string) (flag.Flag, bool) {
+		parent, err := cache.getFlag(flagName)
+		if err != nil {
+			return nil, false
+		}
+		return parent, true
+	}, err
 }
 
 func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
