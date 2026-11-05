@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/utils"
+	httpprovider "github.com/thomaspoignant/koanf-http-provider"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +33,11 @@ type ConfigLoader struct {
 	k              *koanf.Koanf
 	fileProvider   *file.File
 	configFilePath string // stored config file path for reload
+
+	// flagSets loaded from remoteFlagSets.url, the provider and its parser are reused on reload
+	remoteProvider *httpprovider.HTTP
+	remoteParser   koanf.Parser
+	remoteFlagSets []FlagSet
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
@@ -76,6 +83,7 @@ func NewConfigLoader(
 // - the command line
 // - the configuration file
 // - the environment variables
+// - the remote flagSets URL
 func (c *ConfigLoader) loadConfig() {
 	_ = c.k.Load(confmap.Provider(map[string]any{
 		"fileFormat":      "yaml",
@@ -86,6 +94,7 @@ func (c *ConfigLoader) loadConfig() {
 	c.loadPosflag(c.cmdLineFlagSet)
 	c.loadConfigFile()
 	c.loadEnvVariables()
+	c.loadRemoteFlagSets()
 	_ = c.k.Set("version", c.version)
 }
 
@@ -96,9 +105,9 @@ func (c *ConfigLoader) AddConfigChangeCallback(callback func(newConfig *Config))
 	c.callbacks = append(c.callbacks, callback)
 }
 
-// startWatchChanges starts watching for changes in the configuration file
+// startWatchChanges starts watching for changes in the configuration file and the remote flagSets
 func (c *ConfigLoader) startWatchChanges() {
-	if c.fileProvider == nil || !c.watchChanges {
+	if (c.fileProvider == nil && c.remoteProvider == nil) || !c.watchChanges {
 		return
 	}
 
@@ -108,11 +117,11 @@ func (c *ConfigLoader) startWatchChanges() {
 	// Check https://github.com/knadh/koanf/issues/12#issuecomment-2637665148 to understand why this is necessary
 	go c.processConfigChangeEvents()
 
-	// The file watcher callback just sends to the channel and returns immediately
+	// The watcher callback just sends to the channel and returns immediately
 	// This prevents blocking the fsnotify goroutine
-	errWatch := c.fileProvider.Watch(func(event any, err error) {
+	onChange := func(event any, err error) {
 		if err != nil {
-			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(err))
+			c.log.Error("error watching for configuration changes", zap.Error(err))
 			return
 		}
 
@@ -125,9 +134,16 @@ func (c *ConfigLoader) startWatchChanges() {
 		default:
 			// Channel full, event already pending - skip this one
 		}
-	})
-	if errWatch != nil {
-		c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+	}
+	if c.fileProvider != nil {
+		if errWatch := c.fileProvider.Watch(onChange); errWatch != nil {
+			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+		}
+	}
+	if c.remoteProvider != nil {
+		if errWatch := c.remoteProvider.Watch(onChange); errWatch != nil {
+			c.log.Error("error watching for remote flagSets changes", zap.Error(errWatch))
+		}
 	}
 }
 
@@ -177,6 +193,9 @@ func (c *ConfigLoader) reloadConfigAndNotify() {
 		watchChanges:   false,
 		k:              koanf.New("."),
 		configFilePath: c.configFilePath,
+		// reused, so it answers from its last fetch (ETag) or its cache instead of downloading again
+		remoteProvider: c.remoteProvider,
+		remoteParser:   c.remoteParser,
 	}
 	newConfig.loadConfig()
 	modifiedConfig, err := newConfig.ToConfig()
@@ -199,13 +218,17 @@ func (c *ConfigLoader) ToConfig() (*Config, error) {
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
+	if c.remoteProvider != nil {
+		// with remoteFlagSets, the flagSets only come from the URL
+		proxyConf.FlagSets = c.remoteFlagSets
+	}
 	processExporters(proxyConf)
 	return proxyConf, nil
 }
 
-// StopWatchChanges stops watching for changes in the configuration file
+// StopWatchChanges stops watching for changes in the configuration file and the remote flagSets
 func (c *ConfigLoader) StopWatchChanges() error {
-	if c.fileProvider == nil || !c.watchChanges {
+	if (c.fileProvider == nil && c.remoteProvider == nil) || !c.watchChanges {
 		return nil
 	}
 
@@ -216,7 +239,14 @@ func (c *ConfigLoader) StopWatchChanges() error {
 		})
 	}
 
-	return c.fileProvider.Unwatch()
+	var errs []error
+	if c.fileProvider != nil {
+		errs = append(errs, c.fileProvider.Unwatch())
+	}
+	if c.remoteProvider != nil {
+		errs = append(errs, c.remoteProvider.Unwatch())
+	}
+	return errors.Join(errs...)
 }
 
 // loadPosflag loads the flags from the command line
@@ -251,6 +281,32 @@ func (c *ConfigLoader) loadConfigFile() {
 // loadEnvVariables loads the environment variables
 func (c *ConfigLoader) loadEnvVariables() {
 	_ = c.k.Load(c.mapEnvVariablesProvider(c.k.String("envVariablePrefix"), c.log), nil)
+}
+
+// loadRemoteFlagSets loads the flagSets from remoteFlagSets.url, if it is set
+func (c *ConfigLoader) loadRemoteFlagSets() {
+	if c.remoteProvider == nil {
+		conf, err := c.ToConfig()
+		if err != nil || conf.RemoteFlagSets.URL == "" {
+			return
+		}
+		c.remoteParser = conf.RemoteFlagSets.parser()
+		c.remoteProvider = conf.RemoteFlagSets.provider(c.remoteParser, c.log)
+	}
+
+	remote := koanf.New(".")
+	var remoteConf struct {
+		FlagSets []FlagSet `koanf:"flagsets"`
+	}
+	err := remote.Load(c.remoteProvider, c.remoteParser)
+	if err == nil {
+		err = remote.Unmarshal("", &remoteConf)
+	}
+	if err != nil {
+		c.log.Error("error loading the remote flagSets", zap.Error(err))
+		return
+	}
+	c.remoteFlagSets = remoteConf.FlagSets
 }
 
 // locateConfigFile is selecting the configuration file we will use.
