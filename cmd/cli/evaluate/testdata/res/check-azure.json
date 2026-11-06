@@ -29,5 +29,8 @@
   "RedisPrefix": "",
   "AccountName": "goff-user",
   "AccountKey": "goff-key",
-  "Container": "goff-container"
+  "Container": "goff-container",
+  "Pattern": "",
+  "Prefix": "",
+  "Recursive": false
 }

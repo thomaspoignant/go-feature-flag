@@ -54,7 +54,7 @@ export const integrations = {
     {
       name: 'AWS S3',
       description: 'Retrieves the configuration from an AWS S3 bucket.',
-      longDescription: `Retrieves the configuration from an AWS S3 bucket. This retriever is useful when you are using AWS and want to use S3 to store you configuration files.`,
+      longDescription: `Retrieves the configuration from an AWS S3 bucket. This retriever is useful when you are using AWS and want to use S3 to store you configuration files. You can point it to a single file (using "item"), or leave "item" out to load a folder of your bucket and merge several flag files into one configuration.`,
       bgColor: '#222e3c',
       logo: s3logo,
       docLink: 'aws-s3',

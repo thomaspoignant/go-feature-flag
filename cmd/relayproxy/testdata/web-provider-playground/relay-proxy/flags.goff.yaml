@@ -1,0 +1,37 @@
+# Edit this file while the playground is connected: the relay-proxy reloads it every second
+# and pushes a flag-change notification over WS / SSE.
+my-bool-flag:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  targeting:
+    - query: email ew "@gofeatureflag.org"
+      variation: enabled
+
+my-string-flag:
+  variations:
+    blue: "blue"
+    red: "red"
+  targeting:
+    - query: email ew "@gofeatureflag.org"
+      variation: blue
+  defaultRule:
+    variation: blue
+
+my-number-flag:
+  variations:
+    low: 1
+    high: 100
+  defaultRule:
+    percentage:
+      low: 50
+      high: 50
+
+my-object-flag:
+  variations:
+    v1: { "theme": "dark", "size": 12 }
+    v2: { "theme": "light", "size": 14 }
+  defaultRule:
+    variation: v1

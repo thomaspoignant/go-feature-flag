@@ -23,7 +23,7 @@
 .layer {
   width: 100%;
   background-color: var(--goff-switch-bg-off);
-  transition: 0.3s ease all;
+  transition: background-color 0.3s ease;
   z-index: 1;
 }
 
@@ -60,7 +60,9 @@
   padding: 0.55rem 0.25rem;
   background-color: var(--goff-message-error);
   border-radius: 50%;
-  transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+  transition: background-color 0.3s ease, width 0.3s ease,
+    border-radius 0.3s ease, margin-left 0.3s ease,
+    left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
 }
 
 .switch .checkbox:active + .knobs:before {

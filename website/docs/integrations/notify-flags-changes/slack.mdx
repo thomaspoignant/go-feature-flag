@@ -15,7 +15,20 @@ export const info = integrations.notifiers.find((r) => r.name === notifierName)
 ## About {notifierName} Notifier
 The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
 
-<center><img src="/docs/notifier/slack_notification.png" /></center>
+<center><img src="/docs/notifier/slack_change_notification.png" alt="Slack Notification" /></center>
+
+Each notification lists the flags that were created, updated or deleted.
+For an updated flag, every change is described as a short sentence, for example:
+
+```text
+✏️ Flag "dark-mode" updated
+• Version set to `2`
+• Targeting rule `beta-users` now matches `beta eq true or company eq "acme"` (was `beta eq true`)
+• Targeting rule `internal` added: serves `enabled` when `email ew "@example.com"`
+• Default rule now serves `disabled` 50%, `enabled` 50% (was `disabled` 90%, `enabled` 10%)
+```
+
+A flag shows at most 50 changes, and a last line counts the changes left out.
 
 ## Configure Slack Notification
 1. First, you need to create an incoming webhook on your slack instance.

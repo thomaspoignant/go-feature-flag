@@ -124,6 +124,7 @@ func TestReadableValue(t *testing.T) {
 		{name: "nil", value: nil, want: "null"},
 		{name: "string pointer", value: testconvert.String("on"), want: `"on"`},
 		{name: "map", value: map[string]float64{"on": 50, "off": 50}, want: `{"off":50,"on":50}`},
+		{name: "keeps HTML characters as typed", value: "a < b && c", want: `"a < b && c"`},
 		{name: "falls back to Go syntax when JSON cannot encode the value", value: make(chan int), want: "(chan int)"},
 	}
 	for _, tt := range tests {
