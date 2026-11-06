@@ -64,6 +64,11 @@ jobs:
           check-latest: true
           cache: false
       - run: make test
+        env:
+          # Packages run in parallel and share one Ryuk reaper; a package can
+          # latch onto a reaper that is shutting down and time out after 60s.
+          # Runners are ephemeral and tests terminate their own containers.
+          TESTCONTAINERS_RYUK_DISABLED: "true"
 
   Test-Windows:
     runs-on: windows-latest
@@ -103,6 +108,8 @@ jobs:
           check-latest: true
           cache: false
       - run: make coverage
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true" # see Test job
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
