@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,6 +15,7 @@ import (
 )
 
 func TestNewValidateFlags_Handler(t *testing.T) {
+	t.Parallel()
 	const validJSON = `{"flag-a":{"variations":{"a":true,"b":false},"defaultRule":{"variation":"a"}}}`
 	const validYAML = "flag-a:\n  variations:\n    a: true\n    b: false\n  defaultRule:\n    variation: a\n"
 	const validTOML = "[flag-a]\n[flag-a.variations]\na = true\nb = false\n[flag-a.defaultRule]\nvariation = \"a\"\n"
@@ -25,9 +27,27 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 		body        string
 		wantStatus  int
 		wantValid   bool
-		wantFlags   []string
+		wantErrors  []controller.ValidateFlagsError
 		wantErrCode int
+		chunked     bool
 	}{
+		{name: "empty yaml body", contentType: "application/yaml", body: "", wantStatus: 200, wantValid: true},
+		{name: "yaml scalar", contentType: "application/yaml", body: "just a string", wantErrCode: 400},
+		{name: "yaml list", contentType: "application/yaml", body: "- a\n- b\n", wantErrCode: 400},
+		{name: "json list", contentType: "application/json", body: "[]", wantErrCode: 400},
+		{
+			name: "chunked body too large", contentType: "application/json", chunked: true,
+			body: `{"a":"` + strings.Repeat("x", 1<<20) + `"}`, wantErrCode: 413,
+		},
+		{
+			name: "panicking flag definition", contentType: "application/json",
+			body:       `{"f":{"variations":{"a":true},"defaultRule":{"progressiveRollout":{}}}}`,
+			wantStatus: 422,
+			wantErrors: []controller.ValidateFlagsError{{
+				Flag:    "f",
+				Message: "invalid flag definition: runtime error: invalid memory address or nil pointer dereference",
+			}},
+		},
 		{name: "valid json", contentType: "application/json", body: validJSON, wantStatus: 200, wantValid: true},
 		{name: "valid json with charset", contentType: "application/json; charset=utf-8", body: validJSON, wantStatus: 200, wantValid: true},
 		{name: "valid yaml", contentType: "application/yaml", body: validYAML, wantStatus: 200, wantValid: true},
@@ -36,7 +56,11 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 		{name: "valid toml", contentType: "application/toml", body: validTOML, wantStatus: 200, wantValid: true},
 		{
 			name: "invalid flags sorted by key", contentType: "application/json", body: invalidJSON,
-			wantStatus: 422, wantFlags: []string{"flag-a", "flag-b"},
+			wantStatus: 422,
+			wantErrors: []controller.ValidateFlagsError{
+				{Flag: "flag-a", Message: "missing default rule"},
+				{Flag: "flag-b", Message: "missing default rule"},
+			},
 		},
 		{name: "bad json syntax", contentType: "application/json", body: `{"flag-a":`, wantErrCode: 400},
 		{name: "bad yaml syntax", contentType: "application/yaml", body: "a: [", wantErrCode: 400},
@@ -57,6 +81,10 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
 				t.Context(), http.MethodPost, "/admin/v1/flags/validate", strings.NewReader(tt.body))
+			if tt.chunked {
+				req.Body = io.NopCloser(strings.NewReader(tt.body))
+				req.ContentLength = -1
+			}
 			if tt.contentType != "" {
 				req.Header.Set(echo.HeaderContentType, tt.contentType)
 			}
@@ -77,16 +105,11 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			assert.Equal(t, "v1.2.3", got.Version)
 			assert.Equal(t, tt.wantValid, got.Valid)
 			require.NotNil(t, got.Errors)
-			flags := make([]string, 0, len(got.Errors))
-			for _, e := range got.Errors {
-				assert.NotEmpty(t, e.Message)
-				flags = append(flags, e.Flag)
+			wantErrors := tt.wantErrors
+			if wantErrors == nil {
+				wantErrors = []controller.ValidateFlagsError{}
 			}
-			if tt.wantFlags == nil {
-				assert.Empty(t, flags)
-			} else {
-				assert.Equal(t, tt.wantFlags, flags)
-			}
+			assert.Equal(t, wantErrors, got.Errors)
 		})
 	}
 }

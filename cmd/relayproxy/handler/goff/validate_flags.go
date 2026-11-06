@@ -20,7 +20,7 @@ type validateFlags struct {
 // ValidateFlagsError is the validation error of a single flag.
 type ValidateFlagsError struct {
 	Flag    string `json:"flag"    example:"my-flag"`
-	Message string `json:"message" example:"variations are required"`
+	Message string `json:"message" example:"missing default rule"`
 }
 
 // ValidateFlagsResponse is the response of the validate flags endpoint.
@@ -46,6 +46,8 @@ func NewValidateFlags(version string) Controller {
 // @Security     ApiKeyAuth
 // @Accept       json
 // @Accept       application/yaml
+// @Accept       application/x-yaml
+// @Accept       text/yaml
 // @Accept       application/toml
 // @Produce      json
 // @Param        data body object true "The flag file to validate"
@@ -66,8 +68,7 @@ func (h *validateFlags) Handler(c *echo.Context) error {
 	body := http.MaxBytesReader(c.Response(), c.Request().Body, maxValidateBodySize)
 	data, err := io.ReadAll(body)
 	if err != nil {
-		var maxErr *http.MaxBytesError
-		if errors.As(err, &maxErr) {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			return echo.NewHTTPError(http.StatusRequestEntityTooLarge, "request body too large")
 		}
 		return echo.NewHTTPError(http.StatusBadRequest, "impossible to read the request body")

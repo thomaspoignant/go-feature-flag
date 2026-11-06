@@ -37,6 +37,8 @@ const docTemplate = `{
                 "consumes": [
                     "application/json",
                     "application/yaml",
+                    "application/x-yaml",
+                    "text/yaml",
                     "application/toml"
                 ],
                 "produces": [
@@ -881,7 +883,7 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string",
-                    "example": "variations are required"
+                    "example": "missing default rule"
                 }
             }
         },

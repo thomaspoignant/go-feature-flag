@@ -113,11 +113,21 @@ func ValidateFlags(flags map[string]dto.DTO) []FlagError {
 
 	errs := make([]FlagError, 0)
 	for _, key := range keys {
-		flagDto := flags[key]
-		flag := flagDto.Convert()
-		if err := flag.IsValid(); err != nil {
+		if err := validateFlag(flags[key]); err != nil {
 			errs = append(errs, FlagError{Flag: key, Err: err})
 		}
 	}
 	return errs
+}
+
+// validateFlag converts and validates a single flag.
+// A flag definition that makes the validation panic is reported as an invalid flag.
+func validateFlag(flagDto dto.DTO) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("invalid flag definition: %v", r)
+		}
+	}()
+	flag := flagDto.Convert()
+	return flag.IsValid()
 }

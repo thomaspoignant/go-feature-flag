@@ -249,6 +249,7 @@ func TestLoadConfigFile(t *testing.T) {
 }
 
 func TestParseConfig(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name      string
 		data      string
@@ -282,6 +283,11 @@ func TestParseConfig(t *testing.T) {
 }
 
 func TestValidateFlags(t *testing.T) {
+	t.Parallel()
+	panicking := dto.DTO{
+		Variations:  &map[string]*any{"a": testconvert.Interface(true)},
+		DefaultRule: &flag.Rule{ProgressiveRollout: &flag.ProgressiveRollout{}},
+	}
 	valid := dto.DTO{
 		Variations:  &map[string]*any{"a": testconvert.Interface(true)},
 		DefaultRule: &flag.Rule{VariationResult: testconvert.String("a")},
@@ -299,6 +305,11 @@ func TestValidateFlags(t *testing.T) {
 			name:  "invalid flags sorted by key",
 			flags: map[string]dto.DTO{"z": invalid, "ok": valid, "b": invalid},
 			want:  []string{"b", "z"},
+		},
+		{
+			name:  "panicking validation is reported as an invalid flag",
+			flags: map[string]dto.DTO{"p": panicking, "ok": valid},
+			want:  []string{"p"},
 		},
 	}
 	for _, tt := range tests {

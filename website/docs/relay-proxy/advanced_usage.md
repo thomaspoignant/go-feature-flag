@@ -55,7 +55,7 @@ curl -X 'POST' \
 {
   "version": "v1.0.0",
   "valid": false,
-  "errors": [{ "flag": "my-flag", "message": "no default rule set for the flag" }]
+  "errors": [{ "flag": "my-flag", "message": "missing default rule" }]
 }
 ```
 

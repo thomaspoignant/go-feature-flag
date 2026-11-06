@@ -37,7 +37,7 @@ definitions:
         example: my-flag
         type: string
       message:
-        example: variations are required
+        example: missing default rule
         type: string
     type: object
   controller.ValidateFlagsResponse:
@@ -432,6 +432,8 @@ paths:
       consumes:
       - application/json
       - application/yaml
+      - application/x-yaml
+      - text/yaml
       - application/toml
       description: |-
         Validates the flag file sent in the body of the request, using the same rules as the
