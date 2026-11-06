@@ -33,6 +33,41 @@ authorizedKeys:
 ```
 :::
 
+## ✅ Validate a flag file
+
+Before deploying a flag file you can ask the relay proxy to validate it with a POST request to
+`/admin/v1/flags/validate`. The validation uses the same rules as the `goff lint` command, and it has no side
+effect: the flags served by the relay proxy are never modified.
+
+The body of the request is the flag file, and the `Content-Type` header selects its format:
+`application/json`, `application/yaml` (also `application/x-yaml` and `text/yaml`) or `application/toml`.
+The body is limited to 1 MiB.
+
+```shell
+curl -X 'POST' \
+  'http://<your_domain>:1031/admin/v1/flags/validate' \
+  -H 'Content-Type: application/yaml' \
+  -H 'X-API-Key: <your_admin_api_key>' \
+  --data-binary @flags.yaml
+```
+
+```json title="Response (422)"
+{
+  "version": "v1.0.0",
+  "valid": false,
+  "errors": [{ "flag": "my-flag", "message": "no default rule set for the flag" }]
+}
+```
+
+| Status | Meaning                                                        |
+|--------|----------------------------------------------------------------|
+| `200`  | All the flags are valid.                                       |
+| `422`  | At least one flag is invalid, see `errors` (sorted by flag).   |
+| `400`  | The body can't be parsed, or the `Content-Type` is unsupported. |
+| `413`  | The body is larger than 1 MiB.                                 |
+
+As for the other admin endpoints, an **admin token** is required.
+
 ## 🔒 FIPS 140-3 mode
 
 GO Feature Flag publishes **FIPS 140-3 validated** builds of the relay proxy so it can be

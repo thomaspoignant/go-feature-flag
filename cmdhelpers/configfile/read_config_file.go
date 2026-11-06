@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -59,26 +60,64 @@ func readConfigFile(configFile, configFormat string) (map[string]dto.DTO, error)
 	if err != nil {
 		return nil, err
 	}
+	flags, err := ParseConfig(dat, configFormat)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", configFile, err)
+	}
+	return flags, nil
+}
+
+// ParseConfig parses the content of a flag file in the given format (toml, json or yaml).
+// Any format other than toml or json is parsed as YAML.
+func ParseConfig(data []byte, configFormat string) (map[string]dto.DTO, error) {
 	var flags map[string]dto.DTO
 	switch strings.ToLower(configFormat) {
 	case "toml":
-		err := toml.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (toml): %w", configFile, err)
+		if err := toml.Unmarshal(data, &flags); err != nil {
+			return nil, fmt.Errorf("could not parse file (toml): %w", err)
 		}
-		return flags, nil
 	case "json":
-		err := json.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (json): %w", configFile, err)
+		if err := json.Unmarshal(data, &flags); err != nil {
+			return nil, fmt.Errorf("could not parse file (json): %w", err)
 		}
-		return flags, nil
 	default:
 		// default is YAML
-		err := yaml.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (yaml): %w", configFile, err)
+		if err := yaml.Unmarshal(data, &flags); err != nil {
+			return nil, fmt.Errorf("could not parse file (yaml): %w", err)
 		}
-		return flags, nil
 	}
+	return flags, nil
+}
+
+// FlagError is the validation error of a single flag.
+type FlagError struct {
+	Flag string
+	Err  error
+}
+
+// Error implements the error interface.
+func (e FlagError) Error() string {
+	return fmt.Sprintf("invalid flag %s: %v", e.Flag, e.Err)
+}
+
+// Unwrap returns the underlying validation error.
+func (e FlagError) Unwrap() error { return e.Err }
+
+// ValidateFlags converts and validates every flag, it returns the validation errors sorted by flag key.
+func ValidateFlags(flags map[string]dto.DTO) []FlagError {
+	keys := make([]string, 0, len(flags))
+	for key := range flags {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	errs := make([]FlagError, 0)
+	for _, key := range keys {
+		flagDto := flags[key]
+		flag := flagDto.Convert()
+		if err := flag.IsValid(); err != nil {
+			errs = append(errs, FlagError{Flag: key, Err: err})
+		}
+	}
+	return errs
 }

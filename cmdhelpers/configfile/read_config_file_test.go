@@ -247,3 +247,72 @@ func TestLoadConfigFile(t *testing.T) {
 		})
 	}
 }
+
+func TestParseConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		data      string
+		format    string
+		wantFlags []string
+		wantErr   string
+	}{
+		{name: "json", data: `{"f":{"variations":{"a":1}}}`, format: "json", wantFlags: []string{"f"}},
+		{name: "yaml", data: "f:\n  variations:\n    a: 1\n", format: "yaml", wantFlags: []string{"f"}},
+		{name: "unknown format defaults to yaml", data: "f:\n  variations:\n    a: 1\n", format: "", wantFlags: []string{"f"}},
+		{name: "toml", data: "[f.variations]\na = 1\n", format: "TOML", wantFlags: []string{"f"}},
+		{name: "invalid json", data: `{`, format: "json", wantErr: "could not parse file (json)"},
+		{name: "invalid yaml", data: "a: [", format: "yaml", wantErr: "could not parse file (yaml)"},
+		{name: "invalid toml", data: "a = ", format: "toml", wantErr: "could not parse file (toml)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := configfile.ParseConfig([]byte(tt.data), tt.format)
+			if tt.wantErr != "" {
+				assert.ErrorContains(t, err, tt.wantErr)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Len(t, got, len(tt.wantFlags))
+			for _, k := range tt.wantFlags {
+				assert.Contains(t, got, k)
+			}
+		})
+	}
+}
+
+func TestValidateFlags(t *testing.T) {
+	valid := dto.DTO{
+		Variations:  &map[string]*any{"a": testconvert.Interface(true)},
+		DefaultRule: &flag.Rule{VariationResult: testconvert.String("a")},
+	}
+	invalid := dto.DTO{Variations: &map[string]*any{"a": testconvert.Interface(true)}}
+
+	tests := []struct {
+		name  string
+		flags map[string]dto.DTO
+		want  []string
+	}{
+		{name: "nil flags", flags: nil, want: []string{}},
+		{name: "all valid", flags: map[string]dto.DTO{"a": valid}, want: []string{}},
+		{
+			name:  "invalid flags sorted by key",
+			flags: map[string]dto.DTO{"z": invalid, "ok": valid, "b": invalid},
+			want:  []string{"b", "z"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := configfile.ValidateFlags(tt.flags)
+			keys := make([]string, 0, len(got))
+			for _, e := range got {
+				keys = append(keys, e.Flag)
+				assert.Error(t, e)
+				assert.ErrorIs(t, e, e.Err)
+				assert.Contains(t, e.Error(), "invalid flag "+e.Flag)
+			}
+			assert.Equal(t, tt.want, keys)
+		})
+	}
+}

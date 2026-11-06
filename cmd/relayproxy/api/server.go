@@ -121,6 +121,7 @@ func (s *Server) initRoutes() {
 		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
+	cValidateFlags := controller.NewValidateFlags(s.config.Version)
 	cFlagChangeAPI := controller.NewAPIFlagChange(
 		s.services.FlagsetManager,
 		s.services.Metrics,
@@ -137,7 +138,7 @@ func (s *Server) initRoutes() {
 	s.addOFREPRoutes(cFlagEvalOFREP, userAuth)
 	s.addStreamRoutes()
 	s.addMonitoringRoutes()
-	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
+	s.addAdminRoutes(cRetrieverRefresh, cValidateFlags, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)
 }
 
