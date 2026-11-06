@@ -15,7 +15,7 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | Kargo                | https://www.kargo.com                                 | Relay proxy in every region with OpenFeature   |
 | LandsEnd             | https://www.landsend.com                              | FF for backend and frontend apps               |
 | Lyft                 | https://github.com/lyft/atlantis                      | Inside the Atlantis fork used by Lyft.         |
-| Magma                | https://www.magma.it/en                               | Feature flags engine for configuration-driven flags, user targeting, and gradual rollouts for internal and outsurced projects. Together with OpenFeature SDKs and providers to enable flexible and vendor-neutral API layer for features retrieval. |
+| Magma                | https://www.magma.it/en                               | Feature flags engine for configuration-driven flags, user targeting, and gradual rollouts for internal and outsourced projects. Together with OpenFeature SDKs and providers to enable flexible and vendor-neutral API layer for features retrieval. |
 | Mecena               | https://mecena.co                                     | FF for backend microservices                   |
 | Minder (OpenSSF)     | https://github.com/mindersec/minder                   | Feature flags using OpenFeature                |
 | Miro                 | https://www.miro.com                                  | Feature flags in general with OpenFeature      | 
