@@ -41,7 +41,8 @@ effect: the flags served by the relay proxy are never modified.
 
 The body of the request is the flag file, and the `Content-Type` header selects its format:
 `application/json`, `application/yaml` (also `application/x-yaml` and `text/yaml`) or `application/toml`.
-The body is limited to 1 MiB.
+The size of the body is limited (the limits are fixed): 1 MiB for JSON, 64 KiB for YAML and TOML.
+An empty body, `null` or `{}` is accepted and returns `200` with `valid: true` and no flag _(an empty JSON body is a syntax error and returns `400`)_.
 
 ```shell
 curl -X 'POST' \
@@ -59,12 +60,19 @@ curl -X 'POST' \
 }
 ```
 
-| Status | Meaning                                                        |
-|--------|----------------------------------------------------------------|
-| `200`  | All the flags are valid.                                       |
-| `422`  | At least one flag is invalid, see `errors` (sorted by flag).   |
-| `400`  | The body can't be parsed, or the `Content-Type` is unsupported. |
-| `413`  | The body is larger than 1 MiB.                                 |
+| Status | Meaning                                                              |
+|--------|----------------------------------------------------------------------|
+| `200`  | All the flags are valid.                                             |
+| `422`  | At least one flag is invalid, see `errors` (sorted by flag).         |
+| `400`  | The body can't be parsed.                                            |
+| `413`  | The body is larger than the limit of its format.                     |
+| `415`  | The `Content-Type` header is missing or unsupported.                 |
+
+The validation behaves like the `goff lint` command, so it has the same known gaps:
+
+- The steps of a `scheduledRollout` are not validated.
+- Unknown or misspelled fields are ignored.
+- A file that can be read but has wrongly typed fields returns `400` with a parse error, not `422`.
 
 As for the other admin endpoints, an **admin token** is required.
 

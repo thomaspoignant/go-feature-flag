@@ -33,7 +33,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Validates the flag file sent in the body of the request, using the same rules as the\n` + "`" + `goff lint` + "`" + ` command.\nThe flag file is not loaded, nothing is changed on the flags served by the relay proxy.\nThe format of the body is selected with the ` + "`" + `Content-Type` + "`" + ` header (` + "`" + `application/json` + "`" + `,\n` + "`" + `application/yaml` + "`" + `, ` + "`" + `application/x-yaml` + "`" + `, ` + "`" + `text/yaml` + "`" + ` or ` + "`" + `application/toml` + "`" + `).",
+                "description": "Validates the flag file sent in the body of the request, using the same rules as the\n` + "`" + `goff lint` + "`" + ` command.\nThe flag file is not loaded, nothing is changed on the flags served by the relay proxy.\nThe format of the body is selected with the ` + "`" + `Content-Type` + "`" + ` header (` + "`" + `application/json` + "`" + `,\n` + "`" + `application/yaml` + "`" + `, ` + "`" + `application/x-yaml` + "`" + `, ` + "`" + `text/yaml` + "`" + ` or ` + "`" + `application/toml` + "`" + `).\nThe body is limited to 1 MiB for JSON and to 64 KiB for YAML and TOML.",
                 "consumes": [
                     "application/json",
                     "application/yaml",
@@ -63,11 +63,11 @@ const docTemplate = `{
                     "200": {
                         "description": "All the flags are valid",
                         "schema": {
-                            "$ref": "#/definitions/controller.ValidateFlagsResponse"
+                            "$ref": "#/definitions/controller.FlagValidationResponse"
                         }
                     },
                     "400": {
-                        "description": "Unparseable body or unsupported content type",
+                        "description": "Unparseable body",
                         "schema": {
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
@@ -78,10 +78,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     },
+                    "415": {
+                        "description": "Missing or unsupported content type",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
                     "422": {
                         "description": "At least one flag is invalid",
                         "schema": {
-                            "$ref": "#/definitions/controller.ValidateFlagsResponse"
+                            "$ref": "#/definitions/controller.FlagValidationResponse"
                         }
                     }
                 }
@@ -874,7 +880,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.ValidateFlagsError": {
+        "controller.FlagValidationError": {
             "type": "object",
             "properties": {
                 "flag": {
@@ -887,13 +893,13 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.ValidateFlagsResponse": {
+        "controller.FlagValidationResponse": {
             "type": "object",
             "properties": {
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/controller.ValidateFlagsError"
+                        "$ref": "#/definitions/controller.FlagValidationError"
                     }
                 },
                 "valid": {

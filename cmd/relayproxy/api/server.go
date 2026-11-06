@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 	"sync"
 
 	echootel "github.com/labstack/echo-otel/v5"
@@ -72,10 +71,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c *echo.Context) bool {
-			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
-			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
-		},
+		Skipper: bodyDumpSkipper(s.zapLog),
 		Handler: bodyDumpHandler(s.zapLog),
 	}))
 	if s.services.Metrics != (metric.Metrics{}) {
