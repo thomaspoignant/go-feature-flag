@@ -46,7 +46,7 @@ func ValidateFlags(flags map[string]dto.DTO) []FlagError {
 // filled rollout definitions): such a flag is reported as invalid instead of crashing the caller.
 func validateFlag(flagDto dto.DTO) (err error) {
 	defer func() {
-		if r := recover(); r != nil {
+		if recover() != nil {
 			err = errInternalValidation
 		}
 	}()
