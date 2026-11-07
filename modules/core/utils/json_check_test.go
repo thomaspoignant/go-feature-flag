@@ -33,6 +33,36 @@ func TestIsJSONObject(t *testing.T) {
 			input: `not a json`,
 			want:  false,
 		},
+		{
+			name:  "null",
+			input: `null`,
+			want:  true,
+		},
+		{
+			name:  "null with surrounding whitespace",
+			input: " \t null\r\n ",
+			want:  true,
+		},
+		{
+			name:  "null followed by other characters",
+			input: `nullx`,
+			want:  false,
+		},
+		{
+			name:  "null followed by a closing brace",
+			input: `null}`,
+			want:  false,
+		},
+		{
+			name:  "two nulls",
+			input: `null null`,
+			want:  false,
+		},
+		{
+			name:  "null followed by a non-breaking space",
+			input: "null\u00a0",
+			want:  false,
+		},
 	}
 
 	for _, tt := range tests {
