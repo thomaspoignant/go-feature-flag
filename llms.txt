@@ -1,0 +1,225 @@
+# GO Feature Flag
+
+> GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution, 100% open source (MIT) and OpenFeature-native.
+
+
+## docs
+
+GO Feature Flag documentation — describe your feature flags in a simple configuration file, serve them with the relay proxy, and evaluate them from any OpenFeature SDK.
+
+- [GO Feature Flag documentation](https://gofeatureflag.org/docs.md): GO Feature Flag documentation — describe your feature flags in a simple configuration file, serve them with the relay proxy, and evaluate them from any OpenFeature SDK.
+
+### category
+
+- [GO module](https://gofeatureflag.org/docs/category/go-module.md)
+
+### concepts
+
+- [🏗️ Architecture](https://gofeatureflag.org/docs/concepts/architecture.md): What is the GO Feature Flag architecture
+- [🔎 Evaluation Context](https://gofeatureflag.org/docs/concepts/evaluation-context.md): An evaluation context in a feature flagging system is crucial for determining the output of a feature flag evaluation. It's a collection of pertinent data about the conditions under which the evaluation is being made.
+- [🚚 Exporter](https://gofeatureflag.org/docs/concepts/exporter.md): Exporter are used to export your evaluation data to a remote source.
+- [🚥 Flag Evaluation](https://gofeatureflag.org/docs/concepts/flag-evaluation.md): Flag evaluation dynamically determines a feature flag's state at runtime based on context and targeting rules.
+- [⛳️ Flag Set](https://gofeatureflag.org/docs/concepts/flagset.md): Flag sets are a powerful feature in GO Feature Flag that allows you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers.
+- [📣 Notifier](https://gofeatureflag.org/docs/concepts/notifier.md): Notifier are used to notified external systems that a flag configuration has changed.
+- [🎣 Retriever](https://gofeatureflag.org/docs/concepts/retriever.md): Retrievers are used to fetch the feature flag configuration from a remote source.
+- [🧩 SDK paradigms](https://gofeatureflag.org/docs/concepts/sdk-paradigms.md): GO Feature Flag can be use in the server and client side, check the differences.
+
+### configure_flag
+
+- [🆕 Create Flags](https://gofeatureflag.org/docs/configure_flag/create-flags.md): What is a flag and how you can create them.
+- [🪣 Custom Bucketing](https://gofeatureflag.org/docs/configure_flag/custom-bucketing.md): How to bucket users based on a custom identifier
+- [🚀 Rollouts](https://gofeatureflag.org/docs/configure_flag/rollout-strategies.md): Choose the right rollout for your feature flag.
+- [📊 Experimentation rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/experimentation.md): An experimentation rollout is when your flag is configured to be served only for a determined time.
+- [💯 Percentage rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/percentage.md): A percentage rollout refers to a gradual release of a new feature to a subset of users.
+- [📈 Progressive rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/progressive.md): A progressive rollout refers to an automated gradual release of a new feature.
+- [⏱️ Scheduled rollout](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/scheduled.md): Scheduled rollout introduces the ability for users to changes their flags for future points in time.
+- [🎯 Target with Flags](https://gofeatureflag.org/docs/configure_flag/target-with-flags.md): How to create a rule to target specific users
+
+### contributing
+
+How to contribute
+
+- [🤝 Contributing](https://gofeatureflag.org/docs/contributing.md): How to contribute
+
+### getting-started
+
+Overview
+
+- [🏁 Getting Started](https://gofeatureflag.org/docs/getting-started.md): Overview
+
+### go_module
+
+- [⚙️ Configuration](https://gofeatureflag.org/docs/go_module/configuration.md): How to configure the GO module to use it directly in your code.
+- [🚚 Export evaluation data](https://gofeatureflag.org/docs/go_module/data_collection.md): Where to export evaluation data
+- [🏁 Getting Started](https://gofeatureflag.org/docs/go_module/getting-started.md): Use the module in your GO application with nothing to install.
+- [📣 Notify flag changes](https://gofeatureflag.org/docs/go_module/notifier.md): Where to export evaluation data
+- [📦 Retrieve your feature flags configuration](https://gofeatureflag.org/docs/go_module/store_file.md): Where to store your flag configuration file
+- [🎯 Performing flag evaluations](https://gofeatureflag.org/docs/go_module/target_user.md): How to select who should have the flag activated.
+
+### integrations
+
+- [🚚 Export evaluation data](https://gofeatureflag.org/docs/integrations/export-evaluation-data.md): How to export evaluation data?
+- [AWS Kinesis](https://gofeatureflag.org/docs/integrations/export-evaluation-data/aws-kinesis.md): How to configure an AWS Kinesis exporter.
+- [AWS S3](https://gofeatureflag.org/docs/integrations/export-evaluation-data/aws-s3.md): How to configure an AWS S3 exporter.
+- [AWS SQS](https://gofeatureflag.org/docs/integrations/export-evaluation-data/aws-sqs.md): How to configure an AWS SQS exporter.
+- [Azure Blob Storage](https://gofeatureflag.org/docs/integrations/export-evaluation-data/azure-blob-storage.md): How to configure an Azure Blob Storage exporter.
+- [File System](https://gofeatureflag.org/docs/integrations/export-evaluation-data/file.md): How to configure a File System exporter.
+- [Google Cloud BigQuery](https://gofeatureflag.org/docs/integrations/export-evaluation-data/google-cloud-bigquery.md): How to configure a Google Cloud BigQuery exporter.
+- [Google Cloud PubSub](https://gofeatureflag.org/docs/integrations/export-evaluation-data/google-cloud-pubsub.md): How to configure a Google Cloud PubSub exporter.
+- [Google Cloud Storage](https://gofeatureflag.org/docs/integrations/export-evaluation-data/google-cloud-storage.md): How to configure a Google Cloud Storage exporter.
+- [Apache Kafka](https://gofeatureflag.org/docs/integrations/export-evaluation-data/kafka.md): How to configure a Kafka exporter.
+- [Log](https://gofeatureflag.org/docs/integrations/export-evaluation-data/log.md): How to configure a Log exporter.
+- [MinIO](https://gofeatureflag.org/docs/integrations/export-evaluation-data/minio.md): How to export your evaluation data to MinIO or another S3-compatible object store.
+- [OpenTelemetry](https://gofeatureflag.org/docs/integrations/export-evaluation-data/opentelemetry.md): Export evaluation events as OpenTelemetry spans.
+- [Webhook](https://gofeatureflag.org/docs/integrations/export-evaluation-data/webhook.md): How to configure a Webhook exporter.
+- [📣 Notify flag changes](https://gofeatureflag.org/docs/integrations/notify-flags-changes.md): How to be notified of flags changes?
+- [Discord](https://gofeatureflag.org/docs/integrations/notify-flags-changes/discord.md): How to configure a Discord Notifier
+- [Microsoft Teams](https://gofeatureflag.org/docs/integrations/notify-flags-changes/microsoft-teams.md): How to configure a Microsoft Teams Notifier
+- [Slack](https://gofeatureflag.org/docs/integrations/notify-flags-changes/slack.md): How to configure a Slack Notifier
+- [Webhook](https://gofeatureflag.org/docs/integrations/notify-flags-changes/webhook.md): How to configure a Webhook Notifier
+- [💽 Store your flags’ configuration](https://gofeatureflag.org/docs/integrations/store-flags-configuration.md): Where to store the flag's configuration?
+- [AWS S3](https://gofeatureflag.org/docs/integrations/store-flags-configuration/aws-s3.md): How to configure an AWS S3 retriever.
+- [Azure Blob Storage](https://gofeatureflag.org/docs/integrations/store-flags-configuration/azure-blob-storage.md): How to configure an Azure Blob Storage retriever.
+- [Bitbucket](https://gofeatureflag.org/docs/integrations/store-flags-configuration/bitbucket.md): How to configure a Bitbucket retriever.
+- [File](https://gofeatureflag.org/docs/integrations/store-flags-configuration/file.md): How to configure a file retriever.
+- [GitHub](https://gofeatureflag.org/docs/integrations/store-flags-configuration/github.md): How to configure a GitHub retriever.
+- [GitLab](https://gofeatureflag.org/docs/integrations/store-flags-configuration/gitlab.md): How to configure a Gitlab retriever.
+- [Google Cloud Storage](https://gofeatureflag.org/docs/integrations/store-flags-configuration/google-cloud-storage.md): How to configure a Google Cloud Storage retriever.
+- [HTTP(S)](https://gofeatureflag.org/docs/integrations/store-flags-configuration/http.md): How to configure an HTTP(S) retriever.
+- [Kubernetes ConfigMap](https://gofeatureflag.org/docs/integrations/store-flags-configuration/kubernetes-configmap.md): How to configure a kubernetes configmap retriever.
+- [MinIO](https://gofeatureflag.org/docs/integrations/store-flags-configuration/minio.md): How to store your flags' configuration in MinIO or another S3-compatible object store.
+- [MongoDB](https://gofeatureflag.org/docs/integrations/store-flags-configuration/mongodb.md): How to configure a MongoDB retriever.
+- [Postgresql](https://gofeatureflag.org/docs/integrations/store-flags-configuration/postgresql.md): How to configure a Postgresql retriever.
+- [Redis](https://gofeatureflag.org/docs/integrations/store-flags-configuration/redis.md): How to configure a Redis retriever.
+
+### relay-proxy
+
+GO Feature Flag Relay Proxy is a powerful tool that allows developers to easily integrate feature flagging functionality into their applications. It is a simple API service that can be called directly through the API or via the available OpenFeature providers. The service wraps the GO Feature Flag golang module to evaluate your flags and allows it to be used with all the available languages.
+
+- [↔️ Relay proxy](https://gofeatureflag.org/docs/relay-proxy.md): GO Feature Flag Relay Proxy is a powerful tool that allows developers to easily integrate feature flagging functionality into their applications. It is a simple API service that can be called directly through the API or via the available OpenFeature providers. The service wraps the GO Feature Flag golang module to evaluate your flags and allows it to be used with all the available languages.
+- [‼️ Advanced usage](https://gofeatureflag.org/docs/relay-proxy/advanced_usage.md): All the advanced usage of the relay proxy.
+- [🔧 Configuration](https://gofeatureflag.org/docs/relay-proxy/configure-relay-proxy.md): How to configure the relay proxy to serve your feature flags.
+- [🚀 Deployment](https://gofeatureflag.org/docs/relay-proxy/deployment.md): How to deploy GO Feature Flag relay proxy in different environments.
+- [.NET Aspire](https://gofeatureflag.org/docs/relay-proxy/deployment/aspire.md): How to run the GO Feature Flag relay proxy from a .NET Aspire AppHost.
+- [AWS Lambda](https://gofeatureflag.org/docs/relay-proxy/deployment/aws-lambda.md): How to deploy GO Feature Flag relay proxy inside a AWS Lambda.
+- [Helm](https://gofeatureflag.org/docs/relay-proxy/deployment/helm.md): How to deploy GO Feature Flag relay proxy with Helm.
+- [🏁 Getting started](https://gofeatureflag.org/docs/relay-proxy/getting_started.md): Getting started with the relay proxy.
+- [🛠️ Installation](https://gofeatureflag.org/docs/relay-proxy/install_relay_proxy.md): Relay proxy is the component that will evaluate the flags, this page explain how to install it.
+- [👀 Observability](https://gofeatureflag.org/docs/relay-proxy/observability.md): Logging, Monitoring and Tracing of the relay proxy.
+- [📈 Profiling](https://gofeatureflag.org/docs/relay-proxy/profiling.md): Profiling of the relay proxy.
+- [🌐 API endpoints](https://gofeatureflag.org/docs/relay-proxy/relay_proxy_endpoints.md): Description of the available endpoints in the relay proxy.
+
+### sdk
+
+Use GO Feature Flag with Openfeature SDKs
+
+- [🧩 SDKs (with OpenFeature)](https://gofeatureflag.org/docs/sdk.md): Use GO Feature Flag with Openfeature SDKs
+- [Android / Kotlin](https://gofeatureflag.org/docs/sdk/client_providers/openfeature_android.md): How to use the OpenFeature Kotlin SDK for your Android application
+- [Angular SDK](https://gofeatureflag.org/docs/sdk/client_providers/openfeature_angular.md): How to use the OpenFeature Javascript Angular SDK for your Angular application
+- [Javascript / Typescript SDK usage](https://gofeatureflag.org/docs/sdk/client_providers/openfeature_javascript.md): How to use the OpenFeature Javascript web SDK for your client application
+- [React SDK usage](https://gofeatureflag.org/docs/sdk/client_providers/openfeature_react.md): How to use the OpenFeature Javascript React SDK for your React application
+- [Swift SDK](https://gofeatureflag.org/docs/sdk/client_providers/openfeature_swift.md): How to use the OpenFeature Swift SDK for your iOS/tvOS/macOS application
+- [OpenFeature Remote Evaluation Protocol (OFREP)](https://gofeatureflag.org/docs/sdk/ofrep.md): Use GO Feature Flag with Openfeature SDKs
+- [.NET](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_dotnet.md): How to use the OpenFeature .Net SDK
+- [GO](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_go.md): How to use the OpenFeature GO SDK
+- [Java / Kotlin](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_java.md): How to use the OpenFeature Java and Kotlin SDKs with GO Feature Flag
+- [Node.js](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_javascript.md): How to use the OpenFeature Node.js SDK for server-side feature flag evaluation
+- [NestJS](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_nestjs.md): How to use the OpenFeature NestJS SDK
+- [PHP](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_php.md): How to use the OpenFeature PHP SDK with GO Feature Flag
+- [Python](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_python.md): How to use the OpenFeature Python SDK with GO Feature Flag
+- [Ruby](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_ruby.md): How to use the OpenFeature Ruby SDK with GO Feature Flag
+- [Rust](https://gofeatureflag.org/docs/sdk/server_providers/openfeature_rust.md): How to use GO Feature Flag with Rust through the OpenFeature OFREP provider
+
+### tooling
+
+- [🤖 AI Tools](https://gofeatureflag.org/docs/tooling/ai-tools.md): Community AI tools for working with GO Feature Flag using your favorite AI assistant.
+- [🪄 Auto-complete](https://gofeatureflag.org/docs/tooling/autocomplete.md): Flag configuration auto-complete
+- [💻 Command Line](https://gofeatureflag.org/docs/tooling/cli.md): The GO Feature Flag Command Line is a CLI tool to interact with GO Feature Flag in your terminal.
+- [🎯 Evaluate feature flags in your terminal](https://gofeatureflag.org/docs/tooling/evaluate.md): Evaluate feature flags directly in your terminal
+- [🏗️ Generate OpenFeature flag manifest](https://gofeatureflag.org/docs/tooling/generate.md): Evaluate feature flags directly in your terminal
+- [🚧 Linter](https://gofeatureflag.org/docs/tooling/linter.md): Lint your configuration file
+
+### tracking
+
+- [📈 Flag usage tracking](https://gofeatureflag.org/docs/tracking/flag-usage-tracking.md): How flag usage (feature events) is recorded and exported when flags are evaluated.
+- [🎯 Tracking API](https://gofeatureflag.org/docs/tracking/tracking-api.md): How to record custom actions and outcomes with the OpenFeature Tracking API for experimentation and analytics.
+
+## blog
+
+Feature flag practices, release notes and community news from the GO Feature Flag team.
+
+- [Blog](https://gofeatureflag.org/blog.md): Feature flag practices, release notes and community news from the GO Feature Flag team.
+
+### 2022
+
+- [🔊 Feature Flags in Dev’Obs Podcast 🇫🇷](https://gofeatureflag.org/blog/2022/07/01/feature-flags-devobs-podcast.md): Earlier this week the super cool podcast Dev’Obs asked me to talk about feature flags, go-feature-flag and also the super nice initiative OpenFeature.
+
+### 2023
+
+- [🚀 Announcing GO Feature Flag v1.0.0](https://gofeatureflag.org/blog/2023/02/01/introducing-v1.0.0.md): GO Feature Flag logo
+- [Lint your feature flag config in you CI/CD pipelines ❌ ✅](https://gofeatureflag.org/blog/2023/02/20/lint-your-feature-flags.md): As GO Feature Flag continues to evolve, we're excited to announce a new feature that will make it easier for our users to manage their feature flags.
+- [Multiple Configuration Flags for GO Feature Flag 🗄️](https://gofeatureflag.org/blog/2023/03/17/multiple-config-file.md): Are you tired of managing your feature flags with a single configuration flag?
+- [Limiting Access to the relay proxy with API Keys](https://gofeatureflag.org/blog/2023/04/12/relay_proxy_api_keys.md): New API Key feature in GO Feature Flag Relay Proxy 1.7.0 allows you to restrict access to the relay proxy to only known clients.
+- [Enhancing Flag Configuration with Flag Metadata](https://gofeatureflag.org/blog/2023/06/09/flag-metadata.md): Empowering developers to attach additional information directly to flag configurations for enhanced management and code efficiency.
+- [Add Feature Flags in your Node.JS application using GO Feature Flag and Open Feature SDK](https://gofeatureflag.org/blog/2023/07/24/nodejs-tutorial.md): In this video, we'll walk you through the process of implementing feature flags in your Node js applications, allowing you to roll out new features gradually and control their visibility in real-time.
+- [The Power of Rollbacks](https://gofeatureflag.org/blog/2023/09/12/the-power-of-rollbacks.md): 🚨 Bug alert! No worries, feature flags have your back. Learn how to respond swiftly to issues without breaking a sweat
+
+### 2024
+
+- [GO Feature Flag Supports OpenFeature Remote Evaluation Protocol (OFREP)!](https://gofeatureflag.org/blog/2024/03/13/ofrep.md): GO Feature Flag is now one of the first flag management systems to support the Open Feature Remote Evaluation Protocol (OFREP).
+- [GO Feature Flag: Now Powering Your Mobile App Experience](https://gofeatureflag.org/blog/2024/07/25/go-feature-flag-mobile-support.md): GO Feature Flag: Now Powering Your Mobile App Experience.
+- [Feature Flagging in the SDLC](https://gofeatureflag.org/blog/2024/08/02/feature-flagging-in-the-SDLC.md): Feature Flagging in the Software Development Lifecycle - Follow the life of a feature flag from birth to retirement.
+- [Changes to golang OpenFeature Integration](https://gofeatureflag.org/blog/2024/08/14/changes-to-golang-openfeature-integration.md): We have released 2 new golang providers for OpenFeature, let's explain all the changes.
+- [(Java) OpenFeature provider improve the internal cache management.](https://gofeatureflag.org/blog/2024/10/20/breaking-change-java.md): The Java provider has been updated to improve the internal cache management by migrating from guava cache to caffeine cache.
+
+### 2025
+
+- [Introducing Exporter Metadata in the GO Feature Flag Provider for OpenFeature.](https://gofeatureflag.org/blog/2025/01/21/exporter-metadata.md): Exporter metadata in the GO Feature Flag provider for OpenFeature allows enriching evaluation events with static context data like environment or app version for improved observability and analysis.
+- [Watch Thomas's PlatformCon 2025 Talk on Feature Flag Decoupling](https://gofeatureflag.org/blog/2025/07/01/platformcon-2025-talk.md): Thomas Poignant presents "Decouple Deployments and Releases with OpenFeature" at PlatformCon 2025, exploring how to separate feature releases from code deployments using feature flags and OpenFeature.
+- [🏗️ Introducing Flag Sets: Organize Your Feature Flags Like Never Before](https://gofeatureflag.org/blog/2025/09/18/introducing-flagsets.md): Discover how GO Feature Flag's new flag sets feature enables better organization, team isolation, and multi-tenant support for your feature flag management.
+- [Grafana is Now Using GO Feature Flag 🎉](https://gofeatureflag.org/blog/2025/10/03/grafana-using-go-feature-flag.md): We’re proud to announce that Grafana, one of the world’s most popular observability platforms, is now using GO Feature Flag as a dependency in their project! 🚀
+
+### 2026
+
+- [Seamlessly Update API Keys at Runtime in GO Feature Flag (No Restarts Needed)](https://gofeatureflag.org/blog/2026/01/07/runtime-api-key-updates.md): Discover how GO Feature Flag's new runtime API key update feature enables you to update API keys without restarting the relay proxy, ensuring continuous availability and improved security.
+- [In-Process Evaluation for GO Feature Flag OpenFeature Providers](https://gofeatureflag.org/blog/2026/03/31/in-process-openfeature-providers.md): GO, Java, .NET, Python, and JavaScript/TypeScript providers now support in-process evaluation for faster flag resolution with far fewer network calls.
+- [GO Feature Flag at KubeCon EU 2026 — Amsterdam Recap](https://gofeatureflag.org/blog/2026/04/07/kubecon-amsterdam-2026.md): A look back at our week in Amsterdam at KubeCon + CloudNativeCon Europe 2026.
+- [Joining the OpenFeature Governance Committee](https://gofeatureflag.org/blog/2026/04/09/openfeature-governance-committee.md): Thomas Poignant, creator of GO Feature Flag, has been elected to the OpenFeature Governance Committee for the 2026-2028 term.
+- [AI Tooling for GO Feature Flag and OpenFeature](https://gofeatureflag.org/blog/2026/05/02/ai-tooling-go-feature-flag.md): Community-built skills and an MCP server that improve the AI-assisted developer experience when working with GO Feature Flag and OpenFeature.
+- [🎨 A first look at GO Feature Flag Studio](https://gofeatureflag.org/blog/2026/11/04/introducing-goff-studio.md): GO Feature Flag Studio is an optional web UI to manage your feature flags on top of GO Feature Flag. It is still in development; here is a first demo of what it looks like.
+
+### automate-your-product-release-cycles-using-go-feature-flag
+
+When you build a new feature, orchestrating the actual launch schedule between the Product, Engineering, and Marketing
+
+- [Automate Your Product Release Cycles Using Go Feature Flag](https://gofeatureflag.org/blog/automate-your-product-release-cycles-using-go-feature-flag.md): When you build a new feature, orchestrating the actual launch schedule between the Product, Engineering, and Marketing
+
+### best-opensource-feature-flag-tools
+
+The best open-source feature flag tools in 2026, compared through the OpenFeature standard — so you choose for capability, not lock-in.
+
+- [Best Open-Source Feature Flagging Tools in 2026](https://gofeatureflag.org/blog/best-opensource-feature-flag-tools.md): The best open-source feature flag tools in 2026, compared through the OpenFeature standard — so you choose for capability, not lock-in.
+
+### datagalaxy-go-feature-flag-case-study
+
+How DataGalaxy replaced four ad-hoc flag mechanisms with OpenFeature and the GO Feature Flag relay proxy — and unlocked trunk-based development along the way.
+
+- [DataGalaxy Feature Flag Journey: How OpenFeature and GO Feature Flag Rebuilt Trust Between Teams](https://gofeatureflag.org/blog/datagalaxy-go-feature-flag-case-study.md): How DataGalaxy replaced four ad-hoc flag mechanisms with OpenFeature and the GO Feature Flag relay proxy — and unlocked trunk-based development along the way.
+
+### feature-flag-best-practice
+
+Discover best practices for using feature flags in software development to improve agility and reduce risk.
+
+- [Feature Flag best practice](https://gofeatureflag.org/blog/feature-flag-best-practice.md): Discover best practices for using feature flags in software development to improve agility and reduce risk.
+
+### introduction-blog-post
+
+I absolutely don’t think human/manual QA gates should be involved in between the writing of code and its being live. To avoid breaking things every time and to have an early cutoff system, you should use feature flags.
+
+- [Introduction blog post](https://gofeatureflag.org/blog/introduction-blog-post.md): I absolutely don’t think human/manual QA gates should be involved in between the writing of code and its being live. To avoid breaking things every time and to have an early cutoff system, you should use feature flags.
+
+### solaris-go-feature-flag-case-study
+
+Why a German Banking-as-a-Service provider retired its in-house toggle system for GO Feature Flag, after weighing it against seven alternatives under hard EU data residency and zero-budget constraints.
+
+- [Replacing a Custom Feature Flag Platform at Solaris: GitOps, Data Residency and OpenFeature](https://gofeatureflag.org/blog/solaris-go-feature-flag-case-study.md): Why a German Banking-as-a-Service provider retired its in-house toggle system for GO Feature Flag, after weighing it against seven alternatives under hard EU data residency and zero-budget constraints.
