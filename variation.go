@@ -325,7 +325,7 @@ func notifyVariation[T model.JSONType](
 	ctx ffcontext.Context,
 	result model.VariationResult[T],
 ) {
-	if result.TrackEvents {
+	if result.TrackEvents && g.featureEventDataExporter != nil {
 		event := exporter.NewFeatureEvent(
 			ctx,
 			flagKey,
