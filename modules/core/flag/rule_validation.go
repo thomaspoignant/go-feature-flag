@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
-	"github.com/nikunjy/rules/parser"
 )
 
 // IsValid is checking if the rule is valid
@@ -146,12 +145,14 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 }
 
 // validateNikunjyQuery validates the Nikunjy query configuration of the rule.
+// It parses the query through the evaluator cache, so evaluating the rule later
+// reuses this parse instead of parsing the query again.
 func validateNikunjyQuery(query string) error {
-	ev, err := parser.NewEvaluator(query)
+	ev, err := getNikunjyEvaluator(query)
 	if err != nil {
 		return err
 	}
-	_, err = ev.Process(map[string]any{})
+	_, err = ev.process(map[string]any{})
 	if err != nil {
 		return fmt.Errorf("invalid query: %w", err)
 	}
