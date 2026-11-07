@@ -247,3 +247,37 @@ func TestLoadConfigFile(t *testing.T) {
 		})
 	}
 }
+
+func TestParseConfig(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name      string
+		data      string
+		format    string
+		wantFlags []string
+		wantErr   string
+	}{
+		{name: "json", data: `{"f":{"variations":{"a":1}}}`, format: "json", wantFlags: []string{"f"}},
+		{name: "yaml", data: "f:\n  variations:\n    a: 1\n", format: "yaml", wantFlags: []string{"f"}},
+		{name: "unknown format defaults to yaml", data: "f:\n  variations:\n    a: 1\n", format: "", wantFlags: []string{"f"}},
+		{name: "toml", data: "[f.variations]\na = 1\n", format: "TOML", wantFlags: []string{"f"}},
+		{name: "invalid json", data: `{`, format: "json", wantErr: "could not parse file (json)"},
+		{name: "invalid yaml", data: "a: [", format: "yaml", wantErr: "could not parse file (yaml)"},
+		{name: "invalid toml", data: "a = ", format: "toml", wantErr: "could not parse file (toml)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := configfile.ParseConfig([]byte(tt.data), tt.format)
+			if tt.wantErr != "" {
+				assert.ErrorContains(t, err, tt.wantErr)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Len(t, got, len(tt.wantFlags))
+			for _, k := range tt.wantFlags {
+				assert.Contains(t, got, k)
+			}
+		})
+	}
+}
