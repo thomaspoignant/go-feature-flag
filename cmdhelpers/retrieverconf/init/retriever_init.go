@@ -72,10 +72,14 @@ func createGitHubRetriever(
 			}
 			return c.Branch
 		}(),
-		FilePath:    c.Path,
-		GithubToken: token,
-		BaseURL:     c.BaseURL,
-		Timeout:     timeout,
+		FilePath:       c.Path,
+		GithubToken:    token,
+		BaseURL:        c.BaseURL,
+		Timeout:        timeout,
+		AppID:          c.GitHubAppID,
+		InstallationID: c.GitHubInstallationID,
+		PrivateKey:     c.GitHubAppPrivateKey,
+		PrivateKeyFile: c.GitHubAppPrivateKeyFile,
 	}, nil
 }
 
