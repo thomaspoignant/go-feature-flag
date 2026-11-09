@@ -40,7 +40,7 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
 
 // validatePercentages validates the percentage configuration of the rule.
 // It checks that percentages are not empty, none of them is negative or not a finite number,
-// the sum is not zero, and all referenced variations exist in the provided variations map.
+// the sum is not zero and does not overflow once scaled, and all referenced variations exist in the provided variations map.
 func (r *Rule) validatePercentages(variations map[string]*any) error {
 	if r.Percentages == nil {
 		return nil
@@ -65,6 +65,11 @@ func (r *Rule) validatePercentages(variations map[string]*any) error {
 
 	if count == 0 {
 		return fmt.Errorf("invalid percentages: should not be equal to 0")
+	}
+
+	// the buckets are scaled by PercentageMultiplier and stored as uint32.
+	if count*PercentageMultiplier > math.MaxUint32 {
+		return fmt.Errorf("invalid percentages: the sum (%v) is too large", count)
 	}
 
 	return nil

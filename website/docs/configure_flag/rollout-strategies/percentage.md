@@ -20,7 +20,7 @@ You can have as many variations as you want in the percentages, and you can defi
 
 :::note
 If the sum of your percentages is not equal to 100 this is not a problem, we are computing the affectation as fractional numbers.
-Each percentage must be a non-negative number, a flag with a negative percentage is rejected as invalid.
+Each percentage must be a finite, non-negative number (no negative, `NaN` or infinite values), a flag with an invalid percentage is rejected.
 
 _**example**: if you have 2 variations and you set `variation1: 10` and `variation2: 50` it will be equivalent to `variation1: 10/60` and `variation2: 50/60`._
 :::

@@ -325,6 +325,19 @@ func TestRule_validatePercentages(t *testing.T) {
 				"non-finite percentage (+Inf)",
 		},
 		{
+			name: "percentages too large to be scaled should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				Percentages: &map[string]float64{
+					"variation_A": math.MaxFloat64,
+				},
+			},
+			defaultRule: false,
+			variations:  variations,
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid percentages: the sum (",
+		},
+		{
 			name: "percentages summing to more than 100 should be valid",
 			rule: flag.Rule{
 				Query: testconvert.String("key eq \"test\""),
