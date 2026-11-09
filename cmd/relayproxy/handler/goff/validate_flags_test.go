@@ -26,6 +26,13 @@ type failingReader struct{}
 
 func (failingReader) Read([]byte) (int, error) { return 0, errors.New("read failure") }
 
+// normalizeAltMessage replaces the single error message equal to alt by the expected one.
+func normalizeAltMessage(got []controller.FlagValidationError, alt string, want []controller.FlagValidationError) {
+	if alt != "" && len(got) == 1 && got[0].Message == alt {
+		got[0].Message = want[0].Message
+	}
+}
+
 // padTo pads body with the pad string so the result is exactly size bytes long.
 func padTo(body, pad string, size int) string {
 	return body + strings.Repeat(pad, size-len(body))
@@ -151,9 +158,7 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
 			assert.Equal(t, "v1.2.3", got.Version)
 			assert.Equal(t, tt.wantValid, got.Valid)
-			if tt.altMessage != "" && len(got.Errors) == 1 && got.Errors[0].Message == tt.altMessage {
-				got.Errors[0].Message = tt.wantErrors[0].Message
-			}
+			normalizeAltMessage(got.Errors, tt.altMessage, tt.wantErrors)
 			wantErrors := tt.wantErrors
 			if wantErrors == nil {
 				wantErrors = []controller.FlagValidationError{}
