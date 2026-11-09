@@ -40,7 +40,8 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
 
 // validatePercentages validates the percentage configuration of the rule.
 // It checks that percentages are not empty, none of them is negative or not a finite number,
-// the sum is not zero and does not overflow once scaled, and all referenced variations exist in the provided variations map.
+// the sum is not zero and does not overflow once scaled, and all referenced variations exist in the provided
+// variations map.
 func (r *Rule) validatePercentages(variations map[string]*any) error {
 	if r.Percentages == nil {
 		return nil
