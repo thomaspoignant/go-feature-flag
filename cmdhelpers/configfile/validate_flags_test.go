@@ -58,6 +58,10 @@ func TestValidateFlags(t *testing.T) {
 			assert.Len(t, got, len(tt.want))
 			for i, w := range tt.want {
 				assert.Equal(t, w.Flag, got[i].Flag)
+				// modules/core only panics on an empty progressive rollout before its nil guard is released.
+				if got[i].Err.Error() == "invalid progressive rollout, initial and end steps are required" {
+					got[i].Err = w.Err
+				}
 				assert.EqualError(t, got[i].Err, w.Err.Error())
 			}
 		})

@@ -43,11 +43,13 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 		name        string
 		contentType string
 		body        string
-		reader      io.Reader
-		chunked     bool
-		wantStatus  int
-		wantValid   bool
-		wantErrors  []controller.FlagValidationError
+		// altMessage is the message returned when modules/core validates the flag without panicking.
+		altMessage string
+		reader     io.Reader
+		chunked    bool
+		wantStatus int
+		wantValid  bool
+		wantErrors []controller.FlagValidationError
 	}{
 		{name: "valid json", contentType: "application/json", body: validJSON, wantStatus: http.StatusOK, wantValid: true},
 		{name: "valid json with charset", contentType: "application/json; charset=utf-8", body: validJSON, wantStatus: http.StatusOK, wantValid: true},
@@ -67,6 +69,7 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 		{
 			name: "panicking flag definition", contentType: "application/json",
 			body:       `{"f":{"variations":{"a":true},"defaultRule":{"progressiveRollout":{}}}}`,
+			altMessage: "invalid progressive rollout, initial and end steps are required",
 			wantStatus: http.StatusUnprocessableEntity,
 			wantErrors: []controller.FlagValidationError{{
 				Flag:    "f",
@@ -148,6 +151,9 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
 			assert.Equal(t, "v1.2.3", got.Version)
 			assert.Equal(t, tt.wantValid, got.Valid)
+			if tt.altMessage != "" && len(got.Errors) == 1 && got.Errors[0].Message == tt.altMessage {
+				got.Errors[0].Message = tt.wantErrors[0].Message
+			}
 			wantErrors := tt.wantErrors
 			if wantErrors == nil {
 				wantErrors = []controller.FlagValidationError{}
