@@ -102,6 +102,10 @@ func FuzzProgressiveRollout(f *testing.F) {
 				Variation: testconvert.String("B"), Percentage: &endPct, Date: &endDate,
 			},
 		}}
+		missingEnd := Rule{ProgressiveRollout: &ProgressiveRollout{Initial: r.ProgressiveRollout.Initial}}
+		require.Error(t, missingEnd.IsValid(true, fuzzVariations("A", "B")), "missing end step must be rejected")
+		missingInitial := Rule{ProgressiveRollout: &ProgressiveRollout{End: r.ProgressiveRollout.End}}
+		require.Error(t, missingInitial.IsValid(true, fuzzVariations("A", "B")), "missing initial step must be rejected")
 		if hasKnownValidationGap(r) || r.IsValid(true, fuzzVariations("A", "B")) != nil {
 			return
 		}
@@ -124,7 +128,6 @@ func FuzzProgressiveRollout(f *testing.F) {
 // hasKnownValidationGap reports rules that the validation wrongly accepts today,
 // and that are then served wrongly or fail for every user:
 //   - a percentage rule with a negative or NaN share, or a sum too small to bucket anyone,
-//   - a progressive rollout without initial or end step (IsValid panics),
 //   - a progressive rollout with a missing date or an end date not after the initial
 //     date (every evaluation fails with "missing params"),
 //   - a progressive rollout with a negative or NaN percentage (users flip back to
@@ -149,6 +152,7 @@ func hasInvalidPercentages(percentages map[string]float64) bool {
 }
 
 func hasInvalidProgressiveRollout(p ProgressiveRollout) bool {
+	// missing steps are rejected by IsValid, they are only checked here to avoid a nil dereference.
 	if p.Initial == nil || p.End == nil ||
 		p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date) {
 		return true
