@@ -118,6 +118,9 @@ func main() {
 		)
 		return
 	}
+	if err := metricsV2.RegisterFlagLoaded(flagsetManager); err != nil {
+		logger.ZapLogger.Error("impossible to register the flag_loaded metric", zap.Error(err))
+	}
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
 		WebsocketService:  wsService,

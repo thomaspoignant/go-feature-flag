@@ -96,6 +96,19 @@ This endpoint is providing metrics about the relay proxy in the prometheus forma
 The relay proxy supports [Prometheus native histograms](https://prometheus.io/docs/specs/native_histograms/) for improved latency distribution precision. When scraping with Prometheus (especially using protobuf format), histogram metrics will include both classic bucket data and native histogram data for higher-fidelity percentile calculations. Classic histogram buckets are preserved for backward compatibility.
 :::
 
+#### Loaded flags
+The gauge `gofeatureflag_flag_loaded` exposes one series per flag currently loaded in the relay proxy cache,
+with the labels `flagset`, `flag_name` and `disabled`. It is computed from the cache on every scrape, so a
+deleted flag disappears on the next scrape after the cache refresh.
+
+```promql
+# all flags currently served, per flagset
+sum by (flagset) (gofeatureflag_flag_loaded)
+
+# flags loaded but disabled
+gofeatureflag_flag_loaded{disabled="true"}
+```
+
 ---
 
 ## Use specific port for the monitoring
