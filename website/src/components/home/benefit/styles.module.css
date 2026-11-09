@@ -11,7 +11,7 @@
     border-radius: 10px;
     margin-bottom: 50px;
     padding: 15px 15px 20px;
-    transition: 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
     min-height: 30rem;
 }
 
@@ -22,7 +22,7 @@
     display: block;
     color: var(--goff-main-title-color);
     text-decoration: none;
-    transition: 0.3s ease;
+    transition: color 0.3s ease;
     min-height: 2rem;
 }
 

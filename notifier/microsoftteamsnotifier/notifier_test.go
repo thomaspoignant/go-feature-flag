@@ -206,10 +206,13 @@ func (rt *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	return rt.response, nil
 }
 
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
 func TestConvertToMicrosoftTeamsMessage_diffError(t *testing.T) {
-	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	broken := otherFlag{}
 	msg := convertToMicrosoftTeamsMessage(notifier.DiffCache{
 		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
 	})
-	assert.Contains(t, msg, notifier.ChangesUnavailable+": impossible to compute flag changes")
+	assert.Contains(t, msg, notifier.ChangesUnavailable+": impossible to describe changes")
 }

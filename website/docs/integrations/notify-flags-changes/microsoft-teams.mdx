@@ -12,6 +12,23 @@ export const info = integrations.notifiers.find((r) => r.name === notifierName)
 ## Overview
 {info.longDescription ?? info.description}
 
+## About {notifierName} Notifier
+![Microsoft Teams Notification](/docs/notifier/teams_change_notification.png)
+
+Each notification lists the flags that were created, updated or deleted.
+For an updated flag, every change is described as a short sentence, for example:
+
+```text
+✏️ Flag dark-mode updated
+  * Version set to 2
+  * Targeting rule beta-users now matches beta eq true or company eq "acme" (was beta eq true)
+  * Targeting rule internal added: serves enabled when email ew "@example.com"
+  * Default rule now serves disabled 50%, enabled 50% (was disabled 90%, enabled 10%)
+```
+
+Microsoft Teams cards cannot display inline code, so names and values are shown as plain text.
+A flag shows at most 50 changes, and a last line counts the changes left out.
+
 ## Configure Microsoft Teams Notification
 1. First create a Webhook in the channel you want to send notifications to.  
    *Need a hand?* [Click here to see how it's done](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498)

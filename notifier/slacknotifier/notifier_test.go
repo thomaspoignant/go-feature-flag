@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -216,13 +217,39 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	}
 }
 
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
 func TestConvertUpdatedFlagsToSlackMessage_diffError(t *testing.T) {
-	broken := &flag.InternalFlag{Metadata: &map[string]any{"hook": func() {}}}
+	broken := otherFlag{}
 	attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
 		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
 	})
 	assert.Len(t, attachments, 1)
-	assert.Len(t, attachments[0].Fields, 1)
-	assert.Equal(t, notifier.ChangesUnavailable, attachments[0].Fields[0].Title)
-	assert.Contains(t, attachments[0].Fields[0].Value, "impossible to compute flag changes")
+	assert.Contains(t, attachments[0].Text, notifier.ChangesUnavailable)
+	assert.Contains(t, attachments[0].Text, "impossible to describe changes")
+}
+
+func TestConvertUpdatedFlagsToSlackMessage_escapesSlackControlCharacters(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "should escape a channel mention", value: "<!channel>", want: "&lt;!channel&gt;"},
+		{name: "should escape an ampersand", value: "a & b", want: "a &amp; b"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
+				Updated: map[string]notifier.DiffUpdated{"test-flag": {
+					Before: &flag.InternalFlag{},
+					After:  &flag.InternalFlag{Metadata: &map[string]any{"owner": tt.value}},
+				}},
+			})
+			require.Len(t, attachments, 1)
+			assert.Contains(t, attachments[0].Text, tt.want)
+			assert.NotContains(t, attachments[0].Text, tt.value)
+		})
+	}
 }

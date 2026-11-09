@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"slices"
 	"sort"
 	"time"
 
@@ -162,10 +163,12 @@ func (f *InternalFlag) isCacheable() bool {
 func (f *InternalFlag) selectVariation(
 	flagName string, key string, ctx ffcontext.Context) (*variationSelection, error) {
 	hasRule := len(f.GetRules()) != 0
+	// Shared by all the rules below: the context is converted to a map at most once.
+	queryCtx := &queryContext{ctx: ctx}
 	// Check all targeting in order, the first to match will be the one used.
 	if hasRule {
 		for ruleIndex, target := range f.GetRules() {
-			variationName, err := target.Evaluate(key, ctx, flagName, false)
+			variationName, err := target.evaluate(key, queryCtx, flagName, false)
 			if err != nil {
 				// the targeting does not apply
 				if _, ok := err.(*internalerror.RuleNotApplyError); ok {
@@ -188,7 +191,7 @@ func (f *InternalFlag) selectVariation(
 		return nil, fmt.Errorf("no default targeting for the flag")
 	}
 
-	variationName, err := f.GetDefaultRule().Evaluate(key, ctx, flagName, true)
+	variationName, err := f.GetDefaultRule().evaluate(key, queryCtx, flagName, true)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +294,9 @@ func (f *InternalFlag) IsValid() error {
 
 	// Check that all variation has the same types
 	expectedVarType := ""
-	for name, value := range f.GetVariations() {
+	variations := f.GetVariations()
+	for _, name := range slices.Sorted(maps.Keys(variations)) {
+		value := variations[name]
 		if value == nil {
 			return fmt.Errorf("nil value for variation: %s", name)
 		}

@@ -16,7 +16,22 @@ export const info = integrations.notifiers.find((r) => r.name === notifierName)
 The discord notifier allows to get notified on your favorite discord channel when an instance of `go-feature-flag` is
 detecting changes in the configuration of your flags.
 
-![Discord Notification](/docs/notifier/discord1.png)
+![Discord Notification](/docs/notifier/discord_change_notification.png)
+
+Each notification lists the flags that were created, updated or deleted.
+For an updated flag, every change is described as a short sentence, for example:
+
+```text
+✏️ Flag "dark-mode" updated
+• Version set to `2`
+• Targeting rule `beta-users` now matches `beta eq true or company eq "acme"` (was `beta eq true`)
+• Targeting rule `internal` added: serves `enabled` when `email ew "@example.com"`
+• Default rule now serves `disabled` 50%, `enabled` 50% (was `disabled` 90%, `enabled` 10%)
+```
+
+A flag shows at most 50 changes, and a last line counts the changes left out.
+Discord limits the size of a message, so when many flags change at once the longest lists are shortened first.
+If more than 10 flags change, the message shows the first 9 and asks you to check the logs for the rest.
 
 ## Configure Discord Notifications
 

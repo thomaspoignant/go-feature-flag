@@ -85,6 +85,9 @@ func (r *Rule) validateProgressiveRollout(variations map[string]*any) error {
 	}
 
 	progRollout := r.GetProgressiveRollout()
+	if progRollout.Initial == nil || progRollout.End == nil {
+		return fmt.Errorf("invalid progressive rollout, initial and end steps are required")
+	}
 	initialPct := progRollout.Initial.getPercentage()
 	endPct := progRollout.End.getPercentage()
 
