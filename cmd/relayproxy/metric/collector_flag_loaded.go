@@ -2,6 +2,7 @@ package metric
 
 import (
 	"strconv"
+	"strings"
 
 	prom "github.com/prometheus/client_golang/prometheus"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -62,10 +63,28 @@ func (c *flagLoadedCollector) Collect(ch chan<- prom.Metric) {
 func isEffectivelyDisabled(flagName string, f flag.Flag) bool {
 	ctx := ffcontext.NewEvaluationContext(flagLoadedEvaluationKey)
 	if internal, ok := f.(*flag.InternalFlag); ok && internal.GetBucketingKey() != "" {
-		ctx.AddCustomAttribute(internal.GetBucketingKey(), flagLoadedEvaluationKey)
+		addNestedAttribute(ctx, internal.GetBucketingKey(), flagLoadedEvaluationKey)
 	}
 	_, details := f.Value(flagName, ctx, flag.Context{})
+	if details.Reason == flag.ReasonError {
+		return f.IsDisable()
+	}
 	return details.Reason == flag.ReasonDisabled
+}
+
+// addNestedAttribute sets a dotted key such as "company.id" as nested maps, the shape GetNestedFieldValue reads.
+func addNestedAttribute(ctx ffcontext.EvaluationContext, dottedKey string, value any) {
+	parts := strings.Split(dottedKey, ".")
+	current := ctx.GetCustom()
+	for _, part := range parts[:len(parts)-1] {
+		next, ok := current[part].(map[string]any)
+		if !ok {
+			next = map[string]any{}
+			current[part] = next
+		}
+		current = next
+	}
+	current[parts[len(parts)-1]] = value
 }
 
 // RegisterFlagLoaded exposes gofeatureflag_flag_loaded, computed from the flag cache on every scrape.

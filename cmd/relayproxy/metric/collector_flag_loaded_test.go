@@ -122,6 +122,22 @@ percentage-with-bucketing-key:
     percentage:
       enabled: 50
       disabled: 50
+disabled-with-nested-bucketing-key:
+  bucketingKey: company.id
+  variations:
+    enabled: true
+  defaultRule:
+    variation: enabled
+  disable: true
+percentage-with-nested-bucketing-key:
+  bucketingKey: company.id
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    percentage:
+      enabled: 50
+      disabled: 50
 `)
 	m, err := NewMetrics()
 	require.NoError(t, err)
@@ -137,6 +153,8 @@ gofeatureflag_flag_loaded{disabled="false",flag_name="scheduled-back-on",flagset
 gofeatureflag_flag_loaded{disabled="false",flag_name="future-off",flagset="default"} 1
 gofeatureflag_flag_loaded{disabled="true",flag_name="experiment-over",flagset="default"} 1
 gofeatureflag_flag_loaded{disabled="false",flag_name="percentage-with-bucketing-key",flagset="default"} 1
+gofeatureflag_flag_loaded{disabled="true",flag_name="disabled-with-nested-bucketing-key",flagset="default"} 1
+gofeatureflag_flag_loaded{disabled="false",flag_name="percentage-with-nested-bucketing-key",flagset="default"} 1
 `
 	assert.NoError(t, testutil.GatherAndCompare(m.Registry, strings.NewReader(expected), "gofeatureflag_flag_loaded"))
 }
