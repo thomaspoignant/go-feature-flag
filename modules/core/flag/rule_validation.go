@@ -54,9 +54,8 @@ func (r *Rule) validatePercentages(variations map[string]*any) error {
 
 	count := float64(0)
 	for k, p := range percentages {
-		if p < 0 || math.IsNaN(p) || math.IsInf(p, 0) {
-			return fmt.Errorf(
-				"invalid percentage: variation %s has a negative or non-finite percentage (%v)", k, p)
+		if err := r.validateSinglePercentage(p, fmt.Sprintf("variation %s", k)); err != nil {
+			return err
 		}
 		count += p
 		if _, ok := variations[k]; !ok {
@@ -76,6 +75,15 @@ func (r *Rule) validatePercentages(variations map[string]*any) error {
 	return nil
 }
 
+// validateSinglePercentage validates a single percentage.
+func (r *Rule) validateSinglePercentage(p float64, errCtx string) error {
+	if p < 0 || math.IsNaN(p) || math.IsInf(p, 0) {
+		return fmt.Errorf(
+			"invalid percentage: %s has a negative or non-finite percentage (%v)", errCtx, p)
+	}
+	return nil
+}
+
 // validateProgressiveRollout validates the progressive rollout configuration of the rule.
 // It checks that the initial percentage is lower than the end percentage, and that
 // both the initial and end variations exist in the provided variations map.
@@ -88,8 +96,16 @@ func (r *Rule) validateProgressiveRollout(variations map[string]*any) error {
 	if progRollout.Initial == nil || progRollout.End == nil {
 		return fmt.Errorf("invalid progressive rollout, initial and end steps are required")
 	}
+
 	initialPct := progRollout.Initial.getPercentage()
+	if err := r.validateSinglePercentage(initialPct, "initial step percentage"); err != nil {
+		return err
+	}
+
 	endPct := progRollout.End.getPercentage()
+	if err := r.validateSinglePercentage(endPct, "end step percentage"); err != nil {
+		return err
+	}
 
 	if endPct < initialPct {
 		return fmt.Errorf(
