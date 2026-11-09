@@ -99,7 +99,8 @@ The relay proxy supports [Prometheus native histograms](https://prometheus.io/do
 #### Loaded flags
 The gauge `gofeatureflag_flag_loaded` exposes one series per flag currently loaded in the relay proxy cache,
 with the labels `flagset`, `flag_name` and `disabled`. It is computed from the cache on every scrape, so a
-deleted flag disappears on the next scrape after the cache refresh.
+deleted flag disappears on the next scrape after the cache refresh. The `disabled` label reflects the effective
+state at scrape time, including due `scheduledRollout` steps and ended `experimentation` windows.
 
 ```promql
 # all flags currently served, per flagset
