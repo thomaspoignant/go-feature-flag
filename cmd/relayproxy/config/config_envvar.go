@@ -44,10 +44,6 @@ func (c *ConfigLoader) mapEnvVariablesProvider(prefix string, log *zap.Logger) k
 		case key == "OTEL_RESOURCE_ATTRIBUTES":
 			c.parseOtelResourceAttributes(v, log)
 			return key, v
-		case strings.HasPrefix(key, "REMOTEFLAGSETS_"):
-			// same key as in the configuration file, so both are merged (ex: url in the file, headers in env)
-			field := strings.ToLower(strings.TrimPrefix(key, "REMOTEFLAGSETS_"))
-			return "remoteFlagSets." + strings.ReplaceAll(field, "_", "."), v
 		default:
 			return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
 		}

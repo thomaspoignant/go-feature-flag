@@ -18,7 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const remoteFlagSetsYaml = `server:
+const studioYaml = `server:
   port: 9999
 flagSets:
   - name: team-a
@@ -34,7 +34,7 @@ func flagSetNames(c *config.Config) []string {
 	return names
 }
 
-func TestRemoteFlagSets(t *testing.T) {
+func TestStudio(t *testing.T) {
 	tests := []struct {
 		name         string
 		fileConfig   string            // {{URL}} is the URL of the server, {{CACHE}} the cache file
@@ -48,9 +48,9 @@ func TestRemoteFlagSets(t *testing.T) {
 			name: "flagSets from the URL, the rest from the file",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml`,
-			body:         remoteFlagSetsYaml,
+			body:         studioYaml,
 			wantFlagSets: []string{"team-a"},
 		},
 		{
@@ -61,16 +61,16 @@ flagSets:
   - name: team-file
     apiKeys:
       - key-file
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml`,
-			body:         remoteFlagSetsYaml,
+			body:         studioYaml,
 			wantFlagSets: []string{"team-a"},
 		},
 		{
 			name: "toml URL with a query string",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.toml?sig=abc`,
 			body: `[[flagSets]]
 name = "team-a"
@@ -81,11 +81,11 @@ apiKeys = ["key-a"]`,
 			name: "headers from the file",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml
   headers:
     Authorization: Bearer secret`,
-			body:         remoteFlagSetsYaml,
+			body:         studioYaml,
 			authHeader:   "Bearer secret",
 			wantFlagSets: []string{"team-a"},
 		},
@@ -93,20 +93,20 @@ remoteFlagSets:
 			name: "headers from an environment variable, URL from the file",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml`,
-			body:         remoteFlagSetsYaml,
+			body:         studioYaml,
 			authHeader:   "Bearer secret",
-			env:          map[string]string{"REMOTEFLAGSETS_HEADERS_AUTHORIZATION": "Bearer secret"},
+			env:          map[string]string{"STUDIO_HEADERS_AUTHORIZATION": "Bearer secret"},
 			wantFlagSets: []string{"team-a"},
 		},
 		{
 			name: "authorization header missing",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml`,
-			body:         remoteFlagSetsYaml,
+			body:         studioYaml,
 			authHeader:   "Bearer secret",
 			wantFlagSets: []string{},
 		},
@@ -114,10 +114,10 @@ remoteFlagSets:
 			name: "server down, flagSets from the cache",
 			fileConfig: `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml
   cacheFile: {{CACHE}}`,
-			cache:        remoteFlagSetsYaml,
+			cache:        studioYaml,
 			wantFlagSets: []string{"team-a"},
 		},
 		{
@@ -128,12 +128,12 @@ flagSets:
   - name: team-file
     apiKeys:
       - key-file
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml`,
 			wantFlagSets: []string{},
 		},
 		{
-			name: "no remoteFlagSets, flagSets from the file",
+			name: "no studio, flagSets from the file",
 			fileConfig: `server:
   port: 2031
 flagSets:
@@ -178,13 +178,13 @@ flagSets:
 	}
 }
 
-func TestRemoteFlagSetsReload(t *testing.T) {
+func TestStudioReload(t *testing.T) {
 	const fileConfig = `server:
   port: 2031
-remoteFlagSets:
+studio:
   url: {{URL}}/flagsets.yaml
   pollingInterval: 50`
-	const twoFlagSets = remoteFlagSetsYaml + `
+	const twoFlagSets = studioYaml + `
   - name: team-b
     apiKeys:
       - key-b`
@@ -213,7 +213,7 @@ remoteFlagSets:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var mu sync.Mutex
-			body := remoteFlagSetsYaml
+			body := studioYaml
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				mu.Lock()
 				defer mu.Unlock()

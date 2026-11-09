@@ -34,10 +34,10 @@ type ConfigLoader struct {
 	fileProvider   *file.File
 	configFilePath string // stored config file path for reload
 
-	// flagSets loaded from remoteFlagSets.url, the provider and its parser are reused on reload
-	remoteProvider *httpprovider.HTTP
-	remoteParser   koanf.Parser
-	remoteFlagSets []FlagSet
+	// flagSets loaded from studio.url, the provider and its parser are reused on reload
+	studioProvider *httpprovider.HTTP
+	studioParser   koanf.Parser
+	studioFlagSets []FlagSet
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
@@ -83,7 +83,7 @@ func NewConfigLoader(
 // - the command line
 // - the configuration file
 // - the environment variables
-// - the remote flagSets URL
+// - the flagSets from Studio
 func (c *ConfigLoader) loadConfig() {
 	_ = c.k.Load(confmap.Provider(map[string]any{
 		"fileFormat":      "yaml",
@@ -94,7 +94,7 @@ func (c *ConfigLoader) loadConfig() {
 	c.loadPosflag(c.cmdLineFlagSet)
 	c.loadConfigFile()
 	c.loadEnvVariables()
-	c.loadRemoteFlagSets()
+	c.loadStudioFlagSets()
 	_ = c.k.Set("version", c.version)
 }
 
@@ -105,9 +105,9 @@ func (c *ConfigLoader) AddConfigChangeCallback(callback func(newConfig *Config))
 	c.callbacks = append(c.callbacks, callback)
 }
 
-// startWatchChanges starts watching for changes in the configuration file and the remote flagSets
+// startWatchChanges starts watching for changes in the configuration file and Studio
 func (c *ConfigLoader) startWatchChanges() {
-	if (c.fileProvider == nil && c.remoteProvider == nil) || !c.watchChanges {
+	if (c.fileProvider == nil && c.studioProvider == nil) || !c.watchChanges {
 		return
 	}
 
@@ -140,9 +140,9 @@ func (c *ConfigLoader) startWatchChanges() {
 			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
 		}
 	}
-	if c.remoteProvider != nil {
-		if errWatch := c.remoteProvider.Watch(onChange); errWatch != nil {
-			c.log.Error("error watching for remote flagSets changes", zap.Error(errWatch))
+	if c.studioProvider != nil {
+		if errWatch := c.studioProvider.Watch(onChange); errWatch != nil {
+			c.log.Error("error watching for studio flagSets changes", zap.Error(errWatch))
 		}
 	}
 }
@@ -194,8 +194,8 @@ func (c *ConfigLoader) reloadConfigAndNotify() {
 		k:              koanf.New("."),
 		configFilePath: c.configFilePath,
 		// reused, so it answers from its last fetch (ETag) or its cache instead of downloading again
-		remoteProvider: c.remoteProvider,
-		remoteParser:   c.remoteParser,
+		studioProvider: c.studioProvider,
+		studioParser:   c.studioParser,
 	}
 	newConfig.loadConfig()
 	modifiedConfig, err := newConfig.ToConfig()
@@ -218,17 +218,17 @@ func (c *ConfigLoader) ToConfig() (*Config, error) {
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-	if c.remoteProvider != nil {
-		// with remoteFlagSets, the flagSets only come from the URL
-		proxyConf.FlagSets = c.remoteFlagSets
+	if c.studioProvider != nil {
+		// with studio, the flagSets only come from Studio
+		proxyConf.FlagSets = c.studioFlagSets
 	}
 	processExporters(proxyConf)
 	return proxyConf, nil
 }
 
-// StopWatchChanges stops watching for changes in the configuration file and the remote flagSets
+// StopWatchChanges stops watching for changes in the configuration file and Studio
 func (c *ConfigLoader) StopWatchChanges() error {
-	if (c.fileProvider == nil && c.remoteProvider == nil) || !c.watchChanges {
+	if (c.fileProvider == nil && c.studioProvider == nil) || !c.watchChanges {
 		return nil
 	}
 
@@ -243,8 +243,8 @@ func (c *ConfigLoader) StopWatchChanges() error {
 	if c.fileProvider != nil {
 		errs = append(errs, c.fileProvider.Unwatch())
 	}
-	if c.remoteProvider != nil {
-		errs = append(errs, c.remoteProvider.Unwatch())
+	if c.studioProvider != nil {
+		errs = append(errs, c.studioProvider.Unwatch())
 	}
 	return errors.Join(errs...)
 }
@@ -283,30 +283,30 @@ func (c *ConfigLoader) loadEnvVariables() {
 	_ = c.k.Load(c.mapEnvVariablesProvider(c.k.String("envVariablePrefix"), c.log), nil)
 }
 
-// loadRemoteFlagSets loads the flagSets from remoteFlagSets.url, if it is set
-func (c *ConfigLoader) loadRemoteFlagSets() {
-	if c.remoteProvider == nil {
+// loadStudioFlagSets loads the flagSets from studio.url, if it is set
+func (c *ConfigLoader) loadStudioFlagSets() {
+	if c.studioProvider == nil {
 		conf, err := c.ToConfig()
-		if err != nil || conf.RemoteFlagSets.URL == "" {
+		if err != nil || conf.Studio.URL == "" {
 			return
 		}
-		c.remoteParser = conf.RemoteFlagSets.parser()
-		c.remoteProvider = conf.RemoteFlagSets.provider(c.remoteParser, c.log)
+		c.studioParser = conf.Studio.parser()
+		c.studioProvider = conf.Studio.provider(c.studioParser, c.log)
 	}
 
-	remote := koanf.New(".")
-	var remoteConf struct {
+	studio := koanf.New(".")
+	var studioConf struct {
 		FlagSets []FlagSet `koanf:"flagsets"`
 	}
-	err := remote.Load(c.remoteProvider, c.remoteParser)
+	err := studio.Load(c.studioProvider, c.studioParser)
 	if err == nil {
-		err = remote.Unmarshal("", &remoteConf)
+		err = studio.Unmarshal("", &studioConf)
 	}
 	if err != nil {
-		c.log.Error("error loading the remote flagSets", zap.Error(err))
+		c.log.Error("error loading the flagSets from studio", zap.Error(err))
 		return
 	}
-	c.remoteFlagSets = remoteConf.FlagSets
+	c.studioFlagSets = studioConf.FlagSets
 }
 
 // locateConfigFile is selecting the configuration file we will use.

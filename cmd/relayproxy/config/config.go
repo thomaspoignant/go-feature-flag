@@ -104,9 +104,9 @@ type Config struct {
 	// There is no inheritance between flag sets.
 	FlagSets []FlagSet `mapstructure:"flagsets" koanf:"flagsets"`
 
-	// RemoteFlagSets (optional) loads the FlagSets from an HTTP(S) URL instead of the configuration file.
-	// It is enabled when RemoteFlagSets.URL is set.
-	RemoteFlagSets RemoteFlagSets `mapstructure:"remoteFlagSets" koanf:"remoteflagsets"`
+	// Studio (optional) loads the FlagSets from GO Feature Flag Studio instead of the configuration file.
+	// It is enabled when Studio.URL is set.
+	Studio Studio `mapstructure:"studio" koanf:"studio"`
 
 	// ---------- Deprecated fields ----------
 	// ListenPort (optional) is the port we are using to start the proxy

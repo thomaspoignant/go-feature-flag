@@ -9,11 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
-// RemoteFlagSets holds the configuration to load the flagSets from an HTTP(S) URL.
-// When URL is set, the flagSets only come from this URL, the rest of the configuration
+// Studio holds the configuration to load the flagSets from GO Feature Flag Studio.
+// When URL is set, the flagSets only come from Studio, the rest of the configuration
 // still comes from the configuration file and the environment variables.
-type RemoteFlagSets struct {
-	// URL of a document with a flagSets key, in the same format as the configuration file.
+type Studio struct {
+	// URL of the relay proxy configuration served by Studio, only its flagSets key is used.
 	URL string `mapstructure:"url" koanf:"url"`
 
 	// Headers (optional) are sent with every request, for example an Authorization header.
@@ -28,24 +28,24 @@ type RemoteFlagSets struct {
 }
 
 // parser returns the parser matching the extension of the URL path.
-func (r RemoteFlagSets) parser() koanf.Parser {
-	path, _, _ := strings.Cut(r.URL, "?") // pre-signed URLs have a query string after the extension
+func (s Studio) parser() koanf.Parser {
+	path, _, _ := strings.Cut(s.URL, "?") // pre-signed URLs have a query string after the extension
 	return selectParserForFile(path)
 }
 
 // provider returns a koanf provider polling the URL.
-func (r RemoteFlagSets) provider(parser koanf.Parser, log *zap.Logger) *httpprovider.HTTP {
-	return httpprovider.Provider(r.URL,
-		httpprovider.WithHeaders(r.Headers),
-		httpprovider.WithPollInterval(time.Duration(r.PollingInterval)*time.Millisecond),
-		httpprovider.WithCache(r.CacheFile),
+func (s Studio) provider(parser koanf.Parser, log *zap.Logger) *httpprovider.HTTP {
+	return httpprovider.Provider(s.URL,
+		httpprovider.WithHeaders(s.Headers),
+		httpprovider.WithPollInterval(time.Duration(s.PollingInterval)*time.Millisecond),
+		httpprovider.WithCache(s.CacheFile),
 		// invalid content is never cached and never triggers a reload
 		httpprovider.WithValidate(func(content []byte) error {
 			_, err := parser.Unmarshal(content)
 			return err
 		}),
 		httpprovider.WithOnFallback(func(fetchErr error, cachedAt time.Time) {
-			log.Warn("remote flagSets unreachable, using the cached version",
+			log.Warn("studio unreachable, using the cached flagSets",
 				zap.Error(fetchErr), zap.Time("cachedAt", cachedAt))
 		}),
 	)
