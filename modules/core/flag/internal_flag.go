@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 	"sort"
 	"time"
 
@@ -295,7 +296,9 @@ func (f *InternalFlag) IsValid() error {
 
 	// Check that all variation has the same types
 	expectedVarType := ""
-	for name, value := range f.GetVariations() {
+	variations := f.GetVariations()
+	for _, name := range slices.Sorted(maps.Keys(variations)) {
+		value := variations[name]
 		if value == nil {
 			return fmt.Errorf("nil value for variation: %s", name)
 		}

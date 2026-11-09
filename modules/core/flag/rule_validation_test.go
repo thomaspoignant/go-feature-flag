@@ -1,6 +1,7 @@
 package flag_test
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -280,7 +281,7 @@ func TestRule_validatePercentages(t *testing.T) {
 			wantErr:     assert.Error,
 		},
 		{
-			name: "percentages with negative values should be valid (sum > 0)",
+			name: "percentages with negative values should fail even when the sum is positive",
 			rule: flag.Rule{
 				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
@@ -290,7 +291,51 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:     assert.NoError,
+			wantErr:     assert.Error,
+			wantErrMsg: "invalid percentage: variation variation_A has a negative or " +
+				"non-finite percentage (-10)",
+		},
+		{
+			name: "percentages with NaN should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				Percentages: &map[string]float64{
+					"variation_A": math.NaN(),
+					"variation_B": 100,
+				},
+			},
+			defaultRule: false,
+			variations:  variations,
+			wantErr:     assert.Error,
+			wantErrMsg: "invalid percentage: variation variation_A has a negative or " +
+				"non-finite percentage (NaN)",
+		},
+		{
+			name: "percentages with positive infinity should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				Percentages: &map[string]float64{
+					"variation_A": math.Inf(1),
+				},
+			},
+			defaultRule: false,
+			variations:  variations,
+			wantErr:     assert.Error,
+			wantErrMsg: "invalid percentage: variation variation_A has a negative or " +
+				"non-finite percentage (+Inf)",
+		},
+		{
+			name: "percentages too large to be scaled should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				Percentages: &map[string]float64{
+					"variation_A": math.MaxFloat64,
+				},
+			},
+			defaultRule: false,
+			variations:  variations,
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid percentages: the sum (",
 		},
 		{
 			name: "percentages summing to more than 100 should be valid",
@@ -450,6 +495,48 @@ func TestRule_validateProgressiveRollout(t *testing.T) {
 			variations:  variations,
 			wantErr:     assert.Error,
 			wantErrMsg:  "invalid progressive rollout, initial variation non_existent does not exist",
+		},
+		{
+			name: "progressive rollout with nil initial step should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				ProgressiveRollout: &flag.ProgressiveRollout{
+					End: &flag.ProgressiveRolloutStep{
+						Variation:  testconvert.String("variation_B"),
+						Percentage: testconvert.Float64(100),
+						Date:       testconvert.Time(time.Now().Add(2 * time.Hour)),
+					},
+				},
+			},
+			variations: variations,
+			wantErr:    assert.Error,
+			wantErrMsg: "invalid progressive rollout, initial and end steps are required",
+		},
+		{
+			name: "progressive rollout with nil end step should fail",
+			rule: flag.Rule{
+				Query: testconvert.String("key eq \"test\""),
+				ProgressiveRollout: &flag.ProgressiveRollout{
+					Initial: &flag.ProgressiveRolloutStep{
+						Variation:  testconvert.String("variation_A"),
+						Percentage: testconvert.Float64(0),
+						Date:       testconvert.Time(time.Now().Add(1 * time.Hour)),
+					},
+				},
+			},
+			variations: variations,
+			wantErr:    assert.Error,
+			wantErrMsg: "invalid progressive rollout, initial and end steps are required",
+		},
+		{
+			name: "empty progressive rollout should fail",
+			rule: flag.Rule{
+				Query:              testconvert.String("key eq \"test\""),
+				ProgressiveRollout: &flag.ProgressiveRollout{},
+			},
+			variations: variations,
+			wantErr:    assert.Error,
+			wantErrMsg: "invalid progressive rollout, initial and end steps are required",
 		},
 		{
 			name: "progressive rollout with nil initial variation should fail",
