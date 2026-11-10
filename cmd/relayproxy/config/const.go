@@ -3,8 +3,8 @@ package config
 import (
 	"time"
 
+	"github.com/parquet-go/parquet-go/format"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/xitongsys/parquet-go/parquet"
 )
 
 const DefaultLogLevel = "info"
@@ -27,7 +27,7 @@ var DefaultExporter = struct {
 		"{{ .Value}};{{ .Default}};{{ .Source}}\n",
 	FlushInterval:           60000 * time.Millisecond,
 	MaxEventInMemory:        100000,
-	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+	ParquetCompressionCodec: format.Snappy.String(),
 	LogLevel:                DefaultLogLevel,
 	ExporterEventType:       ffclient.FeatureEventExporter,
 }

@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
+	"github.com/parquet-go/parquet-go/format"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
-	"github.com/xitongsys/parquet-go/parquet"
 )
 
 // ExporterConf contains all the field to configure an exporter
@@ -68,8 +68,8 @@ func (c *ExporterConf) IsValid() error {
 		)
 	}
 	if len(c.ParquetCompressionCodec) > 0 {
-		if _, err := parquet.CompressionCodecFromString(c.ParquetCompressionCodec); err != nil {
-			return fmt.Errorf("invalid exporter: \"parquetCompressionCodec\" err: %v", err)
+		if !isValidParquetCompressionCodec(c.ParquetCompressionCodec) {
+			return fmt.Errorf("invalid exporter: \"parquetCompressionCodec\" err: not a valid CompressionCodec string")
 		}
 	}
 	if c.Kind == SQSExporter && c.QueueURL == "" {
@@ -151,4 +151,14 @@ func (r ExporterKind) IsValid() error {
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
+}
+
+// isValidParquetCompressionCodec checks that the codec is one of the parquet format codecs (SNAPPY, GZIP, ...).
+func isValidParquetCompressionCodec(codec string) bool {
+	for c := format.Uncompressed; c <= format.Lz4Raw; c++ {
+		if c.String() == codec {
+			return true
+		}
+	}
+	return false
 }

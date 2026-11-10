@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/parquet-go/parquet-go/format"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -31,7 +32,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
-	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/net/proxy"
@@ -257,7 +257,7 @@ func Test_initExporter(t *testing.T) {
 			conf: &config.ExporterConf{
 				Kind:                    "file",
 				OutputDir:               "/outputfolder/",
-				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
+				ParquetCompressionCodec: format.Uncompressed.String(),
 			},
 			want: ffclient.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
@@ -267,7 +267,7 @@ func Test_initExporter(t *testing.T) {
 					OutputDir:               "/outputfolder/",
 					Filename:                config.DefaultExporter.FileName,
 					CsvTemplate:             config.DefaultExporter.CsvFormat,
-					ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
+					ParquetCompressionCodec: format.Uncompressed.String(),
 				},
 				ExporterEventType: ffclient.FeatureEventExporter,
 			},

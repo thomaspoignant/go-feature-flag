@@ -9,15 +9,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/parquet-go/parquet-go"
+	"github.com/parquet-go/parquet-go/format"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"github.com/xitongsys/parquet-go-source/local"
-	"github.com/xitongsys/parquet-go/parquet"
-	"github.com/xitongsys/parquet-go/reader"
 )
 
 func TestFile_Export(t *testing.T) {
@@ -105,7 +104,7 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields: fields{
 				Format:                  "parquet",
-				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+				ParquetCompressionCodec: format.Snappy.String(),
 			},
 			args: args{
 				events: []exporter.ExportableEvent{
@@ -138,7 +137,7 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields: fields{
 				Format:                  "parquet",
-				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+				ParquetCompressionCodec: format.Snappy.String(),
 				Filename:                "tracking-{{ .Hostname}}-{{ .Timestamp}}.parquet",
 				EventType:               "tracking",
 			},
@@ -200,7 +199,7 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields: fields{
 				Format:                  "parquet",
-				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
+				ParquetCompressionCodec: format.Uncompressed.String(),
 			},
 			args: args{
 				events: []exporter.ExportableEvent{
@@ -493,15 +492,28 @@ func TestFile_Export(t *testing.T) {
 // FeatureEvent records it contains.
 func readParquetFeatureEvents(t *testing.T, filePath string) []exporter.FeatureEvent {
 	t.Helper()
-	fr, err := local.NewLocalFileReader(filePath)
+	rows, err := parquet.ReadFile[struct {
+		Kind         string            `parquet:"kind"`
+		ContextKind  string            `parquet:"contextKind"`
+		UserKey      string            `parquet:"userKey"`
+		CreationDate int64             `parquet:"creationDate"`
+		Key          string            `parquet:"key"`
+		Variation    string            `parquet:"variation"`
+		Value        string            `parquet:"value"`
+		Default      bool              `parquet:"default"`
+		Version      string            `parquet:"version"`
+		Source       string            `parquet:"source"`
+		Metadata     map[string]string `parquet:"metadata"`
+	}](filePath)
 	assert.NoError(t, err)
-	defer fr.Close()
-	pr, err := reader.NewParquetReader(fr, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
-	assert.NoError(t, err)
-	defer pr.ReadStop()
-	gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
-	err = pr.Read(&gotFeatureEvents)
-	assert.NoError(t, err)
+	gotFeatureEvents := make([]exporter.FeatureEvent, 0, len(rows))
+	for _, r := range rows {
+		gotFeatureEvents = append(gotFeatureEvents, exporter.FeatureEvent{
+			Kind: r.Kind, ContextKind: r.ContextKind, UserKey: r.UserKey, CreationDate: r.CreationDate, Key: r.Key,
+			Variation: r.Variation, Value: r.Value, Default: r.Default, Version: r.Version, Source: r.Source,
+			Metadata: toAnyMap(r.Metadata),
+		})
+	}
 	return gotFeatureEvents
 }
 
@@ -509,16 +521,33 @@ func readParquetFeatureEvents(t *testing.T, filePath string) []exporter.FeatureE
 // TrackingEvent records it contains.
 func readParquetTrackingEvents(t *testing.T, filePath string) []exporter.TrackingEvent {
 	t.Helper()
-	fr, err := local.NewLocalFileReader(filePath)
+	rows, err := parquet.ReadFile[struct {
+		Kind              string            `parquet:"kind"`
+		ContextKind       string            `parquet:"contextKind"`
+		UserKey           string            `parquet:"userKey"`
+		CreationDate      int64             `parquet:"creationDate"`
+		Key               string            `parquet:"key"`
+		EvaluationContext map[string]string `parquet:"evaluationContext"`
+		TrackingDetails   map[string]string `parquet:"trackingEventDetails"`
+	}](filePath)
 	assert.NoError(t, err)
-	defer fr.Close()
-	pr, err := reader.NewParquetReader(fr, new(exporter.TrackingEvent), int64(runtime.NumCPU()))
-	assert.NoError(t, err)
-	defer pr.ReadStop()
-	gotTrackingEvents := make([]exporter.TrackingEvent, pr.GetNumRows())
-	err = pr.Read(&gotTrackingEvents)
-	assert.NoError(t, err)
+	gotTrackingEvents := make([]exporter.TrackingEvent, 0, len(rows))
+	for _, r := range rows {
+		gotTrackingEvents = append(gotTrackingEvents, exporter.TrackingEvent{
+			Kind: r.Kind, ContextKind: r.ContextKind, UserKey: r.UserKey, CreationDate: r.CreationDate, Key: r.Key,
+			EvaluationContext: toAnyMap(r.EvaluationContext), TrackingDetails: toAnyMap(r.TrackingDetails),
+		})
+	}
 	return gotTrackingEvents
+}
+
+// toAnyMap converts a parquet map column back to the map[string]any used by the events.
+func toAnyMap(m map[string]string) map[string]any {
+	res := make(map[string]any, len(m))
+	for k, v := range m {
+		res[k] = v
+	}
+	return res
 }
 
 // assertExportOutput validates the exported file. Parquet output is decoded and

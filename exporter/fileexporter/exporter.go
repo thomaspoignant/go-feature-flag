@@ -2,19 +2,18 @@ package fileexporter
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"text/template"
 
+	"github.com/parquet-go/parquet-go"
+	"github.com/parquet-go/parquet-go/compress"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"github.com/xitongsys/parquet-go-source/local"
-	"github.com/xitongsys/parquet-go/parquet"
-	"github.com/xitongsys/parquet-go/writer"
 )
 
 var _ exporter.Exporter = &Exporter{}
@@ -164,36 +163,67 @@ func (f *Exporter) writeParquet(filePath string, events []exporter.ExportableEve
 	return f.writeParquetFeatureEvent(filePath, parquetFeatureEvents)
 }
 
+// parquetFeatureEvent is the parquet row written for an exporter.FeatureEvent.
+type parquetFeatureEvent struct {
+	Kind         string            `parquet:"kind"`
+	ContextKind  string            `parquet:"contextKind"`
+	UserKey      string            `parquet:"userKey"`
+	CreationDate int64             `parquet:"creationDate"`
+	Key          string            `parquet:"key"`
+	Variation    string            `parquet:"variation"`
+	Value        string            `parquet:"value"`
+	Default      bool              `parquet:"default"`
+	Version      string            `parquet:"version"`
+	Source       string            `parquet:"source"`
+	Metadata     map[string]string `parquet:"metadata"`
+}
+
+// parquetTrackingEvent is the parquet row written for an exporter.TrackingEvent.
+type parquetTrackingEvent struct {
+	Kind              string            `parquet:"kind"`
+	ContextKind       string            `parquet:"contextKind"`
+	UserKey           string            `parquet:"userKey"`
+	CreationDate      int64             `parquet:"creationDate"`
+	Key               string            `parquet:"key"`
+	EvaluationContext map[string]string `parquet:"evaluationContext"`
+	TrackingDetails   map[string]string `parquet:"trackingEventDetails"`
+}
+
+// parquetCodecs maps the ParquetCompressionCodec names to their codec.
+// LZ4 is deprecated in the parquet format, so it is written as LZ4_RAW.
+var parquetCodecs = map[string]compress.Codec{
+	"UNCOMPRESSED": &parquet.Uncompressed,
+	"SNAPPY":       &parquet.Snappy,
+	"GZIP":         &parquet.Gzip,
+	"BROTLI":       &parquet.Brotli,
+	"ZSTD":         &parquet.Zstd,
+	"LZ4":          &parquet.Lz4Raw,
+	"LZ4_RAW":      &parquet.Lz4Raw,
+}
+
 // writeParquetFeatureEvent writes the feature events in a parquet file
 func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.FeatureEvent) error {
-	fw, err := local.NewLocalFileWriter(filePath)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = fw.Close() }()
-
-	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
-	if err != nil {
-		return err
-	}
-
-	pw.CompressionType = parquet.CompressionCodec_SNAPPY
-	if ct, err := parquet.CompressionCodecFromString(f.ParquetCompressionCodec); err == nil {
-		pw.CompressionType = ct
-	}
-
+	rows := make([]parquetFeatureEvent, 0, len(events))
 	for _, event := range events {
 		eventValue, err := event.ConvertValueForParquet()
 		if err != nil {
 			return err
 		}
-		event.Value = eventValue
-		if err = pw.Write(event); err != nil {
-			return fmt.Errorf("error while writing the parquet export file: %v", err)
-		}
+		rows = append(rows, parquetFeatureEvent{
+			Kind:         event.Kind,
+			ContextKind:  event.ContextKind,
+			UserKey:      event.UserKey,
+			CreationDate: event.CreationDate,
+			Key:          event.Key,
+			Variation:    event.Variation,
+			Value:        eventValue,
+			Default:      event.Default,
+			Version:      event.Version,
+			Source:       event.Source,
+			Metadata:     toParquetMap(event.Metadata),
+		})
 	}
-
-	return pw.WriteStop()
+	return writeParquetFile(filePath, rows, f.ParquetCompressionCodec)
 }
 
 // writeParquetTrackingEvent writes the tracking events in a parquet file
@@ -201,27 +231,45 @@ func (f *Exporter) writeParquetTrackingEvent(
 	filePath string,
 	events []exporter.TrackingEvent,
 ) error {
-	fw, err := local.NewLocalFileWriter(filePath)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = fw.Close() }()
-
-	pw, err := writer.NewParquetWriter(fw, new(exporter.TrackingEvent), int64(runtime.NumCPU()))
-	if err != nil {
-		return err
-	}
-
-	pw.CompressionType = parquet.CompressionCodec_SNAPPY
-	if ct, err := parquet.CompressionCodecFromString(f.ParquetCompressionCodec); err == nil {
-		pw.CompressionType = ct
-	}
-
+	rows := make([]parquetTrackingEvent, 0, len(events))
 	for _, event := range events {
-		if err = pw.Write(event); err != nil {
-			return fmt.Errorf("error while writing the parquet export file: %v", err)
-		}
+		rows = append(rows, parquetTrackingEvent{
+			Kind:              event.Kind,
+			ContextKind:       event.ContextKind,
+			UserKey:           event.UserKey,
+			CreationDate:      event.CreationDate,
+			Key:               event.Key,
+			EvaluationContext: toParquetMap(event.EvaluationContext),
+			TrackingDetails:   toParquetMap(event.TrackingDetails),
+		})
 	}
+	return writeParquetFile(filePath, rows, f.ParquetCompressionCodec)
+}
 
-	return pw.WriteStop()
+func writeParquetFile[T any](filePath string, rows []T, codecName string) error {
+	codec, ok := parquetCodecs[codecName]
+	if !ok {
+		codec = &parquet.Snappy
+	}
+	if err := parquet.WriteFile(filePath, rows, parquet.Compression(codec)); err != nil {
+		return fmt.Errorf("error while writing the parquet export file: %v", err)
+	}
+	return nil
+}
+
+// toParquetMap converts a map to a map of strings, non-string values are JSON encoded.
+func toParquetMap(m map[string]any) map[string]string {
+	res := make(map[string]string, len(m))
+	for k, v := range m {
+		if s, ok := v.(string); ok {
+			res[k] = s
+			continue
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			b = []byte(fmt.Sprint(v))
+		}
+		res[k] = string(b)
+	}
+	return res
 }
