@@ -145,15 +145,15 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 }
 
 // validateNikunjyQuery validates the Nikunjy query configuration of the rule.
-// It parses the query through the evaluator cache, so evaluating the rule later
-// reuses this parse instead of parsing the query again.
+// It goes through the evaluator cache, which remembers valid queries: reloading a
+// configuration does not parse an unchanged query again, and evaluating the rule
+// soon after can reuse this parse.
 func validateNikunjyQuery(query string) error {
 	ev, err := getNikunjyEvaluator(query)
 	if err != nil {
 		return err
 	}
-	_, err = ev.process(map[string]any{})
-	if err != nil {
+	if err := ev.validate(); err != nil {
 		return fmt.Errorf("invalid query: %w", err)
 	}
 	return nil

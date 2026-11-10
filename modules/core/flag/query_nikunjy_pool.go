@@ -1,7 +1,7 @@
 package flag
 
 import (
-	"fmt"
+	"errors"
 	"sync"
 	"sync/atomic"
 
@@ -18,13 +18,24 @@ import (
 // are part of static config and the set is bounded in practice.
 var nikunjyEvaluatorCache sync.Map // map[string]*pooledNikunjyEvaluator
 
-// pooledNikunjyEvaluator hands out evaluators for one query. One evaluator is pinned:
-// the garbage collector never drops it, so a query evaluated less often than the GC
-// runs is not parsed again on every evaluation, as it would be if every evaluator
-// lived in the sync.Pool. Concurrent evaluations of the same query take more
-// evaluators from the sync.Pool, which keeps that path free of shared locks.
+// The pool's New is wired in newPooledNikunjyEvaluator and is expected to return non-nil
+// values since the query was already parsed once during pool initialization.
+var errNilNikunjyEvaluator = errors.New("nikunjy evaluator pool returned nil")
+
+// pooledNikunjyEvaluator hands out evaluators for one query. From the first evaluation
+// on, one evaluator is pinned: the garbage collector never drops it, so a query evaluated
+// less often than the GC runs is not parsed again on every evaluation, as it would be if
+// every evaluator lived in the sync.Pool. Concurrent evaluations of the same query take
+// more evaluators from the sync.Pool, which keeps that path free of shared locks.
+//
+// Validation never pins. Every configuration load validates every rule, including the
+// rules of flags a process never evaluates, and pinning those would keep a parse of every
+// query in memory. Validation uses the sync.Pool, where the first evaluation can pick its
+// parse up, and the entry remembers that the query is valid, so later loads do not parse
+// it again.
 type pooledNikunjyEvaluator struct {
 	pinned atomic.Pointer[parser.Evaluator]
+	valid  atomic.Bool
 	pool   sync.Pool
 }
 
@@ -40,22 +51,39 @@ func newPooledNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 		ev, _ := parser.NewEvaluator(query)
 		return ev
 	}
-	p.pinned.Store(first)
+	p.pool.Put(first)
 	return p, nil
 }
 
 func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, error) {
 	ev := p.get()
 	if ev == nil {
-		// The pool's New is wired in newPooledNikunjyEvaluator and is expected to return
-		// non-nil values since the query was already validated during pool initialization.
-		return false, fmt.Errorf("nikunjy evaluator pool returned nil")
+		return false, errNilNikunjyEvaluator
 	}
 	defer p.put(ev)
 	return ev.Process(items)
 }
 
-// get takes the pinned evaluator, or one from the pool while the pinned one is in use.
+// validate checks that the query evaluates on an empty context. The result never changes
+// for a query, so it only runs until the query passes once.
+func (p *pooledNikunjyEvaluator) validate() error {
+	if p.valid.Load() {
+		return nil
+	}
+	ev, _ := p.pool.Get().(*parser.Evaluator)
+	if ev == nil {
+		return errNilNikunjyEvaluator
+	}
+	defer p.pool.Put(ev)
+	if _, err := ev.Process(map[string]interface{}{}); err != nil {
+		return err
+	}
+	p.valid.Store(true)
+	return nil
+}
+
+// get takes the pinned evaluator, or one from the pool when none is pinned or the pinned
+// one is in use.
 func (p *pooledNikunjyEvaluator) get() *parser.Evaluator {
 	if ev := p.pinned.Swap(nil); ev != nil {
 		return ev
