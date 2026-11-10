@@ -52,9 +52,13 @@ func (c *flagLoadedCollector) Collect(ch chan<- prom.Metric) {
 			continue
 		}
 		for flagName, f := range flags {
-			ch <- prom.MustNewConstMetric(
+			metric, err := prom.NewConstMetric(
 				c.desc, prom.GaugeValue, 1, flagsetName, flagName, strconv.FormatBool(isEffectivelyDisabled(flagName, f)),
 			)
+			if err != nil {
+				continue
+			}
+			ch <- metric
 		}
 	}
 }

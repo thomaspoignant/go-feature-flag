@@ -213,3 +213,23 @@ func TestFlagLoaded_RegisterIsNoopWithoutRegistryOrSource(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, m.RegisterFlagLoaded(nil))
 }
+
+func TestFlagLoaded_SkipsSeriesWithInvalidLabelValues(t *testing.T) {
+	valid, _ := newFileClient(t, flagsYAML)
+	invalid, _ := newFileClient(t, flagsYAML)
+	m, err := NewMetrics()
+	require.NoError(t, err)
+	require.NoError(t, m.RegisterFlagLoaded(fakeFlagsetSource{
+		flagsets: map[string]*ffclient.GoFeatureFlag{"team-a": valid, "bad-\xff": invalid},
+	}))
+
+	expected := `
+# HELP gofeatureflag_flag_loaded Flags currently loaded in the relay proxy cache, one series per flag with value 1.
+# TYPE gofeatureflag_flag_loaded gauge
+gofeatureflag_flag_loaded{disabled="false",flag_name="flag-on",flagset="team-a"} 1
+gofeatureflag_flag_loaded{disabled="true",flag_name="flag-off",flagset="team-a"} 1
+`
+	assert.NotPanics(t, func() {
+		assert.NoError(t, testutil.GatherAndCompare(m.Registry, strings.NewReader(expected), "gofeatureflag_flag_loaded"))
+	})
+}
