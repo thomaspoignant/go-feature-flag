@@ -601,6 +601,7 @@ It collects all variation events and can save these events in several locations:
 - **AWS S3** *- export your variation usages to S3.*
 - **AWS Kinesis** *- publish your variation usages to AWS Kinesis Stream.*
 - **AWS SQS** *- export your variation usages by sending events to SQS.*
+- **AWS Redshift** *- export your variation usages to a Redshift table.*
 - **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Google PubSub** *- export your variation usages by publishing events to PubSub topic.*
 - **Webhook** *- export your variation usages by calling a webhook.*

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/redshiftexporter"
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
@@ -40,6 +41,12 @@ type ExporterConf struct {
 	AccountKey        string `mapstructure:"accountKey"              koanf:"accountkey"`
 	Container         string `mapstructure:"container"               koanf:"container"`
 	ExporterEventType string `mapstructure:"eventType"               koanf:"eventtype"`
+	ClusterIdentifier string `mapstructure:"clusterIdentifier"       koanf:"clusteridentifier"`
+	WorkgroupName     string `mapstructure:"workgroupName"           koanf:"workgroupname"`
+	Database          string `mapstructure:"database"                koanf:"database"`
+	DbUser            string `mapstructure:"dbUser"                  koanf:"dbuser"`
+	SecretArn         string `mapstructure:"secretArn"               koanf:"secretarn"`
+	AwsRegion         string `mapstructure:"awsRegion"               koanf:"awsregion"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -100,6 +107,10 @@ func (c *ExporterConf) IsValid() error {
 		)
 	}
 
+	if err := c.isValidRedshift(); err != nil {
+		return err
+	}
+
 	if c.Kind == AzureExporter && c.Container == "" {
 		return fmt.Errorf(
 			"invalid exporter: no \"container\" property found for kind \"%s\"",
@@ -116,6 +127,32 @@ func (c *ExporterConf) IsValid() error {
 	return nil
 }
 
+func (c *ExporterConf) isValidRedshift() error {
+	if c.Kind != RedshiftExporter {
+		return nil
+	}
+	if c.Database == "" {
+		return fmt.Errorf(
+			"invalid exporter: no \"database\" property found for kind \"%s\"",
+			c.Kind,
+		)
+	}
+	if (c.ClusterIdentifier == "") == (c.WorkgroupName == "") {
+		return fmt.Errorf(
+			"invalid exporter: exactly one of \"clusterIdentifier\" or \"workgroupName\" is required for kind \"%s\"",
+			c.Kind,
+		)
+	}
+	if !redshiftexporter.IsValidTableName(c.TableName) {
+		return fmt.Errorf(
+			"invalid exporter: \"tableName\" %q is not a valid table name for kind \"%s\"",
+			c.TableName,
+			c.Kind,
+		)
+	}
+	return nil
+}
+
 type ExporterKind string
 
 const (
@@ -129,6 +166,7 @@ const (
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
 	BigQueryExporter      ExporterKind = "bigquery"
+	RedshiftExporter      ExporterKind = "redshift"
 	AzureExporter         ExporterKind = "azureBlobStorage"
 	OpenTelemetryExporter ExporterKind = "opentelemetry"
 )
@@ -145,6 +183,7 @@ func (r ExporterKind) IsValid() error {
 		KafkaExporter,
 		PubSubExporter,
 		BigQueryExporter,
+		RedshiftExporter,
 		KinesisExporter,
 		AzureExporter,
 		OpenTelemetryExporter:

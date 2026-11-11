@@ -24,6 +24,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
+	"github.com/thomaspoignant/go-feature-flag/exporter/redshiftexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -303,6 +304,25 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			DatasetID:         c.DatasetID,
 			TableName:         c.TableName,
 			GoogleCredentials: []byte(c.GoogleCredentials),
+			AutoMigrate:       c.AutoMigrate,
+		}, nil
+	case config.RedshiftExporter:
+		var awsOpts []func(*awsConf.LoadOptions) error
+		if c.AwsRegion != "" {
+			awsOpts = append(awsOpts, awsConf.WithRegion(c.AwsRegion))
+		}
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background(), awsOpts...)
+		if err != nil {
+			return nil, err
+		}
+		return &redshiftexporter.Exporter{
+			ClusterIdentifier: c.ClusterIdentifier,
+			WorkgroupName:     c.WorkgroupName,
+			Database:          c.Database,
+			DbUser:            c.DbUser,
+			SecretArn:         c.SecretArn,
+			TableName:         c.TableName,
+			AwsConfig:         &awsConfig,
 			AutoMigrate:       c.AutoMigrate,
 		}, nil
 	case config.AzureExporter:
