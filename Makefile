@@ -115,9 +115,18 @@ verify: ## Run go mod verify for all modules to validate checksums match go.sum
 	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Verifying $(module)"; cd $(module) && $(GOWORK_ENV) $(GOCMD) mod verify) &&) true
 
 ## Dev:
+# The replace is needed because xitongsys/parquet-go-source pulls cloud.google.com/go/compute v1.5.0
+# (via gocloud.dev v0.26.0), which still contains the metadata package and clashes with
+# cloud.google.com/go/compute/metadata in workspace mode. v1.12.0 is the first version without it.
+# Remove it once we drop xitongsys/parquet-go.
+#
+# "go work sync" pushes the root module's dependency versions into modules/core and cmd/wasm, which
+# bumps their go directive to 1.26. Those 2 modules must stay on go 1.25 to remain compatible with
+# tinygo, so we restore their go.mod and go.sum right after the sync.
 workspace-init:
 	go work init
 	$(foreach module, $(ALL_GO_MOD_DIRS), go work use $(module);)
+	go work edit -replace cloud.google.com/go/compute=cloud.google.com/go/compute@v1.12.0
 	go work sync
 
 watch-relayproxy: ## Launch the relay proxy in watch mode.
