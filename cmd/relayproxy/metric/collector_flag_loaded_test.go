@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
@@ -214,6 +216,10 @@ func TestFlagLoaded_NoSeriesWhenFlagsetsUnavailable(t *testing.T) {
 	}{
 		{name: "source error", source: fakeFlagsetSource{err: errors.New("no flagsets configured")}},
 		{name: "nil flagset", source: fakeFlagsetSource{flagsets: map[string]*ffclient.GoFeatureFlag{"default": nil}}},
+		{
+			name:   "cache not initialized",
+			source: fakeFlagsetSource{flagsets: map[string]*ffclient.GoFeatureFlag{"default": {}}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -225,6 +231,19 @@ func TestFlagLoaded_NoSeriesWhenFlagsetsUnavailable(t *testing.T) {
 			assert.Equal(t, 0, count)
 		})
 	}
+}
+
+func TestIsEffectivelyDisabled_FallsBackToRawStateOnEvaluationError(t *testing.T) {
+	// No defaultRule makes the evaluation fail after the scheduled step re-enabled the flag.
+	f := &flag.InternalFlag{
+		Variations: &map[string]*any{"enabled": testconvert.Interface(true)},
+		Disable:    testconvert.Bool(true),
+		Scheduled: &[]flag.ScheduledStep{{
+			InternalFlag: flag.InternalFlag{Disable: testconvert.Bool(false)},
+			Date:         testconvert.Time(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)),
+		}},
+	}
+	assert.True(t, isEffectivelyDisabled("no-default-rule", f))
 }
 
 func TestFlagLoaded_RegisterIsNoopWithoutRegistryOrSource(t *testing.T) {
