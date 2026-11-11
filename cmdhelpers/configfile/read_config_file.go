@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"gopkg.in/yaml.v3"
 )
