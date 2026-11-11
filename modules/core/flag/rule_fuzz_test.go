@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"math"
 	"strings"
 	"testing"
 	"time"
@@ -127,11 +126,9 @@ func FuzzProgressiveRollout(f *testing.F) {
 
 // hasKnownValidationGap reports rules that the validation wrongly accepts today,
 // and that are then served wrongly or fail for every user:
-//   - a percentage rule with a negative or NaN share, or a sum too small to bucket anyone,
+//   - a percentage rule with a sum too small to bucket anyone,
 //   - a progressive rollout with a missing date or an end date not after the initial
-//     date (every evaluation fails with "missing params"),
-//   - a progressive rollout with a negative or NaN percentage (users flip back to
-//     the initial variation).
+//     date (every evaluation fails with "missing params").
 //
 // ponytail: skips known gaps so the fuzzers keep looking for new ones, drop it
 // once the validation rejects these rules.
@@ -143,9 +140,6 @@ func hasKnownValidationGap(r Rule) bool {
 func hasInvalidPercentages(percentages map[string]float64) bool {
 	sum := 0.0
 	for _, p := range percentages {
-		if p < 0 || math.IsNaN(p) {
-			return true
-		}
 		sum += p
 	}
 	return sum*PercentageMultiplier < 1
@@ -153,12 +147,8 @@ func hasInvalidPercentages(percentages map[string]float64) bool {
 
 func hasInvalidProgressiveRollout(p ProgressiveRollout) bool {
 	// missing steps are rejected by IsValid, they are only checked here to avoid a nil dereference.
-	if p.Initial == nil || p.End == nil ||
-		p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date) {
-		return true
-	}
-	initialPct := p.Initial.getPercentage()
-	return initialPct < 0 || math.IsNaN(initialPct) || math.IsNaN(p.End.getPercentage())
+	return p.Initial == nil || p.End == nil ||
+		p.Initial.Date == nil || p.End.Date == nil || !p.End.Date.After(*p.Initial.Date)
 }
 
 func fuzzVariations(names ...string) map[string]*any {

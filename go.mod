@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag
 
-go 1.26.10
+go 1.26.11
 
 require (
 	cloud.google.com/go/bigquery v1.86.1
@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/storage v1.70.0
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.2
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.3
 	github.com/BurntSushi/toml v1.6.0
 	github.com/IBM/sarama v1.61.1
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
@@ -21,7 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.56.9
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.8
-	github.com/aws/smithy-go v1.28.7
+	github.com/aws/smithy-go v1.28.8
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.56.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
@@ -67,7 +67,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/redis v0.44.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.8.0
-	github.com/xdg-go/scram v1.2.0
+	github.com/xdg-go/scram v1.3.0
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
 	go.mongodb.org/mongo-driver v1.17.10
