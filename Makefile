@@ -121,8 +121,7 @@ verify: ## Run go mod verify for all modules to validate checksums match go.sum
 # Remove it once we drop xitongsys/parquet-go.
 #
 # "go work sync" pushes the root module's dependency versions into modules/core and cmd/wasm, which
-# bumps their go directive to 1.26. Those 2 modules must stay on go 1.25 to remain compatible with
-# tinygo, so we restore their go.mod and go.sum right after the sync.
+# bumps their go directive to 1.26. Those 2 modules must stay on go 1.25 to remain compatible with tinygo.
 workspace-init:
 	go work init
 	$(foreach module, $(ALL_GO_MOD_DIRS), go work use $(module);)
