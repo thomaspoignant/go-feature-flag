@@ -3281,3 +3281,48 @@ func TestInternalFlag_GetVersion(t *testing.T) {
 		})
 	}
 }
+
+// Standalone (rule 7 exception): this asserts repeated-run determinism, which cannot share the
+// table-driven setup of TestInternalFlag_IsValid.
+func TestInternalFlag_IsValid_DeterministicError(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		variations map[string]*any
+		wantErr    string
+	}{
+		{
+			name: "type mismatch reported before later nil value",
+			variations: map[string]*any{
+				"a": testconvert.Interface(true),
+				"b": testconvert.Interface("str"),
+				"c": nil,
+				"d": testconvert.Interface(12),
+			},
+			wantErr: "all variations should have the same type",
+		},
+		{
+			name: "first nil variation in sorted order is reported",
+			variations: map[string]*any{
+				"a": testconvert.Interface(true),
+				"b": nil,
+				"c": nil,
+				"d": nil,
+				"e": testconvert.Interface("str"),
+			},
+			wantErr: "nil value for variation: b",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			for range 50 {
+				f := &flag.InternalFlag{
+					Variations:  &tt.variations,
+					DefaultRule: &flag.Rule{VariationResult: testconvert.String("a")},
+				}
+				assert.EqualError(t, f.IsValid(), tt.wantErr)
+			}
+		})
+	}
+}

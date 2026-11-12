@@ -33,6 +33,36 @@ func TestIsJSONObject(t *testing.T) {
 			input: `not a json`,
 			want:  false,
 		},
+		{
+			name:  "JSON object after leading whitespace",
+			input: " \t\r\n{\"key\": \"value\"}",
+			want:  true,
+		},
+		{
+			name:  "JSON null with surrounding whitespace",
+			input: ` null `,
+			want:  true,
+		},
+		{
+			name:  "JSON array",
+			input: `[{"key": "value"}]`,
+			want:  false,
+		},
+		{
+			name:  "JSON string",
+			input: `"value"`,
+			want:  false,
+		},
+		{
+			name:  "nikunjy query",
+			input: `key in ["a", "b"]`,
+			want:  false,
+		},
+		{
+			name:  "nikunjy query starting with null",
+			input: `nullable eq true`,
+			want:  false,
+		},
 	}
 
 	for _, tt := range tests {
