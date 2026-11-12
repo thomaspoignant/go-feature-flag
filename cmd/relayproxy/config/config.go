@@ -174,6 +174,9 @@ type Config struct {
 
 	// logger is the logger for the relay proxy
 	logger *zap.Logger
+
+	// flagSetMode is where the flagSets come from.
+	flagSetMode flagSetMode
 	// ---------- End of private fields ----------
 }
 

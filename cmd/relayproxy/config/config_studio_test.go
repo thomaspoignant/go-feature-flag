@@ -43,6 +43,7 @@ func TestStudio(t *testing.T) {
 		cache        string            // content of the cache file
 		env          map[string]string // environment variables
 		wantFlagSets []string
+		wantInvalid  bool // flagSets and studio are both set
 	}{
 		{
 			name: "flagSets from the URL, the rest from the file",
@@ -54,7 +55,7 @@ studio:
 			wantFlagSets: []string{"team-a"},
 		},
 		{
-			name: "flagSets of the file are replaced",
+			name: "flagSets in the file and studio",
 			fileConfig: `server:
   port: 2031
 flagSets:
@@ -64,7 +65,8 @@ flagSets:
 studio:
   url: {{URL}}/flagsets.yaml`,
 			body:         studioYaml,
-			wantFlagSets: []string{"team-a"},
+			wantFlagSets: []string{"team-file"},
+			wantInvalid:  true,
 		},
 		{
 			name: "toml URL with a query string",
@@ -121,7 +123,7 @@ studio:
 			wantFlagSets: []string{"team-a"},
 		},
 		{
-			name: "server down without cache",
+			name: "flagSets in the file and studio down",
 			fileConfig: `server:
   port: 2031
 flagSets:
@@ -130,7 +132,8 @@ flagSets:
       - key-file
 studio:
   url: {{URL}}/flagsets.yaml`,
-			wantFlagSets: []string{},
+			wantFlagSets: []string{"team-file"},
+			wantInvalid:  true,
 		},
 		{
 			name: "no studio, flagSets from the file",
@@ -174,6 +177,9 @@ flagSets:
 			require.NoError(t, err)
 			assert.Equal(t, 2031, got.Server.Port)
 			assert.Equal(t, tt.wantFlagSets, flagSetNames(got))
+			if tt.wantInvalid {
+				assert.ErrorContains(t, got.IsValid(), "flagSets and studio cannot be used together")
+			}
 		})
 	}
 }

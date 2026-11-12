@@ -218,9 +218,15 @@ func (c *ConfigLoader) ToConfig() (*Config, error) {
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-	if c.studioProvider != nil {
-		// with studio, the flagSets only come from Studio
+	switch {
+	case len(proxyConf.FlagSets) > 0:
+		// IsValid rejects local flagSets when studio is also set
+		proxyConf.flagSetMode = flagSetModeLocal
+	case proxyConf.Studio.URL != "":
+		proxyConf.flagSetMode = flagSetModeStudio
 		proxyConf.FlagSets = c.studioFlagSets
+	default:
+		proxyConf.flagSetMode = flagSetModeNone
 	}
 	processExporters(proxyConf)
 	return proxyConf, nil
