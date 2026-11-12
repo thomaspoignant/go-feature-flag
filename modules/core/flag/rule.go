@@ -389,11 +389,6 @@ func (r *Rule) GetQueryFormat() QueryFormat {
 	return NikunjyQueryFormat
 }
 
-// nikunjyQuery returns the trimmed query of the rule, and whether it is a nikunjy query.
-func (r *Rule) nikunjyQuery() (string, bool) {
-	return r.GetTrimmedQuery(), r.GetQueryFormat() == NikunjyQueryFormat
-}
-
 func (r *Rule) GetQuery() string {
 	if r.Query == nil {
 		return ""

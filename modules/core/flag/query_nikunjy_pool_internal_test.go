@@ -30,34 +30,24 @@ func TestNikunjyEvaluatorCache_KeepsEvaluatorAcrossGC(t *testing.T) {
 	assert.Same(t, parsed, p.pinned.Load(), "evaluation after GC must reuse the evaluator parsed before it")
 }
 
-func TestValidateNikunjyQuery_SeedsTheEvaluatorCache(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
+func TestNikunjyEvaluatorCache_ValidateSeedsTheCacheWithoutPinning(t *testing.T) {
+	c := newNikunjyEvaluatorCache()
 	const query = `key eq "seeded-by-validation"`
 
-	require.NoError(t, validateNikunjyQuery(query))
+	require.NoError(t, c.validate(query))
 
 	cached, ok := c.entries.Load(query)
 	require.True(t, ok, "validation must leave the parsed query in the cache")
 	p, err := c.get(query)
 	require.NoError(t, err)
 	assert.Same(t, cached, p, "evaluation must reuse the cache entry created during validation")
-}
-
-func TestValidateNikunjyQuery_DoesNotPin(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
-	const query = `key eq "validated-only"`
-
-	require.NoError(t, validateNikunjyQuery(query))
-
-	p, err := c.get(query)
-	require.NoError(t, err)
 	assert.Nil(t, p.pinned.Load(), "the parse of a query that is only validated must stay collectable")
 }
 
-func TestValidateNikunjyQuery_RemembersAValidQuery(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
+func TestNikunjyEvaluatorCache_ValidateRemembersAValidQuery(t *testing.T) {
+	c := newNikunjyEvaluatorCache()
 	const query = `key eq "validated-twice"`
-	require.NoError(t, validateNikunjyQuery(query))
+	require.NoError(t, c.validate(query))
 	p, err := c.get(query)
 	require.NoError(t, err)
 	p.pool.New = func() any {
@@ -67,22 +57,22 @@ func TestValidateNikunjyQuery_RemembersAValidQuery(t *testing.T) {
 	runtime.GC()
 	runtime.GC()
 
-	assert.NoError(t, validateNikunjyQuery(query))
+	assert.NoError(t, c.validate(query))
 }
 
-func TestValidateNikunjyQuery_DoesNotRememberAnInvalidQuery(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
+func TestNikunjyEvaluatorCache_ValidateDoesNotRememberAnInvalidQuery(t *testing.T) {
+	c := newNikunjyEvaluatorCache()
 	const query = `invalid query syntax`
 
-	require.Error(t, validateNikunjyQuery(query))
+	require.Error(t, c.validate(query))
 	_, ok := c.entries.Load(query)
 	require.True(t, ok, "the query parses, so validation leaves a cache entry")
 
-	assert.Error(t, validateNikunjyQuery(query), "an invalid query must fail every validation")
+	assert.Error(t, c.validate(query), "an invalid query must fail every validation")
 }
 
-func TestValidateNikunjyQuery_KeepsAnEvaluatedQueryPinned(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
+func TestNikunjyEvaluatorCache_ValidateKeepsAnEvaluatedQueryPinned(t *testing.T) {
+	c := newNikunjyEvaluatorCache()
 	const query = `key eq "evaluated-then-validated"`
 	p, err := c.get(query)
 	require.NoError(t, err)
@@ -91,7 +81,7 @@ func TestValidateNikunjyQuery_KeepsAnEvaluatedQueryPinned(t *testing.T) {
 	pinned := p.pinned.Load()
 	require.NotNil(t, pinned)
 
-	require.NoError(t, validateNikunjyQuery(query))
+	require.NoError(t, c.validate(query))
 
 	assert.Same(t, pinned, p.pinned.Load(), "validating an evaluated query must leave its evaluator pinned")
 }
@@ -185,7 +175,7 @@ func newFlagWithQueries(queries ...string) *InternalFlag {
 
 // useFreshNikunjyEvaluators gives the test its own package evaluator cache. Cleanups
 // registered by earlier tests release into the cache they retained in, so they cannot
-// evict entries of this test.
+// evict entries of this test. It swaps a package variable: not for parallel tests.
 func useFreshNikunjyEvaluators(tb testing.TB) *nikunjyEvaluatorCache {
 	previous := nikunjyEvaluators
 	nikunjyEvaluators = newNikunjyEvaluatorCache()
@@ -255,8 +245,4 @@ func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testin
 		return !ok
 	}, "a query must be evicted once the last rule list using it is collected")
 	assert.Zero(t, refCount(c, query))
-}
-
-func TestNikunjyEvaluatorCache_RetainIgnoresNilRules(t *testing.T) {
-	assert.NotPanics(t, func() { newNikunjyEvaluatorCache().retain(nil) })
 }

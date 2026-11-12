@@ -2,6 +2,7 @@ package flag
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -124,6 +125,20 @@ func (c *nikunjyEvaluatorCache) get(query string) (*pooledNikunjyEvaluator, erro
 	return actual.(*pooledNikunjyEvaluator), nil
 }
 
+// validate validates a nikunjy query through the cache, which remembers valid queries:
+// reloading a configuration does not parse an unchanged query again, and evaluating the
+// rule soon after can reuse this parse.
+func (c *nikunjyEvaluatorCache) validate(query string) error {
+	p, err := c.get(query)
+	if err != nil {
+		return err
+	}
+	if err := p.validate(); err != nil {
+		return fmt.Errorf("invalid query: %w", err)
+	}
+	return nil
+}
+
 // retain keeps the entries of the nikunjy queries in rules until rules is garbage
 // collected. After a configuration reload, the rules of the previous configuration
 // become unreachable, and the queries that no remaining rule list uses are evicted.
@@ -133,8 +148,8 @@ func (c *nikunjyEvaluatorCache) retain(rules *[]Rule) {
 	}
 	queries := make([]string, 0, len(*rules))
 	for i := range *rules {
-		if query, isNikunjy := (*rules)[i].nikunjyQuery(); isNikunjy {
-			queries = append(queries, query)
+		if r := &(*rules)[i]; r.GetQueryFormat() == NikunjyQueryFormat {
+			queries = append(queries, r.GetTrimmedQuery())
 		}
 	}
 	if len(queries) == 0 {
