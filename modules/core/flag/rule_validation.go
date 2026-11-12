@@ -163,15 +163,13 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	}
 
 	// Validate the query with the parser
-	switch r.GetQueryFormat() {
-	case JSONLogicQueryFormat:
-		if !jsonlogic.IsValid(strings.NewReader(r.GetQuery())) {
-			return fmt.Errorf("invalid jsonlogic query")
-		}
-		return nil
-	default:
-		return validateNikunjyQuery(r.GetTrimmedQuery())
+	if query, isNikunjy := r.nikunjyQuery(); isNikunjy {
+		return validateNikunjyQuery(query)
 	}
+	if !jsonlogic.IsValid(strings.NewReader(r.GetQuery())) {
+		return fmt.Errorf("invalid jsonlogic query")
+	}
+	return nil
 }
 
 // validateNikunjyQuery validates the Nikunjy query configuration of the rule.
@@ -179,7 +177,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 // configuration does not parse an unchanged query again, and evaluating the rule
 // soon after can reuse this parse.
 func validateNikunjyQuery(query string) error {
-	ev, err := getNikunjyEvaluator(query)
+	ev, err := nikunjyEvaluators.get(query)
 	if err != nil {
 		return err
 	}

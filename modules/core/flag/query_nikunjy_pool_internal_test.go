@@ -14,8 +14,7 @@ import (
 )
 
 func TestNikunjyEvaluatorCache_KeepsEvaluatorAcrossGC(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
-	p, err := getNikunjyEvaluator(`key eq "survives-gc"`)
+	p, err := newNikunjyEvaluatorCache().get(`key eq "survives-gc"`)
 	require.NoError(t, err)
 	_, err = p.process(map[string]any{"key": "survives-gc"})
 	require.NoError(t, err)
@@ -32,34 +31,34 @@ func TestNikunjyEvaluatorCache_KeepsEvaluatorAcrossGC(t *testing.T) {
 }
 
 func TestValidateNikunjyQuery_SeedsTheEvaluatorCache(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `key eq "seeded-by-validation"`
 
 	require.NoError(t, validateNikunjyQuery(query))
 
-	cached, ok := nikunjyEvaluatorCache.Load(query)
+	cached, ok := c.entries.Load(query)
 	require.True(t, ok, "validation must leave the parsed query in the cache")
-	p, err := getNikunjyEvaluator(query)
+	p, err := c.get(query)
 	require.NoError(t, err)
 	assert.Same(t, cached, p, "evaluation must reuse the cache entry created during validation")
 }
 
 func TestValidateNikunjyQuery_DoesNotPin(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `key eq "validated-only"`
 
 	require.NoError(t, validateNikunjyQuery(query))
 
-	p, err := getNikunjyEvaluator(query)
+	p, err := c.get(query)
 	require.NoError(t, err)
 	assert.Nil(t, p.pinned.Load(), "the parse of a query that is only validated must stay collectable")
 }
 
 func TestValidateNikunjyQuery_RemembersAValidQuery(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `key eq "validated-twice"`
 	require.NoError(t, validateNikunjyQuery(query))
-	p, err := getNikunjyEvaluator(query)
+	p, err := c.get(query)
 	require.NoError(t, err)
 	p.pool.New = func() any {
 		t.Error("validating a valid query again must not parse it")
@@ -72,20 +71,20 @@ func TestValidateNikunjyQuery_RemembersAValidQuery(t *testing.T) {
 }
 
 func TestValidateNikunjyQuery_DoesNotRememberAnInvalidQuery(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `invalid query syntax`
 
 	require.Error(t, validateNikunjyQuery(query))
-	_, ok := nikunjyEvaluatorCache.Load(query)
+	_, ok := c.entries.Load(query)
 	require.True(t, ok, "the query parses, so validation leaves a cache entry")
 
 	assert.Error(t, validateNikunjyQuery(query), "an invalid query must fail every validation")
 }
 
 func TestValidateNikunjyQuery_KeepsAnEvaluatedQueryPinned(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `key eq "evaluated-then-validated"`
-	p, err := getNikunjyEvaluator(query)
+	p, err := c.get(query)
 	require.NoError(t, err)
 	_, err = p.process(map[string]any{})
 	require.NoError(t, err)
@@ -98,8 +97,7 @@ func TestValidateNikunjyQuery_KeepsAnEvaluatedQueryPinned(t *testing.T) {
 }
 
 func TestNikunjyEvaluatorCache_ConcurrentUseTakesAnotherEvaluator(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
-	p, err := getNikunjyEvaluator(`key eq "overflow"`)
+	p, err := newNikunjyEvaluatorCache().get(`key eq "overflow"`)
 	require.NoError(t, err)
 	_, err = p.process(map[string]any{})
 	require.NoError(t, err)
@@ -117,8 +115,7 @@ func TestNikunjyEvaluatorCache_ConcurrentUseTakesAnotherEvaluator(t *testing.T) 
 }
 
 func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
-	p, err := getNikunjyEvaluator(`tenant eq "match"`)
+	p, err := newNikunjyEvaluatorCache().get(`tenant eq "match"`)
 	require.NoError(t, err)
 
 	goroutines := 4 * runtime.GOMAXPROCS(0)
@@ -150,13 +147,13 @@ func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *test
 func BenchmarkRule_ValidateThenEvaluate(b *testing.B) {
 	variations := map[string]*any{"on": testconvert.Interface(true)}
 	ctx := ffcontext.NewEvaluationContext("user-1")
-	b.Cleanup(nikunjyEvaluatorCache.Clear)
+	useFreshNikunjyEvaluators(b)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if i%1000 == 0 {
 			b.StopTimer()
-			nikunjyEvaluatorCache.Clear()
+			nikunjyEvaluators = newNikunjyEvaluatorCache()
 			b.StartTimer()
 		}
 		r := Rule{
@@ -186,10 +183,20 @@ func newFlagWithQueries(queries ...string) *InternalFlag {
 	}
 }
 
-func nikunjyQueryRefCount(query string) int {
-	nikunjyQueryRefsMu.Lock()
-	defer nikunjyQueryRefsMu.Unlock()
-	return nikunjyQueryRefs[query]
+// useFreshNikunjyEvaluators gives the test its own package evaluator cache. Cleanups
+// registered by earlier tests release into the cache they retained in, so they cannot
+// evict entries of this test.
+func useFreshNikunjyEvaluators(tb testing.TB) *nikunjyEvaluatorCache {
+	previous := nikunjyEvaluators
+	nikunjyEvaluators = newNikunjyEvaluatorCache()
+	tb.Cleanup(func() { nikunjyEvaluators = previous })
+	return nikunjyEvaluators
+}
+
+func refCount(c *nikunjyEvaluatorCache, query string) int {
+	c.refsMu.Lock()
+	defer c.refsMu.Unlock()
+	return c.refs[query]
 }
 
 func gcUntil(t *testing.T, condition func() bool, msg string) {
@@ -201,7 +208,7 @@ func gcUntil(t *testing.T, condition func() bool, msg string) {
 }
 
 func TestNikunjyEvaluatorCache_EvictsQueriesRemovedByAReload(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const (
 		removed   = `key eq "removed-by-reload"`
 		kept      = `key eq "kept-by-reload"`
@@ -212,24 +219,24 @@ func TestNikunjyEvaluatorCache_EvictsQueriesRemovedByAReload(t *testing.T) {
 	require.NoError(t, oldFlag.IsValid())
 	newFlag := newFlagWithQueries(kept, added)
 	require.NoError(t, newFlag.IsValid())
-	require.Equal(t, 2, nikunjyQueryRefCount(kept))
-	require.Zero(t, nikunjyQueryRefCount(jsonLogic), "a jsonlogic query is not a nikunjy query")
+	require.Equal(t, 2, refCount(c, kept))
+	require.Zero(t, refCount(c, jsonLogic), "a jsonlogic query is not a nikunjy query")
 
 	oldFlag = nil
-	gcUntil(t, func() bool { return nikunjyQueryRefCount(kept) == 1 },
+	gcUntil(t, func() bool { return refCount(c, kept) == 1 },
 		"the rules of the previous configuration must release their queries once collected")
 
-	_, ok := nikunjyEvaluatorCache.Load(removed)
+	_, ok := c.entries.Load(removed)
 	assert.False(t, ok, "a query no rule uses anymore must be evicted")
-	_, ok = nikunjyEvaluatorCache.Load(kept)
+	_, ok = c.entries.Load(kept)
 	assert.True(t, ok, "a query the new configuration still uses must stay cached")
-	_, ok = nikunjyEvaluatorCache.Load(added)
+	_, ok = c.entries.Load(added)
 	assert.True(t, ok, "a query added by the new configuration must stay cached")
 	runtime.KeepAlive(newFlag)
 }
 
 func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testing.T) {
-	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	c := useFreshNikunjyEvaluators(t)
 	const query = `key eq "shared-by-two-clients"`
 	first := newFlagWithQueries(query)
 	require.NoError(t, first.IsValid())
@@ -237,19 +244,19 @@ func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testin
 	require.NoError(t, second.IsValid())
 
 	first = nil
-	gcUntil(t, func() bool { return nikunjyQueryRefCount(query) == 1 }, "the first rule list must release its query")
-	_, ok := nikunjyEvaluatorCache.Load(query)
+	gcUntil(t, func() bool { return refCount(c, query) == 1 }, "the first rule list must release its query")
+	_, ok := c.entries.Load(query)
 	require.True(t, ok, "a query another rule list still uses must stay cached")
 
 	runtime.KeepAlive(second)
 	second = nil
 	gcUntil(t, func() bool {
-		_, ok := nikunjyEvaluatorCache.Load(query)
+		_, ok := c.entries.Load(query)
 		return !ok
 	}, "a query must be evicted once the last rule list using it is collected")
-	assert.Zero(t, nikunjyQueryRefCount(query))
+	assert.Zero(t, refCount(c, query))
 }
 
-func TestRetainNikunjyEvaluators_IgnoresNilRules(t *testing.T) {
-	assert.NotPanics(t, func() { retainNikunjyEvaluators(nil) })
+func TestNikunjyEvaluatorCache_RetainIgnoresNilRules(t *testing.T) {
+	assert.NotPanics(t, func() { newNikunjyEvaluatorCache().retain(nil) })
 }

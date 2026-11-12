@@ -15,17 +15,21 @@ import (
 // Evaluator is reusable, but parser.Evaluator.Process writes to an internal field, so
 // concurrent calls require one evaluator per call in flight.
 //
-// An entry is evicted once no loaded flag has a rule with its query, see
-// retainNikunjyEvaluators.
-var nikunjyEvaluatorCache sync.Map // map[string]*pooledNikunjyEvaluator
+// An entry is evicted once no validated rule list contains its query. refs counts those
+// rule lists per query: the cache is shared by every client of the process (e.g. every
+// flag set of the relay proxy), so one client's reload must not evict a query another
+// client still uses.
+type nikunjyEvaluatorCache struct {
+	entries sync.Map // map[string]*pooledNikunjyEvaluator
+	refsMu  sync.Mutex
+	refs    map[string]int
+}
 
-// nikunjyQueryRefs counts, per query, the validated rule lists that contain it. The
-// cache is shared by every client of the process (e.g. every flag set of the relay
-// proxy), so a query is only evicted when no rule list of any client uses it.
-var (
-	nikunjyQueryRefsMu sync.Mutex
-	nikunjyQueryRefs   = map[string]int{}
-)
+func newNikunjyEvaluatorCache() *nikunjyEvaluatorCache {
+	return &nikunjyEvaluatorCache{refs: map[string]int{}}
+}
+
+var nikunjyEvaluators = newNikunjyEvaluatorCache()
 
 // The pool's New is wired in newPooledNikunjyEvaluator and is expected to return non-nil
 // values since the query was already parsed once during pool initialization.
@@ -108,52 +112,50 @@ func (p *pooledNikunjyEvaluator) put(ev *parser.Evaluator) {
 	}
 }
 
-func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
-	if v, ok := nikunjyEvaluatorCache.Load(query); ok {
+func (c *nikunjyEvaluatorCache) get(query string) (*pooledNikunjyEvaluator, error) {
+	if v, ok := c.entries.Load(query); ok {
 		return v.(*pooledNikunjyEvaluator), nil
 	}
 	p, err := newPooledNikunjyEvaluator(query)
 	if err != nil {
 		return nil, err
 	}
-	actual, _ := nikunjyEvaluatorCache.LoadOrStore(query, p)
+	actual, _ := c.entries.LoadOrStore(query, p)
 	return actual.(*pooledNikunjyEvaluator), nil
 }
 
-// retainNikunjyEvaluators keeps the cache entries of the nikunjy queries in rules until
-// rules is garbage collected. After a configuration reload, the rules of the previous
-// configuration become unreachable, and the queries that no remaining rule uses are
-// evicted from nikunjyEvaluatorCache.
-func retainNikunjyEvaluators(rules *[]Rule) {
+// retain keeps the entries of the nikunjy queries in rules until rules is garbage
+// collected. After a configuration reload, the rules of the previous configuration
+// become unreachable, and the queries that no remaining rule list uses are evicted.
+func (c *nikunjyEvaluatorCache) retain(rules *[]Rule) {
 	if rules == nil {
 		return
 	}
 	queries := make([]string, 0, len(*rules))
 	for i := range *rules {
-		r := &(*rules)[i]
-		if q := r.GetTrimmedQuery(); q != "" && r.GetQueryFormat() == NikunjyQueryFormat {
-			queries = append(queries, q)
+		if query, isNikunjy := (*rules)[i].nikunjyQuery(); isNikunjy {
+			queries = append(queries, query)
 		}
 	}
 	if len(queries) == 0 {
 		return
 	}
-	nikunjyQueryRefsMu.Lock()
+	c.refsMu.Lock()
 	for _, q := range queries {
-		nikunjyQueryRefs[q]++
+		c.refs[q]++
 	}
-	nikunjyQueryRefsMu.Unlock()
-	runtime.AddCleanup(rules, releaseNikunjyEvaluators, queries)
+	c.refsMu.Unlock()
+	runtime.AddCleanup(rules, c.release, queries)
 }
 
-func releaseNikunjyEvaluators(queries []string) {
-	nikunjyQueryRefsMu.Lock()
-	defer nikunjyQueryRefsMu.Unlock()
+func (c *nikunjyEvaluatorCache) release(queries []string) {
+	c.refsMu.Lock()
+	defer c.refsMu.Unlock()
 	for _, q := range queries {
-		nikunjyQueryRefs[q]--
-		if nikunjyQueryRefs[q] == 0 {
-			delete(nikunjyQueryRefs, q)
-			nikunjyEvaluatorCache.Delete(q)
+		c.refs[q]--
+		if c.refs[q] == 0 {
+			delete(c.refs, q)
+			c.entries.Delete(q)
 		}
 	}
 }

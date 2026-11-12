@@ -186,7 +186,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 			return true
 		}
 	default:
-		ev, err := getNikunjyEvaluator(query)
+		ev, err := nikunjyEvaluators.get(query)
 		if err != nil {
 			slog.Error("error while parsing the nikunjy query",
 				slog.String("query", query), slog.Any("error", err))
@@ -387,6 +387,11 @@ func (r *Rule) GetQueryFormat() QueryFormat {
 		return JSONLogicQueryFormat
 	}
 	return NikunjyQueryFormat
+}
+
+// nikunjyQuery returns the trimmed query of the rule, and whether it is a nikunjy query.
+func (r *Rule) nikunjyQuery() (string, bool) {
+	return r.GetTrimmedQuery(), r.GetQueryFormat() == NikunjyQueryFormat
 }
 
 func (r *Rule) GetQuery() string {
