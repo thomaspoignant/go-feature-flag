@@ -115,7 +115,7 @@ func TestNikunjyEvaluatorCache_ConcurrentUseTakesAnotherEvaluator(t *testing.T) 
 }
 
 func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *testing.T) {
-	p, err := newNikunjyEvaluatorCache().get(`tenant eq "match"`)
+	p, err := newNikunjyEvaluatorCache().get(`group eq "match"`)
 	require.NoError(t, err)
 
 	goroutines := 4 * runtime.GOMAXPROCS(0)
@@ -126,11 +126,11 @@ func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *test
 			defer wg.Done()
 			for i := range 200 {
 				wantMatch := (g+i)%2 == 0
-				tenant := "other"
+				group := "other"
 				if wantMatch {
-					tenant = "match"
+					group = "match"
 				}
-				ok, err := p.process(map[string]any{"tenant": tenant})
+				ok, err := p.process(map[string]any{"group": group})
 				assert.NoError(t, err)
 				assert.Equal(t, wantMatch, ok, "goroutine %d iteration %d", g, i)
 			}
