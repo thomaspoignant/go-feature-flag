@@ -64,6 +64,11 @@ jobs:
           check-latest: true
           cache: false
       - run: make test
+        env:
+          # Packages run in parallel and share one Ryuk reaper; a package can
+          # latch onto a reaper that is shutting down and time out after 60s.
+          # Runners are ephemeral and tests terminate their own containers.
+          TESTCONTAINERS_RYUK_DISABLED: "true"
 
   Test-Windows:
     runs-on: windows-latest
@@ -103,6 +108,8 @@ jobs:
           check-latest: true
           cache: false
       - run: make coverage
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true" # see Test job
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
@@ -210,12 +217,16 @@ jobs:
           cache: false
       - name: Run benchmark
         run: make bench | tee bench-output.txt
+      - name: Read benchmark CPU
+        id: cpu
+        run: |
+          echo "model=$(sed -n 's/^cpu: *//p' bench-output.txt | head -1 | tr -cs '[:alnum:]' '-')" >> "$GITHUB_OUTPUT"
       - name: Download previous benchmark data
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./cache
-          key: ${{ runner.os }}-benchmark-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-benchmark-
+          key: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
@@ -227,6 +238,12 @@ jobs:
           comment-on-alert: true
           alert-comment-cc-users: "@$GITHUB_ACTOR"
           max-items-in-chart: 100
+      - name: Save benchmark data
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-${{ github.run_id }}
 
   Python-provider:
     runs-on: ubuntu-latest
@@ -249,7 +266,7 @@ jobs:
           python-version: "3.10"
       - name: Install uv
         if: steps.changed-files-specific.outputs.changed == 'true'
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: uv sync
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
@@ -270,7 +287,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
   Verify:
     runs-on: ubuntu-latest
     permissions:

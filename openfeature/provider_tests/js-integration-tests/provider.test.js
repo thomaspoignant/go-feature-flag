@@ -380,10 +380,9 @@ describe("Provider tests", () => {
         flagKey: flagKey,
         reason: "ERROR",
         value: false,
-        errorCode: "GENERAL",
+        errorCode: "PROVIDER_FATAL",
         flagMetadata: {},
-        errorMessage:
-          "Provider is not initialized, impossible to retrieve configuration",
+        errorMessage: "provider is in an irrecoverable error state",
       };
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx);
       expect(got).toEqual(expected);
@@ -411,10 +410,9 @@ describe("Provider tests", () => {
         flagKey: flagKey,
         reason: "ERROR",
         value: false,
-        errorCode: "GENERAL",
+        errorCode: "PROVIDER_FATAL",
         flagMetadata: {},
-        errorMessage:
-          "Provider is not initialized, impossible to retrieve configuration",
+        errorMessage: "provider is in an irrecoverable error state",
       };
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx);
       expect(got).toEqual(expected);

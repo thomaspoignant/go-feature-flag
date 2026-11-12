@@ -3,6 +3,7 @@ package cache_test
 import (
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -241,6 +242,14 @@ percentage = "toto
 [test-flag.defaultRule]
 variation = "false_var"
 `),
+			},
+			flagFormat: "toml",
+			wantErr:    true,
+		},
+		{
+			name: "TOML nested deeper than the parser limit",
+			args: args{
+				loadedFlags: []byte("a = " + strings.Repeat("{b=", 20000) + "1" + strings.Repeat("}", 20000)),
 			},
 			flagFormat: "toml",
 			wantErr:    true,
