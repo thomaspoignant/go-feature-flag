@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -167,4 +168,88 @@ func BenchmarkRule_ValidateThenEvaluate(b *testing.B) {
 		}
 		_, _ = r.Evaluate("user-1", ctx, "test-flag", false)
 	}
+}
+
+func newFlagWithQueries(queries ...string) *InternalFlag {
+	rules := make([]Rule, len(queries))
+	for i, q := range queries {
+		rules[i] = Rule{
+			Name:            testconvert.String(fmt.Sprintf("rule-%d", i)),
+			Query:           testconvert.String(q),
+			VariationResult: testconvert.String("on"),
+		}
+	}
+	return &InternalFlag{
+		Variations:  &map[string]*any{"on": testconvert.Interface(true)},
+		Rules:       &rules,
+		DefaultRule: &Rule{VariationResult: testconvert.String("on")},
+	}
+}
+
+func nikunjyQueryRefCount(query string) int {
+	nikunjyQueryRefsMu.Lock()
+	defer nikunjyQueryRefsMu.Unlock()
+	return nikunjyQueryRefs[query]
+}
+
+func gcUntil(t *testing.T, condition func() bool, msg string) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		runtime.GC()
+		return condition()
+	}, 5*time.Second, 10*time.Millisecond, msg)
+}
+
+func TestNikunjyEvaluatorCache_EvictsQueriesRemovedByAReload(t *testing.T) {
+	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	const (
+		removed   = `key eq "removed-by-reload"`
+		kept      = `key eq "kept-by-reload"`
+		added     = `key eq "added-by-reload"`
+		jsonLogic = `{"==": [{"var": "key"}, "json-logic"]}`
+	)
+	oldFlag := newFlagWithQueries(removed, kept, jsonLogic)
+	require.NoError(t, oldFlag.IsValid())
+	newFlag := newFlagWithQueries(kept, added)
+	require.NoError(t, newFlag.IsValid())
+	require.Equal(t, 2, nikunjyQueryRefCount(kept))
+	require.Zero(t, nikunjyQueryRefCount(jsonLogic), "a jsonlogic query is not a nikunjy query")
+
+	oldFlag = nil
+	gcUntil(t, func() bool { return nikunjyQueryRefCount(kept) == 1 },
+		"the rules of the previous configuration must release their queries once collected")
+
+	_, ok := nikunjyEvaluatorCache.Load(removed)
+	assert.False(t, ok, "a query no rule uses anymore must be evicted")
+	_, ok = nikunjyEvaluatorCache.Load(kept)
+	assert.True(t, ok, "a query the new configuration still uses must stay cached")
+	_, ok = nikunjyEvaluatorCache.Load(added)
+	assert.True(t, ok, "a query added by the new configuration must stay cached")
+	runtime.KeepAlive(newFlag)
+}
+
+func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testing.T) {
+	t.Cleanup(nikunjyEvaluatorCache.Clear)
+	const query = `key eq "shared-by-two-clients"`
+	first := newFlagWithQueries(query)
+	require.NoError(t, first.IsValid())
+	second := newFlagWithQueries(query)
+	require.NoError(t, second.IsValid())
+
+	first = nil
+	gcUntil(t, func() bool { return nikunjyQueryRefCount(query) == 1 }, "the first rule list must release its query")
+	_, ok := nikunjyEvaluatorCache.Load(query)
+	require.True(t, ok, "a query another rule list still uses must stay cached")
+
+	runtime.KeepAlive(second)
+	second = nil
+	gcUntil(t, func() bool {
+		_, ok := nikunjyEvaluatorCache.Load(query)
+		return !ok
+	}, "a query must be evicted once the last rule list using it is collected")
+	assert.Zero(t, nikunjyQueryRefCount(query))
+}
+
+func TestRetainNikunjyEvaluators_IgnoresNilRules(t *testing.T) {
+	assert.NotPanics(t, func() { retainNikunjyEvaluators(nil) })
 }

@@ -319,6 +319,10 @@ func (f *InternalFlag) IsValid() error {
 		return fmt.Errorf("missing default rule")
 	}
 
+	// Retained before the rules are validated, so the parses made by the validation
+	// stay cached even if a previous configuration's rules are collected meanwhile.
+	retainNikunjyEvaluators(f.Rules)
+
 	const isDefaultRule = true
 	// Validate rules
 	if err := f.GetDefaultRule().IsValid(isDefaultRule, f.GetVariations()); err != nil {

@@ -2,6 +2,7 @@ package flag
 
 import (
 	"errors"
+	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -14,9 +15,17 @@ import (
 // Evaluator is reusable, but parser.Evaluator.Process writes to an internal field, so
 // concurrent calls require one evaluator per call in flight.
 //
-// Memory note: cache entries are not evicted, since a feature flag's query strings
-// are part of static config and the set is bounded in practice.
+// An entry is evicted once no loaded flag has a rule with its query, see
+// retainNikunjyEvaluators.
 var nikunjyEvaluatorCache sync.Map // map[string]*pooledNikunjyEvaluator
+
+// nikunjyQueryRefs counts, per query, the validated rule lists that contain it. The
+// cache is shared by every client of the process (e.g. every flag set of the relay
+// proxy), so a query is only evicted when no rule list of any client uses it.
+var (
+	nikunjyQueryRefsMu sync.Mutex
+	nikunjyQueryRefs   = map[string]int{}
+)
 
 // The pool's New is wired in newPooledNikunjyEvaluator and is expected to return non-nil
 // values since the query was already parsed once during pool initialization.
@@ -109,4 +118,42 @@ func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
 	}
 	actual, _ := nikunjyEvaluatorCache.LoadOrStore(query, p)
 	return actual.(*pooledNikunjyEvaluator), nil
+}
+
+// retainNikunjyEvaluators keeps the cache entries of the nikunjy queries in rules until
+// rules is garbage collected. After a configuration reload, the rules of the previous
+// configuration become unreachable, and the queries that no remaining rule uses are
+// evicted from nikunjyEvaluatorCache.
+func retainNikunjyEvaluators(rules *[]Rule) {
+	if rules == nil {
+		return
+	}
+	queries := make([]string, 0, len(*rules))
+	for i := range *rules {
+		r := &(*rules)[i]
+		if q := r.GetTrimmedQuery(); q != "" && r.GetQueryFormat() == NikunjyQueryFormat {
+			queries = append(queries, q)
+		}
+	}
+	if len(queries) == 0 {
+		return
+	}
+	nikunjyQueryRefsMu.Lock()
+	for _, q := range queries {
+		nikunjyQueryRefs[q]++
+	}
+	nikunjyQueryRefsMu.Unlock()
+	runtime.AddCleanup(rules, releaseNikunjyEvaluators, queries)
+}
+
+func releaseNikunjyEvaluators(queries []string) {
+	nikunjyQueryRefsMu.Lock()
+	defer nikunjyQueryRefsMu.Unlock()
+	for _, q := range queries {
+		nikunjyQueryRefs[q]--
+		if nikunjyQueryRefs[q] == 0 {
+			delete(nikunjyQueryRefs, q)
+			nikunjyEvaluatorCache.Delete(q)
+		}
+	}
 }
