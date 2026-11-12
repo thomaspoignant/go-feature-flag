@@ -600,7 +600,7 @@ func roundTripCases(t *testing.T) []loadCase {
 	files := []string{
 		"flag-config.yaml", "flag-config.json", "flag-config.toml",
 		"flag-config-multiline-query.json", "flag-config-scheduled-v0.yaml",
-		"flag-config-3rd-file.yaml", "flag-config-custom-bucketingkey.yaml",
+		"flag-config-3rd-file.yaml", "flag-config-custom-bucketingkey.yaml", "flag-config-rollouts.toml",
 	}
 	cases := make([]loadCase, 0, len(files))
 	for _, f := range files {
