@@ -74,11 +74,23 @@ All the functions that `go-feature-flag` package supports are mirrored as method
 
 #### Example
 
+Inside a function that returns an error, initialize each client and check the result before using it:
+
 ```go showLineNumbers
-x, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/flag-config.goff.yaml",}})
+x, err := ffclient.New(ffclient.Config{
+    Retriever: &httpretriever.Retriever{URL: "http://example.com/flag-config.goff.yaml"},
+})
+if err != nil {
+    return err
+}
 defer x.Close()
 
-y, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/test2.goff.yaml",}})
+y, err := ffclient.New(ffclient.Config{
+    Retriever: &httpretriever.Retriever{URL: "http://example.com/test2.goff.yaml"},
+})
+if err != nil {
+    return err
+}
 defer y.Close()
 
 user := ffcontext.NewEvaluationContext("user-key")

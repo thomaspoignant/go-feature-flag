@@ -61,10 +61,10 @@ With this flag configuration, the `teamId` value will be used for hashing instea
 evalCtx := openfeature.NewEvaluationContext(
     "user-123",
     map[string]any{
-        "teamId", "f74b72",
+        "teamId": "f74b72",
     },
 )
-boolValue, _ := client.BooleanValue("first-flag", false, evalCtx)
+screamLevel, _ := client.StringValue(context.Background(), "scream-level-feature", "whisper", evalCtx)
 ```
 
 As a result, users who are members of the same team will receive the same flag variation, consistently.  
@@ -102,7 +102,7 @@ evalCtx := openfeature.NewEvaluationContext(
         },
     },
 )
-boolValue, _ := client.BooleanValue("premium-feature", false, evalCtx)
+boolValue, _ := client.BooleanValue(context.Background(), "premium-feature", false, evalCtx)
 ```
 
 In this example, all users from the same company will receive the same feature variation because the bucketing is based on `company.id`.
