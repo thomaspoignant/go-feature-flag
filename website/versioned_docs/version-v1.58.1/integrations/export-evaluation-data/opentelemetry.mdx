@@ -42,10 +42,8 @@ with `TracerName`.
 
 ```go title="example.go"
 import (
-    "context"
-
+    ffclient "github.com/thomaspoignant/go-feature-flag"
     "github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
-    "github.com/thomaspoignant/go-feature-flag/ffclient"
 )
 
 // ... initialize your OpenTelemetry tracer provider here (OTLP, resource, etc.) ...
@@ -95,6 +93,8 @@ otel:
 # A flagset that exports evaluation events as OpenTelemetry spans
 flagsets:
   - name: default
+    apiKeys:
+      - "my-api-key"
     retriever:
       kind: file
       path: examples/retriever_file/flags.goff.yaml
@@ -102,6 +102,8 @@ flagsets:
       - kind: opentelemetry
         tracerName: go-feature-flag
 ```
+
+Include `my-api-key` in your provider configuration or send it in the `X-API-Key: my-api-key` header when making requests to this flag set.
 
 Notes:
 
