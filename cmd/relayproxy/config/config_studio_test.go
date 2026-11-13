@@ -23,7 +23,10 @@ const studioYaml = `server:
 flagSets:
   - name: team-a
     apiKeys:
-      - key-a`
+      - key-a
+    retrievers:
+      - kind: file
+        path: /tmp/flags.yaml`
 
 // flagSetNames returns the names of the flagSets of a configuration.
 func flagSetNames(c *config.Config) []string {
@@ -76,7 +79,10 @@ studio:
   url: {{URL}}/flagsets.toml?sig=abc`,
 			body: `[[flagSets]]
 name = "team-a"
-apiKeys = ["key-a"]`,
+apiKeys = ["key-a"]
+[[flagSets.retrievers]]
+kind = "file"
+path = "/tmp/flags.yaml"`,
 			wantFlagSets: []string{"team-a"},
 		},
 		{
@@ -193,7 +199,10 @@ studio:
 	const twoFlagSets = studioYaml + `
   - name: team-b
     apiKeys:
-      - key-b`
+      - key-b
+    retrievers:
+      - kind: file
+        path: /tmp/flags.yaml`
 
 	tests := []struct {
 		name         string
@@ -258,4 +267,162 @@ studio:
 			}
 		})
 	}
+}
+
+func TestStudioReloadRetriesFailedFetch(t *testing.T) {
+	for _, etag := range []string{"", `"v2"`} {
+		t.Run("etag="+etag, func(t *testing.T) {
+			var mu sync.Mutex
+			requests := 0
+			retries := make(chan string, 1)
+			updated := strings.ReplaceAll(studioYaml, "team-a", "team-b")
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mu.Lock()
+				defer mu.Unlock()
+				requests++
+				switch requests {
+				case 1:
+					_, _ = w.Write([]byte(studioYaml))
+				case 2:
+					w.Header().Set("ETag", etag)
+					_, _ = w.Write([]byte(updated))
+				case 3:
+					w.WriteHeader(http.StatusServiceUnavailable)
+				default:
+					select {
+					case retries <- r.Header.Get("If-None-Match"):
+					default:
+					}
+					w.Header().Set("ETag", etag)
+					if etag != "" && r.Header.Get("If-None-Match") == etag {
+						w.WriteHeader(http.StatusNotModified)
+						return
+					}
+					_, _ = w.Write([]byte(updated))
+				}
+			}))
+			defer srv.Close()
+			loader := newStudioTestLoader(t, srv.URL, "")
+			type observedConfig struct {
+				config   *config.Config
+				requests int
+			}
+			configs := make(chan observedConfig, 10)
+			loader.AddConfigChangeCallback(func(c *config.Config) {
+				mu.Lock()
+				count := requests
+				mu.Unlock()
+				configs <- observedConfig{config: c, requests: count}
+			})
+
+			select {
+			case c := <-configs:
+				assert.Equal(t, []string{"team-b"}, flagSetNames(c.config))
+				assert.NoError(t, c.config.IsValid())
+				assert.GreaterOrEqual(t, c.requests, 4, "failed reloads must not notify consumers")
+			case <-time.After(5 * time.Second):
+				t.Fatal("Timeout waiting for recovery after the failed reload")
+			}
+			select {
+			case header := <-retries:
+				assert.Empty(t, header, "the failed reload must invalidate the accepted ETag")
+			case <-time.After(5 * time.Second):
+				t.Fatal("Timeout waiting for an unconditional retry")
+			}
+		})
+	}
+}
+
+func TestStudioRejectedUpdateKeepsETag(t *testing.T) {
+	tests := []struct {
+		name   string
+		body   string
+		status int
+	}{
+		{name: "HTTP error", status: http.StatusServiceUnavailable},
+		{name: "invalid YAML", body: "flagSets: [", status: http.StatusOK},
+		{name: "invalid field type", body: "flagSets: wrong-type", status: http.StatusOK},
+		{
+			name:   "invalid flagset",
+			body:   strings.Replace(studioYaml, "apiKeys:\n      - key-a", "apiKeys: []", 1),
+			status: http.StatusOK,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var mu sync.Mutex
+			body, etag, status := studioYaml, `"v1"`, http.StatusOK
+			rejected := false
+			attempts := make(chan string, 20)
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mu.Lock()
+				defer mu.Unlock()
+				if rejected {
+					select {
+					case attempts <- r.Header.Get("If-None-Match"):
+					default:
+					}
+				}
+				w.Header().Set("ETag", etag)
+				if status != http.StatusOK {
+					w.WriteHeader(status)
+					return
+				}
+				if r.Header.Get("If-None-Match") == etag {
+					w.WriteHeader(http.StatusNotModified)
+					return
+				}
+				_, _ = w.Write([]byte(body))
+			}))
+			defer srv.Close()
+			cacheFile := filepath.Join(t.TempDir(), "flagsets.cache.yaml")
+			loader := newStudioTestLoader(t, srv.URL, cacheFile)
+			configs := make(chan *config.Config, 10)
+			loader.AddConfigChangeCallback(func(c *config.Config) { configs <- c })
+			mu.Lock()
+			body, etag, status, rejected = tt.body, `"v2"`, tt.status, true
+			mu.Unlock()
+
+			// Failed updates must keep requesting the last successfully accepted ETag.
+			for range 2 {
+				select {
+				case got := <-attempts:
+					require.Equal(t, `"v1"`, got)
+				case <-time.After(5 * time.Second):
+					t.Fatal("Timeout waiting for a retry of the rejected update")
+				}
+			}
+			cached, err := os.ReadFile(cacheFile)
+			require.NoError(t, err)
+			assert.Equal(t, studioYaml, string(cached))
+			mu.Lock()
+			body = strings.ReplaceAll(studioYaml, "team-a", "team-b")
+			status, rejected = http.StatusOK, false
+			mu.Unlock()
+
+			// Recovery must work even when the server reuses the rejected ETag.
+			select {
+			case c := <-configs:
+				assert.Equal(t, []string{"team-b"}, flagSetNames(c))
+				assert.NoError(t, c.IsValid())
+			case <-time.After(5 * time.Second):
+				t.Fatal("Timeout waiting for recovery with the same ETag")
+			}
+		})
+	}
+}
+
+func newStudioTestLoader(t *testing.T, url, cacheFile string) *config.ConfigLoader {
+	t.Helper()
+	fileConfig := "studio:\n  url: " + url + "/flagsets.yaml\n  pollingInterval: 150\n"
+	if cacheFile != "" {
+		fileConfig += "  cacheFile: " + cacheFile + "\n"
+	}
+	configFile := testutils.CopyContentToNewTempFile(t, fileConfig)
+	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	f.String("config", "", "Location of your config file")
+	require.NoError(t, f.Parse([]string{"--config=" + configFile.Name()}))
+	loader := config.NewConfigLoader(f, zap.NewNop(), "1.0.0", true)
+	t.Cleanup(func() { assert.NoError(t, loader.StopWatchChanges()) })
+	return loader
 }

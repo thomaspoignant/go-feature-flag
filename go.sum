@@ -983,8 +983,8 @@ github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX2
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/thomaspoignant/go-feature-flag/modules/core v0.8.0 h1:8ZYWAFaiVfyBLcDmS+6cl3nRUXnd944SeR3R9OvILpY=
 github.com/thomaspoignant/go-feature-flag/modules/core v0.8.0/go.mod h1:b2a0fpXczt04g+FaK2jSwEKter6Fn5HQvoul3PWtP90=
-github.com/thomaspoignant/koanf-http-provider v0.0.1 h1:lQ+wsDjnFDAP1vT/lMtYHx6jqg+iGoMngc+/0ztFWHY=
-github.com/thomaspoignant/koanf-http-provider v0.0.1/go.mod h1:fGAHaB9iJFQhMQuOSgAuxJiEfR4+IVhIhXncarFFZnY=
+github.com/thomaspoignant/koanf-http-provider v0.1.0 h1:0FzV72D42olSAUa/9zh6/bHksbAMM6MnIbxo17GBLdA=
+github.com/thomaspoignant/koanf-http-provider v0.1.0/go.mod h1:fGAHaB9iJFQhMQuOSgAuxJiEfR4+IVhIhXncarFFZnY=
 github.com/tinylib/msgp v1.6.4 h1:mOwYbyYDLPj35mkA2BjjYejgJk9BuHxDdvRnb6v2ZcQ=
 github.com/tinylib/msgp v1.6.4/go.mod h1:RSp0LW9oSxFut3KzESt5Voq4GVWyS+PSulT77roAqEA=
 github.com/tklauser/go-sysconf v0.4.0 h1:7H0uAN+7RkwWRaxhYXDLqa5V3LPrJeV8wmD9dRUgPQU=

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knadh/koanf/providers/confmap"
 	"github.com/knadh/koanf/v2"
 	httpprovider "github.com/thomaspoignant/koanf-http-provider"
 	"go.uber.org/zap"
@@ -40,14 +41,31 @@ func (s Studio) provider(parser koanf.Parser, log *zap.Logger) *httpprovider.HTT
 		httpprovider.WithHeaders(s.Headers),
 		httpprovider.WithPollInterval(time.Duration(s.PollingInterval)*time.Millisecond),
 		httpprovider.WithCache(s.CacheFile),
-		// invalid content is never cached and never triggers a reload
+		// Reject invalid flagSets before accepting their ETag or replacing the cache.
 		httpprovider.WithValidate(func(content []byte) error {
-			_, err := parser.Unmarshal(content)
-			return err
+			return validateStudioFlagSets(content, parser)
 		}),
 		httpprovider.WithOnFallback(func(fetchErr error, cachedAt time.Time) {
 			log.Warn("studio unreachable, using the cached flagSets",
 				zap.Error(fetchErr), zap.Time("cachedAt", cachedAt))
 		}),
 	)
+}
+
+func validateStudioFlagSets(content []byte, parser koanf.Parser) error {
+	values, err := parser.Unmarshal(content)
+	if err != nil {
+		return err
+	}
+	k := koanf.New(".")
+	if err := k.Load(confmap.Provider(values, "."), nil); err != nil {
+		return err
+	}
+	var studioConf struct {
+		FlagSets []FlagSet `koanf:"flagsets"`
+	}
+	if err := k.Unmarshal("", &studioConf); err != nil {
+		return err
+	}
+	return (&Config{FlagSets: studioConf.FlagSets}).validateFlagSets()
 }

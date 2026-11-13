@@ -38,6 +38,7 @@ type ConfigLoader struct {
 	studioProvider *httpprovider.HTTP
 	studioParser   koanf.Parser
 	studioFlagSets []FlagSet
+	studioLoadErr  error
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
@@ -193,11 +194,14 @@ func (c *ConfigLoader) reloadConfigAndNotify() {
 		watchChanges:   false,
 		k:              koanf.New("."),
 		configFilePath: c.configFilePath,
-		// reused, so it answers from its last fetch (ETag) or its cache instead of downloading again
+		// Reuse the provider's ETag and cache across reloads.
 		studioProvider: c.studioProvider,
 		studioParser:   c.studioParser,
 	}
 	newConfig.loadConfig()
+	if newConfig.studioLoadErr != nil {
+		return
+	}
 	modifiedConfig, err := newConfig.ToConfig()
 	if err != nil {
 		c.log.Error("error loading new config", zap.Error(err))
@@ -291,6 +295,7 @@ func (c *ConfigLoader) loadEnvVariables() {
 
 // loadStudioFlagSets loads the flagSets from studio.url, if it is set
 func (c *ConfigLoader) loadStudioFlagSets() {
+	c.studioLoadErr = nil
 	if c.studioProvider == nil {
 		conf, err := c.ToConfig()
 		if err != nil || conf.Studio.URL == "" {
@@ -308,7 +313,14 @@ func (c *ConfigLoader) loadStudioFlagSets() {
 	if err == nil {
 		err = studio.Unmarshal("", &studioConf)
 	}
+	if err == nil {
+		err = (&Config{FlagSets: studioConf.FlagSets}).validateFlagSets()
+	}
 	if err != nil {
+		// Polling may already have accepted this document. Retry it even if its
+		// ETag and content are unchanged, since this reload could not use it.
+		c.studioProvider.Invalidate()
+		c.studioLoadErr = err
 		c.log.Error("error loading the flagSets from studio", zap.Error(err))
 		return
 	}
