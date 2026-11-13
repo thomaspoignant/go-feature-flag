@@ -32,7 +32,7 @@ WHITE  := $(shell tput -Txterm setaf 7)
 CYAN   := $(shell tput -Txterm setaf 6)
 RESET  := $(shell tput -Txterm sgr0)
 
-.PHONY: all test build vendor
+.PHONY: all test build vendor fuzz
 
 all: help
 ## Build:
@@ -167,6 +167,9 @@ test: ## Run the tests of the project
 		cd $$module && CGO_ENABLED=1 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) test -v -race -tags=docker ./... || exit 1;  \
 		cd - >/dev/null; \
 	done
+
+fuzz: ## Run every fuzz test for a bounded time (usage: make fuzz FUZZTIME=10s)
+	@FUZZTIME="$(or $(FUZZTIME),10s)" GOWORK_ENV="$(GOWORK_ENV)" GOCMD="$(GOCMD)" .github/ci-scripts/fuzz.sh $(ALL_GO_MOD_DIRS)
 
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
