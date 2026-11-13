@@ -42,10 +42,8 @@ with `TracerName`.
 
 ```go title="example.go"
 import (
-    "context"
-
+    ffclient "github.com/thomaspoignant/go-feature-flag"
     "github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
-    "github.com/thomaspoignant/go-feature-flag/ffclient"
 )
 
 // ... initialize your OpenTelemetry tracer provider here (OTLP, resource, etc.) ...
@@ -86,8 +84,7 @@ server:
 otel:
   exporter:
     otlp:
-      endpoint: http://otel-collector:4317
-      protocol: grpc
+      endpoint: http://otel-collector:4318
   resource:
     attributes:
       service.name: relay-proxy
@@ -95,6 +92,8 @@ otel:
 # A flagset that exports evaluation events as OpenTelemetry spans
 flagsets:
   - name: default
+    apiKeys:
+      - "my-api-key"
     retriever:
       kind: file
       path: examples/retriever_file/flags.goff.yaml
@@ -103,8 +102,13 @@ flagsets:
         tracerName: go-feature-flag
 ```
 
+Include `my-api-key` in your provider configuration or send it in the `X-API-Key: my-api-key` header when making requests to this flag set.
+
 Notes:
 
+- This example uses the default OTLP HTTP/protobuf transport on port `4318`.
+  To use gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` in the relay proxy environment and change the endpoint to your collector's gRPC endpoint (typically port `4317`).
+  The YAML `otel.exporter.otlp.protocol` field does not select the transport.
 - `otel` (top-level) config controls the OpenTelemetry SDK and the OTLP exporter used by the proxy process.
   Ensure it points to your collector (OTLP endpoint) or export configuration is provided via environment variables.
 - The per-flagset exporter only accepts `tracerName` currently; the exporter re-uses the process global
