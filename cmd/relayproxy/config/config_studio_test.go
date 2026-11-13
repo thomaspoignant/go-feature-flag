@@ -37,6 +37,35 @@ func flagSetNames(c *config.Config) []string {
 	return names
 }
 
+// newStudioServer serves body when the Authorization header matches, it is down when body is empty.
+func newStudioServer(t *testing.T, body, authHeader string) *httptest.Server {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != authHeader {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+	if body == "" {
+		srv.Close()
+	}
+	return srv
+}
+
+// receive returns the next value of ch, it fails the test with msg after 5 seconds.
+func receive[T any](t *testing.T, ch <-chan T, msg string) T {
+	t.Helper()
+	select {
+	case v := <-ch:
+		return v
+	case <-time.After(5 * time.Second):
+		t.Fatal(msg)
+		var zero T
+		return zero
+	}
+}
+
 func TestStudio(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -155,17 +184,7 @@ flagSets:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Header.Get("Authorization") != tt.authHeader {
-					w.WriteHeader(http.StatusUnauthorized)
-					return
-				}
-				_, _ = w.Write([]byte(tt.body))
-			}))
-			defer srv.Close()
-			if tt.body == "" {
-				srv.Close()
-			}
+			srv := newStudioServer(t, tt.body, tt.authHeader)
 			cacheFile := filepath.Join(t.TempDir(), "flagsets.cache.yaml")
 			if tt.cache != "" {
 				require.NoError(t, os.WriteFile(cacheFile, []byte(tt.cache), 0600))
@@ -258,13 +277,9 @@ studio:
 				_ = testutils.CopyContentToExistingTempFile(t, strings.ReplaceAll(tt.newFile, "{{URL}}", srv.URL), configFile)
 			}
 
-			select {
-			case newConfig := <-configs:
-				assert.Equal(t, tt.wantPort, newConfig.Server.Port)
-				assert.Equal(t, tt.wantFlagSets, flagSetNames(newConfig))
-			case <-time.After(5 * time.Second):
-				t.Fatal("Timeout waiting for callback to be triggered")
-			}
+			newConfig := receive(t, configs, "Timeout waiting for callback to be triggered")
+			assert.Equal(t, tt.wantPort, newConfig.Server.Port)
+			assert.Equal(t, tt.wantFlagSets, flagSetNames(newConfig))
 		})
 	}
 }
@@ -315,20 +330,12 @@ func TestStudioReloadRetriesFailedFetch(t *testing.T) {
 				configs <- observedConfig{config: c, requests: count}
 			})
 
-			select {
-			case c := <-configs:
-				assert.Equal(t, []string{"team-b"}, flagSetNames(c.config))
-				assert.NoError(t, c.config.IsValid())
-				assert.GreaterOrEqual(t, c.requests, 4, "failed reloads must not notify consumers")
-			case <-time.After(5 * time.Second):
-				t.Fatal("Timeout waiting for recovery after the failed reload")
-			}
-			select {
-			case header := <-retries:
-				assert.Empty(t, header, "the failed reload must invalidate the accepted ETag")
-			case <-time.After(5 * time.Second):
-				t.Fatal("Timeout waiting for an unconditional retry")
-			}
+			c := receive(t, configs, "Timeout waiting for recovery after the failed reload")
+			assert.Equal(t, []string{"team-b"}, flagSetNames(c.config))
+			assert.NoError(t, c.config.IsValid())
+			assert.GreaterOrEqual(t, c.requests, 4, "failed reloads must not notify consumers")
+			header := receive(t, retries, "Timeout waiting for an unconditional retry")
+			assert.Empty(t, header, "the failed reload must invalidate the accepted ETag")
 		})
 	}
 }
@@ -385,12 +392,7 @@ func TestStudioRejectedUpdateKeepsETag(t *testing.T) {
 
 			// Failed updates must keep requesting the last successfully accepted ETag.
 			for range 2 {
-				select {
-				case got := <-attempts:
-					require.Equal(t, `"v1"`, got)
-				case <-time.After(5 * time.Second):
-					t.Fatal("Timeout waiting for a retry of the rejected update")
-				}
+				require.Equal(t, `"v1"`, receive(t, attempts, "Timeout waiting for a retry of the rejected update"))
 			}
 			cached, err := os.ReadFile(cacheFile)
 			require.NoError(t, err)
@@ -401,13 +403,9 @@ func TestStudioRejectedUpdateKeepsETag(t *testing.T) {
 			mu.Unlock()
 
 			// Recovery must work even when the server reuses the rejected ETag.
-			select {
-			case c := <-configs:
-				assert.Equal(t, []string{"team-b"}, flagSetNames(c))
-				assert.NoError(t, c.IsValid())
-			case <-time.After(5 * time.Second):
-				t.Fatal("Timeout waiting for recovery with the same ETag")
-			}
+			c := receive(t, configs, "Timeout waiting for recovery with the same ETag")
+			assert.Equal(t, []string{"team-b"}, flagSetNames(c))
+			assert.NoError(t, c.IsValid())
 		})
 	}
 }
