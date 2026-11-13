@@ -12,6 +12,7 @@ import (
 // Studio holds the configuration to load the flagSets from GO Feature Flag Studio.
 // When URL is set, the flagSets only come from Studio, the rest of the configuration
 // still comes from the configuration file and the environment variables.
+// Changes to the Studio configuration require restarting the relay proxy.
 type Studio struct {
 	// URL of the relay proxy configuration served by Studio, only its flagSets key is used.
 	URL string `mapstructure:"url" koanf:"url"`

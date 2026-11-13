@@ -993,6 +993,10 @@ flagSets:
 GO Feature Flag relay proxy supports updating certain configuration options at runtime without requiring a restart.  
 When the configuration file changes, the relay proxy automatically detects and applies the changes.
 
+:::warning
+Changes to the `studio` configuration require restarting the relay proxy. This includes enabling or disabling Studio and changing its `url`, `headers`, `pollingInterval`, or `cacheFile` settings.
+:::
+
 ### Default mode runtime updates
 
 In **default mode** (when not using flag sets), you can update the following configuration at runtime:
