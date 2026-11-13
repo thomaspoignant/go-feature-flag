@@ -57,8 +57,14 @@ Here is an example of what the data structure for Mike Wazowski evaluation conte
 ```
 ## Targeting Key
 :::info
-**Targeting Key is a mandatory field in GO Feature Flag.**
+**The targeting key requirement depends on the flag and provider.**
 :::
+
+Percentage and progressive rollouts require a non-empty key for bucketing.
+This includes rules introduced by scheduled rollout steps.
+By default, the `targetingKey` supplies this value; a configured [custom bucketing key](../configure_flag/custom-bucketing) can supply it instead.
+
+Static flags and attribute-based targeting without bucketing can be evaluated without a targeting key.
 
 A **targeting key** is a unique identifier that represents the context of the evaluation _(email, session id, a fingerprint or anything that is consistent)_,
 ensuring that they are consistently exposed to the same variation of a feature, even across multiple visits or sessions.
