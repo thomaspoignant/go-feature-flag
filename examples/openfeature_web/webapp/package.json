@@ -36,7 +36,7 @@
     "autoprefixer": "^10.6.2",
     "babel-loader": "^10.1.1",
     "browser-sync": "^3.0.4",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-webpack-plugin": "^6.0.0",
     "htmlnano": "^3.6.1",
     "npm-run-all": "^4.1.5",
@@ -46,9 +46,9 @@
     "posthtml": "^0.16.7",
     "posthtml-modules": "^0.9.1",
     "sass": "^1.107.0",
-    "stylelint": "^17.16.0",
+    "stylelint": "^18.0.0",
     "webpack": "^5.112.2",
-    "webpack-cli": "^7.2.3"
+    "webpack-cli": "^7.3.1"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.11",
