@@ -966,11 +966,14 @@ flagSets:
       - "backend-api-key"
     retrievers:
       - kind: github
-        repository: my-org/backend-flags
+        repositorySlug: my-org/backend-flags
         path: flags.yaml
     exporters:
       - kind: kafka
-        topic: backend-evaluations
+        kafka:
+          topic: backend-evaluations
+          addresses:
+            - "localhost:9092"
     notifiers:
       - kind: discord
         webhookUrl: "https://discord.com/api/webhooks/backend-webhook"
