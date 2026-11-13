@@ -388,6 +388,7 @@ When you configure flag sets, the relay proxy operates in **flag set mode** inst
 - default: **none**
 - mandatory: <NotMandatory />
 - If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
+- Cannot be used together with [`studio`](#studio).
 
 ```yaml title="example goff-proxy.yaml"
 server:
@@ -422,6 +423,41 @@ a newly added flag set is started immediately and a removed flag set is stopped.
 :::warning
 - **Modifying** an existing flag set (its `retrievers`, `exporters`, `notifiers`, `pollingInterval`, …) is **not supported at runtime**. The only exception is its `apiKeys`, which can be changed live. Any other modification is **ignored** and an error is logged; the change will only be applied the next time the relay proxy is **restarted**.
 - Runtime add/remove only works for flag sets that have an explicit, unique [`name`](#flagsetname). Flag sets without a name (or named `default`) get a generated name at startup and cannot be added or removed at runtime.
+:::
+
+### `studio`
+
+Loads the [`flagSets`](#flagsets) from GO Feature Flag Studio instead of the configuration file.
+
+When `studio.url` is set, the relay proxy fetches the document served at this URL and only uses its `flagSets` key.
+The rest of the configuration (`server`, `authorizedKeys`, …) still comes from the configuration file and the environment variables.
+
+- option name: `studio`
+- type: [`studio`](#type-studio)
+- default: **none**
+- mandatory: <NotMandatory />
+- `studio` and `flagSets` cannot be used together, the relay proxy refuses to start if both are set.
+- Check the [studio configuration type](#type-studio) to have more information about the available options.
+
+```yaml title="example goff-proxy.yaml"
+server:
+  mode: http
+  port: 1031
+studio:
+  url: https://studio.example.com/relay-proxy/goff-proxy.yaml
+  headers:
+    Authorization:
+      - "Bearer my-token"
+  pollingInterval: 60000
+  cacheFile: /goff/studio-cache.yaml
+```
+
+**Runtime updates**: the URL is polled every [`studio.pollingInterval`](#studiopollinginterval) milliseconds.
+When the `flagSets` change, they are applied the same way as a change of the [`flagSets`](#flagsets) in the configuration file.
+A document with invalid `flagSets` is rejected, an error is logged and the relay proxy keeps the previous flag sets.
+
+:::warning
+Changes to the `studio` configuration itself (`url`, `headers`, `pollingInterval`, `cacheFile`) require restarting the relay proxy.
 :::
 
 ### `envVariablePrefix`
@@ -781,6 +817,59 @@ Every `notifier` has its own configuration, check the [list of notifiers](../int
     ))}
 </ul>
 :::
+
+### type `studio`
+
+Configuration used to load the flag sets from GO Feature Flag Studio.
+
+#### `studio.url`
+
+URL of the relay proxy configuration served by Studio, only its `flagSets` key is used.
+
+The format of the document is detected from the extension of the URL path (`.yaml`, `.json` or `.toml`), the query string is ignored so pre-signed URLs work. Without a known extension, the document is parsed as YAML.
+
+- option name: `url`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory /> _(Studio is enabled only when it is set)_
+
+#### `studio.headers`
+
+Headers sent with every request to [`studio.url`](#studiourl), for example an `Authorization` header.
+
+- option name: `headers`
+- type: **map[string][]string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+```yaml
+studio:
+  url: https://studio.example.com/relay-proxy/goff-proxy.yaml
+  headers:
+    Authorization:
+      - "Bearer my-token"
+```
+
+#### `studio.pollingInterval`
+
+Time **in milliseconds** between two checks of [`studio.url`](#studiourl).
+
+- option name: `pollingInterval`
+- type: **int**
+- default: **`60000`**
+- A value of `0` or a negative value uses the default.
+- mandatory: <NotMandatory />
+
+#### `studio.cacheFile`
+
+Path of a local file where the relay proxy keeps the last valid document received from Studio.
+When [`studio.url`](#studiourl) is unreachable, the flag sets are loaded from this file and a warning is logged.
+
+- option name: `cacheFile`
+- type: **string**
+- default: **none** _(no cache)_
+- mandatory: <NotMandatory />
+- example: `/goff/studio-cache.yaml`
 
 ### type `swagger`
 
