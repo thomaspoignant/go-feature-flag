@@ -26,6 +26,9 @@ func (c *Config) IsValid() error {
 	if err := c.OfrepEventStream.IsValid(); err != nil {
 		return err
 	}
+	if c.flagSetMode == flagSetModeLocal && c.Studio.URL != "" {
+		return errors.New("flagSets and studio cannot be used together, remove flagSets from your configuration")
+	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}
