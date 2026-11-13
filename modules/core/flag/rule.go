@@ -186,7 +186,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 			return true
 		}
 	default:
-		ev, err := getNikunjyEvaluator(query)
+		ev, err := nikunjyEvaluators.get(query)
 		if err != nil {
 			slog.Error("error while parsing the nikunjy query",
 				slog.String("query", query), slog.Any("error", err))

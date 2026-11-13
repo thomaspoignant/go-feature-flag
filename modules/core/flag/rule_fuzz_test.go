@@ -36,7 +36,7 @@ func FuzzEvaluateRule(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, query, ctxJSON string) {
 		// Every fuzzed query would otherwise stay in the evaluator cache forever.
-		t.Cleanup(nikunjyEvaluatorCache.Clear)
+		useFreshNikunjyEvaluators(t)
 		var attributes map[string]any
 		if json.Unmarshal([]byte(ctxJSON), &attributes) != nil {
 			return
@@ -53,7 +53,7 @@ func FuzzEvaluateRule(f *testing.F) {
 			require.NoError(t, err)
 			_ = jsonlogic.Apply(strings.NewReader(r.GetTrimmedQuery()), bytes.NewReader(strCtx), io.Discard)
 		default:
-			ev, err := getNikunjyEvaluator(r.GetTrimmedQuery())
+			ev, err := nikunjyEvaluators.get(r.GetTrimmedQuery())
 			require.NoError(t, err, "query passed validation but does not parse")
 			_, _ = ev.process(mapCtx)
 		}

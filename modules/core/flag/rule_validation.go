@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
-	"github.com/nikunjy/rules/parser"
 )
 
 // IsValid is checking if the rule is valid
@@ -171,19 +170,6 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 		}
 		return nil
 	default:
-		return validateNikunjyQuery(r.GetTrimmedQuery())
+		return nikunjyEvaluators.validate(r.GetTrimmedQuery())
 	}
-}
-
-// validateNikunjyQuery validates the Nikunjy query configuration of the rule.
-func validateNikunjyQuery(query string) error {
-	ev, err := parser.NewEvaluator(query)
-	if err != nil {
-		return err
-	}
-	_, err = ev.Process(map[string]any{})
-	if err != nil {
-		return fmt.Errorf("invalid query: %w", err)
-	}
-	return nil
 }

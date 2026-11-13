@@ -287,6 +287,9 @@ func (f *InternalFlag) isExperimentationOver(evaluationDate time.Time) bool {
 }
 
 // IsValid is checking if the current flag is valid.
+// Validating a flag also keeps the cached parses of its nikunjy queries until its rules
+// are garbage collected, so validating the flags of a configuration load is what keeps
+// their queries cached across reloads.
 func (f *InternalFlag) IsValid() error {
 	if len(f.GetVariations()) == 0 {
 		return fmt.Errorf("no variation available")
@@ -321,6 +324,10 @@ func (f *InternalFlag) IsValid() error {
 	if f.GetDefaultRule() == nil {
 		return fmt.Errorf("missing default rule")
 	}
+
+	// Retained before the rules are validated, so the parses made by the validation
+	// stay cached even if a previous configuration's rules are collected meanwhile.
+	nikunjyEvaluators.retain(f.Rules)
 
 	const isDefaultRule = true
 	// Validate rules
