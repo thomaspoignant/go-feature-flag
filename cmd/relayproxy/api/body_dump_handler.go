@@ -1,12 +1,25 @@
 package api
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/zap"
 )
+
+// bodyDumpSkipper returns the skipper of the body dump middleware.
+// The dump is skipped for swagger, when the debug level is disabled, and for the flag file validation
+// endpoint to avoid buffering and logging the flag files sent to it.
+func bodyDumpSkipper(logger *zap.Logger) func(c *echo.Context) bool {
+	return func(c *echo.Context) bool {
+		path := c.Request().URL.Path
+		return strings.HasPrefix(path, "/swagger") ||
+			path == "/admin/v1/flags/validate" ||
+			!logger.Core().Enabled(zap.DebugLevel)
+	}
+}
 
 // bodyDumpHandler logs request bodies with truncation for large payloads.
 // Bodies larger than maxBodyLogSize are truncated and suffixed with a marker.

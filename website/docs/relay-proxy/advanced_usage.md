@@ -33,6 +33,49 @@ authorizedKeys:
 ```
 :::
 
+## ✅ Validate a flag file
+
+Before deploying a flag file you can ask the relay proxy to validate it with a POST request to
+`/admin/v1/flags/validate`. The validation uses the same rules as the `goff lint` command, and it has no side
+effect: the flags served by the relay proxy are never modified.
+
+The body of the request is the flag file, and the `Content-Type` header selects its format:
+`application/json`, `application/yaml` (also `application/x-yaml` and `text/yaml`) or `application/toml`.
+The size of the body is limited (the limits are fixed): 1 MiB for JSON, 64 KiB for YAML and TOML.
+An empty body, `null` or `{}` is accepted and returns `200` with `valid: true` and no flag _(an empty JSON body is a syntax error and returns `400`)_.
+
+```shell
+curl -X 'POST' \
+  'http://<your_domain>:1031/admin/v1/flags/validate' \
+  -H 'Content-Type: application/yaml' \
+  -H 'X-API-Key: <your_admin_api_key>' \
+  --data-binary @flags.yaml
+```
+
+```json title="Response (422)"
+{
+  "version": "v1.0.0",
+  "valid": false,
+  "errors": [{ "flag": "my-flag", "message": "missing default rule" }]
+}
+```
+
+| Status | Meaning                                                              |
+|--------|----------------------------------------------------------------------|
+| `200`  | All the flags are valid.                                             |
+| `422`  | At least one flag is invalid, see `errors` (sorted by flag).         |
+| `400`  | The body can't be parsed.                                            |
+| `413`  | The body is larger than the limit of its format.                     |
+| `415`  | The `Content-Type` header is missing or unsupported.                 |
+
+The validation behaves like the `goff lint` command, so it has the same known gaps:
+
+- The steps of a `scheduledRollout` are not validated.
+- Unknown or misspelled fields are ignored.
+- A file that can be read but has wrongly typed fields returns `400` with a parse error, not `422`.
+
+As for the other admin endpoints, an **admin token** is required.
+
 ## 🔒 FIPS 140-3 mode
 
 GO Feature Flag publishes **FIPS 140-3 validated** builds of the relay proxy so it can be

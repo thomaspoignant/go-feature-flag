@@ -5,8 +5,12 @@ import (
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 )
 
-func (s *Server) addAdminRoutes(cRetrieverRefresh controller.Controller, authMiddleware echo.MiddlewareFunc) {
+func (s *Server) addAdminRoutes(
+	cRetrieverRefresh, cValidateFlags controller.Controller,
+	authMiddleware echo.MiddlewareFunc,
+) {
 	adminGrp := s.apiEcho.Group("/admin/v1")
 	adminGrp.Use(authMiddleware)
 	adminGrp.POST("/retriever/refresh", cRetrieverRefresh.Handler)
+	adminGrp.POST("/flags/validate", cValidateFlags.Handler)
 }

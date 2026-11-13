@@ -869,6 +869,24 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			authHeader:    "",
 			want:          http.StatusUnauthorized,
 		},
+		{
+			name:          "Admin validate endpoint - with valid admin key",
+			configAPIKeys: &config.APIKeys{Admin: []string{"admin-key"}},
+			endpoint:      "http://unix/admin/v1/flags/validate",
+			method:        "POST",
+			body:          `{"my-flag":{"variations":{"a":true,"b":false},"defaultRule":{"variation":"a"}}}`,
+			authHeader:    "Bearer admin-key",
+			want:          http.StatusOK,
+		},
+		{
+			name:          "Admin validate endpoint - without admin key (should fail)",
+			configAPIKeys: &config.APIKeys{Admin: []string{"admin-key"}},
+			endpoint:      "http://unix/admin/v1/flags/validate",
+			method:        "POST",
+			body:          `{"my-flag":{"variations":{"a":true,"b":false},"defaultRule":{"variation":"a"}}}`,
+			authHeader:    "",
+			want:          http.StatusUnauthorized,
+		},
 	}
 
 	for index, tt := range tests {

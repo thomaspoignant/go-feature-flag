@@ -1,14 +1,12 @@
 package configfile
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
-	"gopkg.in/yaml.v3"
 )
 
 var ConfigFileDefaultLocations = []string{
@@ -59,26 +57,24 @@ func readConfigFile(configFile, configFormat string) (map[string]dto.DTO, error)
 	if err != nil {
 		return nil, err
 	}
-	var flags map[string]dto.DTO
-	switch strings.ToLower(configFormat) {
-	case "toml":
-		err := toml.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (toml): %w", configFile, err)
-		}
-		return flags, nil
-	case "json":
-		err := json.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (json): %w", configFile, err)
-		}
-		return flags, nil
-	default:
-		// default is YAML
-		err := yaml.Unmarshal(dat, &flags)
-		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file (yaml): %w", configFile, err)
-		}
-		return flags, nil
+	flags, err := ParseConfig(dat, configFormat)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", configFile, err)
 	}
+	return flags, nil
+}
+
+// ParseConfig parses the content of a flag file in the given format (toml, json or yaml).
+// Any format other than toml or json is parsed as YAML.
+// It uses the same parser as the retrievers.
+func ParseConfig(data []byte, configFormat string) (map[string]dto.DTO, error) {
+	flags, err := cache.ConvertToFlagStruct(data, configFormat)
+	if err != nil {
+		format := strings.ToLower(configFormat)
+		if format != "toml" && format != "json" {
+			format = "yaml"
+		}
+		return nil, fmt.Errorf("could not parse file (%s): %w", format, err)
+	}
+	return flags, nil
 }

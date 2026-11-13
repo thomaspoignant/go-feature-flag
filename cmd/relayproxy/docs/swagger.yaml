@@ -31,6 +31,27 @@ definitions:
           $ref: '#/definitions/flag.Flag'
         type: object
     type: object
+  controller.FlagValidationError:
+    properties:
+      flag:
+        example: my-flag
+        type: string
+      message:
+        example: missing default rule
+        type: string
+    type: object
+  controller.FlagValidationResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/controller.FlagValidationError'
+        type: array
+      valid:
+        type: boolean
+      version:
+        example: v1.0.0
+        type: string
+    type: object
   controller.retrieverRefreshResponse:
     properties:
       refreshed:
@@ -406,6 +427,56 @@ info:
   x-logo:
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png
 paths:
+  /admin/v1/flags/validate:
+    post:
+      consumes:
+      - application/json
+      - application/yaml
+      - application/x-yaml
+      - text/yaml
+      - application/toml
+      description: |-
+        Validates the flag file sent in the body of the request, using the same rules as the
+        `goff lint` command.
+        The flag file is not loaded, nothing is changed on the flags served by the relay proxy.
+        The format of the body is selected with the `Content-Type` header (`application/json`,
+        `application/yaml`, `application/x-yaml`, `text/yaml` or `application/toml`).
+        The body is limited to 1 MiB for JSON and to 64 KiB for YAML and TOML.
+      parameters:
+      - description: The flag file to validate
+        in: body
+        name: data
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All the flags are valid
+          schema:
+            $ref: '#/definitions/controller.FlagValidationResponse'
+        "400":
+          description: Unparseable body
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "413":
+          description: Body too large
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "415":
+          description: Missing or unsupported content type
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "422":
+          description: At least one flag is invalid
+          schema:
+            $ref: '#/definitions/controller.FlagValidationResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Validate a flag file
+      tags:
+      - Admin API to manage GO Feature Flag
   /admin/v1/retriever/refresh:
     post:
       description: |-
