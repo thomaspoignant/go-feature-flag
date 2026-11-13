@@ -53,6 +53,20 @@ func newStudioServer(t *testing.T, body, authHeader string) *httptest.Server {
 	return srv
 }
 
+// writeWithETag answers with status when it is not 200, with 304 when the client already has etag, else with body.
+func writeWithETag(w http.ResponseWriter, r *http.Request, body, etag string, status int) {
+	w.Header().Set("ETag", etag)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
+		return
+	}
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	_, _ = w.Write([]byte(body))
+}
+
 // receive returns the next value of ch, it fails the test with msg after 5 seconds.
 func receive[T any](t *testing.T, ch <-chan T, msg string) T {
 	t.Helper()
@@ -370,16 +384,7 @@ func TestStudioRejectedUpdateKeepsETag(t *testing.T) {
 					default:
 					}
 				}
-				w.Header().Set("ETag", etag)
-				if status != http.StatusOK {
-					w.WriteHeader(status)
-					return
-				}
-				if r.Header.Get("If-None-Match") == etag {
-					w.WriteHeader(http.StatusNotModified)
-					return
-				}
-				_, _ = w.Write([]byte(body))
+				writeWithETag(w, r, body, etag, status)
 			}))
 			defer srv.Close()
 			cacheFile := filepath.Join(t.TempDir(), "flagsets.cache.yaml")
