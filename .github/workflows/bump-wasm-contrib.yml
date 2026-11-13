@@ -106,7 +106,7 @@ jobs:
         run: VERSION=${{ steps.normalize_version.outputs.wasm_version }} make bump-wasm-contrib
 
       - name: Create Pull Request to open-feature/java-sdk-contrib
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           path: out/contrib/java-sdk-contrib
           branch: bump-wasm-${{ steps.normalize_version.outputs.wasm_version }}
@@ -120,7 +120,7 @@ jobs:
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
       - name: Create Pull Request to open-feature/dotnet-sdk-contrib
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           path: out/contrib/dotnet-sdk-contrib
           branch: bump-wasm-${{ steps.normalize_version.outputs.wasm_version }}
@@ -134,7 +134,7 @@ jobs:
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
       - name: Create Pull Request to open-feature/js-sdk-contrib
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           path: out/contrib/js-sdk-contrib
           branch: bump-wasm-${{ steps.normalize_version.outputs.wasm_version }}
@@ -148,7 +148,7 @@ jobs:
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
       - name: Create Pull Request to thomaspoignant/go-feature-flag (Python provider)
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           path: out/contrib/go-feature-flag
           base: main

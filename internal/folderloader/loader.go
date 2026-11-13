@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
