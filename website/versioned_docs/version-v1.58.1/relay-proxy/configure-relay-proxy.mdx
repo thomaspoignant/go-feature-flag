@@ -213,6 +213,9 @@ Check [_"Logging"_](./observability#logging) to have more information.
 - When in `DEBUG` mode, the relay proxy will log the request body and response body,
 for large payloads this can be a lot of data and can impact the performance this is the reason why we truncate the body if it is larger than **8KiB**.
 
+Setting `logLevel: debug` also enables debug HTTP error responses and [profiling endpoints](./profiling).
+To enable profiling without debug logging, use [`enablePprof`](#enablepprof).
+
 ### `logFormat`
 
 The format to use for structured logs from the relay proxy.
@@ -270,15 +273,6 @@ Notifiers is the configuration on where to notify a flag changes.
 If `disableNotifierOnInit` is set to **true**, the relay proxy will not call any notifier when the flags are loaded for the 1st time _(during initialization)_. This is useful if you do not want a Slack/Webhook notification saying that the flags have been added every time you start the proxy.
 
 - option name: `disableNotifierOnInit`
-- type: **boolean**
-- default: **`false`**
-- mandatory: <NotMandatory />
-
-### `debug`
-
-If `debug` is set to true, we will set the log level to debug and set some components in debug mode (`labstack/echo`, `pprof` etc ...).
-
-- option name: `debug`
 - type: **boolean**
 - default: **`false`**
 - mandatory: <NotMandatory />
