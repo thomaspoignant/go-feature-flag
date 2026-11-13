@@ -134,7 +134,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
     </tr>
     <tr>
       <td>
-        <code>bucketing-key</code>
+        <code>bucketingKey</code>
         <br />
         <i><sup><sup>optional</sup></sup></i>
       </td>

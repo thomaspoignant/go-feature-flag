@@ -28,6 +28,10 @@ updates:
         patterns:
           - "go.opentelemetry.io/*"
         update-types: ["minor", "patch"]
+      testcontainers:
+        patterns:
+          - "github.com/testcontainers/testcontainers-go*"
+        update-types: ["minor", "patch"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
