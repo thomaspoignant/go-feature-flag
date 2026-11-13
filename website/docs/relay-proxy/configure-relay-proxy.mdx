@@ -899,11 +899,11 @@ flagSets:
 ### Flag set configuration options
 
 :::warning
-If you are using flag sets, all top level configuration options will be ignored.
+Flag sets do not inherit flag configuration from the top level.
+Configure `retrievers`, `exporters`, `notifiers`, `pollingInterval`, and other [flag set options](#type-flagset) separately for each flag set.
 :::
 
-Each flag set supports all the same configuration options as the main relay proxy configuration.
-You can find the list of options in the [flag set types](#type-flagset) section.
+Process-wide settings such as `server`, `logLevel`, `logFormat`, `authorizedKeys.admin`, and `otel` remain top-level settings and still apply in flag set mode.
 
 ### Using flag sets with API keys
 
