@@ -2,25 +2,37 @@ package githubretriever_test
 
 import (
 	"bytes"
+	"cmp"
 	"context"
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 )
+
+var _ retriever.InitializableRetriever = &githubretriever.Retriever{}
 
 // flagBody is what the mock contents API returns.
 const flagBody = `test-flag:
@@ -30,6 +42,12 @@ const flagBody = `test-flag:
   defaultRule:
     variation: false_var
 `
+
+const (
+	testAppID          = int64(12345)
+	defaultTokenURL    = "https://api.github.com/app/installations/67890/access_tokens"
+	testInstallationID = int64(67890)
+)
 
 // tokenResponse builds a JSON access_tokens API response.
 func tokenResponse(token string, expiresAt time.Time) []byte {
@@ -42,61 +60,65 @@ func tokenResponse(token string, expiresAt time.Time) []byte {
 
 // appMockHTTP is a multi-URL mock for GitHub App tests.
 // It records all requests and lets tests configure per-call behaviour.
+// Every minted token is unique (ghs_token_1, ghs_token_2, ...) so tests can tell which one was used.
 type appMockHTTP struct {
+	mu sync.Mutex
 	// tokenStatus is the HTTP status returned for the access_tokens endpoint.
 	// Defaults to 201 Created.
 	tokenStatus int
 	// tokenBody overrides the body of the access_tokens response.
 	tokenBody []byte
-	// contentsStatus is the HTTP status returned for the contents endpoint.
-	contentsStatus int
+	// tokenTTL is the lifetime of the minted tokens. Defaults to 1 hour.
+	tokenTTL time.Duration
 	// first401ThenOK makes the first contents request return 401, then 200.
 	first401ThenOK bool
-	contentsCalls  int
-	recordedReqs   []*http.Request
+	// retryErr is returned as a transport error for the contents request retried after a 401.
+	retryErr      error
+	tokenCalls    int
+	contentsCalls int
+	recordedReqs  []*http.Request
 }
 
 func (m *appMockHTTP) Do(req *http.Request) (*http.Response, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.recordedReqs = append(m.recordedReqs, req)
 
-	if strings.Contains(req.URL.Path, "access_tokens") {
-		status := m.tokenStatus
-		if status == 0 {
-			status = http.StatusCreated
-		}
+	if strings.HasSuffix(req.URL.Path, "/access_tokens") {
+		m.tokenCalls++
 		body := m.tokenBody
 		if body == nil {
-			body = tokenResponse("ghs_test_token", time.Now().Add(1*time.Hour))
+			body = tokenResponse(
+				fmt.Sprintf("ghs_token_%d", m.tokenCalls),
+				time.Now().Add(cmp.Or(m.tokenTTL, time.Hour)),
+			)
 		}
-		return &http.Response{
-			StatusCode: status,
-			Body:       io.NopCloser(bytes.NewReader(body)),
-			Header:     make(http.Header),
-		}, nil
+		return newResponse(cmp.Or(m.tokenStatus, http.StatusCreated), body), nil
 	}
 
-	// contents endpoint
 	m.contentsCalls++
-	status := m.contentsStatus
-	if status == 0 {
-		status = http.StatusOK
-	}
 	if m.first401ThenOK && m.contentsCalls == 1 {
-		return &http.Response{
-			StatusCode: http.StatusUnauthorized,
-			Body:       io.NopCloser(bytes.NewReader([]byte{})),
-			Header:     make(http.Header),
-		}, nil
+		return newResponse(http.StatusUnauthorized, nil), nil
 	}
-	return &http.Response{
-		StatusCode: status,
-		Body:       io.NopCloser(bytes.NewReader([]byte(flagBody))),
-		Header:     make(http.Header),
-	}, nil
+	if m.first401ThenOK && m.retryErr != nil {
+		return nil, m.retryErr
+	}
+	resp := newResponse(http.StatusOK, []byte(flagBody))
+	resp.Header.Set("X-RateLimit-Remaining", "4999")
+	resp.Header.Set("X-RateLimit-Reset", strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10))
+	return resp, nil
 }
 
-// generateTestKey generates a throwaway RSA key for tests and returns its PEM encoding.
-func generateTestKey(t *testing.T) string {
+func newResponse(status int, body []byte) *http.Response {
+	return &http.Response{
+		StatusCode: status,
+		Body:       io.NopCloser(bytes.NewReader(body)),
+		Header:     make(http.Header),
+	}
+}
+
+// generateTestKey generates a throwaway RSA key for tests and returns it with its PEM encoding.
+func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
 	t.Helper()
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
@@ -104,262 +126,342 @@ func generateTestKey(t *testing.T) string {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
-	return string(pemBytes)
+	return key, string(pemBytes)
+}
+
+// newAppRetriever returns a retriever configured for GitHub App auth.
+func newAppRetriever(pemStr string, mock *appMockHTTP) *githubretriever.Retriever {
+	r := &githubretriever.Retriever{
+		RepositorySlug: "myorg/myrepo",
+		FilePath:       "flags/config.yaml",
+		AppID:          testAppID,
+		InstallationID: testInstallationID,
+		PrivateKey:     pemStr,
+	}
+	r.SetHTTPClient(mock)
+	return r
+}
+
+// assertAppJWT checks the JWT sent to access_tokens the way GitHub would:
+// RS256 signature from the app key, iss = app ID, iat backdated ~60s, exp within 10 minutes.
+func assertAppJWT(t *testing.T, authorization string, pub *rsa.PublicKey) {
+	t.Helper()
+	jwt, ok := strings.CutPrefix(authorization, "Bearer ")
+	require.True(t, ok, "access_tokens must be called with a Bearer JWT")
+	parts := strings.Split(jwt, ".")
+	require.Len(t, parts, 3)
+
+	var header struct{ Alg string }
+	decodeJWTPart(t, parts[0], &header)
+	assert.Equal(t, "RS256", header.Alg)
+
+	sig, err := base64.RawURLEncoding.DecodeString(parts[2])
+	require.NoError(t, err)
+	digest := sha256.Sum256([]byte(parts[0] + "." + parts[1]))
+	require.NoError(t, rsa.VerifyPKCS1v15(pub, crypto.SHA256, digest[:], sig), "JWT signature must verify")
+
+	var claims struct{ Iss, Iat, Exp int64 }
+	decodeJWTPart(t, parts[1], &claims)
+	now := time.Now().Unix()
+	assert.Equal(t, testAppID, claims.Iss)
+	assert.InDelta(t, now-60, claims.Iat, 5, "iat should be backdated ~60s")
+	assert.Greater(t, claims.Exp, now)
+	assert.LessOrEqual(t, claims.Exp, now+10*60, "GitHub rejects JWTs expiring more than 10 minutes ahead")
+}
+
+func decodeJWTPart(t *testing.T, part string, v any) {
+	t.Helper()
+	b, err := base64.RawURLEncoding.DecodeString(part)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(b, v))
 }
 
 func TestGitHubAppAuth_Success(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
+	tests := []struct {
+		name         string
+		configure    func(t *testing.T, r *githubretriever.Retriever)
+		wantTokenURL string
+	}{
+		{
+			name:         "private key",
+			configure:    func(*testing.T, *githubretriever.Retriever) {},
+			wantTokenURL: defaultTokenURL,
+		},
+		{
+			name: "private key file",
+			configure: func(t *testing.T, r *githubretriever.Retriever) {
+				r.PrivateKeyFile = filepath.Join(t.TempDir(), "key.pem")
+				require.NoError(t, os.WriteFile(r.PrivateKeyFile, []byte(r.PrivateKey), 0o600))
+				r.PrivateKey = ""
+			},
+			wantTokenURL: defaultTokenURL,
+		},
+		{
+			name: "GitHub Enterprise base URL",
+			configure: func(_ *testing.T, r *githubretriever.Retriever) {
+				r.BaseURL = "https://github.enterprise.example.com/api/v3"
+			},
+			wantTokenURL: "https://github.enterprise.example.com/api/v3/app/installations/67890/access_tokens",
+		},
 	}
-	r.SetHTTPClient(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			key, pemStr := generateTestKey(t)
+			mock := &appMockHTTP{}
+			r := newAppRetriever(pemStr, mock)
+			tt.configure(t, r)
+			require.NoError(t, r.Init(context.Background(), nil))
 
-	got, err := r.Retrieve(context.Background())
-	require.NoError(t, err)
-	assert.Equal(t, []byte(flagBody), got)
+			got, err := r.Retrieve(context.Background())
+			require.NoError(t, err)
+			assert.Equal(t, []byte(flagBody), got)
 
-	// Should have made exactly 2 requests: access_tokens + contents
-	assert.Len(t, mock.recordedReqs, 2)
-	assert.Contains(t, mock.recordedReqs[0].URL.Path, "access_tokens")
-	assert.Contains(t, mock.recordedReqs[1].URL.Path, "contents")
+			// Exactly 2 requests: access_tokens + contents
+			require.Len(t, mock.recordedReqs, 2)
+			tokenReq, contentsReq := mock.recordedReqs[0], mock.recordedReqs[1]
 
-	// Contents request must carry the installation token as a Bearer token
-	assert.Equal(t, "Bearer ghs_test_token", mock.recordedReqs[1].Header.Get("Authorization"))
+			assert.Equal(t, http.MethodPost, tokenReq.Method)
+			assert.Equal(t, tt.wantTokenURL, tokenReq.URL.String())
+			assert.Equal(t, "application/vnd.github+json", tokenReq.Header.Get("Accept"))
+			assertAppJWT(t, tokenReq.Header.Get("Authorization"), &key.PublicKey)
+
+			// Contents request must carry the installation token as a Bearer token
+			assert.Equal(t, http.MethodGet, contentsReq.Method)
+			assert.Contains(t, contentsReq.URL.Path, "/repos/myorg/myrepo/contents/flags/config.yaml")
+			assert.Equal(t, "Bearer ghs_token_1", contentsReq.Header.Get("Authorization"))
+		})
+	}
 }
 
-func TestGitHubAppAuth_TokenCached(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
+func TestGitHubAppAuth_TokenRefresh(t *testing.T) {
+	tests := []struct {
+		name          string
+		tokenTTL      time.Duration
+		wantMints     int
+		wantLastToken string
+	}{
+		{
+			name:          "token still valid is reused",
+			tokenTTL:      time.Hour,
+			wantMints:     1,
+			wantLastToken: "Bearer ghs_token_1",
+		},
+		{
+			name:          "token inside the 5 minute refresh margin is re-minted",
+			tokenTTL:      2 * time.Minute,
+			wantMints:     2,
+			wantLastToken: "Bearer ghs_token_2",
+		},
 	}
-	r.SetHTTPClient(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, pemStr := generateTestKey(t)
+			mock := &appMockHTTP{tokenTTL: tt.tokenTTL}
+			r := newAppRetriever(pemStr, mock)
 
-	// Two successive calls should only mint the token once.
-	_, err := r.Retrieve(context.Background())
-	require.NoError(t, err)
-	_, err = r.Retrieve(context.Background())
-	require.NoError(t, err)
+			_, err := r.Retrieve(context.Background())
+			require.NoError(t, err)
+			_, err = r.Retrieve(context.Background())
+			require.NoError(t, err)
 
-	tokenCalls := 0
-	for _, req := range mock.recordedReqs {
-		if strings.Contains(req.URL.Path, "access_tokens") {
-			tokenCalls++
-		}
+			assert.Equal(t, tt.wantMints, mock.tokenCalls)
+			lastReq := mock.recordedReqs[len(mock.recordedReqs)-1]
+			assert.Equal(t, tt.wantLastToken, lastReq.Header.Get("Authorization"))
+		})
 	}
-	assert.Equal(t, 1, tokenCalls, "installation token should be minted only once when still valid")
 }
 
 func TestGitHubAppAuth_401TriggersRetry(t *testing.T) {
-	pemStr := generateTestKey(t)
-
+	_, pemStr := generateTestKey(t)
 	mock := &appMockHTTP{first401ThenOK: true}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-	}
-	r.SetHTTPClient(mock)
+	r := newAppRetriever(pemStr, mock)
 
 	got, err := r.Retrieve(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, []byte(flagBody), got)
 
 	// Requests: access_tokens (first mint) → contents (401) → access_tokens (re-mint) → contents (200)
-	assert.Len(t, mock.recordedReqs, 4)
+	require.Len(t, mock.recordedReqs, 4)
+	assert.Equal(t, "Bearer ghs_token_2", mock.recordedReqs[3].Header.Get("Authorization"))
 }
 
-func TestGitHubAppAuth_TokenExchangeFailure(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{tokenStatus: http.StatusUnauthorized}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "mint installation token")
-}
-
-func TestGitHubAppAuth_PrivateKeyFile(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	f, err := os.CreateTemp(t.TempDir(), "test-key-*.pem")
-	require.NoError(t, err)
-	_, err = f.WriteString(pemStr)
-	require.NoError(t, err)
-	require.NoError(t, f.Close())
-
+func TestGitHubAppAuth_ConcurrentRetrieveMintsOnce(t *testing.T) {
+	_, pemStr := generateTestKey(t)
 	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKeyFile: f.Name(),
-	}
-	r.SetHTTPClient(mock)
+	r := newAppRetriever(pemStr, mock)
 
-	got, err := r.Retrieve(context.Background())
-	require.NoError(t, err)
-	assert.Equal(t, []byte(flagBody), got)
+	const workers = 10
+	var wg sync.WaitGroup
+	errs := make(chan error, workers)
+	for range workers {
+		wg.Go(func() {
+			_, err := r.Retrieve(context.Background())
+			errs <- err
+		})
+	}
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		require.NoError(t, err)
+	}
+	assert.Equal(t, 1, mock.tokenCalls, "installation token should be minted only once")
+	assert.Equal(t, workers, mock.contentsCalls)
 }
 
-func TestGitHubAppAuth_InvalidPrivateKey(t *testing.T) {
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     "not-a-pem-key",
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "PEM")
-}
-
-func TestGitHubAppAuth_GHESBaseURL(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-		BaseURL:        "https://github.enterprise.example.com/api/v3",
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.NoError(t, err)
-
-	// The access_tokens call must use the GHES base URL
-	assert.Contains(t, mock.recordedReqs[0].URL.Host, "github.enterprise.example.com")
-	assert.Contains(t, mock.recordedReqs[0].URL.Path, "access_tokens")
-}
-
-func TestGitHubAppAuth_PrivateKeyFileMissing(t *testing.T) {
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKeyFile: "/nonexistent/path/key.pem",
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to read private key file")
-}
-
-func TestGitHubAppAuth_MalformedTokenResponse(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{tokenBody: []byte("not-valid-json")}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse token response")
-}
-
-func TestGitHubAppAuth_EmptyTokenInResponse(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	emptyBody, _ := json.Marshal(map[string]string{
-		"token":      "",
-		"expires_at": time.Now().Add(1 * time.Hour).Format(time.RFC3339),
-	})
-	mock := &appMockHTTP{tokenBody: emptyBody}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "token response contained no token")
-}
-
-func TestGitHubAppAuth_InvalidBaseURL(t *testing.T) {
-	pemStr := generateTestKey(t)
-
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     pemStr,
-		BaseURL:        ":invalid:url",
-	}
-	r.SetHTTPClient(mock)
-
-	_, err := r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid base URL")
-}
-
-func TestGitHubAppAuth_PrivateKeyWrongType(t *testing.T) {
-	// Generate an EC key and encode it as a PKCS1 block — the PEM decodes
-	// but x509.ParsePKCS1PrivateKey will fail on the non-RSA bytes.
+func TestGitHubAppAuth_Errors(t *testing.T) {
 	ecKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
-	der, err := x509.MarshalECPrivateKey(ecKey)
+	ecDER, err := x509.MarshalECPrivateKey(ecKey)
 	require.NoError(t, err)
-	wrongTypePEM := string(pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY", // deliberately wrong type to fool the PEM check
-		Bytes: der,
-	}))
+	// The PEM decodes but x509.ParsePKCS1PrivateKey fails on the non-RSA bytes.
+	wrongTypePEM := string(pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: ecDER}))
 
-	mock := &appMockHTTP{}
-	r := githubretriever.Retriever{
-		RepositorySlug: "myorg/myrepo",
-		FilePath:       "flags/config.yaml",
-		AppID:          12345,
-		InstallationID: 67890,
-		PrivateKey:     wrongTypePEM,
+	tests := []struct {
+		name      string
+		mock      *appMockHTTP
+		configure func(r *githubretriever.Retriever)
+		wantErr   string
+	}{
+		{
+			name: "token exchange failure surfaces GitHub message",
+			mock: &appMockHTTP{
+				tokenStatus: http.StatusUnauthorized,
+				tokenBody:   []byte(`{"message":"A JSON web token could not be decoded"}`),
+			},
+			wantErr: "returned 401 for installation 67890: " +
+				`{"message":"A JSON web token could not be decoded"}`,
+		},
+		{
+			name:    "malformed token response",
+			mock:    &appMockHTTP{tokenBody: []byte("not-valid-json")},
+			wantErr: "failed to parse token response",
+		},
+		{
+			name:    "empty token in response",
+			mock:    &appMockHTTP{tokenBody: tokenResponse("", time.Now().Add(time.Hour))},
+			wantErr: "token response contained no token",
+		},
+		{
+			name:    "missing expires_at in response",
+			mock:    &appMockHTTP{tokenBody: []byte(`{"token":"ghs_token"}`)},
+			wantErr: "token response contained no expires_at",
+		},
+		{
+			name:    "transport error on the retry after a 401",
+			mock:    &appMockHTTP{first401ThenOK: true, retryErr: errors.New("connection reset")},
+			wantErr: "connection reset",
+		},
+		{
+			name:      "invalid base URL",
+			configure: func(r *githubretriever.Retriever) { r.BaseURL = ":invalid:url" },
+			wantErr:   "invalid base URL",
+		},
+		{
+			name:      "private key is not PEM",
+			configure: func(r *githubretriever.Retriever) { r.PrivateKey = "not-a-pem-key" },
+			wantErr:   "PEM",
+		},
+		{
+			name:      "private key is not RSA",
+			configure: func(r *githubretriever.Retriever) { r.PrivateKey = wrongTypePEM },
+			wantErr:   "failed to parse RSA private key",
+		},
+		{
+			name: "private key file missing",
+			configure: func(r *githubretriever.Retriever) {
+				r.PrivateKey = ""
+				r.PrivateKeyFile = "/nonexistent/path/key.pem"
+			},
+			wantErr: "failed to read private key file",
+		},
 	}
-	r.SetHTTPClient(mock)
+	_, pemStr := generateTestKey(t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := newAppRetriever(pemStr, cmp.Or(tt.mock, &appMockHTTP{}))
+			if tt.configure != nil {
+				tt.configure(r)
+			}
 
-	_, err = r.Retrieve(context.Background())
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse RSA private key")
+			_, err := r.Retrieve(context.Background())
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErr)
+		})
+	}
+}
+
+func TestGitHubAppAuth_Init(t *testing.T) {
+	_, pemStr := generateTestKey(t)
+	tests := []struct {
+		name      string
+		retriever *githubretriever.Retriever
+		wantErr   string
+	}{
+		{
+			name:      "no auth",
+			retriever: &githubretriever.Retriever{},
+		},
+		{
+			name:      "token auth",
+			retriever: &githubretriever.Retriever{GithubToken: "ghp_token"},
+		},
+		{
+			name:      "app auth",
+			retriever: newAppRetriever(pemStr, nil),
+		},
+		{
+			name:      "app ID only",
+			retriever: &githubretriever.Retriever{AppID: testAppID},
+			wantErr:   "are all required",
+		},
+		{
+			name:      "missing installation ID",
+			retriever: &githubretriever.Retriever{AppID: testAppID, PrivateKey: pemStr},
+			wantErr:   "are all required",
+		},
+		{
+			name:      "missing private key",
+			retriever: &githubretriever.Retriever{AppID: testAppID, InstallationID: testInstallationID},
+			wantErr:   "are all required",
+		},
+		{
+			name: "token and app fields",
+			retriever: &githubretriever.Retriever{
+				GithubToken:    "ghp_token",
+				AppID:          testAppID,
+				InstallationID: testInstallationID,
+				PrivateKey:     pemStr,
+			},
+			wantErr: "mutually exclusive",
+		},
+		{
+			name: "invalid private key",
+			retriever: &githubretriever.Retriever{
+				AppID:          testAppID,
+				InstallationID: testInstallationID,
+				PrivateKey:     "not-a-pem-key",
+			},
+			wantErr: "PEM",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := tt.retriever
+			assert.Equal(t, retriever.RetrieverNotReady, r.Status())
+
+			err := r.Init(context.Background(), nil)
+			if tt.wantErr != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErr)
+				assert.Equal(t, retriever.RetrieverError, r.Status())
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, retriever.RetrieverReady, r.Status())
+
+			require.NoError(t, r.Shutdown(context.Background()))
+			assert.Equal(t, retriever.RetrieverNotReady, r.Status())
+		})
+	}
 }

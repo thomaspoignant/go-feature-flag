@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,7 +19,9 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Retriever is a configuration struct for a GitHub retriever.
@@ -35,7 +38,6 @@ type Retriever struct {
 	BaseURL string
 
 	// GitHub App authentication fields.
-	// When set, these take precedence over GithubToken.
 	// AppID and InstallationID are required together with either
 	// PrivateKey (PEM string) or PrivateKeyFile (path to a PEM file).
 	// Mutually exclusive with GithubToken / AuthToken.
@@ -46,13 +48,17 @@ type Retriever struct {
 
 	// httpClient is the http.Client if you want to override it.
 	httpClient internal.HTTPClient
+	status     retriever.Status
+
+	// mu guards the rate limit fields and the cached installation token,
+	// so concurrent Retrieve calls mint the token only once.
+	mu sync.Mutex
 
 	// rate limit fields
 	rateLimitRemaining int
 	rateLimitReset     time.Time
 
 	// cached installation token state (GitHub App auth only)
-	mu             sync.Mutex
 	cachedToken    string
 	tokenExpiresAt time.Time
 }
@@ -61,6 +67,48 @@ type Retriever struct {
 type installationTokenResponse struct {
 	Token     string    `json:"token"`
 	ExpiresAt time.Time `json:"expires_at"`
+}
+
+// Init validates the authentication configuration.
+func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
+	r.status = retriever.RetrieverNotReady
+	if err := r.validateAppAuth(); err != nil {
+		r.status = retriever.RetrieverError
+		return err
+	}
+	r.status = retriever.RetrieverReady
+	return nil
+}
+
+// Shutdown drops the cached installation token and sets the status as not ready.
+func (r *Retriever) Shutdown(_ context.Context) error {
+	r.invalidateCachedToken()
+	r.status = retriever.RetrieverNotReady
+	return nil
+}
+
+// Status is the function returning the internal state of the retriever.
+func (r *Retriever) Status() retriever.Status {
+	if r == nil || r.status == "" {
+		return retriever.RetrieverNotReady
+	}
+	return r.status
+}
+
+// validateAppAuth checks that GitHub App fields are either all unset, or complete,
+// usable and not mixed with GithubToken.
+func (r *Retriever) validateAppAuth() error {
+	if r.AppID == 0 && r.InstallationID == 0 && r.PrivateKey == "" && r.PrivateKeyFile == "" {
+		return nil
+	}
+	if r.GithubToken != "" {
+		return errors.New("github app: GithubToken and GitHub App fields are mutually exclusive")
+	}
+	if !r.isAppAuth() {
+		return errors.New("github app: AppID, InstallationID and PrivateKey or PrivateKeyFile are all required")
+	}
+	_, err := r.loadPrivateKey()
+	return err
 }
 
 // Retrieve is the function in charge of fetching the flag configuration.
@@ -84,8 +132,6 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	header := r.buildHeaders(token)
-
 	if err := r.checkRateLimit(); err != nil {
 		return nil, err
 	}
@@ -95,13 +141,10 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := shared.CallHTTPAPI(ctx, URL, http.MethodGet, "", r.Timeout, header, r.httpClient)
+	resp, err := r.fetch(ctx, URL, token)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	r.updateRateLimit(resp.Header)
 
 	// On a 401 with App auth, the cached token may have just expired.
 	// Invalidate it and retry once with a fresh token.
@@ -109,19 +152,14 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		_ = resp.Body.Close()
 		r.invalidateCachedToken()
 
-		token, err = r.resolveToken(ctx)
-		if err != nil {
+		if token, err = r.resolveToken(ctx); err != nil {
 			return nil, err
 		}
-		header = r.buildHeaders(token)
-
-		resp, err = shared.CallHTTPAPI(ctx, URL, http.MethodGet, "", r.Timeout, header, r.httpClient)
-		if err != nil {
+		if resp, err = r.fetch(ctx, URL, token); err != nil {
 			return nil, err
 		}
-		defer func() { _ = resp.Body.Close() }()
-		r.updateRateLimit(resp.Header)
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	if err := r.checkResponseError(resp, URL); err != nil {
 		return nil, err
@@ -132,6 +170,16 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+// fetch calls the contents API with the given token and records the rate limit headers.
+func (r *Retriever) fetch(ctx context.Context, contentsURL string, token string) (*http.Response, error) {
+	resp, err := shared.CallHTTPAPI(ctx, contentsURL, http.MethodGet, "", r.Timeout, r.buildHeaders(token), r.httpClient)
+	if err != nil {
+		return nil, err
+	}
+	r.updateRateLimit(resp.Header)
+	return resp, nil
 }
 
 // isAppAuth reports whether GitHub App auth fields are configured.
@@ -186,21 +234,14 @@ func (r *Retriever) mintInstallationToken(ctx context.Context) (string, time.Tim
 		return "", time.Time{}, err
 	}
 
-	baseURL := r.BaseURL
-	if baseURL == "" {
-		baseURL = "https://api.github.com"
-	}
-
-	u, err := url.Parse(baseURL)
+	u, err := r.apiURL("app", "installations", strconv.FormatInt(r.InstallationID, 10), "access_tokens")
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("invalid base URL: %w", err)
+		return "", time.Time{}, err
 	}
-	u.Path = path.Join(u.Path, "app", "installations", strconv.FormatInt(r.InstallationID, 10), "access_tokens")
 
-	header := http.Header{}
+	// access_tokens answers in JSON, not in the raw format used for file contents.
+	header := r.buildHeaders(jwt)
 	header.Set("Accept", "application/vnd.github+json")
-	header.Set("X-GitHub-Api-Version", "2022-11-28")
-	header.Set("Authorization", "Bearer "+jwt)
 
 	resp, err := shared.CallHTTPAPI(ctx, u.String(), http.MethodPost, "", r.Timeout, header, r.httpClient)
 	if err != nil {
@@ -209,9 +250,11 @@ func (r *Retriever) mintInstallationToken(ctx context.Context) (string, time.Tim
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusCreated {
+		// GitHub explains the failure in the body (bad app id, suspended installation, clock skew...).
+		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 		return "", time.Time{}, fmt.Errorf(
-			"github app: access_tokens endpoint returned %d for installation %d",
-			resp.StatusCode, r.InstallationID,
+			"github app: access_tokens endpoint returned %d for installation %d: %s",
+			resp.StatusCode, r.InstallationID, strings.TrimSpace(string(msg)),
 		)
 	}
 
@@ -226,6 +269,9 @@ func (r *Retriever) mintInstallationToken(ctx context.Context) (string, time.Tim
 	}
 	if result.Token == "" {
 		return "", time.Time{}, fmt.Errorf("github app: token response contained no token")
+	}
+	if result.ExpiresAt.IsZero() {
+		return "", time.Time{}, fmt.Errorf("github app: token response contained no expires_at")
 	}
 	return result.Token, result.ExpiresAt, nil
 }
@@ -269,6 +315,8 @@ func (r *Retriever) buildHeaders(token string) http.Header {
 
 // checkRateLimit checks if the rate limit has been exceeded.
 func (r *Retriever) checkRateLimit() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if r.rateLimitRemaining <= 0 && time.Now().Before(r.rateLimitReset) {
 		return fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
 	}
@@ -285,6 +333,20 @@ func (r *Retriever) buildURL(branch string) (string, error) {
 		return "", fmt.Errorf("repository slug must not contain '..'")
 	}
 
+	u, err := r.apiURL("repos", r.RepositorySlug, "contents", r.FilePath)
+	if err != nil {
+		return "", err
+	}
+
+	q := u.Query()
+	q.Set("ref", branch)
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
+}
+
+// apiURL returns the GitHub API base URL (BaseURL or api.github.com) with elem appended to its path.
+func (r *Retriever) apiURL(elem ...string) (*url.URL, error) {
 	baseURL := r.BaseURL
 	if baseURL == "" {
 		baseURL = "https://api.github.com"
@@ -292,15 +354,10 @@ func (r *Retriever) buildURL(branch string) (string, error) {
 
 	u, err := url.Parse(baseURL)
 	if err != nil {
-		return "", fmt.Errorf("invalid base URL: %w", err)
+		return nil, fmt.Errorf("invalid base URL: %w", err)
 	}
-	u.Path = path.Join(u.Path, "repos", r.RepositorySlug, "contents", r.FilePath)
-
-	q := u.Query()
-	q.Set("ref", branch)
-	u.RawQuery = q.Encode()
-
-	return u.String(), nil
+	u.Path = path.Join(append([]string{u.Path}, elem...)...)
+	return u, nil
 }
 
 // checkResponseError checks if the response indicates an error and returns an appropriate error message.
@@ -327,6 +384,8 @@ func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 }
 
 func (r *Retriever) updateRateLimit(headers http.Header) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if remaining := headers.Get("X-RateLimit-Remaining"); remaining != "" {
 		if remainingInt, err := strconv.Atoi(remaining); err == nil {
 			r.rateLimitRemaining = remainingInt
