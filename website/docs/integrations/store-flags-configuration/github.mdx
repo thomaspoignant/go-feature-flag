@@ -42,7 +42,7 @@ retrievers:
 | `timeout`                  | <NotMandatory /> | string | `10000`  | Timeout in millisecond used when calling GitHub.                                                                                                                                                                                   |
 | `githubAppId`              | <NotMandatory /> | int    | **none** | GitHub App ID. Required when using GitHub App authentication (see [GitHub App auth](#github-app-authentication)). Mutually exclusive with `token`.                                                                                 |
 | `githubInstallationId`     | <NotMandatory /> | int    | **none** | GitHub App installation ID. Required when using GitHub App authentication.                                                                                                                                                         |
-| `githubAppPrivateKey`      | <NotMandatory /> | string | **none** | PEM-encoded RSA private key for the GitHub App (inline). Use this or `githubAppPrivateKeyFile`, not both.                                                                                                                          |
+| `githubAppPrivateKey`      | <NotMandatory /> | string | **none** | PKCS#1 PEM-encoded RSA private key for the GitHub App (inline). Required unless `githubAppPrivateKeyFile` is set; the file takes precedence if both are set.                                                                                                                          |
 | `githubAppPrivateKeyFile`  | <NotMandatory /> | string | **none** | Path to a PEM file containing the GitHub App private key. Useful for Kubernetes secret volume mounts. Takes precedence over `githubAppPrivateKey` if both are set.                                                                 |
 
 ## Configure the GO Module
@@ -73,7 +73,7 @@ defer ffclient.Close()
 | **`Timeout`**              | <NotMandatory /> | Timeout for the HTTP call <br/>Default: 10 seconds                                                                                                                                                                                        |
 | **`AppID`**                | <NotMandatory /> | GitHub App ID. Required when using GitHub App authentication (see [GitHub App auth](#github-app-authentication)). Mutually exclusive with `GithubToken`.                                                                                   |
 | **`InstallationID`**       | <NotMandatory /> | GitHub App installation ID. Required when using GitHub App authentication.                                                                                                                                                                 |
-| **`PrivateKey`**           | <NotMandatory /> | PEM-encoded RSA private key for the GitHub App (inline string). Use this or `PrivateKeyFile`, not both.                                                                                                                                    |
+| **`PrivateKey`**           | <NotMandatory /> | PKCS#1 PEM-encoded RSA private key for the GitHub App (inline string). Required unless `PrivateKeyFile` is set; the file takes precedence if both are set.                                                                                                                                    |
 | **`PrivateKeyFile`**       | <NotMandatory /> | Path to a PEM file containing the GitHub App private key. Takes precedence over `PrivateKey` if both are set.                                                                                                                              |
 
 ## GitHub App authentication
@@ -81,15 +81,24 @@ defer ffclient.Close()
 Instead of a personal access token you can authenticate as a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps).
 This removes the dependency on a user account and gives you fine-grained, repo-scoped permissions.
 
-The retriever handles the full OAuth flow internally: it signs a short-lived JWT with the app's private key,
-exchanges it for an installation token, caches the token, and refreshes it automatically before it expires.
+The retriever signs a short-lived JWT with the app's private key and exchanges it for an installation access token.
+It caches the token and refreshes it on the next retrieval when fewer than five minutes remain before expiry.
+If a file retrieval returns HTTP 401, it discards the cached token and retries once with a fresh installation token.
 No external service or sidecar is needed.
 
 **GitHub App prerequisites:**
+
 - Repository permission: **Contents: read-only** (Metadata: read is implicit).
 - Install the app on the repository that holds your flag file.
 - Generate a private key in the app settings and store it securely (e.g. a Kubernetes secret or AWS Secrets Manager).
 - Note the **App ID** (shown on the app settings page) and **Installation ID** (visible in the URL of the app's installation settings: `https://github.com/organizations/<org>/settings/installations/<id>`).
+
+Supply the App ID, installation ID, and either an inline private key or a private-key file.
+The key must be a PKCS#1 PEM-encoded RSA private key (`-----BEGIN RSA PRIVATE KEY-----`);
+PKCS#8 keys (`-----BEGIN PRIVATE KEY-----`) are not supported.
+If both key sources are configured, the file takes precedence. A missing, unreadable, or invalid
+key file causes an error rather than falling back to the inline key.
+The file path must be readable by the running process; in a container, mount the file and use its path inside the container.
 
 ### Relay Proxy Configuration
 
@@ -110,7 +119,7 @@ retrievers:
 ```
 
 :::note
-`token` / `githubToken` and the GitHub App fields (`githubAppId`, `githubInstallationId`,
+`token` (or the legacy `githubToken` setting) and the GitHub App fields (`githubAppId`, `githubInstallationId`,
 `githubAppPrivateKey` / `githubAppPrivateKeyFile`) are mutually exclusive.
 Validation will reject a configuration that supplies both.
 :::
@@ -136,7 +145,9 @@ defer ffclient.Close()
 
 ## GitHub Enterprise / Self-hosted instances
 
-If you are using a GitHub Enterprise or self-hosted instance, you can configure the `baseUrl` field to point to your instance's API endpoint.
+If you are using a GitHub Enterprise or self-hosted instance, configure `baseUrl` (relay proxy) or `BaseURL` (Go module) to point to your instance's API endpoint.
+This endpoint is used for both file retrieval and GitHub App installation-token exchange.
+To use App authentication, combine this setting with the App credentials shown above, omitting the static token.
 
 ### Relay Proxy Configuration
 
