@@ -61,6 +61,8 @@ type FlagConfigurationResponse struct {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/configuration [post]
 func (h *FlagConfigurationAPICtrl) Handler(c *echo.Context) error {
+	h.metrics.IncFlagConfigurationCall()
+
 	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "flagConfiguration")
 	defer span.End()
