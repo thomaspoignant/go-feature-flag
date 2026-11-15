@@ -51,6 +51,18 @@ func validateOutcomeCounts(t *testing.T, m metric.Metrics) map[string]float64 {
 	return counts
 }
 
+// outcomeForStatus returns the metric outcome expected for an HTTP status.
+func outcomeForStatus(status int) string {
+	switch status {
+	case http.StatusOK:
+		return metric.ValidateFlagsOutcomeValid
+	case http.StatusUnprocessableEntity:
+		return metric.ValidateFlagsOutcomeInvalid
+	default:
+		return metric.ValidateFlagsOutcomeError
+	}
+}
+
 // padTo pads body with the pad string so the result is exactly size bytes long.
 func padTo(body, pad string, size int) string {
 	return body + strings.Repeat(pad, size-len(body))
@@ -165,14 +177,7 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			c := e.NewContext(req, rec)
 
 			err = ctrl.Handler(c)
-			wantOutcome := metric.ValidateFlagsOutcomeError
-			switch tt.wantStatus {
-			case http.StatusOK:
-				wantOutcome = metric.ValidateFlagsOutcomeValid
-			case http.StatusUnprocessableEntity:
-				wantOutcome = metric.ValidateFlagsOutcomeInvalid
-			}
-			assert.Equal(t, map[string]float64{wantOutcome: 1}, validateOutcomeCounts(t, metrics))
+			assert.Equal(t, map[string]float64{outcomeForStatus(tt.wantStatus): 1}, validateOutcomeCounts(t, metrics))
 			if tt.wantStatus != http.StatusOK && tt.wantStatus != http.StatusUnprocessableEntity {
 				var httpErr *echo.HTTPError
 				require.ErrorAs(t, err, &httpErr)
