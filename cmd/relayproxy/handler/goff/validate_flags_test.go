@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 )
 
 const (
@@ -31,6 +32,23 @@ func normalizeAltMessage(got []controller.FlagValidationError, alt string, want 
 	if alt != "" && len(got) == 1 && got[0].Message == alt {
 		got[0].Message = want[0].Message
 	}
+}
+
+// validateOutcomeCounts returns the validate flags counter value per outcome label.
+func validateOutcomeCounts(t *testing.T, m metric.Metrics) map[string]float64 {
+	t.Helper()
+	families, err := m.Registry.Gather()
+	require.NoError(t, err)
+	counts := map[string]float64{}
+	for _, f := range families {
+		if f.GetName() != "gofeatureflag_validate_flags_total" {
+			continue
+		}
+		for _, mm := range f.GetMetric() {
+			counts[mm.GetLabel()[0].GetValue()] = mm.GetCounter().GetValue()
+		}
+	}
+	return counts
 }
 
 // padTo pads body with the pad string so the result is exactly size bytes long.
@@ -126,7 +144,9 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			ctrl := controller.NewValidateFlags("v1.2.3")
+			metrics, err := metric.NewMetrics()
+			require.NoError(t, err)
+			ctrl := controller.NewValidateFlags("v1.2.3", metrics)
 			e := echo.New()
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
@@ -144,7 +164,15 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			}
 			c := e.NewContext(req, rec)
 
-			err := ctrl.Handler(c)
+			err = ctrl.Handler(c)
+			wantOutcome := metric.ValidateFlagsOutcomeError
+			switch tt.wantStatus {
+			case http.StatusOK:
+				wantOutcome = metric.ValidateFlagsOutcomeValid
+			case http.StatusUnprocessableEntity:
+				wantOutcome = metric.ValidateFlagsOutcomeInvalid
+			}
+			assert.Equal(t, map[string]float64{wantOutcome: 1}, validateOutcomeCounts(t, metrics))
 			if tt.wantStatus != http.StatusOK && tt.wantStatus != http.StatusUnprocessableEntity {
 				var httpErr *echo.HTTPError
 				require.ErrorAs(t, err, &httpErr)

@@ -3,6 +3,7 @@ package metric
 import (
 	"testing"
 
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -166,6 +167,26 @@ func TestMetrics_IncForceRefresh(t *testing.T) {
 	metricSrv.IncForceRefresh()
 
 	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.forceRefreshCounter))
+}
+
+func TestMetrics_IncValidateFlags(t *testing.T) {
+	metricSrv, err := NewMetrics()
+	assert.NoError(t, err)
+
+	metricSrv.IncValidateFlags(ValidateFlagsOutcomeValid)
+	metricSrv.IncValidateFlags(ValidateFlagsOutcomeValid)
+	metricSrv.IncValidateFlags(ValidateFlagsOutcomeInvalid)
+	metricSrv.IncValidateFlags(ValidateFlagsOutcomeError)
+
+	counter := func(outcome string) float64 {
+		return testutil.ToFloat64(metricSrv.validateFlagsCounterVec.With(prom.Labels{outcomeLabel: outcome}))
+	}
+	assert.Equal(t, 2.0, counter(ValidateFlagsOutcomeValid))
+	assert.Equal(t, 1.0, counter(ValidateFlagsOutcomeInvalid))
+	assert.Equal(t, 1.0, counter(ValidateFlagsOutcomeError))
+
+	// a zero value Metrics must not panic
+	assert.NotPanics(t, func() { (&Metrics{}).IncValidateFlags(ValidateFlagsOutcomeValid) })
 }
 
 func TestMetrics_IncFlagConfigurationCall(t *testing.T) {

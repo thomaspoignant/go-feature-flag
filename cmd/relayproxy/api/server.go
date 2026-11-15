@@ -117,7 +117,7 @@ func (s *Server) initRoutes() {
 		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
-	cValidateFlags := controller.NewValidateFlags(s.config.Version)
+	cValidateFlags := controller.NewValidateFlags(s.config.Version, s.services.Metrics)
 	cFlagChangeAPI := controller.NewAPIFlagChange(
 		s.services.FlagsetManager,
 		s.services.Metrics,
