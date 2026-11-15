@@ -58,7 +58,7 @@ func NewOFREPEvaluate(
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/evaluate/flags/{flag_key} [post]
 func (h *EvaluateCtrl) Evaluate(c *echo.Context) error {
-	flagKey := c.Param("flagKey")
+	flagKey := helper.FlagKey(c)
 	if flagKey == "" {
 		return c.JSON(
 			http.StatusBadRequest,

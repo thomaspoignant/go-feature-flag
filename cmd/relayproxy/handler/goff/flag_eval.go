@@ -51,7 +51,7 @@ func NewFlagEval(flagsetMngr service.FlagsetManager, metrics metric.Metrics) Con
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
 func (h *flagEval) Handler(c *echo.Context) error {
-	flagKey := c.Param("flagKey")
+	flagKey := helper.FlagKey(c)
 	if flagKey == "" {
 		return fmt.Errorf("impossible to find the flag key in the URL")
 	}
