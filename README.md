@@ -34,18 +34,33 @@
 GO Feature Flag is used by teams at:
 
 <p align="center">
-  <img src="website/static/img/using-it/grafana.png" width="160" alt="Grafana Labs" />
-  <img src="website/static/img/using-it/miro.png" width="100" alt="Miro" />
-  <img src="website/static/img/using-it/castai.png" width="90" alt="Cast.ai" />
-  <img src="website/static/img/using-it/lyft.png" width="50" alt="Lyft" />
-  <img src="website/static/img/using-it/tencent.png" width="120" alt="Tencent" />
-  <img src="website/static/img/using-it/minder.png" width="110" alt="Minder" />
-  <img src="website/static/img/using-it/agentero.png" width="110" alt="Agentero" />
-  <img src="website/static/img/using-it/landsend.png" width="120" alt="Lands’ End" />
-  <img src="website/static/img/using-it/alternativepayment.png" width="130" alt="Alternative Payments" />
-  <img src="website/static/img/using-it/mecena.png" width="110" alt="Mecena" />
-  <img src="website/static/img/using-it/helloworldcs.png" width="100" alt="HelloWorld CS" />
-  <img src="website/static/img/using-it/stacklok.png" width="110" alt="Stacklok" />
+  <img src="website/static/img/using-it/grafana.png" width="160" alt="Grafana Labs" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/miro.png" width="100" alt="Miro" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/castai.png" width="90" alt="Cast.ai" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/lyft.png" width="50" alt="Lyft" align="middle" />
+</p>
+
+<p align="center">
+  <img src="website/static/img/using-it/tencent.png" width="120" alt="Tencent" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/minder.png" width="110" alt="Minder" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/agentero.png" width="110" alt="Agentero" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/landsend.png" width="120" alt="Lands’ End" align="middle" />
+</p>
+
+<p align="center">
+  <img src="website/static/img/using-it/alternativepayment.png" width="130" alt="Alternative Payments" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/mecena.png" width="110" alt="Mecena" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/helloworldcs.png" width="100" alt="HelloWorld CS" align="middle" />
+  &emsp;&emsp;
+  <img src="website/static/img/using-it/stacklok.png" width="110" alt="Stacklok" align="middle" />
 </p>
 
 See the full [adopters list](./ADOPTERS.md), or add your organization.
