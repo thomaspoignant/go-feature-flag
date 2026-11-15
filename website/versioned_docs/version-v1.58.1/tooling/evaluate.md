@@ -23,7 +23,7 @@ Check the [installation guide](./cli) to install the `go-feature-flag-cli`.
 ./go-feature-flag-cli evaluate \
   --config="<location_of_your_flag_configuration_file>" \
   --format="yaml" \
-  --flag="<name_of_your_flag_to_evaluate>" \ 
+  --flag="<name_of_your_flag_to_evaluate>" \
   --ctx='<evaluation_ctx_as_json_string>'
 ```
 

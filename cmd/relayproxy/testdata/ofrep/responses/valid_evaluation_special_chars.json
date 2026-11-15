@@ -1,0 +1,9 @@
+{
+  "key": "team:checkout",
+  "value": true,
+  "reason": "STATIC",
+  "variant": "enabled",
+  "metadata": {
+    "gofeatureflag_cacheable": true
+  }
+}

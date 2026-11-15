@@ -2,6 +2,7 @@ package helper
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -39,4 +40,18 @@ func FlagSet(flagsetManager service.FlagsetManager, apiKey string) (*ffclient.Go
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: "+err.Error())
 	}
 	return flagset, nil
+}
+
+// FlagKey returns the flagKey path parameter, unescaped.
+// When a request path contains escapes that Go would not produce itself (e.g. %3A for ":"),
+// the router matches on the raw path and the parameter keeps its escaping.
+func FlagKey(c *echo.Context) string {
+	key := c.Param("flagKey")
+	if c.Request().URL.RawPath == "" {
+		return key
+	}
+	if decoded, err := url.PathUnescape(key); err == nil {
+		return decoded
+	}
+	return key
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/utils"
+	httpprovider "github.com/thomaspoignant/koanf-http-provider"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +33,12 @@ type ConfigLoader struct {
 	k              *koanf.Koanf
 	fileProvider   *file.File
 	configFilePath string // stored config file path for reload
+
+	// flagSets loaded from studio.url, the provider and its parser are reused on reload
+	studioProvider *httpprovider.HTTP
+	studioParser   koanf.Parser
+	studioFlagSets []FlagSet
+	studioLoadErr  error
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
@@ -76,6 +84,7 @@ func NewConfigLoader(
 // - the command line
 // - the configuration file
 // - the environment variables
+// - the flagSets from Studio
 func (c *ConfigLoader) loadConfig() {
 	_ = c.k.Load(confmap.Provider(map[string]any{
 		"fileFormat":      "yaml",
@@ -86,6 +95,7 @@ func (c *ConfigLoader) loadConfig() {
 	c.loadPosflag(c.cmdLineFlagSet)
 	c.loadConfigFile()
 	c.loadEnvVariables()
+	c.loadStudioFlagSets()
 	_ = c.k.Set("version", c.version)
 }
 
@@ -96,9 +106,9 @@ func (c *ConfigLoader) AddConfigChangeCallback(callback func(newConfig *Config))
 	c.callbacks = append(c.callbacks, callback)
 }
 
-// startWatchChanges starts watching for changes in the configuration file
+// startWatchChanges starts watching for changes in the configuration file and Studio
 func (c *ConfigLoader) startWatchChanges() {
-	if c.fileProvider == nil || !c.watchChanges {
+	if (c.fileProvider == nil && c.studioProvider == nil) || !c.watchChanges {
 		return
 	}
 
@@ -108,11 +118,11 @@ func (c *ConfigLoader) startWatchChanges() {
 	// Check https://github.com/knadh/koanf/issues/12#issuecomment-2637665148 to understand why this is necessary
 	go c.processConfigChangeEvents()
 
-	// The file watcher callback just sends to the channel and returns immediately
+	// The watcher callback just sends to the channel and returns immediately
 	// This prevents blocking the fsnotify goroutine
-	errWatch := c.fileProvider.Watch(func(event any, err error) {
+	onChange := func(event any, err error) {
 		if err != nil {
-			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(err))
+			c.log.Error("error watching for configuration changes", zap.Error(err))
 			return
 		}
 
@@ -125,9 +135,16 @@ func (c *ConfigLoader) startWatchChanges() {
 		default:
 			// Channel full, event already pending - skip this one
 		}
-	})
-	if errWatch != nil {
-		c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+	}
+	if c.fileProvider != nil {
+		if errWatch := c.fileProvider.Watch(onChange); errWatch != nil {
+			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+		}
+	}
+	if c.studioProvider != nil {
+		if errWatch := c.studioProvider.Watch(onChange); errWatch != nil {
+			c.log.Error("error watching for studio flagSets changes", zap.Error(errWatch))
+		}
 	}
 }
 
@@ -177,8 +194,14 @@ func (c *ConfigLoader) reloadConfigAndNotify() {
 		watchChanges:   false,
 		k:              koanf.New("."),
 		configFilePath: c.configFilePath,
+		// Reuse the provider's ETag and cache across reloads.
+		studioProvider: c.studioProvider,
+		studioParser:   c.studioParser,
 	}
 	newConfig.loadConfig()
+	if newConfig.studioLoadErr != nil {
+		return
+	}
 	modifiedConfig, err := newConfig.ToConfig()
 	if err != nil {
 		c.log.Error("error loading new config", zap.Error(err))
@@ -199,13 +222,23 @@ func (c *ConfigLoader) ToConfig() (*Config, error) {
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
+	switch {
+	case len(proxyConf.FlagSets) > 0:
+		// IsValid rejects local flagSets when studio is also set
+		proxyConf.flagSetMode = flagSetModeLocal
+	case proxyConf.Studio.URL != "":
+		proxyConf.flagSetMode = flagSetModeStudio
+		proxyConf.FlagSets = c.studioFlagSets
+	default:
+		proxyConf.flagSetMode = flagSetModeNone
+	}
 	processExporters(proxyConf)
 	return proxyConf, nil
 }
 
-// StopWatchChanges stops watching for changes in the configuration file
+// StopWatchChanges stops watching for changes in the configuration file and Studio
 func (c *ConfigLoader) StopWatchChanges() error {
-	if c.fileProvider == nil || !c.watchChanges {
+	if (c.fileProvider == nil && c.studioProvider == nil) || !c.watchChanges {
 		return nil
 	}
 
@@ -216,7 +249,14 @@ func (c *ConfigLoader) StopWatchChanges() error {
 		})
 	}
 
-	return c.fileProvider.Unwatch()
+	var errs []error
+	if c.fileProvider != nil {
+		errs = append(errs, c.fileProvider.Unwatch())
+	}
+	if c.studioProvider != nil {
+		errs = append(errs, c.studioProvider.Unwatch())
+	}
+	return errors.Join(errs...)
 }
 
 // loadPosflag loads the flags from the command line
@@ -251,6 +291,40 @@ func (c *ConfigLoader) loadConfigFile() {
 // loadEnvVariables loads the environment variables
 func (c *ConfigLoader) loadEnvVariables() {
 	_ = c.k.Load(c.mapEnvVariablesProvider(c.k.String("envVariablePrefix"), c.log), nil)
+}
+
+// loadStudioFlagSets loads the flagSets from studio.url, if it is set
+func (c *ConfigLoader) loadStudioFlagSets() {
+	c.studioLoadErr = nil
+	if c.studioProvider == nil {
+		conf, err := c.ToConfig()
+		if err != nil || conf.Studio.URL == "" {
+			return
+		}
+		c.studioParser = conf.Studio.parser()
+		c.studioProvider = conf.Studio.provider(c.studioParser, c.log)
+	}
+
+	studio := koanf.New(".")
+	var studioConf struct {
+		FlagSets []FlagSet `koanf:"flagsets"`
+	}
+	err := studio.Load(c.studioProvider, c.studioParser)
+	if err == nil {
+		err = studio.Unmarshal("", &studioConf)
+	}
+	if err == nil {
+		err = (&Config{FlagSets: studioConf.FlagSets}).validateFlagSets()
+	}
+	if err != nil {
+		// Polling may already have accepted this document. Retry it even if its
+		// ETag and content are unchanged, since this reload could not use it.
+		c.studioProvider.Invalidate()
+		c.studioLoadErr = err
+		c.log.Error("error loading the flagSets from studio", zap.Error(err))
+		return
+	}
+	c.studioFlagSets = studioConf.FlagSets
 }
 
 // locateConfigFile is selecting the configuration file we will use.

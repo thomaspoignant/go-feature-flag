@@ -289,6 +289,18 @@ func Test_Evaluate(t *testing.T) {
 		want want
 	}{
 		{
+			name: "flag key with an escaped reserved character",
+			args: args{
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
+				configFlagsLocation: testdataDir + "/ofrep/config_flags_special_chars.yaml",
+				flagKey:             "team%3Acheckout",
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: testdataDir + "/ofrep/responses/valid_evaluation_special_chars.json",
+			},
+		},
+		{
 			name: "valid evaluation",
 			args: args{
 				bodyFile:            testdataDir + "/ofrep/valid_request.json",
