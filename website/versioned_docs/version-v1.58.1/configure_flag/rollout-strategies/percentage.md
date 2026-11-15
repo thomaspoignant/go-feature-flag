@@ -45,9 +45,9 @@ All variations that are part of the percentage rollout are sorted by **reverse a
 For example, if you have the following percentages:
 ```yaml
 percentage:
-  - varC: 20
-  - varB: 30
-  - varA: 50
+  varC: 20
+  varB: 30
+  varA: 50
 ```
 
 After sorting by inverse alphabetical order, the buckets are assigned as follows:
@@ -73,9 +73,9 @@ When you change the percentage configuration, **all buckets are recalculated**, 
 For example, if you change the configuration to:
 ```yaml
 percentage:
-  - varC: 30
-  - varB: 30
-  - varA: 40
+  varC: 30
+  varB: 30
+  varA: 40
 ```
 
 The new bucket assignments become:

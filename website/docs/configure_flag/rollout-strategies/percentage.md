@@ -20,6 +20,7 @@ You can have as many variations as you want in the percentages, and you can defi
 
 :::note
 If the sum of your percentages is not equal to 100 this is not a problem, we are computing the affectation as fractional numbers.
+Each percentage must be a finite, non-negative number (no negative, `NaN` or infinite values), a flag with an invalid percentage is rejected.
 
 _**example**: if you have 2 variations and you set `variation1: 10` and `variation2: 50` it will be equivalent to `variation1: 10/60` and `variation2: 50/60`._
 :::
@@ -45,9 +46,9 @@ All variations that are part of the percentage rollout are sorted by **reverse a
 For example, if you have the following percentages:
 ```yaml
 percentage:
-  - varC: 20
-  - varB: 30
-  - varA: 50
+  varC: 20
+  varB: 30
+  varA: 50
 ```
 
 After sorting by inverse alphabetical order, the buckets are assigned as follows:
@@ -73,9 +74,9 @@ When you change the percentage configuration, **all buckets are recalculated**, 
 For example, if you change the configuration to:
 ```yaml
 percentage:
-  - varC: 30
-  - varB: 30
-  - varA: 40
+  varC: 30
+  varB: 30
+  varA: 40
 ```
 
 The new bucket assignments become:

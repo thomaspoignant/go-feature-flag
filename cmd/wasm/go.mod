@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/cmd/wasm
 
-go 1.25.0
+go 1.25.14
 
 require (
 	github.com/stretchr/testify v1.12.1

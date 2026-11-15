@@ -1,6 +1,8 @@
 package flag_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -43,6 +45,29 @@ func BenchmarkRuleEvaluate_NikunjySimple(b *testing.B) {
 	}
 	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
 		AddCustom("language", "ar").
+		Build()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = rule.Evaluate("user-1", ctx, "test-flag", false)
+	}
+}
+
+// BenchmarkRuleEvaluate_NikunjyLargeIn evaluates a rule that targets 400 UUID-length
+// tenant IDs, the shape of a flag that lists individual targets, with a context
+// that is not in the list.
+func BenchmarkRuleEvaluate_NikunjyLargeIn(b *testing.B) {
+	tenants := make([]string, 400)
+	for i := range tenants {
+		tenants[i] = fmt.Sprintf(`"%08d-0000-4000-8000-000000000000"`, i)
+	}
+	rule := flag.Rule{
+		Name:            testconvert.String("large-in"),
+		VariationResult: testconvert.String("on"),
+		Query:           testconvert.String(`tenantId in [` + strings.Join(tenants, ", ") + `]`),
+	}
+	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
+		AddCustom("tenantId", "ffffffff-0000-4000-8000-000000000000").
 		Build()
 	b.ReportAllocs()
 	b.ResetTimer()

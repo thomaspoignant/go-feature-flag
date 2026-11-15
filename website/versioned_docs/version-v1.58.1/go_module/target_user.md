@@ -22,10 +22,13 @@ user2 = ffcontext.NewEvaluationContextBuilder("user2-key").
  Build()
 ```
 
-The most common attribute is the user's key and **this is the only mandatory user attribute.**  
+The user's key provides a stable identifier for bucketing.
+It is required for flags using percentage or progressive rollouts, including scheduled rollout steps that introduce them, unless a [custom bucketing key](../configure_flag/custom-bucketing) supplies the value.
+Static flags and targeting based only on attributes can be evaluated without a user key.
+
 The key should also uniquely identify each user. You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key.  
 **We recommend using a hash if possible.**  
-All the other attributes are optional.
+Other attributes are optional unless required by your targeting rules or custom bucketing configuration.
 
 :::info
 Custom attributes are one of the most powerful features.  
