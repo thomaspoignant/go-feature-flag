@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/google/go-cmp/cmp"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"

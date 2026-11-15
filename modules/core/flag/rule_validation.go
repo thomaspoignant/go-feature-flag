@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
@@ -38,8 +39,9 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
 }
 
 // validatePercentages validates the percentage configuration of the rule.
-// It checks that percentages are not empty, the sum is not zero, and all
-// referenced variations exist in the provided variations map.
+// It checks that percentages are not empty, none of them is negative or not a finite number,
+// the sum is not zero and does not overflow once scaled, and all referenced variations exist in the provided
+// variations map.
 func (r *Rule) validatePercentages(variations map[string]*any) error {
 	if r.Percentages == nil {
 		return nil
@@ -52,6 +54,9 @@ func (r *Rule) validatePercentages(variations map[string]*any) error {
 
 	count := float64(0)
 	for k, p := range percentages {
+		if err := r.validateSinglePercentage(p, fmt.Sprintf("variation %s", k)); err != nil {
+			return err
+		}
 		count += p
 		if _, ok := variations[k]; !ok {
 			return fmt.Errorf("invalid percentage: variation %s does not exist", k)
@@ -62,6 +67,20 @@ func (r *Rule) validatePercentages(variations map[string]*any) error {
 		return fmt.Errorf("invalid percentages: should not be equal to 0")
 	}
 
+	// the buckets are scaled by PercentageMultiplier and stored as uint32.
+	if count*PercentageMultiplier > math.MaxUint32 {
+		return fmt.Errorf("invalid percentages: the sum (%v) is too large", count)
+	}
+
+	return nil
+}
+
+// validateSinglePercentage validates a single percentage.
+func (r *Rule) validateSinglePercentage(p float64, errCtx string) error {
+	if p < 0 || math.IsNaN(p) || math.IsInf(p, 0) {
+		return fmt.Errorf(
+			"invalid percentage: %s has a negative or non-finite percentage (%v)", errCtx, p)
+	}
 	return nil
 }
 
@@ -74,8 +93,19 @@ func (r *Rule) validateProgressiveRollout(variations map[string]*any) error {
 	}
 
 	progRollout := r.GetProgressiveRollout()
+	if progRollout.Initial == nil || progRollout.End == nil {
+		return fmt.Errorf("invalid progressive rollout, initial and end steps are required")
+	}
+
 	initialPct := progRollout.Initial.getPercentage()
+	if err := r.validateSinglePercentage(initialPct, "initial step percentage"); err != nil {
+		return err
+	}
+
 	endPct := progRollout.End.getPercentage()
+	if err := r.validateSinglePercentage(endPct, "end step percentage"); err != nil {
+		return err
+	}
 
 	if endPct < initialPct {
 		return fmt.Errorf(

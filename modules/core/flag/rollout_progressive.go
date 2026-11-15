@@ -26,14 +26,14 @@ type ProgressiveRolloutStep struct {
 }
 
 func (p *ProgressiveRolloutStep) getVariation() string {
-	if p.Variation == nil {
+	if p == nil || p.Variation == nil {
 		return ""
 	}
 	return *p.Variation
 }
 
 func (p *ProgressiveRolloutStep) getPercentage() float64 {
-	if p.Percentage == nil {
+	if p == nil || p.Percentage == nil {
 		return 0
 	}
 	return *p.Percentage

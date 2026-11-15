@@ -289,6 +289,27 @@ const config = {
       },
     ],
     require('./plugins/tailwind-plugin.cjs'),
+    [
+      '@signalwire/docusaurus-plugin-llms-txt',
+      {
+        siteDescription:
+          'GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution, 100% open source (MIT) and OpenFeature-native.',
+        depth: 2,
+        includeOrder: ['/docs/**', '/blog/**'],
+        content: {
+          includeBlog: true,
+          // Only the latest released docs: skip /docs/next and archived versions.
+          includeVersionedDocs: false,
+          relativePaths: false,
+          excludeRoutes: [
+            '/search',
+            '/blog/archive',
+            '/blog/authors{,/**}',
+            '/blog/tags{,/**}',
+          ],
+        },
+      },
+    ],
   ],
 
   customFields: {

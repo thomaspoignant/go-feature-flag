@@ -69,6 +69,14 @@ func (r *Rule) RequiresBucketing() bool {
 // If yes, it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
+	return r.evaluate(key, &queryContext{ctx: ctx}, flagName, isDefault)
+}
+
+// evaluate is Evaluate reading the context through queryCtx, which the caller can share
+// across the rules of a flag.
+func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isDefault bool,
+) (string, error) {
+	ctx := queryCtx.ctx
 	// Only require key if this rule needs bucketing
 	if key == "" && r.RequiresBucketing() {
 		return "", fmt.Errorf("evaluate Rule: no key for bucketing-required rule")
@@ -81,7 +89,7 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	}
 
 	// Check if the rule applies for this user
-	ruleApply := isDefault || evaluateRule(r.GetTrimmedQuery(), r.GetQueryFormat(), ctx)
+	ruleApply := isDefault || evaluateRule(r.GetTrimmedQuery(), r.GetQueryFormat(), queryCtx)
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApplyError{Context: ctx}
 	}
@@ -103,11 +111,39 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) (success bool) {
+// queryContext is the evaluation context as targeting queries read it. The map is built on
+// first use and shared by every rule of a flag, so a flag with several targeting rules
+// converts the context once per evaluation instead of once per rule. Because it is shared,
+// the query engines must only read the map, never modify it. The JSON form JsonLogic reads
+// is shared the same way.
+type queryContext struct {
+	ctx                  ffcontext.Context
+	parsedEvalCtxAsMap   map[string]any
+	parsedEvalCtxAsBytes []byte
+}
+
+func (q *queryContext) mapOnce() map[string]any {
+	if q.parsedEvalCtxAsMap == nil {
+		q.parsedEvalCtxAsMap = utils.ContextToMap(q.ctx)
+	}
+	return q.parsedEvalCtxAsMap
+}
+
+func (q *queryContext) jsonOnce() ([]byte, error) {
+	if q.parsedEvalCtxAsBytes == nil {
+		var err error
+		if q.parsedEvalCtxAsBytes, err = json.Marshal(q.mapOnce()); err != nil {
+			return nil, err
+		}
+	}
+	return q.parsedEvalCtxAsBytes, nil
+}
+
+func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
 	if query == "" {
 		return true
 	}
-	mapCtx := utils.ContextToMap(ctx)
+	mapCtx := queryCtx.mapOnce()
 
 	// Catch any panics that may occur during evaluation
 	defer func() {
@@ -120,9 +156,10 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		}
 	}()
 
+	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
 	switch queryFormat {
 	case JSONLogicQueryFormat:
-		strCtx, err := json.Marshal(mapCtx)
+		strCtx, err := queryCtx.jsonOnce()
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))

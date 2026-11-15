@@ -94,6 +94,19 @@ nonRoot:
   # write to the container filesystem.
   enabled: false
 
+# -- Lifecycle hooks for the relay proxy container. A `preStop` sleep keeps the pod serving
+# while its endpoint is removed from Services and ingress controllers, avoiding failed
+# requests during rollouts and node drains. Use the native `sleep` action (Kubernetes 1.30+):
+# the default image is distroless and has no shell for `exec` hooks.
+lifecycle: {}
+# preStop:
+#   sleep:
+#     seconds: 10
+
+# -- (int) Time in seconds given to the pod to terminate gracefully, including any `preStop` hook.
+# Uses the Kubernetes default (30s) when not set.
+terminationGracePeriodSeconds: null
+
 service:
   # -- The type of service to create
   type: ClusterIP

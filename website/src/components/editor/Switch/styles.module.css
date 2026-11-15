@@ -23,7 +23,7 @@
 .layer {
   width: 100%;
   background-color: var(--goff-switch-bg-off);
-  transition: 0.3s ease all;
+  transition: background-color 0.3s ease;
   z-index: 1;
 }
 

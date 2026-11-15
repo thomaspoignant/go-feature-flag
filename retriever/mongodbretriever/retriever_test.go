@@ -7,18 +7,18 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/mongodbretriever"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Test_MongoDBRetriever_Retrieve(t *testing.T) {
@@ -57,17 +57,16 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		mtDB.Run(tt.name, func(t *mtest.T) {
 			mongodbContainer, err := mongodb.Run(context.TODO(), "mongo:6")
+			testcontainers.CleanupContainer(t, mongodbContainer)
 			require.NoError(t, err)
-			defer func() {
-				err := mongodbContainer.Terminate(context.TODO())
-				require.NoError(t, err)
-			}()
 
 			uri, err := mongodbContainer.ConnectionString(context.Background())
+			require.NoError(t, err)
 
 			if tt.data != "" {
 				// insert data
 				client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+				require.NoError(t, err)
 				coll := client.Database("database").Collection("collection")
 				var documents []bson.M
 				err = json.Unmarshal([]byte(tt.data), &documents)
@@ -87,7 +86,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 			}
 			assert.Equal(t, retriever.RetrieverNotReady, mdb.Status())
 			err = mdb.Init(context.TODO(), &fflog.FFLogger{})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer func() { _ = mdb.Shutdown(context.TODO()) }()
 			assert.Equal(t, retriever.RetrieverReady, mdb.Status())
 

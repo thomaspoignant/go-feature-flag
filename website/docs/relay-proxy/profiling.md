@@ -30,9 +30,9 @@ enablePprof: true
 ```
 
 :::note
-The `debug` field also enables profiling, but it is deprecated.
+Setting `logLevel: debug` also enables profiling. Use `enablePprof: true` to enable profiling without debug logging.
 ```yaml title="goff-proxy.yaml"
 #...
-debug: true
+logLevel: debug
 ```
 :::

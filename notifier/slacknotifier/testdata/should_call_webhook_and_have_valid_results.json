@@ -12,58 +12,11 @@
     {
       "color": "#FFA500",
       "title": "✏️ Flag \"test-flag2\" updated",
-      "fields": [
-        {
-          "title": "DefaultRule.Percentages",
-          "value": "{\"False\":0,\"True\":100} => null",
-          "short": true
-        },
-        {
-          "title": "DefaultRule.VariationResult",
-          "value": "null => \"Default\"",
-          "short": true
-        },
-        {
-          "title": "Disable",
-          "value": "null => true",
-          "short": true
-        },
-        {
-          "title": "Experimentation",
-          "value": "{\"start\":\"2004-09-17T00:03:20Z\",\"end\":\"2004-09-16T21:43:20Z\"} => null",
-          "short": false
-        },
-        {
-          "title": "Rules",
-          "value": "null => [{\"name\":\"rule1\",\"query\":\"key eq \\\"not-a-ke\\\"\",\"percentage\":{\"False\":20,\"True\":80}}]",
-          "short": false
-        },
-        {
-          "title": "TrackEvents",
-          "value": "null => false",
-          "short": true
-        },
-        {
-          "title": "Variations.Default",
-          "value": "false => \"strDefault\"",
-          "short": true
-        },
-        {
-          "title": "Variations.False",
-          "value": "false => \"strFalse\"",
-          "short": true
-        },
-        {
-          "title": "Variations.True",
-          "value": "true => \"strTrue\"",
-          "short": true
-        },
-        {
-          "title": "Version",
-          "value": "null => \"1.1\"",
-          "short": true
-        }
+      "text": "• Flag disabled\n• Event tracking turned off\n• Version set to `1.1`\n• Variation `Default` changed from `false` to `\"strDefault\"`\n• Variation `False` changed from `false` to `\"strFalse\"`\n• Variation `True` changed from `true` to `\"strTrue\"`\n• Targeting rule `rule1` added: serves `False` 20%, `True` 80% when `key eq \"not-a-ke\"`\n• Default rule now serves `Default` (was `False` 0%, `True` 100%)\n• Experimentation removed (was from 2004-09-17 00:03:20 UTC to 2004-09-16 21:43:20 UTC)",
+      "mrkdwn_in": [
+        "text"
       ],
+      "fields": null,
       "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
       "footer": "go-feature-flag"
     },

@@ -10,16 +10,14 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	testcontainerRedis "github.com/testcontainers/testcontainers-go/modules/redis"
 	ret "github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 )
 
-var redisContainerList = make(map[string]*testcontainerRedis.RedisContainer)
-
 func Test_Redis_Retrieve(t *testing.T) {
-
 	tests := []struct {
 		name        string
 		prefix      string
@@ -49,8 +47,7 @@ func Test_Redis_Retrieve(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			options := startRedisAndAddData(t, t.Name(), tt.flagsToLoad, tt.prefix)
-			defer stopRedis(t, t.Name())
+			options := startRedisAndAddData(t, tt.flagsToLoad, tt.prefix)
 
 			retriever := redisretriever.Retriever{
 				Options: options,
@@ -58,7 +55,7 @@ func Test_Redis_Retrieve(t *testing.T) {
 			}
 
 			err := retriever.Init(context.TODO(), nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer func() {
 				err := retriever.Shutdown(context.TODO())
 				assert.NoError(t, err)
@@ -78,12 +75,12 @@ func Test_Redis_Retrieve(t *testing.T) {
 				flagStr += "}"
 				assert.JSONEq(t, string(got), flagStr)
 			}
-
 		})
 	}
 }
 
-func startRedisAndAddData(t *testing.T, testName string, files []string, prefix string) *redis.Options {
+// startRedisAndAddData starts a Redis container, terminated when the test ends, and seeds it with the flag files.
+func startRedisAndAddData(t *testing.T, files []string, prefix string) *redis.Options {
 	ctx := context.TODO()
 
 	redisContainer, err := testcontainerRedis.RunContainer(ctx,
@@ -92,10 +89,11 @@ func startRedisAndAddData(t *testing.T, testName string, files []string, prefix 
 		testcontainerRedis.WithLogLevel(testcontainerRedis.LogLevelVerbose),
 		testcontainerRedis.WithConfigFile(filepath.Join("testdata", "redis.conf")),
 	)
-	assert.NoError(t, err)
+	testcontainers.CleanupContainer(t, redisContainer)
+	require.NoError(t, err)
 
 	address, err := redisContainer.Endpoint(ctx, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	options := &redis.Options{
 		Addr: address,
@@ -106,20 +104,9 @@ func startRedisAndAddData(t *testing.T, testName string, files []string, prefix 
 	for _, file := range files {
 		flagName, content := readFile(t, file)
 		_, errAdd := rdb.Set(ctx, prefix+flagName, string(content), 0).Result()
-		assert.NoError(t, errAdd)
-
+		require.NoError(t, errAdd)
 	}
-	redisContainerList[testName] = redisContainer
 	return options
-}
-
-func stopRedis(t *testing.T, testName string) {
-	redisContainer := redisContainerList[testName]
-	if redisContainer != nil {
-		if err := redisContainer.Terminate(context.TODO()); err != nil {
-			assert.NoError(t, err)
-		}
-	}
 }
 
 func TestRedisStatus(t *testing.T) {
@@ -135,8 +122,7 @@ func TestRedisStatus(t *testing.T) {
 }
 
 func TestRedisShutdown(t *testing.T) {
-	options := startRedisAndAddData(t, t.Name(), []string{"flag1.json"}, "")
-	defer stopRedis(t, t.Name())
+	options := startRedisAndAddData(t, []string{"flag1.json"}, "")
 
 	t.Run("should close connection successfully", func(t *testing.T) {
 		retriever := &redisretriever.Retriever{
@@ -144,7 +130,7 @@ func TestRedisShutdown(t *testing.T) {
 		}
 
 		err := retriever.Init(context.TODO(), nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		err = retriever.Shutdown(context.TODO())
@@ -168,7 +154,7 @@ func TestRedisShutdown(t *testing.T) {
 		}
 
 		err := retriever.Init(context.TODO(), nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		// First shutdown
@@ -224,7 +210,7 @@ func TestRedisShutdown(t *testing.T) {
 		}
 
 		err := retriever.Init(context.TODO(), nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		err = retriever.Shutdown(context.TODO())

@@ -69,12 +69,14 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
 	for _, key := range updatedKeys {
 		value := diffCache.Updated[key]
 		msgText += fmt.Sprintf("\n * ✏️ Flag **%s** updated", key)
-		changes, err := notifier.FlagChanges(value.Before, value.After)
+		// Adaptive Card markdown has no inline code, so the changes are described without it.
+		changes, err := notifier.DescribeChangesPlain(value.Before, value.After)
 		if err != nil {
 			msgText += fmt.Sprintf("\n   * %s: %s", notifier.ChangesUnavailable, err)
+			continue
 		}
-		for _, change := range changes {
-			msgText += fmt.Sprintf("\n   * %s: %s => %s", change.Path, change.From, change.To)
+		if len(changes) > 0 {
+			msgText += "\n" + notifier.ChangeList(changes, "   * ", 0)
 		}
 	}
 	return msgText
