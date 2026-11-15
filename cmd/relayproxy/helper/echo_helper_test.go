@@ -296,4 +296,13 @@ func TestFlagKey(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+
+	t.Run("malformed escape returns the raw value", func(t *testing.T) {
+		// net/http rejects malformed escapes before routing, so build the context by hand.
+		req := httptest.NewRequest(http.MethodPost, "/flags/x", nil)
+		req.URL.RawPath = "/flags/a%zz"
+		c := echo.New().NewContext(req, httptest.NewRecorder())
+		c.SetPathValues(echo.PathValues{{Name: "flagKey", Value: "a%zz"}})
+		assert.Equal(t, "a%zz", helper.FlagKey(c))
+	})
 }
