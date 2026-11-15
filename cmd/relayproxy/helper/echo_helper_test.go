@@ -268,3 +268,41 @@ func TestFlagSetIntegration(t *testing.T) {
 		assert.NotNil(t, flagset)
 	})
 }
+
+func TestFlagKey(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		want string
+	}{
+		{name: "plain key", path: "/flags/my-flag", want: "my-flag"},
+		{name: "escaped colon", path: "/flags/team%3Acheckout", want: "team:checkout"},
+		{name: "escaped slash", path: "/flags/checkout%2Fnew", want: "checkout/new"},
+		{name: "escaped plus", path: "/flags/plan%2Bpro", want: "plan+pro"},
+		{name: "escaped space", path: "/flags/new%20checkout", want: "new checkout"},
+		{name: "escaped percent", path: "/flags/100%25", want: "100%"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got string
+			e := echo.New()
+			e.POST("/flags/:flagKey", func(c *echo.Context) error {
+				got = helper.FlagKey(c)
+				return c.NoContent(http.StatusOK)
+			})
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, tt.path, nil))
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+
+	t.Run("malformed escape returns the raw value", func(t *testing.T) {
+		// net/http rejects malformed escapes before routing, so build the context by hand.
+		req := httptest.NewRequest(http.MethodPost, "/flags/x", nil)
+		req.URL.RawPath = "/flags/a%zz"
+		c := echo.New().NewContext(req, httptest.NewRecorder())
+		c.SetPathValues(echo.PathValues{{Name: "flagKey", Value: "a%zz"}})
+		assert.Equal(t, "a%zz", helper.FlagKey(c))
+	})
+}
