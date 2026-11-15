@@ -10,7 +10,7 @@ By default, the retrievers are called regularly to refresh the configuration bas
 But there are use cases where you want to refresh the configuration explicitly _(for example, during the CI process
 after you have changed your configuration file)_.
 
-To do so you can call the `/v1/admin/retriever/refresh` endpoint with a POST request.  
+To do so you can call the `/admin/v1/retriever/refresh` endpoint with a POST request.
 It will force the retrievers to be called and update the internal cache.
 
 ```shell

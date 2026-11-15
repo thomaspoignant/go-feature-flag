@@ -68,7 +68,7 @@ If you intend to partially rollout or keep both features, you can use the `perce
         date: 2024-01-05T05:00:00.100Z
 ```
 
-- Before the `initial` date, the flag will return **variationB 20% of the time** and **variationA 80% of the time**.
-- Between the `initial` and `end` date, the flag will gradually shift to return variationB more instead of variationA.
-- After the `end` date, the flag will return **variationB 80% of the time** and **variationA 20% of the time**.
-- This may not be intuitive. It starts with variationA as the dominant response and gradually shifts towards variationB.
+- Before the `initial` date, the flag will return **variationA for all users**.
+- At the `initial` date, the configured split starts at **20% variationB** and **80% variationA**.
+- Between the `initial` and `end` dates, the share of users receiving variationB gradually increases from **20% to 80%**.
+- At and after the `end` date, the configured split remains at **80% variationB** and **20% variationA**.

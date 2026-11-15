@@ -32,7 +32,7 @@ WHITE  := $(shell tput -Txterm setaf 7)
 CYAN   := $(shell tput -Txterm setaf 6)
 RESET  := $(shell tput -Txterm sgr0)
 
-.PHONY: all test build vendor
+.PHONY: all test build vendor fuzz
 
 all: help
 ## Build:
@@ -168,6 +168,9 @@ test: ## Run the tests of the project
 		cd - >/dev/null; \
 	done
 
+fuzz: ## Run every fuzz test for a bounded time (usage: make fuzz FUZZTIME=10s)
+	@FUZZTIME="$(or $(FUZZTIME),10s)" GOWORK_ENV="$(GOWORK_ENV)" GOCMD="$(GOCMD)" .github/ci-scripts/fuzz.sh $(ALL_GO_MOD_DIRS)
+
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
@@ -177,7 +180,7 @@ coverage: ## Run the tests of the project and export the coverage for all module
 		echo "Running coverage for $$module..."; \
 		export original_path=$(shell pwd); \
 		covfile="coverage-$$(basename $$module).cov.tmp"; \
-		cd $$module && $(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=$${original_path}/$${covfile} ./...; \
+		cd $$module && $(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=$${original_path}/$${covfile} ./... || exit 1; \
 		cd $$original_path; \
 	done
 	@echo "mode: count" > coverage.cov && cat *.cov.tmp | grep -v "mode: count" | grep -v "/examples/" >> coverage.cov

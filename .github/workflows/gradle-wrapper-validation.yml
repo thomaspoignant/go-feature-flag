@@ -1,0 +1,24 @@
+name: "Gradle wrapper validation"
+# Kept out of ci.yml on purpose: Scorecard's Binary-Artifacts check only exempts
+# gradle-wrapper.jar when this workflow already succeeded on the scanned commit.
+# scorecard.yml is triggered by this workflow's name, keep them in sync.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  # Job name is a required status check on main, do not rename.
+  GraddleWrapperValidation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
