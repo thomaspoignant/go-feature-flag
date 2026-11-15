@@ -279,15 +279,6 @@ jobs:
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: uv run --no-sync --no-build pytest
-  GraddleWrapperValidation:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
   Verify:
     runs-on: ubuntu-latest
     permissions:
