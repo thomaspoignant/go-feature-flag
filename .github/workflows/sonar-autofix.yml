@@ -125,11 +125,21 @@ jobs:
             --max-turns 80
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(cd:*),Bash(jq:*),Bash(go build:*),Bash(go vet:*),Bash(go test:*),Bash(gofmt:*),Bash(make lint),Bash(npm ci:*),Bash(npm run:*),Bash(git diff:*),Bash(git status:*)"
 
-      # Step 4: open the pull request. This is a no-op when Claude changed nothing.
-      - name: Create Pull Request
+      # Step 4: open the pull request, only when Claude changed something. When Claude
+      # picks no issue it writes no pr-body.md, and create-pull-request fails on a
+      # missing body-path instead of doing nothing.
+      - name: Check for changes
+        id: changes
         if: >-
           fromJSON(steps.previous_pr.outputs.data).total_count == 0 &&
           fromJSON(steps.sonar.outputs.response).total > 0
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           branch: sonar-autofix/${{ github.run_number }}
