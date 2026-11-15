@@ -29,9 +29,31 @@
 > 
 > If you want to support me and GO Feature Flag, you can also [become a sponsor](https://github.com/sponsors/thomaspoignant).
 
+## Used by
+
+GO Feature Flag is used by teams at:
+
+<p align="center">
+  <img src="website/static/img/using-it/grafana.png" width="160" alt="Grafana Labs" />
+  <img src="website/static/img/using-it/miro.png" width="100" alt="Miro" />
+  <img src="website/static/img/using-it/castai.png" width="90" alt="Cast.ai" />
+  <img src="website/static/img/using-it/lyft.png" width="50" alt="Lyft" />
+  <img src="website/static/img/using-it/tencent.png" width="120" alt="Tencent" />
+  <img src="website/static/img/using-it/minder.png" width="110" alt="Minder" />
+  <img src="website/static/img/using-it/agentero.png" width="110" alt="Agentero" />
+  <img src="website/static/img/using-it/landsend.png" width="120" alt="Lands’ End" />
+  <img src="website/static/img/using-it/alternativepayment.png" width="130" alt="Alternative Payments" />
+  <img src="website/static/img/using-it/mecena.png" width="110" alt="Mecena" />
+  <img src="website/static/img/using-it/helloworldcs.png" width="100" alt="HelloWorld CS" />
+  <img src="website/static/img/using-it/stacklok.png" width="110" alt="Stacklok" />
+</p>
+
+See the full [adopters list](./ADOPTERS.md), or add your organization.
+
 ## Table of Contents
 
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
+  - [Used by](#used-by)
   - [Table of Contents](#table-of-contents)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
