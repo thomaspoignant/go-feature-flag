@@ -320,4 +320,4 @@ replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
 // This fix is needed to resolve semver comparison issues with prerelease versions.
 // Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+replace github.com/nikunjy/rules => github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e

@@ -10,7 +10,7 @@ require (
 )
 
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+replace github.com/nikunjy/rules => github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect

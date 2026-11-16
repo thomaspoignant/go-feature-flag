@@ -179,7 +179,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 func validateNikunjyQuery(query string) error {
 	ev, err := parser.NewEvaluator(query)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid query: %w", err)
 	}
 	_, err = ev.Process(map[string]any{})
 	if err != nil {

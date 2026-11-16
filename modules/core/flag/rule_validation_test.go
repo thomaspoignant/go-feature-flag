@@ -1163,14 +1163,15 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 			wantErrMsg:  "invalid query",
 		},
 		{
-			name: "invalid query with malformed parentheses - removed as parser accepts it",
+			name: "invalid query with malformed parentheses",
 			rule: flag.Rule{
 				Query:           testconvert.String("key eq \"test\" and (version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:     assert.NoError, // Parser accepts this, so we accept it
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid query",
 		},
 		{
 			name: "empty query",
