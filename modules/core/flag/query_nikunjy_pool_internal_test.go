@@ -212,7 +212,7 @@ func TestNikunjyEvaluatorCache_EvictsQueriesRemovedByAReload(t *testing.T) {
 	require.Equal(t, 2, refCount(c, kept))
 	require.Zero(t, refCount(c, jsonLogic), "a jsonlogic query is not a nikunjy query")
 
-	oldFlag = nil
+	runtime.KeepAlive(oldFlag)
 	gcUntil(t, func() bool { return refCount(c, kept) == 1 },
 		"the rules of the previous configuration must release their queries once collected")
 
@@ -232,14 +232,14 @@ func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testin
 	require.NoError(t, first.IsValid())
 	second := newFlagWithQueries(query)
 	require.NoError(t, second.IsValid())
+	require.Equal(t, 2, refCount(c, query))
 
-	first = nil
+	runtime.KeepAlive(first)
 	gcUntil(t, func() bool { return refCount(c, query) == 1 }, "the first rule list must release its query")
 	_, ok := c.entries.Load(query)
 	require.True(t, ok, "a query another rule list still uses must stay cached")
 
 	runtime.KeepAlive(second)
-	second = nil
 	gcUntil(t, func() bool {
 		_, ok := c.entries.Load(query)
 		return !ok
