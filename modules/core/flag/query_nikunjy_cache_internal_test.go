@@ -7,118 +7,61 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nikunjy/rules/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestNikunjyEvaluatorCache_KeepsEvaluatorAcrossGC(t *testing.T) {
-	p, err := newNikunjyEvaluatorCache().get(`key eq "survives-gc"`)
-	require.NoError(t, err)
-	_, err = p.process(map[string]any{"key": "survives-gc"})
-	require.NoError(t, err)
-	parsed := p.pinned.Load()
-	require.NotNil(t, parsed, "the first evaluation pins an evaluator")
-
-	runtime.GC()
-	runtime.GC()
-	ok, err := p.process(map[string]any{"key": "survives-gc"})
-
-	require.NoError(t, err)
-	assert.True(t, ok)
-	assert.Same(t, parsed, p.pinned.Load(), "evaluation after GC must reuse the evaluator parsed before it")
-}
-
 func TestNikunjyEvaluatorCache_Validate(t *testing.T) {
 	tests := []struct {
-		name          string
-		query         string
-		evaluateFirst bool
-		wantErr       assert.ErrorAssertionFunc
-		// wantRemembered: a second validation, after a GC, must not parse the query again.
-		wantRemembered bool
+		name       string
+		query      string
+		wantErr    assert.ErrorAssertionFunc
+		wantCached bool
 	}{
 		{
-			name:           "valid query is cached but not pinned",
-			query:          `key eq "validated"`,
-			wantErr:        assert.NoError,
-			wantRemembered: true,
+			name:       "valid query is cached for evaluation",
+			query:      `key eq "validated"`,
+			wantErr:    assert.NoError,
+			wantCached: true,
 		},
 		{
-			name:    "invalid query fails every validation",
+			name:    "query that does not parse fails every validation",
 			query:   `invalid query syntax`,
 			wantErr: assert.Error,
 		},
 		{
-			name:           "evaluated query stays pinned",
-			query:          `key eq "evaluated-then-validated"`,
-			evaluateFirst:  true,
-			wantErr:        assert.NoError,
-			wantRemembered: true,
+			name:       "query that parses but fails on an empty context fails every validation",
+			query:      `key co 1`,
+			wantErr:    assert.Error,
+			wantCached: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := newNikunjyEvaluatorCache()
-			var pinned *parser.Evaluator
-			if tt.evaluateFirst {
-				p, err := c.get(tt.query)
-				require.NoError(t, err)
-				_, err = p.process(map[string]any{})
-				require.NoError(t, err)
-				pinned = p.pinned.Load()
-				require.NotNil(t, pinned)
-			}
 
 			tt.wantErr(t, c.validate(tt.query))
-
 			cached, ok := c.entries.Load(tt.query)
-			require.True(t, ok, "validation must leave the parsed query in the cache")
-			p, err := c.get(tt.query)
-			require.NoError(t, err)
-			assert.Same(t, cached, p, "evaluation must reuse the cache entry created during validation")
+			require.Equal(t, tt.wantCached, ok, "is the query cached after validation")
 
-			if tt.wantRemembered {
-				p.pool.New = func() any {
-					t.Error("validating a valid query again must not parse it")
-					return nil
-				}
-			}
 			runtime.GC()
 			runtime.GC()
 			tt.wantErr(t, c.validate(tt.query), "validating a query again must give the same result")
-
-			if tt.evaluateFirst {
-				assert.Same(t, pinned, p.pinned.Load(), "validating an evaluated query must leave its evaluator pinned")
-			} else {
-				assert.Nil(t, p.pinned.Load(), "the parse of a query that is only validated must stay collectable")
+			if tt.wantCached {
+				ev, err := c.get(tt.query)
+				require.NoError(t, err)
+				assert.Same(t, cached, ev, "evaluation after a GC must reuse the evaluator parsed by validation")
 			}
 		})
 	}
 }
 
-func TestNikunjyEvaluatorCache_ConcurrentUseTakesAnotherEvaluator(t *testing.T) {
-	p, err := newNikunjyEvaluatorCache().get(`key eq "overflow"`)
-	require.NoError(t, err)
-	_, err = p.process(map[string]any{})
-	require.NoError(t, err)
-	pinned := p.pinned.Load()
-	require.NotNil(t, pinned)
-
-	first := p.get()
-	second := p.get()
-
-	assert.Same(t, pinned, first, "the first evaluation takes the pinned evaluator")
-	assert.NotSame(t, first, second, "an evaluation running at the same time gets its own evaluator")
-	p.put(second)
-	p.put(first)
-	assert.Same(t, second, p.pinned.Load(), "the first evaluator returned is pinned again")
-}
-
-func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *testing.T) {
-	p, err := newNikunjyEvaluatorCache().get(`group eq "match"`)
+func TestNikunjyEvaluatorCache_ConcurrentEvaluationsShareOneEvaluator(t *testing.T) {
+	c := newNikunjyEvaluatorCache()
+	const query = `group eq "match"`
+	ev, err := c.get(query)
 	require.NoError(t, err)
 
 	goroutines := 4 * runtime.GOMAXPROCS(0)
@@ -128,20 +71,23 @@ func TestNikunjyEvaluatorCache_ConcurrentEvaluationsDoNotShareEvaluators(t *test
 		go func() {
 			defer wg.Done()
 			for i := range 200 {
+				shared, err := c.get(query)
+				if !assert.NoError(t, err) {
+					return
+				}
+				assert.Same(t, ev, shared, "every evaluation must share the cached evaluator")
 				wantMatch := (g+i)%2 == 0
 				group := "other"
 				if wantMatch {
 					group = "match"
 				}
-				ok, err := p.process(map[string]any{"group": group})
+				ok, err := shared.Process(map[string]any{"group": group})
 				assert.NoError(t, err)
 				assert.Equal(t, wantMatch, ok, "goroutine %d iteration %d", g, i)
 			}
 		}()
 	}
 	wg.Wait()
-
-	assert.NotNil(t, p.pinned.Load(), "an evaluator is pinned again once every evaluation returned")
 }
 
 // BenchmarkRule_ValidateThenEvaluate measures loading a rule with a query never

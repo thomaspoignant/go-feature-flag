@@ -9,8 +9,10 @@ require (
 	github.com/stretchr/testify v1.12.1
 )
 
-// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+// The evaluator cache shares one evaluator per query between goroutines, which needs
+// https://github.com/go-feature-flag/rules/pull/1 (compiled, concurrency-safe Process).
+// TODO: point at a github.com/go-feature-flag/rules tag once that PR merges.
+replace github.com/nikunjy/rules => github.com/jh125486/rules v1.5.1-0.20261116140709-a9eeb6d8d42d
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect

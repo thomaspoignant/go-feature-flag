@@ -55,7 +55,7 @@ func FuzzEvaluateRule(f *testing.F) {
 		default:
 			ev, err := nikunjyEvaluators.get(r.GetTrimmedQuery())
 			require.NoError(t, err, "query passed validation but does not parse")
-			_, _ = ev.process(mapCtx)
+			_, _ = ev.Process(mapCtx)
 		}
 	})
 }
