@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nikunjy/rules/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -30,60 +31,72 @@ func TestNikunjyEvaluatorCache_KeepsEvaluatorAcrossGC(t *testing.T) {
 	assert.Same(t, parsed, p.pinned.Load(), "evaluation after GC must reuse the evaluator parsed before it")
 }
 
-func TestNikunjyEvaluatorCache_ValidateSeedsTheCacheWithoutPinning(t *testing.T) {
-	c := newNikunjyEvaluatorCache()
-	const query = `key eq "seeded-by-validation"`
-
-	require.NoError(t, c.validate(query))
-
-	cached, ok := c.entries.Load(query)
-	require.True(t, ok, "validation must leave the parsed query in the cache")
-	p, err := c.get(query)
-	require.NoError(t, err)
-	assert.Same(t, cached, p, "evaluation must reuse the cache entry created during validation")
-	assert.Nil(t, p.pinned.Load(), "the parse of a query that is only validated must stay collectable")
-}
-
-func TestNikunjyEvaluatorCache_ValidateRemembersAValidQuery(t *testing.T) {
-	c := newNikunjyEvaluatorCache()
-	const query = `key eq "validated-twice"`
-	require.NoError(t, c.validate(query))
-	p, err := c.get(query)
-	require.NoError(t, err)
-	p.pool.New = func() any {
-		t.Error("validating a valid query again must not parse it")
-		return nil
+func TestNikunjyEvaluatorCache_Validate(t *testing.T) {
+	tests := []struct {
+		name          string
+		query         string
+		evaluateFirst bool
+		wantErr       assert.ErrorAssertionFunc
+		// wantRemembered: a second validation, after a GC, must not parse the query again.
+		wantRemembered bool
+	}{
+		{
+			name:           "valid query is cached but not pinned",
+			query:          `key eq "validated"`,
+			wantErr:        assert.NoError,
+			wantRemembered: true,
+		},
+		{
+			name:    "invalid query fails every validation",
+			query:   `invalid query syntax`,
+			wantErr: assert.Error,
+		},
+		{
+			name:           "evaluated query stays pinned",
+			query:          `key eq "evaluated-then-validated"`,
+			evaluateFirst:  true,
+			wantErr:        assert.NoError,
+			wantRemembered: true,
+		},
 	}
-	runtime.GC()
-	runtime.GC()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := newNikunjyEvaluatorCache()
+			var pinned *parser.Evaluator
+			if tt.evaluateFirst {
+				p, err := c.get(tt.query)
+				require.NoError(t, err)
+				_, err = p.process(map[string]any{})
+				require.NoError(t, err)
+				pinned = p.pinned.Load()
+				require.NotNil(t, pinned)
+			}
 
-	assert.NoError(t, c.validate(query))
-}
+			tt.wantErr(t, c.validate(tt.query))
 
-func TestNikunjyEvaluatorCache_ValidateDoesNotRememberAnInvalidQuery(t *testing.T) {
-	c := newNikunjyEvaluatorCache()
-	const query = `invalid query syntax`
+			cached, ok := c.entries.Load(tt.query)
+			require.True(t, ok, "validation must leave the parsed query in the cache")
+			p, err := c.get(tt.query)
+			require.NoError(t, err)
+			assert.Same(t, cached, p, "evaluation must reuse the cache entry created during validation")
 
-	require.Error(t, c.validate(query))
-	_, ok := c.entries.Load(query)
-	require.True(t, ok, "the query parses, so validation leaves a cache entry")
+			if tt.wantRemembered {
+				p.pool.New = func() any {
+					t.Error("validating a valid query again must not parse it")
+					return nil
+				}
+			}
+			runtime.GC()
+			runtime.GC()
+			tt.wantErr(t, c.validate(tt.query), "validating a query again must give the same result")
 
-	assert.Error(t, c.validate(query), "an invalid query must fail every validation")
-}
-
-func TestNikunjyEvaluatorCache_ValidateKeepsAnEvaluatedQueryPinned(t *testing.T) {
-	c := newNikunjyEvaluatorCache()
-	const query = `key eq "evaluated-then-validated"`
-	p, err := c.get(query)
-	require.NoError(t, err)
-	_, err = p.process(map[string]any{})
-	require.NoError(t, err)
-	pinned := p.pinned.Load()
-	require.NotNil(t, pinned)
-
-	require.NoError(t, c.validate(query))
-
-	assert.Same(t, pinned, p.pinned.Load(), "validating an evaluated query must leave its evaluator pinned")
+			if tt.evaluateFirst {
+				assert.Same(t, pinned, p.pinned.Load(), "validating an evaluated query must leave its evaluator pinned")
+			} else {
+				assert.Nil(t, p.pinned.Load(), "the parse of a query that is only validated must stay collectable")
+			}
+		})
+	}
 }
 
 func TestNikunjyEvaluatorCache_ConcurrentUseTakesAnotherEvaluator(t *testing.T) {
@@ -197,52 +210,80 @@ func gcUntil(t *testing.T, condition func() bool, msg string) {
 	}, 5*time.Second, 10*time.Millisecond, msg)
 }
 
-func TestNikunjyEvaluatorCache_EvictsQueriesRemovedByAReload(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
+func TestNikunjyEvaluatorCache_Eviction(t *testing.T) {
 	const (
 		removed   = `key eq "removed-by-reload"`
 		kept      = `key eq "kept-by-reload"`
 		added     = `key eq "added-by-reload"`
 		jsonLogic = `{"==": [{"var": "key"}, "json-logic"]}`
 	)
-	oldFlag := newFlagWithQueries(removed, kept, jsonLogic)
-	require.NoError(t, oldFlag.IsValid())
-	newFlag := newFlagWithQueries(kept, added)
-	require.NoError(t, newFlag.IsValid())
-	require.Equal(t, 2, refCount(c, kept))
-	require.Zero(t, refCount(c, jsonLogic), "a jsonlogic query is not a nikunjy query")
+	tests := []struct {
+		name       string
+		oldQueries []string
+		newQueries []string
+		// wantRefs: the references per query once both rule lists are validated.
+		wantRefs map[string]int
+		// wantEvicted and wantCached: the cache once the old rule list is collected.
+		wantEvicted []string
+		wantCached  []string
+	}{
+		{
+			name:        "a reload evicts the removed query and keeps the others",
+			oldQueries:  []string{removed, kept, jsonLogic},
+			newQueries:  []string{kept, added},
+			wantRefs:    map[string]int{removed: 1, kept: 2, added: 1, jsonLogic: 0},
+			wantEvicted: []string{removed},
+			wantCached:  []string{kept, added},
+		},
+		{
+			name:       "a query shared by two rule lists stays until both are collected",
+			oldQueries: []string{kept},
+			newQueries: []string{kept},
+			wantRefs:   map[string]int{kept: 2},
+			wantCached: []string{kept},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := useFreshNikunjyEvaluators(t)
+			oldFlag := newFlagWithQueries(tt.oldQueries...)
+			require.NoError(t, oldFlag.IsValid())
+			newFlag := newFlagWithQueries(tt.newQueries...)
+			require.NoError(t, newFlag.IsValid())
+			for query, want := range tt.wantRefs {
+				require.Equal(t, want, refCount(c, query), "references of %s", query)
+			}
 
-	runtime.KeepAlive(oldFlag)
-	gcUntil(t, func() bool { return refCount(c, kept) == 1 },
-		"the rules of the previous configuration must release their queries once collected")
+			runtime.KeepAlive(oldFlag)
+			gcUntil(t, func() bool {
+				for _, query := range tt.newQueries {
+					if refCount(c, query) != 1 {
+						return false
+					}
+				}
+				return true
+			}, "the old rule list must release its queries once collected")
+			for _, query := range tt.wantEvicted {
+				_, ok := c.entries.Load(query)
+				assert.False(t, ok, "%s must be evicted: no rule uses it anymore", query)
+			}
+			for _, query := range tt.wantCached {
+				_, ok := c.entries.Load(query)
+				assert.True(t, ok, "%s must stay cached: the new rule list uses it", query)
+			}
 
-	_, ok := c.entries.Load(removed)
-	assert.False(t, ok, "a query no rule uses anymore must be evicted")
-	_, ok = c.entries.Load(kept)
-	assert.True(t, ok, "a query the new configuration still uses must stay cached")
-	_, ok = c.entries.Load(added)
-	assert.True(t, ok, "a query added by the new configuration must stay cached")
-	runtime.KeepAlive(newFlag)
-}
-
-func TestNikunjyEvaluatorCache_EvictsAQueryOnceEveryRuleListReleasedIt(t *testing.T) {
-	c := useFreshNikunjyEvaluators(t)
-	const query = `key eq "shared-by-two-clients"`
-	first := newFlagWithQueries(query)
-	require.NoError(t, first.IsValid())
-	second := newFlagWithQueries(query)
-	require.NoError(t, second.IsValid())
-	require.Equal(t, 2, refCount(c, query))
-
-	runtime.KeepAlive(first)
-	gcUntil(t, func() bool { return refCount(c, query) == 1 }, "the first rule list must release its query")
-	_, ok := c.entries.Load(query)
-	require.True(t, ok, "a query another rule list still uses must stay cached")
-
-	runtime.KeepAlive(second)
-	gcUntil(t, func() bool {
-		_, ok := c.entries.Load(query)
-		return !ok
-	}, "a query must be evicted once the last rule list using it is collected")
-	assert.Zero(t, refCount(c, query))
+			runtime.KeepAlive(newFlag)
+			gcUntil(t, func() bool {
+				for _, query := range tt.wantCached {
+					if _, ok := c.entries.Load(query); ok {
+						return false
+					}
+				}
+				return true
+			}, "the last rule list using a query must evict it once collected")
+			for query := range tt.wantRefs {
+				assert.Zero(t, refCount(c, query), "references of %s", query)
+			}
+		})
+	}
 }
