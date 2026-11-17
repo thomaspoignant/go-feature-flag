@@ -355,7 +355,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 				DbUser:        "goff_writer",
 			},
 			wantErr:  true,
-			errValue: "invalid exporter: \"dbUser\" can only be used with \"clusterIdentifier\", not with \"workgroupName\" for kind \"redshift\"",
+			errValue: "invalid exporter: \"dbUser\" cannot be used with \"workgroupName\" for kind \"redshift\"",
 		},
 		{
 			name: "kind Redshift with dbUser and secretArn",

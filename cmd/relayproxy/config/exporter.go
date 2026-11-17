@@ -145,7 +145,7 @@ func (c *ExporterConf) isValidRedshift() error {
 	}
 	if c.DbUser != "" && c.WorkgroupName != "" {
 		return fmt.Errorf(
-			"invalid exporter: \"dbUser\" can only be used with \"clusterIdentifier\", not with \"workgroupName\" for kind \"%s\"",
+			"invalid exporter: \"dbUser\" cannot be used with \"workgroupName\" for kind \"%s\"",
 			c.Kind,
 		)
 	}
