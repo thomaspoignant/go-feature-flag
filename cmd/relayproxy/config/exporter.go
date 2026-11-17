@@ -143,6 +143,18 @@ func (c *ExporterConf) isValidRedshift() error {
 			c.Kind,
 		)
 	}
+	if c.DbUser != "" && c.WorkgroupName != "" {
+		return fmt.Errorf(
+			"invalid exporter: \"dbUser\" can only be used with \"clusterIdentifier\", not with \"workgroupName\" for kind \"%s\"",
+			c.Kind,
+		)
+	}
+	if c.DbUser != "" && c.SecretArn != "" {
+		return fmt.Errorf(
+			"invalid exporter: \"dbUser\" and \"secretArn\" are mutually exclusive for kind \"%s\"",
+			c.Kind,
+		)
+	}
 	if !redshiftexporter.IsValidTableName(c.TableName) {
 		return fmt.Errorf(
 			"invalid exporter: \"tableName\" %q is not a valid table name for kind \"%s\"",
