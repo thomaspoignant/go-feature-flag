@@ -4,7 +4,7 @@ go 1.25.14
 
 require (
 	github.com/stretchr/testify v1.12.1
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.8.0
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.8.1
 )
 
 require (
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/diegoholiveira/jsonlogic/v3 v3.10.1 // indirect
+	github.com/diegoholiveira/jsonlogic/v3 v3.10.2 // indirect
 	github.com/nikunjy/rules v1.5.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297 // indirect
