@@ -65,12 +65,14 @@ exporters:
 | `database`          |  <Mandatory />   | string  | **none**                                                      | Name of the Redshift database receiving the events.                                                                 |
 | `clusterIdentifier` | <NotMandatory /> | string  | **none**                                                      | Identifier of a provisioned Redshift cluster. Set either `clusterIdentifier` or `workgroupName`.                    |
 | `workgroupName`     | <NotMandatory /> | string  | **none**                                                      | Name or ARN of a Redshift Serverless workgroup. Set either `clusterIdentifier` or `workgroupName`.                  |
-| `dbUser`            | <NotMandatory /> | string  | **none**                                                      | Database user used with `clusterIdentifier` to get temporary credentials.                                           |
-| `secretArn`         | <NotMandatory /> | string  | **none**                                                      | ARN of an AWS Secrets Manager secret containing the database credentials.                                           |
+| `dbUser`            | <NotMandatory /> | string  | **none**                                                      | Database user used with `clusterIdentifier` to get temporary credentials. It cannot be used with `workgroupName` or `secretArn`. |
+| `secretArn`         | <NotMandatory /> | string  | **none**                                                      | ARN of an AWS Secrets Manager secret containing the database credentials. It cannot be used with `dbUser`.          |
 | `tableName`         | <NotMandatory /> | string  | `feature_flag_evaluations` (feature), `tracking_events` (tracking) | Table used by this exporter instance, it can be prefixed by a schema (`my_schema.my_table`).                    |
 | `awsRegion`         | <NotMandatory /> | string  | **none**                                                      | AWS region of your Redshift cluster or workgroup. If empty, the default AWS configuration is used.                  |
 | `autoMigrate`       | <NotMandatory /> | boolean | `false`                                                       | When `true`, the exporter creates the table if it does not exist.                                                   |
 | `eventType`         | <NotMandatory /> | string  | `feature`                                                     | Event type to export. Use `feature` for evaluation events or `tracking` for tracking events.                        |
+| `flushInterval`     | <NotMandatory /> | int     | `60000`                                                       | The interval in millisecond between 2 calls to the exporter _(if the `maxEventInMemory` is reached before the flushInterval we will call the exporter before)_. |
+| `maxEventInMemory`  | <NotMandatory /> | int     | `100000`                                                      | If we hit that limit we will call the exporter.                                                                     |
 
 ## Configure the GO Module
 To configure your GO module to use the {exporterName} exporter, you need to add the following
@@ -79,7 +81,7 @@ configuration to your `ffclient.Config{}` object:
 ```go title="example.go"
 awsConfig, _ := config.LoadDefaultConfig(context.Background())
 
-config := ffclient.Config{
+ffConfig := ffclient.Config{
     // ...
     DataExporters: []ffclient.DataExporter{
         {
@@ -107,7 +109,7 @@ config := ffclient.Config{
     },
     // ...
 }
-err := ffclient.Init(config)
+err := ffclient.Init(ffConfig)
 defer ffclient.Close()
 ```
 
@@ -116,24 +118,36 @@ defer ffclient.Close()
 | `Database`          |  <Mandatory />   | **none**                                                           | Name of the Redshift database receiving the events.                                               |
 | `ClusterIdentifier` | <NotMandatory /> | **none**                                                           | Identifier of a provisioned Redshift cluster. Set either `ClusterIdentifier` or `WorkgroupName`.  |
 | `WorkgroupName`     | <NotMandatory /> | **none**                                                           | Name or ARN of a Redshift Serverless workgroup. Set either `ClusterIdentifier` or `WorkgroupName`.|
-| `DbUser`            | <NotMandatory /> | **none**                                                           | Database user used with `ClusterIdentifier` to get temporary credentials.                         |
-| `SecretArn`         | <NotMandatory /> | **none**                                                           | ARN of an AWS Secrets Manager secret containing the database credentials.                         |
+| `DbUser`            | <NotMandatory /> | **none**                                                           | Database user used with `ClusterIdentifier` to get temporary credentials. It cannot be used with `WorkgroupName` or `SecretArn`. |
+| `SecretArn`         | <NotMandatory /> | **none**                                                           | ARN of an AWS Secrets Manager secret containing the database credentials. It cannot be used with `DbUser`. |
 | `TableName`         | <NotMandatory /> | `feature_flag_evaluations` (feature), `tracking_events` (tracking) | Table used by this exporter instance, it can be prefixed by a schema.                             |
 | `AwsConfig`         | <NotMandatory /> | **none**                                                           | AWS SDK configuration. If empty, the default AWS configuration is loaded.                         |
 | `AutoMigrate`       | <NotMandatory /> | `false`                                                            | When `true`, the exporter creates the table if it does not exist.                                 |
+
+`FlushInterval` and `MaxEventInMemory` are fields of `ffclient.DataExporter` (next to `Exporter`), not of `redshiftexporter.Exporter`:
+
+| Field              |    Mandatory     | Default    | Description                                                                                                                                            |
+|--------------------|:----------------:|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `FlushInterval`    | <NotMandatory /> | `1 minute` | The interval (`time.Duration`) between 2 calls to the exporter _(if the `MaxEventInMemory` is reached before the FlushInterval we will call the exporter before)_. |
+| `MaxEventInMemory` | <NotMandatory /> | `100000`   | If we hit that limit we will call the exporter.                                                                                                        |
 
 ## Authentication
 
 The exporter uses the [Redshift Data API](https://docs.aws.amazon.com/redshift/latest/mgmt/data-api.html),
 so no JDBC connection or database password is needed. Depending on the fields you set, it authenticates with:
 
-- **IAM identity**: `clusterIdentifier` (or `workgroupName`) and `database`. The database user is derived from the IAM identity.
-- **Temporary credentials for a database user**: `clusterIdentifier`, `database` and `dbUser`.
-- **AWS Secrets Manager**: `clusterIdentifier` (or `workgroupName`), `database` and `secretArn`.
+| Authentication method                       | Fields                                                      | Permission required by the method                                                                              |
+|---------------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| **IAM identity**                            | `clusterIdentifier` (or `workgroupName`) and `database`     | `redshift:GetClusterCredentialsWithIAM` for a provisioned cluster, `redshift-serverless:GetCredentials` for Serverless. The database user is derived from the IAM identity. |
+| **Temporary credentials for a database user** | `clusterIdentifier`, `database` and `dbUser` (provisioned clusters only) | `redshift:GetClusterCredentials`                                                                |
+| **AWS Secrets Manager**                     | `clusterIdentifier` (or `workgroupName`), `database` and `secretArn` | `secretsmanager:GetSecretValue` on the secret                                                          |
 
-The IAM identity used by GO Feature Flag needs the `redshift-data:BatchExecuteStatement`, `redshift-data:DescribeStatement`
-and `redshift-data:CancelStatement` permissions, plus the permission required by the authentication method
-(for example `redshift:GetClusterCredentials`).
+In addition to the permission of the authentication method, the IAM identity used by GO Feature Flag needs these Redshift Data API permissions:
+
+- `redshift-data:BatchExecuteStatement` to run the `INSERT` (and `CREATE TABLE`) statements.
+- `redshift-data:DescribeStatement` to wait for the result of the statements. It is **required**: without it the `INSERT` still runs,
+  but the exporter cannot know it succeeded, so the export fails and the events are inserted again on the next flush.
+- `redshift-data:CancelStatement` to cancel a transaction that takes too long.
 
 ## How events are inserted
 
@@ -161,6 +175,11 @@ A flush that fails is retried with the same events, so the exporter avoids sendi
 
 When `autoMigrate` / `AutoMigrate` is enabled, the exporter runs a `CREATE TABLE IF NOT EXISTS` for the table it is about to write,
 using the schemas below. It is done once per exporter instance.
+
+:::warning
+AutoMigrate only creates the **table**, not the schema. If you use a schema-qualified `tableName` (e.g. `my_schema.my_table`),
+create the schema first (`CREATE SCHEMA IF NOT EXISTS my_schema`), otherwise the `CREATE TABLE` fails.
+:::
 
 ## Table schemas
 
