@@ -3161,7 +3161,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("A"),
 				},
 			},
-			errorMsg: "invalid query: Invalid rule",
+			errorMsg: "invalid query: invalid rule \"invalid\": line 1:7 no viable alternative at input 'invalid'",
 			wantErr:  assert.Error,
 		},
 	}

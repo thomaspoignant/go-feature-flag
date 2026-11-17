@@ -4,10 +4,10 @@ github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/diegoholiveira/jsonlogic/v3 v3.10.1 h1:LfEloCfkty+LOkYbLRTw7FrrQGqX+BYuKtPqizmoQ7k=
 github.com/diegoholiveira/jsonlogic/v3 v3.10.1/go.mod h1:mJcE63oWAS86KovXNXxyiBvJk8bvOaeGG7psnkzn9ms=
+github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e h1:3Gsg/Q2PEDX0D8uLX/2w8bedFFmZT7F9DCR7nQLymuY=
+github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e/go.mod h1:GuNyXWXF6lBCeCziZSIDhX/fF2t1rJ0mQT1lacWHhrE=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc h1:Lf2F57nHEebTz1Z1WVB/bt6k8LvRgk1hWdDGM+Y3TgQ=
-github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc/go.mod h1:GuNyXWXF6lBCeCziZSIDhX/fF2t1rJ0mQT1lacWHhrE=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=

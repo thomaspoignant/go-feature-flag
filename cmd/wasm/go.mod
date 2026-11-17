@@ -19,7 +19,7 @@ require (
 	golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297 // indirect
 )
 
-// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
-// This fix is needed to resolve semver comparison issues with prerelease versions.
-// Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+// github.com/go-feature-flag/rules is our maintained fork of github.com/nikunjy/rules (slow to merge changes).
+// It adds proper semver support (prerelease comparison, see https://github.com/thomaspoignant/go-feature-flag/issues/4736)
+// and rejects invalid rule syntax at parse time.
+replace github.com/nikunjy/rules => github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e
