@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag/modules/core
 go 1.25.0
 
 require (
-	github.com/diegoholiveira/jsonlogic/v3 v3.10.1
+	github.com/diegoholiveira/jsonlogic/v3 v3.10.2
 	github.com/google/go-cmp v0.7.0
 	github.com/nikunjy/rules v1.5.0
 	github.com/stretchr/testify v1.12.1
