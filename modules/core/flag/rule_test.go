@@ -126,6 +126,23 @@ func TestRuleEvaluate(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			// GHSA-mw4w-7w23-cg45: a context value shaped like JSON Logic must not be executed.
+			name: "JSONLogic does not execute logic coming from the context",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"some":[{"var":"orgs"},{"==":[{"var":"plan"},"enterprise"]}]}`),
+			},
+			args: args{
+				isDefault: false,
+				user: ffcontext.NewEvaluationContextBuilder("abc").
+					AddCustom("orgs", []any{map[string]any{"id": 1}}).
+					AddCustom("plan", map[string]any{"cat": []any{"enter", "prise"}}).
+					Build(),
+			},
+			wantErr: assert.Error,
+		},
+		{
 			name: "Invalid json for query",
 			rule: flag.Rule{
 				Name:            testconvert.String("rule1"),
