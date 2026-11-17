@@ -13,9 +13,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata"
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata/types"
+	"github.com/aws/smithy-go"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
@@ -207,7 +209,7 @@ func (e *Exporter) Export(
 	logger *fflog.FFLogger,
 	events []exporter.ExportableEvent,
 ) error {
-	rows, eventType, err := buildRows(events)
+	rows, eventType, err := buildRows(logger, events)
 	if err != nil {
 		return err
 	}
@@ -308,7 +310,7 @@ func (e *Exporter) migrate(ctx context.Context, table string, columns []column) 
 	for _, c := range columns {
 		definitions = append(definitions, quoteIdentifier(c.name)+" "+c.sqlType)
 	}
-	sql := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", table, strings.Join(definitions, ", "))
+	sql := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", quoteTableName(table), strings.Join(definitions, ", "))
 	if err := e.run(ctx, []string{sql}, nil); err != nil {
 		return err
 	}
@@ -354,7 +356,8 @@ func (e *Exporter) run(ctx context.Context, sqls []string, params []types.SqlPar
 }
 
 // waitForStatement polls the statement until it completes. DescribeStatement errors are
-// considered transient and retried until the context is done, the statement is then cancelled.
+// retried until the context is done, the statement is then cancelled. API errors that a new
+// attempt will not fix (e.g. AccessDeniedException, ValidationException) are returned immediately.
 func (e *Exporter) waitForStatement(ctx context.Context, id *string) error {
 	ticker := time.NewTicker(e.interval())
 	defer ticker.Stop()
@@ -366,6 +369,9 @@ func (e *Exporter) waitForStatement(ctx context.Context, id *string) error {
 			WaitTimeSeconds: aws.Int32(describeWaitSeconds),
 		})
 		if err != nil {
+			if isPermanentAPIError(err) {
+				return fmt.Errorf("redshift exporter: describe statement %s: %w", aws.ToString(id), err)
+			}
 			lastErr = err
 		} else if done, err := statementResult(id, output); done {
 			return err
@@ -396,7 +402,7 @@ func (e *Exporter) cancelStatement(ctx context.Context, id *string, lastErr erro
 	}
 
 	errs := []error{fmt.Errorf("redshift exporter: statement %s did not complete: %w", aws.ToString(id), ctx.Err())}
-	if lastErr != nil {
+	if lastErr != nil && !errors.Is(lastErr, ctx.Err()) {
 		errs = append(errs, fmt.Errorf("last describe statement error: %w", lastErr))
 	}
 	if cancelErr != nil {
@@ -422,6 +428,18 @@ func (e *Exporter) finishedAfterCancel(ctx context.Context, id *string) bool {
 		case <-ticker.C:
 		}
 	}
+}
+
+// isPermanentAPIError reports if err is an AWS API error that a new attempt will not fix.
+// Server errors and the errors the SDK considers retryable (throttling, 5xx, ...) are kept
+// retryable. We do not only check for client faults: errors that are not modeled by the
+// Redshift Data API, such as AccessDeniedException, have an unknown fault.
+func isPermanentAPIError(err error) bool {
+	var apiErr smithy.APIError
+	if !errors.As(err, &apiErr) || apiErr.ErrorFault() == smithy.FaultServer {
+		return false
+	}
+	return retry.IsErrorRetryables(retry.DefaultRetryables).IsErrorRetryable(err) != aws.TrueTernary
 }
 
 func (e *Exporter) interval() time.Duration {
@@ -461,10 +479,14 @@ func statementError(output *redshiftdata.DescribeStatementOutput) string {
 }
 
 // buildRows converts the events into rows and reports the event type of the batch.
-// Events this exporter does not handle are skipped.
-func buildRows(events []exporter.ExportableEvent) ([]row, string, error) {
+// Events this exporter does not handle are skipped. Events that cannot be converted to JSON
+// (e.g. a NaN value) are skipped with a warning: a failed export is retried with the same
+// events, so a single invalid event would block the exporter forever.
+func buildRows(logger *fflog.FFLogger, events []exporter.ExportableEvent) ([]row, string, error) {
 	rows := make([]row, 0, len(events))
 	eventType := ""
+	var skippedKeys []string
+	var firstErr error
 	for _, event := range events {
 		var values []string
 		var rowType string
@@ -479,16 +501,24 @@ func buildRows(events []exporter.ExportableEvent) ([]row, string, error) {
 		default:
 			continue
 		}
-		if err != nil {
-			return nil, "", err
-		}
 		if eventType == "" {
 			eventType = rowType
 		}
 		if eventType != rowType {
 			return nil, "", errors.New("redshift exporter received mixed event types")
 		}
+		if err != nil {
+			skippedKeys = append(skippedKeys, event.GetKey())
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
+		}
 		rows = append(rows, row{key: event.GetKey(), values: values})
+	}
+	if len(skippedKeys) > 0 {
+		logger.Warn("redshift exporter: events skipped because they cannot be converted to JSON",
+			"count", len(skippedKeys), "keys", uniqueKeys(skippedKeys), "error", firstErr.Error())
 	}
 	return rows, eventType, nil
 }
@@ -601,7 +631,7 @@ func insertPrefix(table string, columns []column) string {
 	for _, c := range columns {
 		quoted = append(quoted, quoteIdentifier(c.name))
 	}
-	return fmt.Sprintf("INSERT INTO %s (%s) VALUES ", table, strings.Join(quoted, ", "))
+	return fmt.Sprintf("INSERT INTO %s (%s) VALUES ", quoteTableName(table), strings.Join(quoted, ", "))
 }
 
 // buildBatches builds multi-rows INSERT statements and groups them in batches of up to
@@ -699,4 +729,13 @@ func booleanLiteral(value string) string {
 // quoteIdentifier quotes a column name, some of them (e.g. "default") are reserved words.
 func quoteIdentifier(name string) string {
 	return `"` + name + `"`
+}
+
+// quoteTableName quotes each component of a validated, optionally schema-qualified name.
+func quoteTableName(name string) string {
+	parts := strings.Split(name, ".")
+	for i, part := range parts {
+		parts[i] = quoteIdentifier(part)
+	}
+	return strings.Join(parts, ".")
 }

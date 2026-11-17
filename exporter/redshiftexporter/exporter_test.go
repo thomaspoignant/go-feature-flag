@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -15,8 +17,11 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata"
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata/types"
+	"github.com/aws/smithy-go"
+	smithyhttp "github.com/aws/smithy-go/transport/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -68,7 +73,7 @@ func TestExporter_ExportFeatureEvents(t *testing.T) {
 	assert.Nil(t, input.SecretArn)
 	assert.Equal(t, types.ExecutionModeTransaction, input.ExecutionMode)
 	assert.Equal(t, []string{
-		`INSERT INTO feature_table ("kind", "context_kind", "user_key", "creation_date", "key", "variation", ` +
+		`INSERT INTO "feature_table" ("kind", "context_kind", "user_key", "creation_date", "key", "variation", ` +
 			`"value", "default", "version", "source", "metadata") VALUES ` +
 			`(:p0, :p1, :p2, 1617970547, :p3, :p4, JSON_PARSE(:p5), FALSE, :p6, '', JSON_PARSE(:p7))`,
 	}, input.Sqls)
@@ -115,7 +120,7 @@ func TestExporter_ExportTrackingEvents(t *testing.T) {
 	assert.Equal(t, "my-workgroup", aws.ToString(input.WorkgroupName))
 	assert.Equal(t, "arn:aws:secretsmanager:us-east-1:123456789012:secret:goff", aws.ToString(input.SecretArn))
 	assert.Equal(t, []string{
-		`INSERT INTO tracking_events ("kind", "context_kind", "user_key", "creation_date", "key", ` +
+		`INSERT INTO "tracking_events" ("kind", "context_kind", "user_key", "creation_date", "key", ` +
 			`"tracking_details", "evaluation_context") VALUES ` +
 			`(:p0, :p1, :p2, 1617970547, :p3, JSON_PARSE(:p4), JSON_PARSE(:p5))`,
 	}, input.Sqls)
@@ -137,7 +142,43 @@ func TestExporter_DefaultTableName(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Len(t, client.executed, 1)
-	assert.True(t, strings.HasPrefix(client.executed[0].Sqls[0], "INSERT INTO feature_flag_evaluations ("))
+	assert.True(t, strings.HasPrefix(client.executed[0].Sqls[0], `INSERT INTO "feature_flag_evaluations" (`))
+}
+
+func TestExporter_QuotesTableName(t *testing.T) {
+	client := &mockRedshiftDataClient{}
+	// "order" is a reserved word, it must be quoted to be used as a table name
+	e := &Exporter{
+		ClusterIdentifier: "my-cluster",
+		Database:          "analytics",
+		TableName:         "goff.order",
+		AutoMigrate:       true,
+		client:            client,
+	}
+
+	err := e.Export(context.TODO(), nil, []exporter.ExportableEvent{newFeatureEvent(0)})
+
+	require.NoError(t, err)
+	require.Len(t, client.executed, 2)
+	assert.True(t, strings.HasPrefix(client.executed[0].Sqls[0], `CREATE TABLE IF NOT EXISTS "goff"."order" (`))
+	assert.True(t, strings.HasPrefix(client.executed[1].Sqls[0], `INSERT INTO "goff"."order" (`))
+}
+
+func TestQuoteTableName(t *testing.T) {
+	tests := []struct {
+		name  string
+		table string
+		want  string
+	}{
+		{name: "table", table: "feature_flag_evaluations", want: `"feature_flag_evaluations"`},
+		{name: "reserved word", table: "order", want: `"order"`},
+		{name: "schema and table", table: "analytics.goff_events$1", want: `"analytics"."goff_events$1"`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, quoteTableName(tt.table))
+		})
+	}
 }
 
 func TestExporter_ValuesAreSentAsParameters(t *testing.T) {
@@ -371,6 +412,84 @@ func TestExporter_SkipsAllRowsWithoutLogger(t *testing.T) {
 	assert.Empty(t, client.executed)
 }
 
+func TestExporter_SkipsEventsThatCannotBeMarshalled(t *testing.T) {
+	featureEvents := func(bad exporter.FeatureEvent) []exporter.ExportableEvent {
+		bad.Key = "bad-flag"
+		bad.UserKey = "secret-user"
+		return []exporter.ExportableEvent{newFeatureEvent(0), bad, newFeatureEvent(2)}
+	}
+	trackingEvents := func(bad exporter.TrackingEvent) []exporter.ExportableEvent {
+		bad.Key = "bad-flag"
+		bad.UserKey = "secret-user"
+		return []exporter.ExportableEvent{exporter.TrackingEvent{Key: "checkout"}, bad, exporter.TrackingEvent{Key: "checkout"}}
+	}
+	tests := []struct {
+		name    string
+		events  []exporter.ExportableEvent
+		wantErr string
+	}{
+		{
+			name:    "feature value NaN",
+			events:  featureEvents(exporter.FeatureEvent{Value: math.NaN()}),
+			wantErr: "unsupported value: NaN",
+		},
+		{
+			name:    "feature value unsupported type",
+			events:  featureEvents(exporter.FeatureEvent{Value: make(chan int)}),
+			wantErr: "unsupported type",
+		},
+		{
+			name:    "feature metadata unsupported type",
+			events:  featureEvents(exporter.FeatureEvent{Metadata: map[string]any{"bad": make(chan int)}}),
+			wantErr: "unsupported type",
+		},
+		{
+			name:    "tracking details unsupported type",
+			events:  trackingEvents(exporter.TrackingEvent{TrackingDetails: map[string]any{"bad": make(chan int)}}),
+			wantErr: "unsupported type",
+		},
+		{
+			name:    "tracking evaluation context infinity",
+			events:  trackingEvents(exporter.TrackingEvent{EvaluationContext: map[string]any{"bad": math.Inf(1)}}),
+			wantErr: "unsupported value: +Inf",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &mockRedshiftDataClient{}
+			e := &Exporter{ClusterIdentifier: "my-cluster", Database: "analytics", client: client}
+			var logs bytes.Buffer
+			logger := &fflog.FFLogger{LeveledLogger: slog.New(slog.NewTextHandler(&logs, nil))}
+
+			err := e.Export(context.TODO(), logger, tt.events)
+
+			require.NoError(t, err)
+			require.Len(t, client.executed, 1)
+			// the 2 valid events are exported, without the invalid one
+			assert.Equal(t, 2, strings.Count(client.executed[0].Sqls[0], "JSON_PARSE(:p")/2)
+			for _, p := range client.executed[0].Parameters {
+				assert.NotEqual(t, "bad-flag", aws.ToString(p.Value))
+			}
+			assert.Contains(t, logs.String(), "level=WARN")
+			assert.Contains(t, logs.String(), "cannot be converted to JSON")
+			assert.Contains(t, logs.String(), "count=1")
+			assert.Contains(t, logs.String(), "bad-flag")
+			assert.Contains(t, logs.String(), tt.wantErr)
+			assert.NotContains(t, logs.String(), "secret-user")
+		})
+	}
+}
+
+func TestExporter_SkipsAllEventsThatCannotBeMarshalled(t *testing.T) {
+	client := &mockRedshiftDataClient{}
+	e := &Exporter{ClusterIdentifier: "my-cluster", Database: "analytics", AutoMigrate: true, client: client}
+
+	err := e.Export(context.TODO(), nil, []exporter.ExportableEvent{exporter.FeatureEvent{Key: "flag", Value: math.NaN()}})
+
+	assert.NoError(t, err)
+	assert.Empty(t, client.executed)
+}
+
 func TestExporter_AutoMigrate(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -382,7 +501,7 @@ func TestExporter_AutoMigrate(t *testing.T) {
 			name:        "feature table",
 			autoMigrate: true,
 			events:      []exporter.ExportableEvent{newFeatureEvent(0)},
-			wantCreate: `CREATE TABLE IF NOT EXISTS feature_flag_evaluations ("kind" VARCHAR(50), ` +
+			wantCreate: `CREATE TABLE IF NOT EXISTS "feature_flag_evaluations" ("kind" VARCHAR(50), ` +
 				`"context_kind" VARCHAR(50), "user_key" VARCHAR(512), "creation_date" BIGINT, "key" VARCHAR(256), ` +
 				`"variation" VARCHAR(256), "value" SUPER, "default" BOOLEAN, "version" VARCHAR(64), ` +
 				`"source" VARCHAR(64), "metadata" SUPER)`,
@@ -391,7 +510,7 @@ func TestExporter_AutoMigrate(t *testing.T) {
 			name:        "tracking table",
 			autoMigrate: true,
 			events:      []exporter.ExportableEvent{exporter.TrackingEvent{Kind: "tracking", Key: "checkout"}},
-			wantCreate: `CREATE TABLE IF NOT EXISTS tracking_events ("kind" VARCHAR(50), ` +
+			wantCreate: `CREATE TABLE IF NOT EXISTS "tracking_events" ("kind" VARCHAR(50), ` +
 				`"context_kind" VARCHAR(50), "user_key" VARCHAR(512), "creation_date" BIGINT, "key" VARCHAR(256), ` +
 				`"tracking_details" SUPER, "evaluation_context" SUPER)`,
 		},
@@ -458,6 +577,7 @@ func TestExporter_WaitsForStatement(t *testing.T) {
 		client            *mockRedshiftDataClient
 		timeout           time.Duration
 		wantErr           []string
+		notWantErr        []string
 		wantErrIs         error
 		wantPolls         int
 		wantCancel        bool
@@ -501,6 +621,36 @@ func TestExporter_WaitsForStatement(t *testing.T) {
 			wantPolls: 3,
 		},
 		{
+			name: "access denied describe error fails fast",
+			client: &mockRedshiftDataClient{
+				describeErr: &smithy.GenericAPIError{Code: "AccessDeniedException", Message: "not authorized"},
+			},
+			timeout:   time.Second,
+			wantErr:   []string{"describe statement", "AccessDeniedException"},
+			wantPolls: 1,
+		},
+		{
+			name: "validation describe error fails fast",
+			client: &mockRedshiftDataClient{
+				describeErr: &types.ValidationException{Message: aws.String("invalid statement id")},
+			},
+			timeout:   time.Second,
+			wantErr:   []string{"describe statement", "ValidationException"},
+			wantPolls: 1,
+		},
+		{
+			name: "retryable API describe errors",
+			client: &mockRedshiftDataClient{describeErrs: []error{
+				&smithy.GenericAPIError{Code: "ThrottlingException", Message: "rate exceeded"},
+				&types.InternalServerException{Message: aws.String("internal error")},
+				&awshttp.ResponseError{ResponseError: &smithyhttp.ResponseError{
+					Response: &smithyhttp.Response{Response: &http.Response{StatusCode: http.StatusServiceUnavailable}},
+					Err:      &smithy.GenericAPIError{Code: "ServiceUnavailable"},
+				}},
+			}},
+			wantPolls: 4,
+		},
+		{
 			name:       "describe errors until the deadline",
 			client:     &mockRedshiftDataClient{describeErr: errors.New("throttled")},
 			timeout:    30 * time.Millisecond,
@@ -516,6 +666,18 @@ func TestExporter_WaitsForStatement(t *testing.T) {
 			},
 			timeout:    30 * time.Millisecond,
 			wantErr:    []string{"did not complete"},
+			wantErrIs:  context.DeadlineExceeded,
+			wantCancel: true,
+		},
+		{
+			name: "deadline during a describe long poll is reported once",
+			client: &mockRedshiftDataClient{
+				statuses: []types.StatusString{types.StatusStringStarted},
+				longPoll: true,
+			},
+			timeout:    30 * time.Millisecond,
+			wantErr:    []string{"did not complete"},
+			notWantErr: []string{"last describe statement error"},
 			wantErrIs:  context.DeadlineExceeded,
 			wantCancel: true,
 		},
@@ -560,6 +722,9 @@ func TestExporter_WaitsForStatement(t *testing.T) {
 			}
 			for _, want := range tt.wantErr {
 				assert.ErrorContains(t, err, want)
+			}
+			for _, notWant := range tt.notWantErr {
+				assert.NotContains(t, err.Error(), notWant)
 			}
 			if tt.wantErrIs != nil {
 				assert.ErrorIs(t, err, tt.wantErrIs)
@@ -703,36 +868,6 @@ func TestExporter_ExportErrors(t *testing.T) {
 			wantErr:  "redshift exporter received mixed event types",
 		},
 		{
-			name:     "feature value marshal error",
-			exporter: &Exporter{Database: "analytics", ClusterIdentifier: "my-cluster"},
-			events:   []exporter.ExportableEvent{exporter.FeatureEvent{Key: "flag", Value: make(chan int)}},
-			wantErr:  "unsupported type",
-		},
-		{
-			name:     "feature metadata marshal error",
-			exporter: &Exporter{Database: "analytics", ClusterIdentifier: "my-cluster"},
-			events: []exporter.ExportableEvent{
-				exporter.FeatureEvent{Key: "flag", Metadata: map[string]any{"bad": make(chan int)}},
-			},
-			wantErr: "unsupported type",
-		},
-		{
-			name:     "tracking details marshal error",
-			exporter: &Exporter{Database: "analytics", ClusterIdentifier: "my-cluster"},
-			events: []exporter.ExportableEvent{
-				exporter.TrackingEvent{Key: "checkout", TrackingDetails: map[string]any{"bad": make(chan int)}},
-			},
-			wantErr: "unsupported type",
-		},
-		{
-			name:     "tracking evaluation context marshal error",
-			exporter: &Exporter{Database: "analytics", ClusterIdentifier: "my-cluster"},
-			events: []exporter.ExportableEvent{
-				exporter.TrackingEvent{Key: "checkout", EvaluationContext: map[string]any{"bad": make(chan int)}},
-			},
-			wantErr: "unsupported type",
-		},
-		{
 			name: "execute statement error",
 			exporter: &Exporter{
 				Database: "analytics", ClusterIdentifier: "my-cluster",
@@ -856,6 +991,9 @@ type mockRedshiftDataClient struct {
 	finishAfter time.Duration
 	executedAt  time.Time
 	cancelErr   error
+	// longPoll makes DescribeStatement wait until the context is done, like a long polling call
+	// on a statement that does not complete, and return the context error.
+	longPoll bool
 
 	executed          []*redshiftdata.BatchExecuteStatementInput
 	described         []string
@@ -883,7 +1021,7 @@ func (m *mockRedshiftDataClient) BatchExecuteStatement(
 }
 
 func (m *mockRedshiftDataClient) DescribeStatement(
-	_ context.Context,
+	ctx context.Context,
 	params *redshiftdata.DescribeStatementInput,
 	_ ...func(*redshiftdata.Options),
 ) (*redshiftdata.DescribeStatementOutput, error) {
@@ -891,6 +1029,12 @@ func (m *mockRedshiftDataClient) DescribeStatement(
 	defer m.mu.Unlock()
 	m.described = append(m.described, aws.ToString(params.Id))
 	m.lastDescribeInput = params
+	if m.longPoll {
+		m.mu.Unlock()
+		<-ctx.Done()
+		m.mu.Lock()
+		return nil, fmt.Errorf("operation error Redshift Data: DescribeStatement, %w", ctx.Err())
+	}
 	if len(m.describeErrs) > 0 {
 		err := m.describeErrs[0]
 		m.describeErrs = m.describeErrs[1:]
