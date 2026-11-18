@@ -134,7 +134,9 @@ func (h *validateFlags) validate(c *echo.Context) (string, error) {
 // size of the body for this format.
 // tooLargeMessage is the error message returned when the body exceeds the limit of its format.
 func tooLargeMessage(maxSize int64, format string) string {
-	return fmt.Sprintf("request body too large (max %s for %s)", humanize.IBytes(uint64(maxSize)), format)
+	// limits are validated as non-negative, the conversion cannot overflow.
+	size := humanize.IBytes(uint64(maxSize)) //nolint:gosec // see above
+	return fmt.Sprintf("request body too large (max %s for %s)", size, format)
 }
 
 func (h *validateFlags) formatFromContentType(contentType string) (string, int64, bool) {
