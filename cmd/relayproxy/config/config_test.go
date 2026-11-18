@@ -1939,22 +1939,22 @@ func TestConfigOnlyEnvVars(t *testing.T) {
 func TestConfig_IsValid_UseUnifiedRetriever(t *testing.T) {
 	t.Parallel()
 	s3Item := &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: "flags", Item: "a/flags.yaml"}
-	flagset := func(common config.CommonFlagSet) config.Config {
+	flagset := func(common config.CommonFlagSet) *config.Config {
 		common.UseUnifiedRetriever = true
-		return config.Config{
+		return &config.Config{
 			Server:   config.Server{Port: 8080},
 			FlagSets: []config.FlagSet{{Name: "fs", APIKeys: []string{"k"}, CommonFlagSet: common}},
 		}
 	}
 	tests := []struct {
 		name    string
-		cfg     config.Config
+		cfg     *config.Config
 		wantErr string
 	}{
 		{name: "s3 with item", cfg: flagset(config.CommonFlagSet{Retriever: s3Item})},
 		{
 			name: "default (non flagset) config",
-			cfg: config.Config{
+			cfg: &config.Config{
 				Server:        config.Server{Port: 8080},
 				CommonFlagSet: config.CommonFlagSet{Retriever: s3Item, UseUnifiedRetriever: true},
 			},
