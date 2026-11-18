@@ -4,7 +4,7 @@ go 1.25.14
 
 require (
 	github.com/stretchr/testify v1.12.1
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.8.1
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.8.2
 )
 
 require (
