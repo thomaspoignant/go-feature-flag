@@ -441,7 +441,8 @@ paths:
         The flag file is not loaded, nothing is changed on the flags served by the relay proxy.
         The format of the body is selected with the `Content-Type` header (`application/json`,
         `application/yaml`, `application/x-yaml`, `text/yaml` or `application/toml`).
-        The body is limited to 1 MiB for JSON and to 64 KiB for YAML and TOML.
+        The maximum size of the body is configurable per format with `endpoints.validateFlags`
+        (defaults: 1 MiB for JSON, 64 KiB for YAML and TOML).
       parameters:
       - description: The flag file to validate
         in: body

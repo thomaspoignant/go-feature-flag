@@ -33,7 +33,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Validates the flag file sent in the body of the request, using the same rules as the\n` + "`" + `goff lint` + "`" + ` command.\nThe flag file is not loaded, nothing is changed on the flags served by the relay proxy.\nThe format of the body is selected with the ` + "`" + `Content-Type` + "`" + ` header (` + "`" + `application/json` + "`" + `,\n` + "`" + `application/yaml` + "`" + `, ` + "`" + `application/x-yaml` + "`" + `, ` + "`" + `text/yaml` + "`" + ` or ` + "`" + `application/toml` + "`" + `).\nThe body is limited to 1 MiB for JSON and to 64 KiB for YAML and TOML.",
+                "description": "Validates the flag file sent in the body of the request, using the same rules as the\n` + "`" + `goff lint` + "`" + ` command.\nThe flag file is not loaded, nothing is changed on the flags served by the relay proxy.\nThe format of the body is selected with the ` + "`" + `Content-Type` + "`" + ` header (` + "`" + `application/json` + "`" + `,\n` + "`" + `application/yaml` + "`" + `, ` + "`" + `application/x-yaml` + "`" + `, ` + "`" + `text/yaml` + "`" + ` or ` + "`" + `application/toml` + "`" + `).\nThe maximum size of the body is configurable per format with ` + "`" + `endpoints.validateFlags` + "`" + `\n(defaults: 1 MiB for JSON, 64 KiB for YAML and TOML).",
                 "consumes": [
                     "application/json",
                     "application/yaml",
