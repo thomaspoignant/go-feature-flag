@@ -129,7 +129,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
@@ -246,7 +246,7 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 					},
 				},
 			}
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			require.NoError(t, err)
 			defer flagsetManager.Close()
 
@@ -413,7 +413,7 @@ func Test_Evaluate(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
@@ -490,7 +490,7 @@ func Test_Evaluate_FlagEvaluationMetric(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			require.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 

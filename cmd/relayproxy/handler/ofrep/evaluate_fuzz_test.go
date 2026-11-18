@@ -41,7 +41,7 @@ func FuzzOFREPEvaluate(f *testing.F) {
 				{Kind: retrieverconf.FileRetriever, Path: configFlagsLocation},
 			},
 		},
-	}, zap.NewNop(), nil, nil)
+	}, zap.NewNop(), nil, nil, nil)
 	require.NoError(f, err)
 	f.Cleanup(flagsetManager.Close)
 

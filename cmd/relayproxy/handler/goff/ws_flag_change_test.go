@@ -3,6 +3,8 @@ package controller_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"sync"
@@ -20,6 +22,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
+
+// defaultFlagsetMgr is a flagset manager in default mode (no flagsets configured).
+var defaultFlagsetMgr = &mockFlagsetManagerSSE{flagsetName: "default", isDefault: true}
 
 func Test_websocket_flag_change(t *testing.T) {
 	tests := []struct {
@@ -121,7 +126,7 @@ func Test_websocket_flag_change(t *testing.T) {
 			}()
 
 			log := zap.L()
-			ctrl := controller.NewWsFlagChange(websocketService, log)
+			ctrl := controller.NewWsFlagChange(websocketService, defaultFlagsetMgr, log)
 
 			e := echo.New()
 			e.GET("/ws/v1/flag/change", ctrl.Handler)
@@ -153,7 +158,7 @@ func Test_websocket_flag_change(t *testing.T) {
 			time.Sleep(100 * time.Millisecond)
 
 			// Broadcast the flag change
-			websocketService.BroadcastFlagChanges(tt.flagChange)
+			websocketService.BroadcastFlagChanges("default", tt.flagChange)
 
 			// Read message with timeout
 			_, receivedMessage, err := ws.ReadMessage()
@@ -180,7 +185,7 @@ func broadcastUntilRegistered(
 	t.Helper()
 	deadline := time.After(5 * time.Second)
 	for {
-		svc.BroadcastFlagChanges(diff)
+		svc.BroadcastFlagChanges("default", diff)
 		select {
 		case <-firstMsg:
 			return
@@ -208,7 +213,7 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 		}
 	}()
 
-	ctrl := controller.NewWsFlagChange(websocketService, zap.L())
+	ctrl := controller.NewWsFlagChange(websocketService, defaultFlagsetMgr, zap.L())
 
 	e := echo.New()
 	e.GET("/ws/v1/flag/change", ctrl.Handler)
@@ -271,7 +276,7 @@ func Test_websocket_concurrent_writes(t *testing.T) {
 	for range broadcasters {
 		wg.Go(func() {
 			for range broadcastsEach {
-				websocketService.BroadcastFlagChanges(diff)
+				websocketService.BroadcastFlagChanges("default", diff)
 			}
 		})
 	}
@@ -300,7 +305,7 @@ func Test_websocket_legacy_handler(t *testing.T) {
 		}
 	}()
 
-	ctrl := controller.NewWsFlagChange(websocketService, zap.L())
+	ctrl := controller.NewWsFlagChange(websocketService, defaultFlagsetMgr, zap.L())
 
 	e := echo.New()
 	e.GET("/ws/v1/flag/change", ctrl.LegacyHandler)
@@ -330,11 +335,153 @@ func Test_websocket_legacy_handler(t *testing.T) {
 			},
 		},
 	}
-	websocketService.BroadcastFlagChanges(diff)
+	websocketService.BroadcastFlagChanges("default", diff)
 
 	_, received, err := ws.ReadMessage()
 	assert.NoError(t, err)
 	expected, err := json.Marshal(diff)
 	assert.NoError(t, err)
 	assert.JSONEq(t, string(expected), string(received))
+}
+
+// Test_websocket_flagset_scoping verifies that, with flagsets, a client is
+// registered on the flagset of its API key and only receives its changes.
+func Test_websocket_flagset_scoping(t *testing.T) {
+	tests := []struct {
+		name    string
+		handler func(*controller.WSFlagChange) echo.HandlerFunc
+	}{
+		{
+			name:    "handler",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.Handler },
+		},
+		{
+			name:    "legacy handler",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.LegacyHandler },
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			websocketService := stream.NewWebsocketService()
+			defer websocketService.Close()
+
+			flagsetMgr := &mockFlagsetManagerSSE{flagsetName: "flagsetA", isDefault: false}
+			ctrl := controller.NewWsFlagChange(websocketService, flagsetMgr, zap.NewNop())
+
+			e := echo.New()
+			e.GET("/ws", tt.handler(ctrl))
+			testServer := httptest.NewServer(e)
+			defer testServer.Close()
+
+			url := "ws" + strings.TrimPrefix(testServer.URL, "http") + "/ws?apiKey=key-a"
+			ws, _, err := websocket.DefaultDialer.DialContext(ctx, url, nil)
+			require.NoError(t, err)
+			defer func() { _ = ws.Close() }()
+
+			msgs := make(chan string, 64)
+			go func() {
+				defer close(msgs)
+				for {
+					_, msg, err := ws.ReadMessage()
+					if err != nil {
+						return
+					}
+					msgs <- string(msg)
+				}
+			}()
+
+			diff := func(flagName string) notifier.DiffCache {
+				return notifier.DiffCache{Added: map[string]flag.Flag{flagName: &flag.InternalFlag{}}}
+			}
+
+			// Broadcast until a message is received, it proves the connection is registered.
+			deadline := time.After(5 * time.Second)
+			registered := false
+			for !registered {
+				websocketService.BroadcastFlagChanges("flagsetA", diff("probe-flag"))
+				select {
+				case <-msgs:
+					registered = true
+				case <-deadline:
+					t.Fatal("connection never registered: no broadcast reached the client")
+				case <-time.After(20 * time.Millisecond):
+				}
+			}
+
+			// The connection is registered and the writes are ordered: if the flagsetB
+			// broadcast reached the client, it would be read before the flagsetA one.
+			websocketService.BroadcastFlagChanges("flagsetB", diff("wrong-flag"))
+			websocketService.BroadcastFlagChanges("flagsetA", diff("right-flag"))
+			for {
+				select {
+				case msg, ok := <-msgs:
+					require.True(t, ok, "websocket connection closed before receiving the flag change")
+					require.NotContains(t, msg, "wrong-flag")
+					if strings.Contains(msg, "right-flag") {
+						return
+					}
+				case <-deadline:
+					t.Fatal("the flagsetA broadcast never reached the client")
+				}
+			}
+		})
+	}
+}
+
+// Test_websocket_flagset_not_resolved verifies that the connection is rejected
+// before the websocket upgrade when no flagset can be resolved from the API key.
+func Test_websocket_flagset_not_resolved(t *testing.T) {
+	tests := []struct {
+		name    string
+		handler func(*controller.WSFlagChange) echo.HandlerFunc
+		query   string
+	}{
+		{
+			name:    "handler: no apiKey",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.Handler },
+		},
+		{
+			name:    "handler: apiKey not associated to a flagset",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.Handler },
+			query:   "?apiKey=unknown",
+		},
+		{
+			name:    "legacy handler: no apiKey",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.LegacyHandler },
+		},
+		{
+			name:    "legacy handler: apiKey not associated to a flagset",
+			handler: func(c *controller.WSFlagChange) echo.HandlerFunc { return c.LegacyHandler },
+			query:   "?apiKey=unknown",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			websocketService := stream.NewWebsocketService()
+			defer websocketService.Close()
+
+			flagsetMgr := &mockFlagsetManagerSSE{
+				isDefault: false,
+				err:       errors.New("no flag set associated to the API key"),
+			}
+			ctrl := controller.NewWsFlagChange(websocketService, flagsetMgr, zap.NewNop())
+
+			e := echo.New()
+			e.GET("/ws", tt.handler(ctrl))
+			testServer := httptest.NewServer(e)
+			defer testServer.Close()
+
+			url := "ws" + strings.TrimPrefix(testServer.URL, "http") + "/ws" + tt.query
+			ws, resp, err := websocket.DefaultDialer.Dial(url, nil)
+			if ws != nil {
+				_ = ws.Close()
+			}
+			require.ErrorIs(t, err, websocket.ErrBadHandshake)
+			defer func() { _ = resp.Body.Close() }()
+			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		})
+	}
 }
