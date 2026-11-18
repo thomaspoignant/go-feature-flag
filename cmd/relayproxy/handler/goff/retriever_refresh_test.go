@@ -45,7 +45,7 @@ func Test_retriever_refresh_Handler_valid(t *testing.T) {
 		},
 	}
 
-	flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+	flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 	assert.NoError(t, err, "impossible to create flagset manager")
 
 	// Get the default flagset to check refresh date

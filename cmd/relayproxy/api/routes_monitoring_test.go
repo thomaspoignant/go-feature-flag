@@ -61,7 +61,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				EnablePprof:    tt.EnablePprof,
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil, nil)
 			require.NoError(t, err)
 			apiServer := api.New(c, service.Services{
 				MonitoringService: service.NewMonitoring(flagsetManager),

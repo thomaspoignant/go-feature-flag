@@ -74,6 +74,11 @@ The API key is what we use to route the request to the appropriate flag set, so 
 3. **Route request**: The evaluation request is routed to that specific flag set
 4. **Return result**: The evaluation result comes from that flag set's flags
 
+### **Flag change streams**
+
+The flag change streams (WebSocket and SSE) are scoped to the flag set of the API key: a connection only receives the changes of its own flag set, and the API key must be associated to a flag set.
+To watch several flag sets, open one connection per flag set. See [flag change streams](../relay-proxy/relay_proxy_endpoints.md#flag-change-streams) for the details.
+
 ## Managing flag sets at runtime
 
 The relay proxy watches its configuration file and applies changes to flag sets **without a restart**:

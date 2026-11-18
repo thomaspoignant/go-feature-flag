@@ -13,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/docs"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	stream "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
@@ -105,12 +104,10 @@ func main() {
 	wsService := stream.NewWebsocketService(stream.WithFlagDetails(!proxyConf.DisableFlagDetailsInStream))
 	sseService := stream.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, sseService)
+	}, sseService, wsService)
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",

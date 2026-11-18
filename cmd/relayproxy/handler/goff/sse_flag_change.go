@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
-	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 )
 
@@ -51,7 +49,7 @@ type sseFlagChange struct {
 // @Router       /stream/v1/sse/flag/change [get]
 func (h *sseFlagChange) Handler(c *echo.Context) error {
 	apiKey := c.QueryParam("apiKey")
-	flagsetName, err := h.resolveFlagsetName(apiKey)
+	flagsetName, err := h.flagsetManager.FlagSetName(apiKey)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -70,16 +68,4 @@ func (h *sseFlagChange) Handler(c *echo.Context) error {
 
 	h.sseService.ServeHTTP(c.Response(), c.Request())
 	return nil
-}
-
-// resolveFlagsetName resolves the flagset name from the API key
-// If the flagset manager is in default mode, it returns the default flagset name
-func (h *sseFlagChange) resolveFlagsetName(apiKey string) (string, error) {
-	if h.flagsetManager.IsDefaultFlagSet() {
-		return utils.DefaultFlagSetName, nil
-	}
-	if apiKey == "" {
-		return "", fmt.Errorf("apiKey is required when using flagsets")
-	}
-	return h.flagsetManager.FlagSetName(apiKey)
 }
