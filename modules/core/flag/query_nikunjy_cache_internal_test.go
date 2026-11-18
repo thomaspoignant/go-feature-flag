@@ -2,7 +2,9 @@ package flag
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -148,6 +150,35 @@ func refCount(c *nikunjyEvaluatorCache, query string) int {
 	return c.refs[query]
 }
 
+func refCounts(c *nikunjyEvaluatorCache, queries []string) map[string]int {
+	counts := make(map[string]int, len(queries))
+	for _, query := range queries {
+		counts[query] = refCount(c, query)
+	}
+	return counts
+}
+
+// haveRefs reports whether every query has n references.
+func haveRefs(c *nikunjyEvaluatorCache, queries []string, n int) bool {
+	for _, query := range queries {
+		if refCount(c, query) != n {
+			return false
+		}
+	}
+	return true
+}
+
+// cachedQueries returns the queries that have a cache entry, in their order.
+func cachedQueries(c *nikunjyEvaluatorCache, queries []string) []string {
+	var cached []string
+	for _, query := range queries {
+		if _, ok := c.entries.Load(query); ok {
+			cached = append(cached, query)
+		}
+	}
+	return cached
+}
+
 func gcUntil(t *testing.T, condition func() bool, msg string) {
 	t.Helper()
 	require.Eventually(t, func() bool {
@@ -192,44 +223,24 @@ func TestNikunjyEvaluatorCache_Eviction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := useFreshNikunjyEvaluators(t)
+			queries := slices.Sorted(maps.Keys(tt.wantRefs))
 			oldFlag := newFlagWithQueries(tt.oldQueries...)
 			require.NoError(t, oldFlag.IsValid())
 			newFlag := newFlagWithQueries(tt.newQueries...)
 			require.NoError(t, newFlag.IsValid())
-			for query, want := range tt.wantRefs {
-				require.Equal(t, want, refCount(c, query), "references of %s", query)
-			}
+			require.Equal(t, tt.wantRefs, refCounts(c, queries), "references once both rule lists are validated")
 
 			runtime.KeepAlive(oldFlag)
-			gcUntil(t, func() bool {
-				for _, query := range tt.newQueries {
-					if refCount(c, query) != 1 {
-						return false
-					}
-				}
-				return true
-			}, "the old rule list must release its queries once collected")
-			for _, query := range tt.wantEvicted {
-				_, ok := c.entries.Load(query)
-				assert.False(t, ok, "%s must be evicted: no rule uses it anymore", query)
-			}
-			for _, query := range tt.wantCached {
-				_, ok := c.entries.Load(query)
-				assert.True(t, ok, "%s must stay cached: the new rule list uses it", query)
-			}
+			gcUntil(t, func() bool { return haveRefs(c, tt.newQueries, 1) },
+				"the old rule list must release its queries once collected")
+			assert.Empty(t, cachedQueries(c, tt.wantEvicted), "queries that no rule uses anymore must be evicted")
+			assert.Equal(t, tt.wantCached, cachedQueries(c, tt.wantCached),
+				"queries that the new rule list uses must stay cached")
 
 			runtime.KeepAlive(newFlag)
-			gcUntil(t, func() bool {
-				for _, query := range tt.wantCached {
-					if _, ok := c.entries.Load(query); ok {
-						return false
-					}
-				}
-				return true
-			}, "the last rule list using a query must evict it once collected")
-			for query := range tt.wantRefs {
-				assert.Zero(t, refCount(c, query), "references of %s", query)
-			}
+			gcUntil(t, func() bool { return len(cachedQueries(c, tt.wantCached)) == 0 },
+				"the last rule list using a query must evict it once collected")
+			assert.True(t, haveRefs(c, queries, 0), "no query may keep a reference once both rule lists are collected")
 		})
 	}
 }
