@@ -36,6 +36,8 @@ type unifiedRetrieverRegistry struct {
 
 	mu     sync.Mutex
 	groups map[string]*registryGroup
+	// pending are the retrievers created by preRegister and not claimed yet.
+	pending map[string][]*releasingRetriever
 }
 
 type registryGroup struct {
@@ -47,19 +49,74 @@ func newUnifiedRetrieverRegistry(factory sharedItemsFactory) *unifiedRetrieverRe
 	if factory == nil {
 		factory = defaultSharedItemsFactory
 	}
-	return &unifiedRetrieverRegistry{factory: factory, groups: map[string]*registryGroup{}}
+	return &unifiedRetrieverRegistry{factory: factory, groups: map[string]*registryGroup{}, pending: map[string][]*releasingRetriever{}}
+}
+
+// pendingKey identifies the retrievers created by preRegister for a flagset configuration.
+func pendingKey(fs *config.FlagSet) string {
+	rc := fs.Retriever
+	return fmt.Sprintf("%s\x00%s\x00%d", rc.Bucket, rc.Item, fs.PollingInterval)
 }
 
 // retrieverFor returns the retriever of the flagset (its configuration is expected to be valid).
 // The reference on the bucket group is released when the retriever is shut down.
 func (r *unifiedRetrieverRegistry) retrieverFor(fs *config.FlagSet) (retriever.Retriever, error) {
-	rc := fs.Retriever
-	if fs.Retrievers != nil || rc == nil || rc.Kind != retrieverconf.S3Retriever || rc.Item == "" {
-		return nil, fmt.Errorf("useUnifiedRetriever requires a single s3 retriever with item set")
+	if err := checkUnifiedFlagSet(fs); err != nil {
+		return nil, err
 	}
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	key := pendingKey(fs)
+	if p := r.pending[key]; len(p) > 0 {
+		r.pending[key] = p[1:]
+		return p[0], nil
+	}
+	return r.newRetrieverLocked(fs)
+}
+
+// preRegister registers the item of the flagset in its bucket group so that the first listing
+// already covers it. The next retrieverFor with the same configuration returns this retriever,
+// the ones that are not claimed must be released with releasePending.
+func (r *unifiedRetrieverRegistry) preRegister(fs *config.FlagSet) error {
+	if err := checkUnifiedFlagSet(fs); err != nil {
+		return err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	rr, err := r.newRetrieverLocked(fs)
+	if err != nil {
+		return err
+	}
+	key := pendingKey(fs)
+	r.pending[key] = append(r.pending[key], rr)
+	return nil
+}
+
+// releasePending shuts down the pre-registered retrievers nobody claimed.
+func (r *unifiedRetrieverRegistry) releasePending() {
+	r.mu.Lock()
+	var unclaimed []*releasingRetriever
+	for k, p := range r.pending {
+		unclaimed = append(unclaimed, p...)
+		delete(r.pending, k)
+	}
+	r.mu.Unlock()
+	for _, rr := range unclaimed {
+		_ = rr.Shutdown(context.Background())
+	}
+}
+
+func checkUnifiedFlagSet(fs *config.FlagSet) error {
+	rc := fs.Retriever
+	if fs.Retrievers != nil || rc == nil || rc.Kind != retrieverconf.S3Retriever || rc.Item == "" {
+		return fmt.Errorf("useUnifiedRetriever requires a single s3 retriever with item set")
+	}
+	return nil
+}
+
+// newRetrieverLocked creates the retriever of the flagset, the caller must hold r.mu.
+func (r *unifiedRetrieverRegistry) newRetrieverLocked(fs *config.FlagSet) (*releasingRetriever, error) {
+	rc := fs.Retriever
 	g, ok := r.groups[rc.Bucket]
 	if !ok {
 		items, err := r.factory(context.Background(), rc.Bucket)

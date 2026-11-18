@@ -64,7 +64,7 @@ func newGoFeatureFlagClient(
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 	opts ...clientOption,
-) (*ffclient.GoFeatureFlag, error) {
+) (_ *ffclient.GoFeatureFlag, retErr error) {
 	var err error
 	if cFlagSet == nil {
 		return nil, fmt.Errorf("proxy config is empty")
@@ -78,6 +78,18 @@ func newGoFeatureFlagClient(
 	if err != nil {
 		return nil, err
 	}
+	// If the client can't be created, the unified retrievers must leave their shared group,
+	// otherwise their item stays registered forever. Their Shutdown is idempotent.
+	defer func() {
+		if retErr == nil {
+			return
+		}
+		for _, r := range retrievers {
+			if ur, ok := r.(*releasingRetriever); ok {
+				_ = ur.Shutdown(context.Background())
+			}
+		}
+	}()
 
 	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
