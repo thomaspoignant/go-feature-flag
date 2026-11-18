@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.1...modules/core/v0.8.2) (2026-11-18)
+
+
+### 🔧 Chores
+
+* Bump go-feature-flag/rules fork in all modules ([#6529](https://github.com/thomaspoignant/go-feature-flag/issues/6529)) ([321d9c8](https://github.com/thomaspoignant/go-feature-flag/commit/321d9c8c06ba70328c48a071d76285bd775dc947))
+
 ## [0.8.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.0...modules/core/v0.8.1) (2026-11-17)
 
 
