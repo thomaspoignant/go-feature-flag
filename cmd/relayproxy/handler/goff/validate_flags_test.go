@@ -69,6 +69,35 @@ func padTo(body, pad string, size int) string {
 	return body + strings.Repeat(pad, size-len(body))
 }
 
+// assertValidateResult checks the handler error (error statuses) or the JSON response (200 and 422).
+func assertValidateResult(
+	t *testing.T, err error, rec *httptest.ResponseRecorder,
+	wantStatus int, wantValid bool, altMessage string, wantErrors []controller.FlagValidationError,
+) {
+	t.Helper()
+	if wantStatus != http.StatusOK && wantStatus != http.StatusUnprocessableEntity {
+		var httpErr *echo.HTTPError
+		require.ErrorAs(t, err, &httpErr)
+		assert.Equal(t, wantStatus, httpErr.Code)
+		if wantStatus == http.StatusRequestEntityTooLarge {
+			assert.Contains(t, httpErr.Message, "request body too large (max ")
+		}
+		return
+	}
+	require.NoError(t, err)
+	assert.Equal(t, wantStatus, rec.Code)
+
+	var got controller.FlagValidationResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
+	assert.Equal(t, "v1.2.3", got.Version)
+	assert.Equal(t, wantValid, got.Valid)
+	normalizeAltMessage(got.Errors, altMessage, wantErrors)
+	if wantErrors == nil {
+		wantErrors = []controller.FlagValidationError{}
+	}
+	assert.Equal(t, wantErrors, got.Errors)
+}
+
 func TestNewValidateFlags_Handler(t *testing.T) {
 	t.Parallel()
 	const validJSON = `{"flag-a":{"variations":{"a":true,"b":false},"defaultRule":{"variation":"a"}}}`
@@ -220,28 +249,7 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 
 			err = ctrl.Handler(c)
 			assert.Equal(t, map[string]float64{outcomeForStatus(tt.wantStatus): 1}, validateOutcomeCounts(t, metrics))
-			if tt.wantStatus != http.StatusOK && tt.wantStatus != http.StatusUnprocessableEntity {
-				var httpErr *echo.HTTPError
-				require.ErrorAs(t, err, &httpErr)
-				assert.Equal(t, tt.wantStatus, httpErr.Code)
-				if tt.wantStatus == http.StatusRequestEntityTooLarge {
-					assert.Contains(t, httpErr.Message, "request body too large (max ")
-				}
-				return
-			}
-			require.NoError(t, err)
-			assert.Equal(t, tt.wantStatus, rec.Code)
-
-			var got controller.FlagValidationResponse
-			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
-			assert.Equal(t, "v1.2.3", got.Version)
-			assert.Equal(t, tt.wantValid, got.Valid)
-			normalizeAltMessage(got.Errors, tt.altMessage, tt.wantErrors)
-			wantErrors := tt.wantErrors
-			if wantErrors == nil {
-				wantErrors = []controller.FlagValidationError{}
-			}
-			assert.Equal(t, wantErrors, got.Errors)
+			assertValidateResult(t, err, rec, tt.wantStatus, tt.wantValid, tt.altMessage, tt.wantErrors)
 		})
 	}
 }
