@@ -5,7 +5,7 @@ go 1.26.11
 require (
 	cloud.google.com/go/bigquery v1.86.2
 	cloud.google.com/go/pubsub v1.52.0
-	cloud.google.com/go/pubsub/v2 v2.8.1
+	cloud.google.com/go/pubsub/v2 v2.9.0
 	cloud.google.com/go/storage v1.70.0
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0
