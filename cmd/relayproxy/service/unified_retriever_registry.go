@@ -49,7 +49,11 @@ func newUnifiedRetrieverRegistry(factory sharedItemsFactory) *unifiedRetrieverRe
 	if factory == nil {
 		factory = defaultSharedItemsFactory
 	}
-	return &unifiedRetrieverRegistry{factory: factory, groups: map[string]*registryGroup{}, pending: map[string][]*releasingRetriever{}}
+	return &unifiedRetrieverRegistry{
+		factory: factory,
+		groups:  map[string]*registryGroup{},
+		pending: map[string][]*releasingRetriever{},
+	}
 }
 
 // pendingKey identifies the retrievers created by preRegister for a flagset configuration.

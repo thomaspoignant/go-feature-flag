@@ -228,7 +228,7 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 		if fl == nil {
 			fl = &sharedListing{done: make(chan struct{})}
 			g.inflight = fl
-			go g.runListing(fl, slices.Clone(g.dirs))
+			go g.runListing(context.WithoutCancel(ctx), fl, slices.Clone(g.dirs))
 		}
 		g.mu.Unlock()
 
@@ -243,8 +243,8 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 
 // runListing lists the directories and publishes the result. It does not depend on the context of
 // a caller so that a cancelled caller does not fail the others.
-func (g *SharedItems) runListing(fl *sharedListing, dirs []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), sharedListTimeout)
+func (g *SharedItems) runListing(base context.Context, fl *sharedListing, dirs []string) {
+	ctx, cancel := context.WithTimeout(base, sharedListTimeout)
 	defer cancel()
 	listing, err := g.list(ctx, dirs)
 
