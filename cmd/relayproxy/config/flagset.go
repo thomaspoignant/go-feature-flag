@@ -101,6 +101,17 @@ type CommonFlagSet struct {
 
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
+
+	// UseUnifiedRetriever (optional) makes the flagset share its storage requests with the other
+	// flagsets using the same S3 bucket and this option: the bucket is listed once per listing
+	// window (max(1s, smallest polling interval / 10)) for all of them, and an object is
+	// only downloaded when its ETag changed, instead of one GetObject per flagset per poll.
+	// Caches, notifiers, exporters and polling loops stay per flagset.
+	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set.
+	// A change can be detected up to one listing window later than with an independent retriever.
+	// Not available outside of flagsets.
+	// Default: false
+	UseUnifiedRetriever bool `mapstructure:"useUnifiedRetriever" koanf:"useunifiedretriever"`
 }
 
 // GetFlagSets returns a shallow copy of the configured flag sets.

@@ -1935,3 +1935,70 @@ func TestConfigOnlyEnvVars(t *testing.T) {
 		assert.Equal(t, "https://example.com/flags.goff.yaml", (*got.FlagSets[0].Retrievers)[0].URL)
 	})
 }
+
+func TestConfig_IsValid_UseUnifiedRetriever(t *testing.T) {
+	t.Parallel()
+	s3Item := &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: "flags", Item: "a/flags.yaml"}
+	flagset := func(common config.CommonFlagSet) config.Config {
+		common.UseUnifiedRetriever = true
+		return config.Config{
+			Server:   config.Server{Port: 8080},
+			FlagSets: []config.FlagSet{{Name: "fs", APIKeys: []string{"k"}, CommonFlagSet: common}},
+		}
+	}
+	tests := []struct {
+		name    string
+		cfg     config.Config
+		wantErr string
+	}{
+		{name: "s3 with item", cfg: flagset(config.CommonFlagSet{Retriever: s3Item})},
+		{
+			name: "default (non flagset) config",
+			cfg: config.Config{
+				Server:        config.Server{Port: 8080},
+				CommonFlagSet: config.CommonFlagSet{Retriever: s3Item, UseUnifiedRetriever: true},
+			},
+			wantErr: "only available inside a flagset",
+		},
+		{
+			name: "retrievers",
+			cfg: flagset(config.CommonFlagSet{
+				Retrievers: &[]retrieverconf.RetrieverConf{*s3Item},
+			}),
+			wantErr: "can't be used with retrievers",
+		},
+		{
+			name: "retriever and retrievers",
+			cfg: flagset(config.CommonFlagSet{
+				Retriever:  s3Item,
+				Retrievers: &[]retrieverconf.RetrieverConf{*s3Item},
+			}),
+			wantErr: "can't be used with retrievers",
+		},
+		{
+			name: "other kind",
+			cfg: flagset(config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{Kind: retrieverconf.HTTPRetriever, URL: "http://x"},
+			}),
+			wantErr: "only supported with a retriever of kind s3",
+		},
+		{
+			name: "folder mode",
+			cfg: flagset(config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: "flags", Prefix: "a/"},
+			}),
+			wantErr: "folder mode is not supported",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			err := tt.cfg.IsValid()
+			if tt.wantErr == "" {
+				assert.NoError(t, err)
+				return
+			}
+			assert.ErrorContains(t, err, tt.wantErr)
+		})
+	}
+}

@@ -29,6 +29,9 @@ func (c *Config) IsValid() error {
 	if c.flagSetMode == flagSetModeLocal && c.Studio.URL != "" {
 		return errors.New("flagSets and studio cannot be used together, remove flagSets from your configuration")
 	}
+	if c.UseUnifiedRetriever {
+		return errors.New("useUnifiedRetriever is only available inside a flagset")
+	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}
@@ -115,6 +118,9 @@ func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
 	if err := validateRetrievers(flagset.Retriever, flagset.Retrievers); err != nil {
 		return err
 	}
+	if err := validateUnifiedRetriever(flagset); err != nil {
+		return err
+	}
 
 	if err := validateExporters(flagset.Exporter, flagset.Exporters); err != nil {
 		return err
@@ -173,6 +179,25 @@ func validateNotifiers(notifiers []NotifierConf) error {
 				return fmt.Errorf("notifier at index %d validation failed: %w", i, err)
 			}
 		}
+	}
+	return nil
+}
+
+// validateUnifiedRetriever checks that a flagset using useUnifiedRetriever has a single S3 retriever
+// in single file mode.
+func validateUnifiedRetriever(flagset *FlagSet) error {
+	if !flagset.UseUnifiedRetriever {
+		return nil
+	}
+	if flagset.Retrievers != nil {
+		return errors.New("useUnifiedRetriever can't be used with retrievers, use a single retriever")
+	}
+	r := flagset.Retriever
+	if r == nil || r.Kind != retrieverconf.S3Retriever {
+		return errors.New("useUnifiedRetriever is only supported with a retriever of kind s3")
+	}
+	if r.Item == "" {
+		return errors.New("useUnifiedRetriever requires the s3 retriever to set item (folder mode is not supported)")
 	}
 	return nil
 }
