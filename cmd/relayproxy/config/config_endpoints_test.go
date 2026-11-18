@@ -21,12 +21,19 @@ func TestByteSize_UnmarshalText(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "plain bytes", text: "1048576", want: 1048576},
-		{name: "negative bytes", text: "-5", want: -5},
+		{name: "negative bytes", text: "-5", wantErr: true},
+		{name: "negative with unit", text: "-1MiB", wantErr: true},
+		{name: "lowercase unit", text: "1mib", want: 1 << 20},
+		{name: "surrounding whitespace", text: "  64KiB\t", want: 64 << 10},
+		{name: "too large", text: "8EiB", wantErr: true},
+		{name: "fraction without unit", text: "1.5", wantErr: true},
+		{name: "fraction with unit", text: "1.5KiB", want: 1536},
 		{name: "MiB", text: "1MiB", want: 1 << 20},
 		{name: "KiB with space", text: "64 KiB", want: 64 << 10},
 		{name: "decimal unit", text: "2KB", want: 2000},
 		{name: "invalid", text: "lots", wantErr: true},
-		{name: "empty", text: "", wantErr: true},
+		{name: "empty", text: "", want: 0},
+		{name: "blank", text: "  ", want: 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -64,6 +71,37 @@ func TestValidateFlagsEndpoint_WithDefaults(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tt.want, tt.in.WithDefaults())
+		})
+	}
+}
+
+func TestValidateFlagsEndpoint_IsValid(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		in      config.ValidateFlagsEndpoint
+		wantErr string
+	}{
+		{name: "unset", in: config.ValidateFlagsEndpoint{}},
+		{name: "valid", in: config.ValidateFlagsEndpoint{MaxJSONBodySize: 1, MaxYAMLBodySize: 2, MaxTOMLBodySize: 3}},
+		{name: "negative json", in: config.ValidateFlagsEndpoint{MaxJSONBodySize: -1}, wantErr: "maxJSONBodySize must not be negative"},
+		{name: "negative yaml", in: config.ValidateFlagsEndpoint{MaxYAMLBodySize: -1}, wantErr: "maxYAMLBodySize must not be negative"},
+		{name: "negative toml", in: config.ValidateFlagsEndpoint{MaxTOMLBodySize: -1}, wantErr: "maxTOMLBodySize must not be negative"},
+		{
+			name:    "several negatives report the first in order",
+			in:      config.ValidateFlagsEndpoint{MaxJSONBodySize: -1, MaxYAMLBodySize: -1, MaxTOMLBodySize: -1},
+			wantErr: "maxJSONBodySize must not be negative",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			err := tt.in.IsValid()
+			if tt.wantErr != "" {
+				assert.ErrorContains(t, err, tt.wantErr)
+				return
+			}
+			assert.NoError(t, err)
 		})
 	}
 }

@@ -2,10 +2,12 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
 
+	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo/v5"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
@@ -83,13 +85,13 @@ func (h *validateFlags) validate(c *echo.Context) (string, error) {
 	}
 
 	if c.Request().ContentLength > maxSize {
-		return outcomeError, echo.NewHTTPError(http.StatusRequestEntityTooLarge, "request body too large")
+		return outcomeError, echo.NewHTTPError(http.StatusRequestEntityTooLarge, tooLargeMessage(maxSize, format))
 	}
 	body := http.MaxBytesReader(c.Response(), c.Request().Body, maxSize)
 	data, err := io.ReadAll(body)
 	if err != nil {
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
-			return outcomeError, echo.NewHTTPError(http.StatusRequestEntityTooLarge, "request body too large")
+			return outcomeError, echo.NewHTTPError(http.StatusRequestEntityTooLarge, tooLargeMessage(maxSize, format))
 		}
 		return outcomeError, echo.NewHTTPError(http.StatusBadRequest, "impossible to read the request body")
 	}
@@ -130,6 +132,11 @@ func (h *validateFlags) validate(c *echo.Context) (string, error) {
 
 // formatFromContentType returns the flag file format matching the content type and the maximum
 // size of the body for this format.
+// tooLargeMessage is the error message returned when the body exceeds the limit of its format.
+func tooLargeMessage(maxSize int64, format string) string {
+	return fmt.Sprintf("request body too large (max %s for %s)", humanize.IBytes(uint64(maxSize)), format)
+}
+
 func (h *validateFlags) formatFromContentType(contentType string) (string, int64, bool) {
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {

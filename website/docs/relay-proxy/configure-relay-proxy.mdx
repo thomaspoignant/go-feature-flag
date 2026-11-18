@@ -336,12 +336,14 @@ A request with a larger body is rejected with a `413`.
 
 Each value is either a number of bytes (`1048576`) or a human-readable size (`1MiB`, `64KiB`, `2MB`).
 An unset (or `0`) value keeps the default, a negative value is rejected when the configuration is loaded.
+SI units are decimal (`2MB` = 2,000,000 bytes) while IEC units are binary (`2MiB` = 2,097,152 bytes).
+Changing this setting requires restarting the relay proxy.
 
 | Option            | Type                | Default            |
 |-------------------|---------------------|--------------------|
-| `maxJSONBodySize` | integer or **string** | `1048576` (1 MiB)  |
-| `maxYAMLBodySize` | integer or **string** | `65536` (64 KiB)   |
-| `maxTOMLBodySize` | integer or **string** | `65536` (64 KiB)   |
+| `maxJSONBodySize` | integer or string | `1048576` (1 MiB)  |
+| `maxYAMLBodySize` | integer or string | `65536` (64 KiB)   |
+| `maxTOMLBodySize` | integer or string | `65536` (64 KiB)   |
 
 ```yaml
 endpoints:
@@ -356,7 +358,7 @@ and `ENDPOINTS_VALIDATEFLAGS_MAXTOMLBODYSIZE` (for example `ENDPOINTS_VALIDATEFL
 
 :::warning
 The YAML and TOML limits are lower than the JSON one on purpose: the parsing cost of those formats grows
-quadratically with the size of the body (see [#6439](https://github.com/thomaspoignant/go-feature-flag/issues/6439)).
+quadratically with the size of the body (tracked in [#6439](https://github.com/thomaspoignant/go-feature-flag/issues/6439)).
 Raising them exposes the relay proxy to slower requests, so keep them as small as your flag files allow.
 :::
 

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -25,16 +26,27 @@ type ByteSize int64
 // convert the strings (configuration file and environment variables) to a number of bytes.
 func (b *ByteSize) UnmarshalText(text []byte) error {
 	s := strings.TrimSpace(string(text))
-	// plain (possibly negative) number of bytes, negative values are rejected by the validation.
-	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
+	if s == "" {
+		// an empty value (for example an empty environment variable) means unset.
+		*b = 0
+		return nil
+	}
+	if strings.HasPrefix(s, "-") {
+		return fmt.Errorf("invalid size %q: must not be negative", s)
+	}
+	if n, err := strconv.ParseUint(s, 10, 63); err == nil {
 		*b = ByteSize(n)
 		return nil
+	}
+	if _, err := strconv.ParseFloat(s, 64); err == nil {
+		// a number without unit that is not an integer (1.5, 1e3), do not truncate it silently.
+		return fmt.Errorf("invalid size %q: a number of bytes must be an integer", s)
 	}
 	n, err := humanize.ParseBytes(s)
 	if err != nil {
 		return fmt.Errorf("invalid size %q: %w", s, err)
 	}
-	if n > uint64(1<<63-1) {
+	if n > math.MaxInt64 {
 		return fmt.Errorf("invalid size %q: too large", s)
 	}
 	*b = ByteSize(n)
@@ -82,13 +94,16 @@ func (e Endpoints) IsValid() error {
 
 // IsValid validates the limits, negative values are rejected.
 func (v ValidateFlagsEndpoint) IsValid() error {
-	for name, size := range map[string]ByteSize{
-		"endpoints.validateFlags.maxJSONBodySize": v.MaxJSONBodySize,
-		"endpoints.validateFlags.maxYAMLBodySize": v.MaxYAMLBodySize,
-		"endpoints.validateFlags.maxTOMLBodySize": v.MaxTOMLBodySize,
+	for _, limit := range []struct {
+		name string
+		size ByteSize
+	}{
+		{"endpoints.validateFlags.maxJSONBodySize", v.MaxJSONBodySize},
+		{"endpoints.validateFlags.maxYAMLBodySize", v.MaxYAMLBodySize},
+		{"endpoints.validateFlags.maxTOMLBodySize", v.MaxTOMLBodySize},
 	} {
-		if size < 0 {
-			return fmt.Errorf("%s must not be negative", name)
+		if limit.size < 0 {
+			return fmt.Errorf("%s must not be negative", limit.name)
 		}
 	}
 	return nil

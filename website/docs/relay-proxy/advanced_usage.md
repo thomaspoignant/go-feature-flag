@@ -45,7 +45,7 @@ The size of the body is limited per format: by default 1 MiB for JSON, 64 KiB fo
 The limits are configurable with the [`endpoints.validateFlags`](./configure-relay-proxy#endpoints) options
 (`maxJSONBodySize`, `maxYAMLBodySize` and `maxTOMLBodySize`), as a number of bytes or a string like `1MiB`.
 Raising the YAML and TOML limits makes the parsing more expensive (the cost grows quadratically with the size of the body,
-see [#6439](https://github.com/thomaspoignant/go-feature-flag/issues/6439)).
+tracked in [#6439](https://github.com/thomaspoignant/go-feature-flag/issues/6439)).
 An empty body, `null` or `{}` is accepted and returns `200` with `valid: true` and no flag _(an empty JSON body is a syntax error and returns `400`)_.
 
 ```shell

@@ -224,6 +224,9 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 				var httpErr *echo.HTTPError
 				require.ErrorAs(t, err, &httpErr)
 				assert.Equal(t, tt.wantStatus, httpErr.Code)
+				if tt.wantStatus == http.StatusRequestEntityTooLarge {
+					assert.Contains(t, httpErr.Message, "request body too large (max ")
+				}
 				return
 			}
 			require.NoError(t, err)
