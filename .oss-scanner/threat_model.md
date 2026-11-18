@@ -18,7 +18,6 @@ Untrusted input:
     `cmd/relayproxy/api/middleware`.
 - **Evaluation context** (targeting key + arbitrary attributes) sent by callers; it is matched against flag rules
   (`internal/` rule/query evaluation, `nikunjy/rules` fork, JsonLogic).
-- **Editor API** (`cmd/editor`) — evaluates a flag config posted by the caller.
 
 Trusted (operator-controlled): the relay proxy config file, environment variables, and the flag configuration files the
 retrievers fetch (file, HTTP, S3, GCS, GitHub, GitLab, Bitbucket, K8s, Redis, MongoDB, PostgreSQL, Azure Blob).
@@ -32,7 +31,7 @@ retrievers fetch (file, HTTP, S3, GCS, GitHub, GitLab, Bitbucket, K8s, Redis, Mo
   `cmd/wasm` (needs TinyGo, not built here).
 
 ## How to exercise it
-- Binaries are built in `/src/out/bin/`: `relayproxy`, `cli`, `editor-api`, `jsonschema-generator`.
+- Binaries are built in `/src/out/bin/`: `relayproxy`, `cli`, `jsonschema-generator`.
 - Start the relay proxy offline: `out/bin/relayproxy --config .oss-scanner/scanner-proxy.yaml` (file retriever, evaluation
   key `eval-key`, admin key `admin-key`), then e.g.
   `curl -X POST -H 'X-API-Key: eval-key' -H 'Content-Type: application/json' -d '{"context":{"targetingKey":"u1"}}' localhost:1031/ofrep/v1/evaluate/flags`
