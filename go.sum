@@ -400,8 +400,8 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.6.3/go.mod h1:75u5sXoLsGZoRN5Sgbi1eraJ4GU3++wFwWzhwvtwp4M=
 github.com/gin-gonic/gin v1.7.3/go.mod h1:jD2toBW3GZUr5UMcdrwQA10I7RuaFOl/SGeDjXkfUtY=
-github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e h1:3Gsg/Q2PEDX0D8uLX/2w8bedFFmZT7F9DCR7nQLymuY=
-github.com/go-feature-flag/rules v0.0.0-20260914023221-fa9c2951893e/go.mod h1:GuNyXWXF6lBCeCziZSIDhX/fF2t1rJ0mQT1lacWHhrE=
+github.com/go-feature-flag/rules v0.0.0-20261118103042-e9704fa7a06c h1:2LXiS4mG1O4GTWWzvuEJ8rTFAwZ3CfBn+EJImA3JHXQ=
+github.com/go-feature-flag/rules v0.0.0-20261118103042-e9704fa7a06c/go.mod h1:GuNyXWXF6lBCeCziZSIDhX/fF2t1rJ0mQT1lacWHhrE=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
