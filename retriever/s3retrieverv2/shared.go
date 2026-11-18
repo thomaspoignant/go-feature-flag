@@ -118,13 +118,6 @@ func (g *SharedItems) Retriever(item string, pollingInterval time.Duration) *Sha
 	return &SharedItemRetriever{group: g, item: item, pollingInterval: pollingInterval}
 }
 
-// registered returns the number of registered items.
-func (g *SharedItems) registered() int {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	return len(g.items)
-}
-
 func (g *SharedItems) register(r *SharedItemRetriever) {
 	g.mu.Lock()
 	defer g.mu.Unlock()

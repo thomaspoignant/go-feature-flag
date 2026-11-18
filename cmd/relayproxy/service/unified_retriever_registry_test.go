@@ -59,13 +59,13 @@ func newFakeRegistry(t *testing.T, f *fakeS3, created *atomic.Int32) *unifiedRet
 	})
 }
 
-func s3FlagSet(name, bucket, item string, unified bool) config.FlagSet {
+func s3FlagSet(name, bucket, item string) config.FlagSet {
 	return config.FlagSet{
 		Name:    name,
 		APIKeys: []string{name + "-key"},
 		CommonFlagSet: config.CommonFlagSet{
 			Retriever:           &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: bucket, Item: item},
-			UseUnifiedRetriever: unified,
+			UseUnifiedRetriever: true,
 			PollingInterval:     60000,
 		},
 	}
@@ -77,8 +77,8 @@ func Test_unifiedRetrieverRegistry_retrieverFor(t *testing.T) {
 		t.Parallel()
 		var created atomic.Int32
 		reg := newFakeRegistry(t, &fakeS3{}, &created)
-		fs1, fs2, fs3 := s3FlagSet("a", "b1", "p/a.yaml", true), s3FlagSet("b", "b1", "p/b.yaml", true),
-			s3FlagSet("c", "b2", "p/c.yaml", true)
+		fs1, fs2, fs3 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml"),
+			s3FlagSet("c", "b2", "p/c.yaml")
 		r1, err := reg.retrieverFor(&fs1)
 		require.NoError(t, err)
 		_, err = reg.retrieverFor(&fs2)
@@ -98,7 +98,7 @@ func Test_unifiedRetrieverRegistry_retrieverFor(t *testing.T) {
 		t.Parallel()
 		var created atomic.Int32
 		reg := newFakeRegistry(t, &fakeS3{}, &created)
-		fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml", true), s3FlagSet("b", "b1", "p/b.yaml", true)
+		fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml")
 		r1, err := reg.retrieverFor(&fs1)
 		require.NoError(t, err)
 		r2, err := reg.retrieverFor(&fs2)
@@ -112,10 +112,10 @@ func Test_unifiedRetrieverRegistry_retrieverFor(t *testing.T) {
 	t.Run("unsupported configurations", func(t *testing.T) {
 		t.Parallel()
 		reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
-		folder := s3FlagSet("a", "b1", "", true)
-		other := s3FlagSet("a", "b1", "x", true)
+		folder := s3FlagSet("a", "b1", "")
+		other := s3FlagSet("a", "b1", "x")
 		other.Retriever.Kind = retrieverconf.HTTPRetriever
-		multi := s3FlagSet("a", "b1", "x", true)
+		multi := s3FlagSet("a", "b1", "x")
 		multi.Retrievers = &[]retrieverconf.RetrieverConf{*multi.Retriever}
 		for _, fs := range []config.FlagSet{folder, other, multi} {
 			_, err := reg.retrieverFor(&fs)
@@ -141,8 +141,8 @@ func TestFlagsetManager_UnifiedRetriever(t *testing.T) {
 		},
 	}
 	cfg := &config.Config{FlagSets: []config.FlagSet{
-		s3FlagSet("u1", "flags", "p/a.yaml", true),
-		s3FlagSet("u2", "flags", "p/b.yaml", true),
+		s3FlagSet("u1", "flags", "p/a.yaml"),
+		s3FlagSet("u2", "flags", "p/b.yaml"),
 		nonUnified,
 	}}
 	mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(cfg, zap.NewNop(), nil, nil, nil, reg)
@@ -157,7 +157,7 @@ func TestFlagsetManager_UnifiedRetriever(t *testing.T) {
 
 	// a flagset added at runtime joins the same group
 	impl := mgr.(*flagsetManagerImpl)
-	impl.addFlagset(s3FlagSet("u3", "flags", "p/c.yaml", true))
+	impl.addFlagset(s3FlagSet("u3", "flags", "p/c.yaml"))
 	assert.EqualValues(t, 1, created.Load())
 	assert.Equal(t, 1, reg.groupCount())
 	all, err := mgr.AllFlagSets()
@@ -165,8 +165,8 @@ func TestFlagsetManager_UnifiedRetriever(t *testing.T) {
 	assert.Contains(t, all, "u3")
 
 	// removing flagsets releases the group once the last one is gone
-	impl.removeFlagset(s3FlagSet("u1", "flags", "p/a.yaml", true))
-	impl.removeFlagset(s3FlagSet("u2", "flags", "p/b.yaml", true))
+	impl.removeFlagset(s3FlagSet("u1", "flags", "p/a.yaml"))
+	impl.removeFlagset(s3FlagSet("u2", "flags", "p/b.yaml"))
 	assert.Equal(t, 1, reg.groupCount())
 	mgr.Close()
 	assert.Equal(t, 0, reg.groupCount())
