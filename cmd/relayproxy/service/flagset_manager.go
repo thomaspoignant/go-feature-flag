@@ -90,6 +90,9 @@ type flagsetManagerImpl struct {
 
 	// Logger is the logger for the flagset manager.
 	logger *zap.Logger
+
+	// unifiedRegistry shares the S3 requests of the flagsets using useUnifiedRetriever.
+	unifiedRegistry *unifiedRetrieverRegistry
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -159,6 +162,15 @@ func newFlagsetManagerWithFlagsets(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
 	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
+	return newFlagsetManagerWithFlagsetsAndRegistry(
+		config, logger, notifiers, sseService, wsService, newUnifiedRetrieverRegistry(nil))
+}
+
+func newFlagsetManagerWithFlagsetsAndRegistry(
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
+	sseService stream.SSEService, wsService stream.WebsocketService,
+	registry *unifiedRetrieverRegistry,
+) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
@@ -177,7 +189,8 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		allNotifiers := appendStreamNotifiers(notifiers, sseService, wsService, flagSetName)
-		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
+		client, err := newGoFeatureFlagClient(
+			&flagset, logger, allNotifiers, withUnifiedRetrieverRegistry(registry))
 		if err != nil {
 			logger.Error(
 				"failed to create goff client for flagset",
@@ -207,6 +220,7 @@ func newFlagsetManagerWithFlagsets(
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
 		logger:               logger,
+		unifiedRegistry:      registry,
 	}, nil
 }
 
@@ -407,7 +421,8 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 	allNotifiers := appendStreamNotifiers(m.notifiers, m.sseService, m.wsService, flagset.Name)
-	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
+	client, err := newGoFeatureFlagClient(
+		&flagset, m.logger, allNotifiers, withUnifiedRetrieverRegistry(m.unifiedRegistry))
 	if err != nil {
 		m.logger.Error(
 			"failed to create the flagset added at runtime, it will not be available until the "+

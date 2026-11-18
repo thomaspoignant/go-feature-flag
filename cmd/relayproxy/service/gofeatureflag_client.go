@@ -37,17 +37,44 @@ import (
 	"go.uber.org/zap"
 )
 
+// clientOptions are the internal options of NewGoFeatureFlagClient.
+type clientOptions struct {
+	unifiedRegistry *unifiedRetrieverRegistry
+}
+
+// clientOption customizes NewGoFeatureFlagClient.
+type clientOption func(*clientOptions)
+
+// withUnifiedRetrieverRegistry sets the registry providing the retrievers of the flagsets with
+// useUnifiedRetriever, so that they are shared between the clients created with the same registry.
+func withUnifiedRetrieverRegistry(r *unifiedRetrieverRegistry) clientOption {
+	return func(o *clientOptions) { o.unifiedRegistry = r }
+}
+
 func NewGoFeatureFlagClient(
 	cFlagSet *config.FlagSet,
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
+	return newGoFeatureFlagClient(cFlagSet, logger, notifiers)
+}
+
+func newGoFeatureFlagClient(
+	cFlagSet *config.FlagSet,
+	logger *zap.Logger,
+	notifiers []notifier.Notifier,
+	opts ...clientOption,
+) (*ffclient.GoFeatureFlag, error) {
 	var err error
 	if cFlagSet == nil {
 		return nil, fmt.Errorf("proxy config is empty")
 	}
+	var o clientOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
 
-	retrievers, err := initRetrievers(cFlagSet)
+	retrievers, err := initRetrieversWithRegistry(cFlagSet, o.unifiedRegistry)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +141,26 @@ func initLeveledLogger(c *config.FlagSet, logger *zap.Logger) *slog.Logger {
 // initRetrievers initialize the retrievers based on the configuration
 // it handles both the `retriever` and `retrievers` fields
 func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
+	return initRetrieversWithRegistry(proxyConf, nil)
+}
+
+// initRetrieversWithRegistry is initRetrievers using the registry for the flagsets with
+// useUnifiedRetriever.
+func initRetrieversWithRegistry(
+	proxyConf *config.FlagSet, registry *unifiedRetrieverRegistry,
+) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
+	if proxyConf.UseUnifiedRetriever {
+		if registry == nil {
+			// no registry to share with: the flagset gets a group of its own.
+			registry = newUnifiedRetrieverRegistry(nil)
+		}
+		r, err := registry.retrieverFor(proxyConf)
+		if err != nil {
+			return nil, err
+		}
+		return append(retrievers, r), nil
+	}
 	// if the retriever is set, we add it to the retrievers
 	if proxyConf.Retriever != nil {
 		currentRetriever, err := retrieverInit.InitRetriever(proxyConf.Retriever)
