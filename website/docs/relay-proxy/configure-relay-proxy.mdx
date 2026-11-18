@@ -454,9 +454,11 @@ flagSets:
 
 - The flag sets must use a single `retriever` of kind `s3` with `item` set. The relay proxy refuses to start otherwise.
 - Only the flag sets with the same `bucket` and `useUnifiedRetriever: true` are grouped, the others behave as usual. You can keep your production flag sets isolated by not setting the option on them.
-- The listing window is `max(1s, smallest pollingInterval of the group / 10)`. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`).
-- When the group starts, the listing is refreshed each time a new flag set widens the listed prefix, so a few listings are done at startup.
-- It reduces the number of requests sent to S3 (a listing per window instead of one `GetObject` per flag set per poll). It does **not** reduce memory or goroutines: caches, notifiers, exporters, clients and polling loops stay per flag set.
+- The listing window is `max(1s, smallest pollingInterval of the group / 2)`. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`).
+- The relay proxy lists the directories (the "folder" part of each `item`, not recursively) of the grouped flag sets, never the whole bucket. The listing is shared and its errors are cached for the window, so an outage sends one failing request per window and not one per flag set.
+- **IAM**: in addition to `s3:GetObject`, the relay proxy needs `s3:ListBucket` on the bucket (it can be restricted to the directories of your items with the `s3:prefix` condition).
+- **When it is worth it**: a listing request costs about 12.5 times more than a `GetObject` request, and the group lists about twice per polling interval (once per directory and per page of 1000 objects). Unified retrievers therefore only save requests and cost when there are **many flag sets per bucket, roughly more than 100 per listed directory page**. With a handful of flag sets it can send **more** and costlier requests than independent retrievers, and adds change-detection lag: leave the option off in that case.
+- It reduces the number of requests sent to S3 only. It does **not** reduce memory or goroutines: caches, notifiers, exporters, clients and polling loops stay per flag set. The content is even cached twice (shared content cache and flag set cache) and copied when returned, so expect a transient memory use of 2-3 times the size of the flag files.
 - Like the other flag set options, it can't be changed on an existing flag set at runtime.
 
 ### `studio`

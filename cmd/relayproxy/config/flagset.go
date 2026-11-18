@@ -104,8 +104,10 @@ type CommonFlagSet struct {
 
 	// UseUnifiedRetriever (optional) makes the flagset share its storage requests with the other
 	// flagsets using the same S3 bucket and this option: the bucket is listed once per listing
-	// window (max(1s, smallest polling interval / 10)) for all of them, and an object is
+	// window (max(1s, smallest polling interval / 2)) for all of them, and an object is
 	// only downloaded when its ETag changed, instead of one GetObject per flagset per poll.
+	// It needs s3:ListBucket and only saves requests with many flagsets per bucket (roughly
+	// more than 100 per listed directory page): leave it off for a few flagsets.
 	// Caches, notifiers, exporters and polling loops stay per flagset.
 	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set.
 	// A change can be detected up to one listing window later than with an independent retriever.
