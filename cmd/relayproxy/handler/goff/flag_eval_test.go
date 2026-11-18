@@ -159,7 +159,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			flagEval := controller.NewFlagEval(flagsetManager, metric.Metrics{})
@@ -245,7 +245,7 @@ func Test_flag_eval_Handler_FlagEvaluationMetric(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			require.NoError(t, err, "impossible to create flagset manager")
 			defer flagsetManager.Close()
 

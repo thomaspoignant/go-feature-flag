@@ -14,10 +14,11 @@ import (
 
 type mockWebsocketService struct {
 	internalDiff notifier.DiffCache
+	flagsetName  string
 	nbConnection int
 }
 
-func (m *mockWebsocketService) Register(_ stream.WebsocketConnector) {
+func (m *mockWebsocketService) Register(_ stream.WebsocketConnector, _ string) {
 	m.nbConnection++
 }
 
@@ -34,7 +35,8 @@ func (m *mockWebsocketService) WaitForCleanup(_ time.Duration) error {
 	return nil
 }
 
-func (m *mockWebsocketService) BroadcastFlagChanges(diff notifier.DiffCache) {
+func (m *mockWebsocketService) BroadcastFlagChanges(flagsetName string, diff notifier.DiffCache) {
+	m.flagsetName = flagsetName
 	m.internalDiff = diff
 }
 
@@ -43,7 +45,7 @@ func TestNotify(t *testing.T) {
 	mockService := &mockWebsocketService{}
 
 	// Create the notifierWebsocket instance with the mock service
-	n := proxynotifier.NewNotifierWebsocket(mockService)
+	n := proxynotifier.NewNotifierWebsocket(mockService, "my-flagset")
 
 	// Prepare the input data
 	diff := notifier.DiffCache{
@@ -99,4 +101,5 @@ func TestNotify(t *testing.T) {
 	// Assertions
 	assert.NoError(t, err)
 	assert.Equal(t, diff, mockService.internalDiff)
+	assert.Equal(t, "my-flagset", mockService.flagsetName)
 }

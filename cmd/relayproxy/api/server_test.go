@@ -21,7 +21,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
@@ -87,11 +86,9 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -151,11 +148,9 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -234,11 +229,9 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -311,7 +304,7 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	require.NoError(t, err)
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close()
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil, nil)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -358,7 +351,7 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	require.NoError(t, err)
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close()
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil, nil)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -500,7 +493,7 @@ func runAuthMiddlewareTests(
 			require.NoError(t, err)
 			wsService := stream.NewWebsocketService()
 			defer wsService.Close()
-			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil, nil)
 			require.NoError(t, err)
 
 			services := service.Services{
@@ -579,11 +572,9 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -663,11 +654,9 @@ func Test_Starting_RelayProxy_UnixSocket_MonitoringPort(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -749,11 +738,9 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	wsService := stream.NewWebsocketService()
 	defer wsService.Close()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -923,7 +910,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			require.NoError(t, err)
 			wsService := stream.NewWebsocketService()
 			defer wsService.Close()
-			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil, nil)
 			require.NoError(t, err)
 
 			services := service.Services{
@@ -1021,7 +1008,7 @@ func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 			require.NoError(t, err)
 			wsService := stream.NewWebsocketService()
 			defer wsService.Close()
-			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil, nil, nil)
 			require.NoError(t, err)
 
 			services := service.Services{
@@ -1087,12 +1074,10 @@ func Test_NativeHistograms_Enabled(t *testing.T) {
 	defer wsService.Close()
 
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, nil)
+	}, nil, wsService)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -1196,7 +1181,7 @@ func Test_PortFreedAfterShutdown(t *testing.T) {
 
 	wsService := stream.NewWebsocketService()
 
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil, nil)
 	require.NoError(t, err)
 
 	services := service.Services{
@@ -1264,7 +1249,7 @@ func Test_StopBeforeStart(t *testing.T) {
 	}
 
 	l := newTestLogger(t)
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil, nil)
 	require.NoError(t, err)
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
