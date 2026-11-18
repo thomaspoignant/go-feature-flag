@@ -7,25 +7,17 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
-const (
-	// maxValidateJSONBodySize is the maximum size of a JSON flag file accepted by the validate endpoint.
-	maxValidateJSONBodySize = 1 << 20 // 1 MiB
-	// maxValidateYAMLBodySize is the maximum size of a YAML flag file accepted by the validate endpoint.
-	// It is smaller than the JSON one because YAML parsing is more expensive.
-	maxValidateYAMLBodySize = 64 << 10 // 64 KiB
-	// maxValidateTOMLBodySize is the maximum size of a TOML flag file accepted by the validate endpoint.
-	maxValidateTOMLBodySize = 64 << 10 // 64 KiB
-)
-
 type validateFlags struct {
 	version string
 	metrics metric.Metrics
+	limits  config.ValidateFlagsEndpoint
 }
 
 // FlagValidationError is the validation error of a single flag.
@@ -42,8 +34,11 @@ type FlagValidationResponse struct {
 }
 
 // NewValidateFlags initializes the controller for the /admin/v1/flags/validate endpoint.
-func NewValidateFlags(version string, metrics metric.Metrics) Controller {
-	return &validateFlags{version: version, metrics: metrics}
+// The unset (zero) limits are replaced by their default.
+func NewValidateFlags(
+	version string, metrics metric.Metrics, limits config.ValidateFlagsEndpoint,
+) Controller {
+	return &validateFlags{version: version, metrics: metrics, limits: limits.WithDefaults()}
 }
 
 // Handler validates a flag file without loading it in the relay proxy.
@@ -54,7 +49,8 @@ func NewValidateFlags(version string, metrics metric.Metrics) Controller {
 // @Description  The flag file is not loaded, nothing is changed on the flags served by the relay proxy.
 // @Description  The format of the body is selected with the `Content-Type` header (`application/json`,
 // @Description  `application/yaml`, `application/x-yaml`, `text/yaml` or `application/toml`).
-// @Description  The body is limited to 1 MiB for JSON and to 64 KiB for YAML and TOML.
+// @Description  The maximum size of the body is configurable per format with `endpoints.validateFlags`
+// @Description  (defaults: 1 MiB for JSON, 64 KiB for YAML and TOML).
 // @Security     ApiKeyAuth
 // @Accept       json
 // @Accept       application/yaml
@@ -78,7 +74,7 @@ func (h *validateFlags) Handler(c *echo.Context) error {
 // validate runs the validation and returns the outcome used for the metric alongside the handler error.
 func (h *validateFlags) validate(c *echo.Context) (string, error) {
 	const outcomeError = metric.ValidateFlagsOutcomeError
-	format, maxSize, ok := formatFromContentType(c.Request().Header.Get(echo.HeaderContentType))
+	format, maxSize, ok := h.formatFromContentType(c.Request().Header.Get(echo.HeaderContentType))
 	if !ok {
 		return outcomeError, echo.NewHTTPError(
 			http.StatusUnsupportedMediaType,
@@ -134,18 +130,18 @@ func (h *validateFlags) validate(c *echo.Context) (string, error) {
 
 // formatFromContentType returns the flag file format matching the content type and the maximum
 // size of the body for this format.
-func formatFromContentType(contentType string) (string, int64, bool) {
+func (h *validateFlags) formatFromContentType(contentType string) (string, int64, bool) {
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return "", 0, false
 	}
 	switch mediaType {
 	case "application/json":
-		return "json", maxValidateJSONBodySize, true
+		return "json", int64(h.limits.MaxJSONBodySize), true
 	case "application/yaml", "application/x-yaml", "text/yaml":
-		return "yaml", maxValidateYAMLBodySize, true
+		return "yaml", int64(h.limits.MaxYAMLBodySize), true
 	case "application/toml":
-		return "toml", maxValidateTOMLBodySize, true
+		return "toml", int64(h.limits.MaxTOMLBodySize), true
 	default:
 		return "", 0, false
 	}

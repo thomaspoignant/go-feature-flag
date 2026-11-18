@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 )
@@ -84,6 +85,7 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 		altMessage string
 		reader     io.Reader
 		chunked    bool
+		limits     config.ValidateFlagsEndpoint
 		wantStatus int
 		wantValid  bool
 		wantErrors []controller.FlagValidationError
@@ -152,13 +154,53 @@ func TestNewValidateFlags_Handler(t *testing.T) {
 			name: "toml over the size limit", contentType: "application/toml",
 			body: padTo(validTOML, "\n", tomlBodyLimit+1), wantStatus: http.StatusRequestEntityTooLarge,
 		},
+		{
+			name: "custom json limit, at the limit", contentType: "application/json",
+			limits: config.ValidateFlagsEndpoint{MaxJSONBodySize: 2048},
+			body:   padTo(validJSON, " ", 2048), wantStatus: http.StatusOK, wantValid: true,
+		},
+		{
+			name: "custom json limit, over the limit", contentType: "application/json",
+			limits: config.ValidateFlagsEndpoint{MaxJSONBodySize: 2048},
+			body:   padTo(validJSON, " ", 2049), wantStatus: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name: "custom json limit does not change yaml", contentType: "application/yaml",
+			limits: config.ValidateFlagsEndpoint{MaxJSONBodySize: 2048},
+			body:   padTo(validYAML, "\n", yamlBodyLimit+1), wantStatus: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name: "custom yaml limit, at the limit", contentType: "application/yaml",
+			limits: config.ValidateFlagsEndpoint{MaxYAMLBodySize: 128 << 10},
+			body:   padTo(validYAML, "\n", 128<<10), wantStatus: http.StatusOK, wantValid: true,
+		},
+		{
+			name: "custom yaml limit, over the limit", contentType: "application/yaml", chunked: true,
+			limits: config.ValidateFlagsEndpoint{MaxYAMLBodySize: 128 << 10},
+			body:   padTo(validYAML, "\n", 128<<10+1), wantStatus: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name: "custom toml limit, at the limit", contentType: "application/toml",
+			limits: config.ValidateFlagsEndpoint{MaxTOMLBodySize: 1024},
+			body:   padTo(validTOML, "\n", 1024), wantStatus: http.StatusOK, wantValid: true,
+		},
+		{
+			name: "custom toml limit, over the limit", contentType: "application/toml",
+			limits: config.ValidateFlagsEndpoint{MaxTOMLBodySize: 1024},
+			body:   padTo(validTOML, "\n", 1025), wantStatus: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name: "custom toml limit smaller than the default", contentType: "application/toml",
+			limits: config.ValidateFlagsEndpoint{MaxTOMLBodySize: 1024},
+			body:   padTo(validTOML, "\n", tomlBodyLimit), wantStatus: http.StatusRequestEntityTooLarge,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			metrics, err := metric.NewMetrics()
 			require.NoError(t, err)
-			ctrl := controller.NewValidateFlags("v1.2.3", metrics)
+			ctrl := controller.NewValidateFlags("v1.2.3", metrics, tt.limits)
 			e := echo.New()
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
