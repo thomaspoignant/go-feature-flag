@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -23,6 +25,10 @@ const (
 	DefaultSharedPollingInterval = 60 * time.Second
 	// minSharedListingTTL is the lowest listing TTL.
 	minSharedListingTTL = time.Second
+	// maxSharedErrorTTL is the longest time a listing error is served without listing again.
+	maxSharedErrorTTL = 10 * time.Second
+	// sharedListTimeout bounds one listing, which is not tied to the context of a caller.
+	sharedListTimeout = 30 * time.Second
 )
 
 // SharedItemsOptions configures a SharedItems group.
@@ -40,27 +46,37 @@ type SharedItemsOptions struct {
 }
 
 // SharedItems lets several single-file S3 retrievers of the same bucket share their storage
-// requests: the bucket is listed once per listing TTL window for all of them, and an object is
-// only downloaded when its ETag differs from the one of the cached content.
+// requests: the directories of the registered items are listed once per listing TTL window for
+// all of them, and an object is only downloaded when its ETag differs from the cached one.
 //
-// The listing TTL is max(1s, minPollingInterval/10), where minPollingInterval is the lowest
+// The listing TTL is max(1s, minPollingInterval/2), where minPollingInterval is the lowest
 // polling interval of the registered items. A change in the bucket can therefore be detected up
-// to one TTL later than with an independent retriever.
+// to one TTL later than with an independent retriever. Listing errors are cached for
+// min(TTL, 10s) so that an outage causes one failing listing per window, not one per item.
 type SharedItems struct {
 	bucket     string
 	lister     ListerAPI
 	downloader DownloaderAPI
 
-	// mu protects the registered items, the listing and the content cache map.
-	mu    sync.Mutex
-	items map[*SharedItemRetriever]struct{}
-	// listMu serializes the refresh of the listing so that concurrent callers reuse its result.
-	listMu       sync.Mutex
-	listing      map[string]string // key -> normalized ETag
-	listedPrefix string
-	listedAt     time.Time
-	listed       bool
-	contents     map[string]*sharedContent
+	// mu protects everything below.
+	mu       sync.Mutex
+	items    map[*SharedItemRetriever]struct{}
+	keyRefs  map[string]int
+	dirs     []string      // sorted distinct prefixes ("" or "dir/") of the registered items
+	ttl      time.Duration // listing TTL of the registered items
+	contents map[string]*sharedContent
+
+	listing    map[string]string // key -> normalized ETag
+	listedDirs map[string]struct{}
+	listErr    error
+	listedAt   time.Time
+	listed     bool
+	inflight   *sharedListing
+}
+
+// sharedListing is a listing in progress, shared by all the callers waiting for it.
+type sharedListing struct {
+	done chan struct{}
 }
 
 // sharedContent is the cached content of one object.
@@ -101,73 +117,80 @@ func NewSharedItems(ctx context.Context, opts SharedItemsOptions) (*SharedItems,
 		lister:     lister,
 		downloader: downloader,
 		items:      map[*SharedItemRetriever]struct{}{},
+		keyRefs:    map[string]int{},
 		contents:   map[string]*sharedContent{},
+		ttl:        minSharedListingTTL,
 	}, nil
 }
 
 // Bucket returns the bucket of the group.
 func (g *SharedItems) Bucket() string { return g.bucket }
 
-// Retriever returns the retriever of one item of the bucket. It joins the group when Init is
-// called and leaves it on Shutdown. pollingInterval is used to compute the listing TTL, 0 means
-// the default one (60s).
+// Retriever returns the retriever of one item of the bucket. The item joins the group
+// immediately (so that the listing covers it from the first poll) and leaves it on Shutdown.
+// pollingInterval is used to compute the listing TTL, 0 means the default one (60s).
 func (g *SharedItems) Retriever(item string, pollingInterval time.Duration) *SharedItemRetriever {
 	if pollingInterval <= 0 {
 		pollingInterval = DefaultSharedPollingInterval
 	}
-	return &SharedItemRetriever{group: g, item: item, pollingInterval: pollingInterval}
+	r := &SharedItemRetriever{group: g, item: item, pollingInterval: pollingInterval}
+	g.register(r)
+	return r
 }
 
 func (g *SharedItems) register(r *SharedItemRetriever) {
+	if r.item == "" {
+		return
+	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	if _, ok := g.items[r]; ok {
+		return
+	}
 	g.items[r] = struct{}{}
+	g.keyRefs[r.item]++
+	g.recompute()
 }
 
 func (g *SharedItems) deregister(r *SharedItemRetriever) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	if _, ok := g.items[r]; !ok {
+		return
+	}
 	delete(g.items, r)
-	// Drop the contents that are not used anymore.
-	used := map[string]struct{}{}
-	for it := range g.items {
-		used[it.item] = struct{}{}
+	if g.keyRefs[r.item]--; g.keyRefs[r.item] <= 0 {
+		delete(g.keyRefs, r.item)
+		delete(g.contents, r.item)
 	}
-	for key := range g.contents {
-		if _, ok := used[key]; !ok {
-			delete(g.contents, key)
-		}
-	}
+	g.recompute()
 }
 
-// ttlAndPrefix computes the listing TTL and prefix from the registered items.
-func (g *SharedItems) ttlAndPrefix() (time.Duration, string) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
+// recompute refreshes the listed directories and the TTL. The caller must hold g.mu.
+func (g *SharedItems) recompute() {
 	minPolling := time.Duration(0)
-	keys := make([]string, 0, len(g.items))
+	dirs := map[string]struct{}{}
 	for it := range g.items {
-		keys = append(keys, it.item)
+		dirs[dirPrefix(it.item)] = struct{}{}
 		if minPolling == 0 || it.pollingInterval < minPolling {
 			minPolling = it.pollingInterval
 		}
 	}
-	ttl := max(minSharedListingTTL, minPolling/10)
-	return ttl, commonPrefix(keys)
+	g.dirs = g.dirs[:0]
+	for d := range dirs {
+		g.dirs = append(g.dirs, d)
+	}
+	sort.Strings(g.dirs)
+	g.ttl = max(minSharedListingTTL, minPolling/2)
 }
 
-// commonPrefix is the longest common prefix of the keys.
-func commonPrefix(keys []string) string {
-	if len(keys) == 0 {
+// dirPrefix is the listing prefix of the directory of the key: "" for the root, "dir/" otherwise.
+func dirPrefix(key string) string {
+	dir := path.Dir(key)
+	if dir == "." || dir == "/" {
 		return ""
 	}
-	prefix := keys[0]
-	for _, k := range keys[1:] {
-		for !strings.HasPrefix(k, prefix) {
-			prefix = prefix[:len(prefix)-1]
-		}
-	}
-	return prefix
+	return dir + "/"
 }
 
 // normalizeETag ignores the weak prefix and the surrounding double quotes.
@@ -175,39 +198,84 @@ func normalizeETag(v string) string {
 	return strings.Trim(strings.TrimPrefix(v, "W/"), `"`)
 }
 
-// etagOf returns the ETag of the key in a listing no older than the TTL (listing it if needed).
-func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, error) {
-	g.listMu.Lock()
-	defer g.listMu.Unlock()
-	ttl, prefix := g.ttlAndPrefix()
-	fresh := g.listed && time.Since(g.listedAt) < ttl && strings.HasPrefix(key, g.listedPrefix)
-	if !fresh {
-		listing, err := g.list(ctx, prefix)
-		if err != nil {
-			g.listed = false
-			return "", false, err
-		}
-		g.listing, g.listedPrefix, g.listedAt, g.listed = listing, prefix, time.Now(), true
+// freshLocked tells if the current listing can serve the key. The caller must hold g.mu.
+func (g *SharedItems) freshLocked(key string) bool {
+	if !g.listed {
+		return false
 	}
-	etag, ok := g.listing[key]
-	return etag, ok, nil
+	if _, ok := g.listedDirs[dirPrefix(key)]; !ok {
+		return false
+	}
+	ttl := g.ttl
+	if g.listErr != nil {
+		ttl = min(ttl, maxSharedErrorTTL)
+	}
+	return time.Since(g.listedAt) < ttl
 }
 
-// list walks all the pages of the objects under prefix (recursively).
-func (g *SharedItems) list(ctx context.Context, prefix string) (map[string]string, error) {
-	input := &s3.ListObjectsV2Input{Bucket: aws.String(g.bucket)}
-	if prefix != "" {
-		input.Prefix = aws.String(prefix)
-	}
-	res := map[string]string{}
-	paginator := s3.NewListObjectsV2Paginator(g.lister, input)
-	for paginator.HasMorePages() {
-		page, err := paginator.NextPage(ctx)
-		if err != nil {
-			return nil, err
+// etagOf returns the ETag of the key in a listing no older than the TTL, listing if needed.
+// Concurrent callers share one listing, and a caller stops waiting when its ctx is done.
+func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, error) {
+	for range 3 {
+		g.mu.Lock()
+		if g.freshLocked(key) {
+			etag, ok := g.listing[key]
+			err := g.listErr
+			g.mu.Unlock()
+			return etag, ok, err
 		}
-		for _, obj := range page.Contents {
-			res[aws.ToString(obj.Key)] = normalizeETag(aws.ToString(obj.ETag))
+		fl := g.inflight
+		if fl == nil {
+			fl = &sharedListing{done: make(chan struct{})}
+			g.inflight = fl
+			go g.runListing(fl, slices.Clone(g.dirs))
+		}
+		g.mu.Unlock()
+
+		select {
+		case <-fl.done:
+		case <-ctx.Done():
+			return "", false, ctx.Err()
+		}
+	}
+	return "", false, errors.New("item is not registered in the shared listing")
+}
+
+// runListing lists the directories and publishes the result. It does not depend on the context of
+// a caller so that a cancelled caller does not fail the others.
+func (g *SharedItems) runListing(fl *sharedListing, dirs []string) {
+	ctx, cancel := context.WithTimeout(context.Background(), sharedListTimeout)
+	defer cancel()
+	listing, err := g.list(ctx, dirs)
+
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.listing, g.listErr, g.listedAt, g.listed = listing, err, time.Now(), true
+	g.listedDirs = make(map[string]struct{}, len(dirs))
+	for _, d := range dirs {
+		g.listedDirs[d] = struct{}{}
+	}
+	g.inflight = nil
+	close(fl.done)
+}
+
+// list walks all the pages of each directory (not recursively).
+func (g *SharedItems) list(ctx context.Context, dirs []string) (map[string]string, error) {
+	res := map[string]string{}
+	for _, prefix := range dirs {
+		input := &s3.ListObjectsV2Input{Bucket: aws.String(g.bucket), Delimiter: aws.String("/")}
+		if prefix != "" {
+			input.Prefix = aws.String(prefix)
+		}
+		paginator := s3.NewListObjectsV2Paginator(g.lister, input)
+		for paginator.HasMorePages() {
+			page, err := paginator.NextPage(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, obj := range page.Contents {
+				res[aws.ToString(obj.Key)] = normalizeETag(aws.ToString(obj.ETag))
+			}
 		}
 	}
 	return res, nil
@@ -217,7 +285,7 @@ func (g *SharedItems) list(ctx context.Context, prefix string) (map[string]strin
 func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 	etag, found, err := g.etagOf(ctx, key)
 	if err != nil {
-		return nil, fmt.Errorf("unable to list bucket %q: %w", g.bucket, err)
+		return nil, fmt.Errorf("unable to list S3 bucket %q, %w", g.bucket, err)
 	}
 	if !found {
 		return nil, fmt.Errorf("item %q not found in S3 bucket %q", key, g.bucket)
@@ -227,7 +295,10 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 	c, ok := g.contents[key]
 	if !ok {
 		c = &sharedContent{}
-		g.contents[key] = c
+		// an item that left the group in the meantime must not be cached again
+		if g.keyRefs[key] > 0 {
+			g.contents[key] = c
+		}
 	}
 	g.mu.Unlock()
 
@@ -238,12 +309,17 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 	}
 	data, dlETag, err := downloadObject(ctx, g.downloader, g.bucket, key)
 	if err != nil {
-		return nil, fmt.Errorf("unable to download item %q from S3 bucket %q: %w", key, g.bucket, err)
+		return nil, fmt.Errorf("unable to download item from S3 %q, %v", key, err)
 	}
-	c.etag, c.data = normalizeETag(dlETag), data
-	if c.data == nil {
-		c.data = []byte{}
+	dlETag = normalizeETag(dlETag)
+	if dlETag == "" {
+		// no ETag in the download, the listed one identifies the content
+		dlETag = etag
 	}
+	if data == nil {
+		data = []byte{}
+	}
+	c.etag, c.data = dlETag, data
 	return slices.Clone(c.data), nil
 }
 
