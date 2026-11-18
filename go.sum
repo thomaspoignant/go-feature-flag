@@ -979,8 +979,8 @@ github.com/testcontainers/testcontainers-go/modules/redis v0.45.0 h1:U7GClvzAxLc
 github.com/testcontainers/testcontainers-go/modules/redis v0.45.0/go.mod h1:06G3YVRf2RHAFNKwtFYhVd4CYgnXLWXmckaJNWI4fGY=
 github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.8.1 h1:xYoM7aH7H3ODQFVengrJV//jj0zlNUSnJCYFo1JM/Eo=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.8.1/go.mod h1:0/DY/l1HMB/shfxZ4OCwIROPTfIKxGdwwE8ZKEWWj4I=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.8.2 h1:3qLh+P4Es1yXOvAscDnuCUBPRoOW1BftPy88MP+Oi90=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.8.2/go.mod h1:iQeidJz18VwmlvhP1lIXwOqQtoL+UZGudor16QMCxC4=
 github.com/thomaspoignant/koanf-http-provider v0.1.0 h1:0FzV72D42olSAUa/9zh6/bHksbAMM6MnIbxo17GBLdA=
 github.com/thomaspoignant/koanf-http-provider v0.1.0/go.mod h1:fGAHaB9iJFQhMQuOSgAuxJiEfR4+IVhIhXncarFFZnY=
 github.com/tinylib/msgp v1.6.4 h1:mOwYbyYDLPj35mkA2BjjYejgJk9BuHxDdvRnb6v2ZcQ=
