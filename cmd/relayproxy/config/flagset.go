@@ -6,6 +6,18 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
 
+// flagSetMode is where the relay proxy gets its flagSets from.
+type flagSetMode = string
+
+const (
+	// flagSetModeNone is when there is no flagSet, the retrievers of the configuration are used.
+	flagSetModeNone flagSetMode = "none"
+	// flagSetModeLocal is when the flagSets come from the configuration file or the environment variables.
+	flagSetModeLocal flagSetMode = "local"
+	// flagSetModeStudio is when the flagSets come from GO Feature Flag Studio.
+	flagSetModeStudio flagSetMode = "studio"
+)
+
 // FlagSet is the configuration for a flag set.
 // A flag set is a collection of flags that are used to evaluate features.
 // It is used to group flags together and to apply the same configuration to them.

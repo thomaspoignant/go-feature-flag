@@ -32,7 +32,9 @@ const (
 type FlagsetManager interface {
 	// FlagSet returns the flag set linked to the API Key
 	FlagSet(apiKey string) (*ffclient.GoFeatureFlag, error)
-	// FlagSetName returns the name of the flagset linked to the API Key
+	// FlagSetName returns the name of the flagset linked to the API Key.
+	// In default mode it returns the default flagset name, with flagsets it returns an
+	// error if the API Key is empty or not linked to a flagset.
 	FlagSetName(apiKey string) (string, error)
 	// AllFlagSets returns all flag sets of the flagset manager
 	AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error)
@@ -66,7 +68,7 @@ type flagsetManagerImpl struct {
 	// read or write of these maps must be done while holding this lock.
 	flagsetsMutex sync.RWMutex
 
-	// notifiers are the relay-proxy level notifiers (e.g. prometheus, websocket) passed at
+	// notifiers are the relay-proxy level notifiers (e.g. prometheus) passed at
 	// construction time. They are stored so we can re-create a GoFeatureFlag client when a
 	// flagset is added at runtime.
 	notifiers []notifier.Notifier
@@ -74,6 +76,10 @@ type flagsetManagerImpl struct {
 	// sseService is used to create a per-flagset SSE notifier when a flagset is added at
 	// runtime. It can be nil.
 	sseService stream.SSEService
+
+	// wsService is used to create a per-flagset websocket notifier when a flagset is added at
+	// runtime. It can be nil.
+	wsService stream.WebsocketService
 
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
@@ -88,11 +94,11 @@ type flagsetManagerImpl struct {
 
 // NewFlagsetManager is creating a new FlagsetManager.
 // It is used to retrieve the flagset linked to the API Key.
-// sseService is optional: when non-nil a per-flagset SSE notifier is created
-// so that flag-change events are scoped to the correct flagset.
+// sseService and wsService are optional: when non-nil a per-flagset SSE / websocket
+// notifier is created so that flag-change events are scoped to the correct flagset.
 func NewFlagsetManager(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
@@ -101,9 +107,9 @@ func NewFlagsetManager(
 	var flagsetMngr FlagsetManager
 	var err error
 	if config.IsUsingFlagsets() {
-		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers, sseService)
+		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers, sseService, wsService)
 	} else {
-		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers, sseService)
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers, sseService, wsService)
 	}
 	if err != nil {
 		return nil, err
@@ -114,7 +120,7 @@ func NewFlagsetManager(
 
 func newFlagsetManagerWithDefaultConfig(
 	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: utils.DefaultFlagSetName,
@@ -133,7 +139,7 @@ func newFlagsetManagerWithDefaultConfig(
 			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
 		},
 	}
-	allNotifiers := appendSSENotifier(notifiers, sseService, utils.DefaultFlagSetName)
+	allNotifiers := appendStreamNotifiers(notifiers, sseService, wsService, utils.DefaultFlagSetName)
 	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, allNotifiers)
 	if err != nil {
 		return nil, err
@@ -142,6 +148,7 @@ func newFlagsetManagerWithDefaultConfig(
 		DefaultFlagSet: client,
 		notifiers:      notifiers,
 		sseService:     sseService,
+		wsService:      wsService,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
 		logger:         logger,
@@ -150,7 +157,7 @@ func newFlagsetManagerWithDefaultConfig(
 
 func newFlagsetManagerWithFlagsets(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService stream.SSEService,
+	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
@@ -169,7 +176,7 @@ func newFlagsetManagerWithFlagsets(
 			logger.Warn(logMessage, zap.String("flagset", flagSetName))
 		}
 
-		allNotifiers := appendSSENotifier(notifiers, sseService, flagSetName)
+		allNotifiers := appendStreamNotifiers(notifiers, sseService, wsService, flagSetName)
 		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
 		if err != nil {
 			logger.Error(
@@ -196,6 +203,7 @@ func newFlagsetManagerWithFlagsets(
 		APIKeysToFlagSetName: apiKeysToFlagSet,
 		notifiers:            notifiers,
 		sseService:           sseService,
+		wsService:            wsService,
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
 		logger:               logger,
@@ -233,6 +241,9 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
+		if apiKey == "" {
+			return "", fmt.Errorf("apiKey is required when using flagsets")
+		}
 		m.flagsetsMutex.RLock()
 		name, ok := m.APIKeysToFlagSetName[apiKey]
 		m.flagsetsMutex.RUnlock()
@@ -395,7 +406,7 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 // addFlagset creates a new GoFeatureFlag client for the given flagset and registers it so it
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
-	allNotifiers := appendSSENotifier(m.notifiers, m.sseService, flagset.Name)
+	allNotifiers := appendStreamNotifiers(m.notifiers, m.sseService, m.wsService, flagset.Name)
 	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
 	if err != nil {
 		m.logger.Error(
@@ -640,15 +651,19 @@ func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config)
 	}
 }
 
-// appendSSENotifier returns a copy of notifiers with an SSE notifier appended
-// when sseService is non-nil.
-func appendSSENotifier(
-	notifiers []notifier.Notifier, sseService stream.SSEService, flagsetName string,
+// appendStreamNotifiers returns a copy of notifiers with the SSE and websocket notifiers of
+// the flagset appended, each one only when its service is non-nil.
+func appendStreamNotifiers(
+	notifiers []notifier.Notifier, sseService stream.SSEService, wsService stream.WebsocketService,
+	flagsetName string,
 ) []notifier.Notifier {
-	if sseService == nil {
-		return notifiers
-	}
-	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+1)
+	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+2)
 	copy(out, notifiers)
-	return append(out, proxynotifier.NewNotifierSSE(sseService, flagsetName))
+	if sseService != nil {
+		out = append(out, proxynotifier.NewNotifierSSE(sseService, flagsetName))
+	}
+	if wsService != nil {
+		out = append(out, proxynotifier.NewNotifierWebsocket(wsService, flagsetName))
+	}
+	return out
 }

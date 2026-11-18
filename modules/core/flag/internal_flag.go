@@ -2,6 +2,7 @@ package flag
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -161,7 +162,7 @@ func (f *InternalFlag) isCacheable() bool {
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
 func (f *InternalFlag) selectVariation(
-	flagName string, key string, ctx ffcontext.Context) (*variationSelection, error) {
+	flagName string, key string, ctx ffcontext.Context) (variationSelection, error) {
 	hasRule := len(f.GetRules()) != 0
 	// Shared by all the rules below: the context is converted to a map at most once.
 	queryCtx := &queryContext{ctx: ctx}
@@ -171,33 +172,34 @@ func (f *InternalFlag) selectVariation(
 			variationName, err := target.evaluate(key, queryCtx, flagName, false)
 			if err != nil {
 				// the targeting does not apply
-				if _, ok := err.(*internalerror.RuleNotApplyError); ok {
+				if errors.Is(err, errRuleNotApply) {
 					continue
 				}
-				return nil, err
+				return variationSelection{}, err
 			}
+			matchedIndex := ruleIndex
 			reason := selectEvaluationReason(hasRule, true, target.IsDynamic(), false)
-			return &variationSelection{
+			return variationSelection{
 				name:      variationName,
 				reason:    reason,
-				ruleIndex: &ruleIndex,
-				ruleName:  f.GetRules()[ruleIndex].Name,
+				ruleIndex: &matchedIndex,
+				ruleName:  f.GetRules()[matchedIndex].Name,
 				cacheable: f.isCacheable() && target.ProgressiveRollout == nil,
 			}, err
 		}
 	}
 
 	if f.DefaultRule == nil {
-		return nil, fmt.Errorf("no default targeting for the flag")
+		return variationSelection{}, fmt.Errorf("no default targeting for the flag")
 	}
 
 	variationName, err := f.GetDefaultRule().evaluate(key, queryCtx, flagName, true)
 	if err != nil {
-		return nil, err
+		return variationSelection{}, err
 	}
 
 	reason := selectEvaluationReason(hasRule, false, f.GetDefaultRule().IsDynamic(), true)
-	return &variationSelection{
+	return variationSelection{
 		name:      variationName,
 		reason:    reason,
 		cacheable: f.isCacheable() && f.GetDefaultRule().ProgressiveRollout == nil,

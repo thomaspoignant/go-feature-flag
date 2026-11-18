@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v5"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
@@ -78,7 +80,7 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAPIFlagConfiguration(flagsetManager, metric.Metrics{})
@@ -201,7 +203,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAPIFlagConfiguration(flagsetManager, metric.Metrics{})
@@ -243,6 +245,95 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 				assert.NoError(t, err)
 				assert.JSONEq(t, string(wantBody), rec.Body.String())
 			}
+		})
+	}
+}
+
+func TestFlagConfigurationAPICtrl_Handler_FlagConfigurationMetric(t *testing.T) {
+	const metricName = "gofeatureflag_flag_configuration_total"
+	const want = "# HELP " + metricName + " Counter events for number of configuration api requests.\n" +
+		"# TYPE " + metricName + " counter\n" +
+		metricName + " 1\n"
+
+	conf := config.Config{
+		FlagSets: []config.FlagSet{
+			{
+				Name: "flagset1",
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
+						Path: testdataDir + "/configuration_flags.yaml",
+					},
+				},
+				APIKeys: []string{"flagset1-api-key"},
+			},
+		},
+	}
+	flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
+	require.NoError(t, err, "impossible to create flagset manager")
+	defer flagsetManager.Close()
+
+	tests := []struct {
+		name           string
+		flagsetManager service.FlagsetManager
+		requestBody    string
+		apiKey         string
+		wantStatusCode int
+	}{
+		{
+			name:           "successful request",
+			flagsetManager: flagsetManager,
+			requestBody:    mockConfigFlagsLocation + "requests/filter-flags.json",
+			apiKey:         "flagset1-api-key",
+			wantStatusCode: http.StatusOK,
+		},
+		{
+			name:           "invalid request body",
+			flagsetManager: flagsetManager,
+			requestBody:    mockConfigFlagsLocation + "requests/invalid-json.json",
+			apiKey:         "flagset1-api-key",
+			wantStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:           "API key not linked to a flagset",
+			flagsetManager: flagsetManager,
+			requestBody:    mockConfigFlagsLocation + "requests/empty.json",
+			apiKey:         "invalid-api-key",
+			wantStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:           "flagset manager not initialized",
+			flagsetManager: nil,
+			requestBody:    mockConfigFlagsLocation + "requests/empty.json",
+			wantStatusCode: http.StatusInternalServerError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			metrics, err := metric.NewMetrics()
+			require.NoError(t, err)
+
+			requestBody, err := os.ReadFile(tt.requestBody)
+			require.NoError(t, err)
+
+			ctrl := controller.NewAPIFlagConfiguration(tt.flagsetManager, metrics)
+			req := httptest.NewRequest(http.MethodPost, "/v1/flag/configuration", strings.NewReader(string(requestBody)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			req.Header.Set(echo.HeaderAuthorization, "Bearer "+tt.apiKey)
+			rec := httptest.NewRecorder()
+			c := echo.New().NewContext(req, rec)
+			c.SetPath("/v1/flag/configuration")
+
+			handlerErr := ctrl.Handler(c)
+			statusCode := rec.Code
+			if handlerErr != nil {
+				var he *echo.HTTPError
+				require.ErrorAs(t, handlerErr, &he)
+				statusCode = he.Code
+			}
+
+			assert.Equal(t, tt.wantStatusCode, statusCode)
+			assert.NoError(t, testutil.GatherAndCompare(metrics.Registry, strings.NewReader(want), metricName))
 		})
 	}
 }

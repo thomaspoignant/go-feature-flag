@@ -7,15 +7,17 @@ import (
 
 type notifierWebsocket struct {
 	websocketService stream.WebsocketService
+	flagsetName      string
 }
 
-func NewNotifierWebsocket(websocketService stream.WebsocketService) notifier.Notifier {
+func NewNotifierWebsocket(websocketService stream.WebsocketService, flagsetName string) notifier.Notifier {
 	return &notifierWebsocket{
 		websocketService: websocketService,
+		flagsetName:      flagsetName,
 	}
 }
 
 func (n *notifierWebsocket) Notify(diff notifier.DiffCache) error {
-	n.websocketService.BroadcastFlagChanges(diff)
+	n.websocketService.BroadcastFlagChanges(n.flagsetName, diff)
 	return nil
 }

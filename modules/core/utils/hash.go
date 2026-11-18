@@ -15,5 +15,20 @@ func BuildHash(flagName string, bucketingKey string, maxPercentage uint32) uint3
 	if maxPercentage == uint32(0) {
 		return uint32(0)
 	}
-	return Hash(flagName+bucketingKey) % maxPercentage
+	// FNV-1a over flagName then bucketingKey, same result as Hash(flagName+bucketingKey)
+	// without allocating the concatenated string.
+	const (
+		offset32 = 2166136261
+		prime32  = 16777619
+	)
+	h := uint32(offset32)
+	for i := 0; i < len(flagName); i++ {
+		h ^= uint32(flagName[i])
+		h *= prime32
+	}
+	for i := 0; i < len(bucketingKey); i++ {
+		h ^= uint32(bucketingKey[i])
+		h *= prime32
+	}
+	return h % maxPercentage
 }

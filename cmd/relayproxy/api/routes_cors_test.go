@@ -47,7 +47,7 @@ func startTestServer(t *testing.T, conf *config.Config) string {
 	require.NoError(t, err)
 	wsService := stream.NewWebsocketService()
 	t.Cleanup(wsService.Close)
-	flagsetManager, err := service.NewFlagsetManager(conf, log.ZapLogger, nil, nil)
+	flagsetManager, err := service.NewFlagsetManager(conf, log.ZapLogger, nil, nil, nil)
 	require.NoError(t, err)
 
 	s := api.New(conf, service.Services{
