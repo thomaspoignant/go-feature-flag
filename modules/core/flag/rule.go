@@ -314,7 +314,7 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 	// we need to sort the names to be sure we are constantly affecting the users to the same bucket.
 	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the
 	// buckets every time we are in this function.
-	var buf [8]string
+	var buf [16]string
 	names := buf[:0]
 	for k := range percentage {
 		names = append(names, k)

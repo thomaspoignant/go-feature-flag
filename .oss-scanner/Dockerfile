@@ -1,7 +1,7 @@
 # Scanner image for https://github.com/anthropics/oss-scanner (projects/go-feature-flag).
 #
-# The audit runs offline, so this build fetches every module, builds the library, the relay proxy, the CLI, the editor
-# API and the jsonschema generator, and precompiles the tests. threat_model.md, next to this file, says how to run them.
+# The audit runs offline, so this build fetches every module, builds the library, the relay proxy, the CLI
+# and the jsonschema generator, and precompiles the tests. threat_model.md, next to this file, says how to run them.
 FROM golang:1.26-bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 # curl to talk to a running relay proxy.
@@ -24,7 +24,6 @@ RUN go build ./... \
     && mkdir -p out/bin \
     && go build -o out/bin/relayproxy ./cmd/relayproxy \
     && go build -o out/bin/cli ./cmd/cli \
-    && go build -o out/bin/editor-api ./cmd/editor \
     && go build -o out/bin/jsonschema-generator ./cmd/jsonschema-generator
 
 # Run the short tests so the log shows the image works, without letting a failure abort the build. Tests tagged

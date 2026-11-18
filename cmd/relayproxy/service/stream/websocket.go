@@ -16,12 +16,12 @@ type WebsocketConnector interface {
 // WebsocketService is the service interface that handle the websocket connections
 // This service is able to broadcast a notification to all the open websockets
 type WebsocketService interface {
-	// Register is adding the connection to the list of open connection.
-	Register(c WebsocketConnector)
+	// Register is adding the connection to the list of open connection of the flagset.
+	Register(c WebsocketConnector, flagsetName string)
 	// Deregister is removing the connection from the list of open connection.
 	Deregister(c WebsocketConnector)
-	// BroadcastFlagChanges is sending the diff cache struct to the client.
-	BroadcastFlagChanges(diff notifier.DiffCache)
+	// BroadcastFlagChanges is sending the diff cache struct to the clients of the flagset.
+	BroadcastFlagChanges(flagsetName string, diff notifier.DiffCache)
 	// Close deregister all open connections.
 	Close()
 	// WaitForCleanup waits for all connections to be properly closed
@@ -32,7 +32,7 @@ type WebsocketService interface {
 func NewWebsocketService(opts ...Option) WebsocketService {
 	options := newOptions(opts...)
 	return &websocketServiceImpl{
-		clients:            map[WebsocketConnector]any{},
+		clients:            map[WebsocketConnector]string{},
 		mutex:              &sync.RWMutex{},
 		closed:             make(chan struct{}),
 		includeFlagDetails: options.includeFlagDetails,
@@ -41,18 +41,22 @@ func NewWebsocketService(opts ...Option) WebsocketService {
 
 // websocketServiceImpl is the implementation of the interface.
 type websocketServiceImpl struct {
-	clients            map[WebsocketConnector]any
+	// clients stores the flagset name of every open connection.
+	clients            map[WebsocketConnector]string
 	mutex              *sync.RWMutex
 	closed             chan struct{}
 	includeFlagDetails bool
 }
 
-// BroadcastFlagChanges is sending a string to all the open connection.
-func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
+// BroadcastFlagChanges is sending the diff to all the open connection of the flagset.
+func (w *websocketServiceImpl) BroadcastFlagChanges(flagsetName string, diff notifier.DiffCache) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	payload := flagChangePayload(diff, w.includeFlagDetails)
-	for c := range w.clients {
+	for c, clientFlagsetName := range w.clients {
+		if clientFlagsetName != flagsetName {
+			continue
+		}
 		err := c.WriteJSON(payload)
 		if err != nil {
 			w.mutex.RUnlock()
@@ -62,11 +66,11 @@ func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
 	}
 }
 
-// Register is adding the connection to the list of open connection.
-func (w *websocketServiceImpl) Register(c WebsocketConnector) {
+// Register is adding the connection to the list of open connection of the flagset.
+func (w *websocketServiceImpl) Register(c WebsocketConnector, flagsetName string) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
-	w.clients[c] = struct{}{}
+	w.clients[c] = flagsetName
 }
 
 // Deregister is removing the connection from the list of open connection.
