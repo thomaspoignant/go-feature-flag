@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.59.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.59.0...v1.59.1) (2026-11-18)
+
+
+### 🐛 Bug Fixes
+
+* **relay-proxy:** Scope websocket flag-change notifications to the client's flagset ([#6534](https://github.com/thomaspoignant/go-feature-flag/issues/6534)) ([fde9eb8](https://github.com/thomaspoignant/go-feature-flag/commit/fde9eb8cb340ad8b7233bdc66a5bdafd6117acb3))
+
+
+### 🔧 Chores
+
+* Bump cloud.google.com/go/pubsub/v2 from 2.8.1 to 2.9.0 ([#6525](https://github.com/thomaspoignant/go-feature-flag/issues/6525)) ([7817e4a](https://github.com/thomaspoignant/go-feature-flag/commit/7817e4a1692b8d6088e63a886114b87df07d63f9))
+* Bump go-feature-flag/rules fork in all modules ([#6529](https://github.com/thomaspoignant/go-feature-flag/issues/6529)) ([321d9c8](https://github.com/thomaspoignant/go-feature-flag/commit/321d9c8c06ba70328c48a071d76285bd775dc947))
+* Bump google.golang.org/api from 0.311.0 to 0.312.0 ([#6526](https://github.com/thomaspoignant/go-feature-flag/issues/6526)) ([3dff8c9](https://github.com/thomaspoignant/go-feature-flag/commit/3dff8c96be3bef0b82b7ffd0b9ea0131196fbd79))
+* Bump Microsoft.NET.Test.Sdk from 18.11.0 to 18.11.1 ([#6528](https://github.com/thomaspoignant/go-feature-flag/issues/6528)) ([4f6da82](https://github.com/thomaspoignant/go-feature-flag/commit/4f6da823a40af5f25d7932c0887946473ab049ad))
+* Bump the aws group with 7 updates ([#6524](https://github.com/thomaspoignant/go-feature-flag/issues/6524)) ([1cdc082](https://github.com/thomaspoignant/go-feature-flag/commit/1cdc08279e8ffe616850651b31fb30cc05c7becb))
+* **dependency:** Bump module modules/core 0.8.2 ([#6533](https://github.com/thomaspoignant/go-feature-flag/issues/6533)) ([6baeafe](https://github.com/thomaspoignant/go-feature-flag/commit/6baeafeeda2a93fe1c0ec6232cb2d57f83e213d3))
+
 ## [1.59.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.58.1...v1.59.0) (2026-11-17)
 
 
