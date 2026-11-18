@@ -419,6 +419,46 @@ a newly added flag set is started immediately and a removed flag set is stopped.
 - Runtime add/remove only works for flag sets that have an explicit, unique [`name`](#flagsetname). Flag sets without a name (or named `default`) get a generated name at startup and cannot be added or removed at runtime.
 :::
 
+#### Sharing S3 requests between flag sets
+
+By default every flag set polls its own retriever, so with `N` flag sets reading `N` files from the same S3 bucket, each relay proxy replica sends `N` `GetObject` requests per polling interval.
+
+Set `useUnifiedRetriever: true` on the flag sets that read from the same bucket to make them share the storage requests:
+the bucket is listed once per listing window for all of them, and a file is only downloaded when its ETag changed.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: project-1-prod # no option: keeps its own retriever
+    apiKeys: ["prod-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: project-1/prod/flags.yaml
+
+  - name: project-1-dev
+    useUnifiedRetriever: true
+    apiKeys: ["dev-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: project-1/dev/flags.yaml
+
+  - name: project-2-dev
+    useUnifiedRetriever: true
+    apiKeys: ["dev-2-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: project-2/dev/flags.yaml
+```
+
+- The flag sets must use a single `retriever` of kind `s3` with `item` set. The relay proxy refuses to start otherwise.
+- Only the flag sets with the same `bucket` and `useUnifiedRetriever: true` are grouped, the others behave as usual. You can keep your production flag sets isolated by not setting the option on them.
+- The listing window is `max(1s, smallest pollingInterval of the group / 10)`. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`).
+- When the group starts, the listing is refreshed each time a new flag set widens the listed prefix, so a few listings are done at startup.
+- It reduces the number of requests sent to S3 (a listing per window instead of one `GetObject` per flag set per poll). It does **not** reduce memory or goroutines: caches, notifiers, exporters, clients and polling loops stay per flag set.
+- Like the other flag set options, it can't be changed on an existing flag set at runtime.
+
 ### `studio`
 
 Loads the [`flagSets`](#flagsets) from GO Feature Flag Studio instead of the configuration file.
@@ -780,6 +820,18 @@ File path to persist flag configurations for this flag set.
 Environment identifier for this flag set (e.g., "dev", "staging", "prod").
 
 - [_see `environment`_](#environment)
+
+#### `flagSet.useUnifiedRetriever`
+
+Share the S3 requests of this flag set with the other flag sets of the same bucket that also set this option.
+
+- option name: `useUnifiedRetriever`
+- type: **boolean**
+- default: **false**
+- mandatory: <NotMandatory />
+- Requires a single `retriever` of kind `s3` with `item` set (`retrievers` and the folder mode, `prefix`, are not supported).
+- Not available outside of `flagSets`.
+- [_see Sharing S3 requests between flag sets_](#sharing-s3-requests-between-flag-sets)
 
 ### type `notifier`
 
