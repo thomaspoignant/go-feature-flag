@@ -433,7 +433,7 @@ flagSets:
     retriever:
       kind: s3
       bucket: flags
-      item: project-1/prod/flags.yaml
+      item: flags/project-1/prod/flags.yaml
 
   - name: project-1-dev
     useUnifiedRetriever: true
@@ -441,7 +441,7 @@ flagSets:
     retriever:
       kind: s3
       bucket: flags
-      item: project-1/dev/flags.yaml
+      item: flags/project-1/dev/flags.yaml
 
   - name: project-2-dev
     useUnifiedRetriever: true
@@ -449,16 +449,24 @@ flagSets:
     retriever:
       kind: s3
       bucket: flags
-      item: project-2/dev/flags.yaml
+      item: flags/project-2/dev/flags.yaml
 ```
 
 - The flag sets must use a single `retriever` of kind `s3` with `item` set. The relay proxy refuses to start otherwise.
 - Only the flag sets with the same `bucket` and `useUnifiedRetriever: true` are grouped, the others behave as usual. You can keep your production flag sets isolated by not setting the option on them.
-- The listing window is `max(1s, smallest pollingInterval of the group / 2)`. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`).
-- **Layout**: put the flag files of the grouped flag sets under a dedicated prefix (for example `flags/project-1/dev/flags.yaml`). The relay proxy does **one recursive listing** of the longest common key prefix of the grouped items (cut at its last `/`, the whole bucket if there is none), and the listing covers **every object under that prefix, including the unrelated ones**. The keys are used as they are, they are never normalized.
-- The listing is shared, each page request has a 30 second timeout, and a listing error is cached for `min(listing window, 10s)`, so an outage sends one failing request per window (at most 10 seconds) and not one per flag set. For example, with a `pollingInterval` of 60s the listing window is 30s, but a failed listing is retried after 10s. The [`retriever.timeout`](#type-retriever) has no effect on the unified path.
-- **IAM**: in addition to `s3:GetObject`, the relay proxy needs `s3:ListBucket` on the bucket, and the listing prefix must be allowed (with an `s3:prefix` condition, allow the common prefix; a flag set whose item is at the root of the bucket needs the empty prefix to be allowed). If the prefix is denied, the listing fails for **the whole group**.
-- **When it is worth it**: a listing page (1000 objects) costs about 12.5 times a `GetObject` request, and a replica lists about twice per polling interval, so unified retrievers cost about 25 `GetObject` equivalents per listed page and per polling interval, versus one `GetObject` per flag set without the option. It only saves requests and cost with **roughly more than 25 flag sets per listed 1000-object page**, and the target is the thousands of flag sets of a multi-project setup. With a handful of flag sets it sends more and costlier requests than independent retrievers and adds change-detection lag: leave the option off in that case.
+- **Layout**: put the flag files under a dedicated prefix (like `flags/` above). The relay proxy does **one recursive listing** of the longest common key prefix of the grouped items, cut at its last `/` (`flags/` in the example). The listing covers **every object under that prefix, including the unrelated ones**, and items with no common directory (`a/f.yaml` and `b/f.yaml`, or a root-level item) list **the whole bucket**. The keys are used as they are, they are never normalized.
+- **IAM**: in addition to `s3:GetObject`, the relay proxy needs `s3:ListBucket` on the bucket, and the listing prefix must be allowed (with an `s3:prefix` condition, allow the common prefix; the empty prefix when there is no common directory). If the prefix is denied, the listing fails for **the whole group**.
+
+##### Request load on the bucket
+
+Per replica and per polling interval, independent retrievers send `N` `GetObject` requests. With the option, a replica sends about 2 listings of `ceil(objects under the prefix / 1000)` pages each, plus a `GetObject` for each file that changed.
+It lowers the request load on the bucket while the prefix holds **fewer than roughly 500 times as many objects as there are unified flag sets** (and the issue's target, thousands of flag sets in one prefix, is well inside that). Keep the prefix dedicated to the flag files, and leave the option off for a handful of flag sets.
+In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost only goes down while the prefix holds fewer than about 40 times as many objects as unified flag sets: the cost is secondary, the goal is the request load.
+
+- **Listing window**: the group lists at most every `max(1s, smallest pollingInterval of the group / 2)`, measured from the end of the previous listing. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`). A single flag set with a very short `pollingInterval` makes the **whole group** list that often: do not mix very short intervals into a group.
+- **Bounded requests**: each listing page request has a 30 second timeout, a listing is limited to 10000 pages and an incomplete listing is an error. Downloads are limited to 16 concurrent `GetObject` requests per group. The `timeout` of the `retriever` configuration is not used by the unified path (nor by the other S3 retriever).
+- **Errors**: a listing error is cached for `min(listing window, 10s)` from the end of the failed listing, so an outage sends one failing request per window (at most 10 seconds) and not one per flag set. For example, with a `pollingInterval` of 60s the listing window is 30s, but a failed listing is retried after 10s.
+- **Startup and restarts**: each replica still downloads each file once when it starts (the concurrency limit of 16 bounds the burst) and then lists once. Replicas restarted together keep polling in step: set [`enablePollingJitter`](#flagsetenablepollingjitter) to spread their requests.
 - It reduces the number of requests sent to S3 only. It does **not** reduce goroutines, and caches, notifiers, exporters and clients stay per flag set. The content of each file is cached twice (shared content cache and flag set cache) and copied when returned, so expect a transient memory use of 2-3 times the size of the flag files, plus a map of the registered keys for the listing.
 - Like the other flag set options, it can't be changed on an existing flag set at runtime.
 

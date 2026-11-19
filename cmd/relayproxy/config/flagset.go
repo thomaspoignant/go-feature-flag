@@ -109,15 +109,17 @@ type CommonFlagSet struct {
 	// when its ETag changed, instead of one GetObject per flagset per poll.
 	// Put the flag files under a dedicated prefix: every object under the common prefix is listed.
 	// It needs s3:ListBucket allowed on that prefix (a denied prefix fails the whole group).
-	// A listing page costs about 12.5 GetObject and a replica lists about twice per polling
-	// interval, so it only saves requests with more than ~25 flagsets per listed page of 1000
-	// objects: leave it off for a few flagsets.
+	// It lowers the request load on the bucket while the prefix holds fewer than roughly 500
+	// objects per unified flagset (about 2 listings of ceil(objects/1000) pages per polling
+	// interval, versus one GetObject per flagset): leave it off for a few flagsets.
+	// Downloads are limited to 16 concurrent GetObject per bucket and a very short polling
+	// interval in the group makes the whole group list that often.
 	// Caches, notifiers, exporters and polling loops stay per flagset.
 	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set, the
 	// `timeout` of the retriever has no effect.
 	// A change can be detected up to one listing window later than with an independent retriever.
-	// A listing error is cached for min(listing window, 10s) so an outage sends one failing
-	// request per window and not one per flagset.
+	// A listing error is cached for min(listing window, 10s) from the end of the listing, so an
+	// outage sends one failing request per window and not one per flagset.
 	// Not available outside of flagsets.
 	// Default: false
 	UseUnifiedRetriever bool `mapstructure:"useUnifiedRetriever" koanf:"useunifiedretriever"`
