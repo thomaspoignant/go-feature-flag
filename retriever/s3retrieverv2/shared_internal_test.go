@@ -9,10 +9,9 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
-
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
