@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"sync/atomic"
@@ -26,6 +27,7 @@ import (
 type fakeS3 struct {
 	content []byte
 	listErr error
+	keys    []string
 	lists   atomic.Int32
 	gets    atomic.Int32
 }
@@ -38,7 +40,11 @@ func (f *fakeS3) ListObjectsV2(
 		return nil, f.listErr
 	}
 	out := &s3.ListObjectsV2Output{}
-	for _, k := range []string{"p/a.yaml", "p/b.yaml", "p/c.yaml"} {
+	keys := f.keys
+	if keys == nil {
+		keys = []string{"p/a.yaml", "p/b.yaml", "p/c.yaml"}
+	}
+	for _, k := range keys {
 		if strings.HasPrefix(k, aws.ToString(in.Prefix)) {
 			out.Contents = append(out.Contents, s3types.Object{Key: aws.String(k), ETag: aws.String(`"x"`)})
 		}
@@ -353,6 +359,34 @@ func Test_flagsetManagerImpl_addFlagset_unifiedDuplicate(t *testing.T) {
 		dup := s3FlagSet("u1", "flags", "p/b.yaml")
 		mgr.(*flagsetManagerImpl).addFlagset(dup)
 		assert.Equal(t, 1, reg.groupCount())
+		mgr.Close()
+		assert.Equal(t, 0, reg.groupCount())
+	})
+}
+
+func Test_flagsetManagerImpl_reloadAddsUnifiedFlagsets(t *testing.T) {
+	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
+		require.NoError(t, err)
+		f := &fakeS3{content: content}
+		flagsets := make([]config.FlagSet, 11)
+		for i := range flagsets {
+			f.keys = append(f.keys, fmt.Sprintf("p/f%d.yaml", i))
+			flagsets[i] = s3FlagSet(fmt.Sprintf("u%d", i), "flags", f.keys[i])
+		}
+		reg := newFakeRegistry(t, f, &atomic.Int32{})
+		mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(
+			&config.Config{FlagSets: flagsets[:1]}, zap.NewNop(), nil, nil, nil, reg)
+		require.NoError(t, err)
+		require.EqualValues(t, 1, f.lists.Load())
+
+		// 10 flagsets added in one reload share one listing
+		mgr.OnConfigChange(&config.Config{Server: config.Server{Port: 8080}, FlagSets: flagsets})
+		all, err := mgr.AllFlagSets()
+		require.NoError(t, err)
+		assert.Len(t, all, 11)
+		assert.EqualValues(t, 2, f.lists.Load())
 		mgr.Close()
 		assert.Equal(t, 0, reg.groupCount())
 	})

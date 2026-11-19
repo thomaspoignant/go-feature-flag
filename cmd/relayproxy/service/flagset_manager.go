@@ -375,11 +375,18 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 		}
 	}
 
-	// 2. Add the flagsets that are new in the configuration.
+	// 2. Add the flagsets that are new in the configuration. The unified retrievers are
+	// registered first so that the first listing of a bucket covers all of them.
+	var added []config.FlagSet
 	for name, newFlagset := range newByName {
 		if _, alreadyExists := currentByName[name]; !alreadyExists {
-			m.addFlagset(newFlagset)
+			added = append(added, newFlagset)
 		}
+	}
+	m.unifiedRegistry.preRegisterAll(added, m.logger)
+	defer m.unifiedRegistry.releasePending()
+	for _, newFlagset := range added {
+		m.addFlagset(newFlagset)
 	}
 
 	// 3. Reconcile the flagsets that are present in both configurations: only their API keys
