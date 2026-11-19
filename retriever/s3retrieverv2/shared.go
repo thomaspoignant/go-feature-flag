@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path"
 	"slices"
 	"sort"
 	"strings"
@@ -62,8 +61,11 @@ type SharedItems struct {
 	mu       sync.Mutex
 	items    map[*SharedItemRetriever]struct{}
 	keyRefs  map[string]int
-	dirs     []string      // sorted distinct prefixes ("" or "dir/") of the registered items
-	ttl      time.Duration // listing TTL of the registered items
+	seq      uint64            // incremented each time a new key is registered
+	keySeq   map[string]uint64 // key -> seq of its registration
+	listSeq  uint64            // seq at the start of the current listing
+	dirs     []string          // sorted distinct prefixes ("" or "dir/") of the registered items
+	ttl      time.Duration     // listing TTL of the registered items
 	contents map[string]*sharedContent
 
 	listing    map[string]string // key -> normalized ETag
@@ -118,6 +120,7 @@ func NewSharedItems(ctx context.Context, opts SharedItemsOptions) (*SharedItems,
 		downloader: downloader,
 		items:      map[*SharedItemRetriever]struct{}{},
 		keyRefs:    map[string]int{},
+		keySeq:     map[string]uint64{},
 		contents:   map[string]*sharedContent{},
 		ttl:        minSharedListingTTL,
 	}, nil
@@ -148,7 +151,11 @@ func (g *SharedItems) register(r *SharedItemRetriever) {
 		return
 	}
 	g.items[r] = struct{}{}
-	g.keyRefs[r.item]++
+	if g.keyRefs[r.item]++; g.keyRefs[r.item] == 1 {
+		// a listing started before this registration may not know the key: force a refresh
+		g.seq++
+		g.keySeq[r.item] = g.seq
+	}
 	g.recompute()
 }
 
@@ -162,6 +169,7 @@ func (g *SharedItems) deregister(r *SharedItemRetriever) {
 	if g.keyRefs[r.item]--; g.keyRefs[r.item] <= 0 {
 		delete(g.keyRefs, r.item)
 		delete(g.contents, r.item)
+		delete(g.keySeq, r.item)
 	}
 	g.recompute()
 }
@@ -184,13 +192,10 @@ func (g *SharedItems) recompute() {
 	g.ttl = max(minSharedListingTTL, minPolling/2)
 }
 
-// dirPrefix is the listing prefix of the directory of the key: "" for the root, "dir/" otherwise.
+// dirPrefix is the listing prefix of the directory of the key: everything up to the last "/"
+// included, "" if there is none. S3 keys are opaque so the key is not normalized in any way.
 func dirPrefix(key string) string {
-	dir := path.Dir(key)
-	if dir == "." || dir == "/" {
-		return ""
-	}
-	return dir + "/"
+	return key[:strings.LastIndex(key, "/")+1]
 }
 
 // normalizeETag ignores the weak prefix and the surrounding double quotes.
@@ -204,6 +209,9 @@ func (g *SharedItems) freshLocked(key string) bool {
 		return false
 	}
 	if _, ok := g.listedDirs[dirPrefix(key)]; !ok {
+		return false
+	}
+	if g.listSeq < g.keySeq[key] {
 		return false
 	}
 	ttl := g.ttl
@@ -228,7 +236,7 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 		if fl == nil {
 			fl = &sharedListing{done: make(chan struct{})}
 			g.inflight = fl
-			go g.runListing(context.WithoutCancel(ctx), fl, slices.Clone(g.dirs))
+			go g.runListing(context.WithoutCancel(ctx), fl, slices.Clone(g.dirs), g.seq)
 		}
 		g.mu.Unlock()
 
@@ -243,14 +251,14 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 
 // runListing lists the directories and publishes the result. It does not depend on the context of
 // a caller so that a cancelled caller does not fail the others.
-func (g *SharedItems) runListing(base context.Context, fl *sharedListing, dirs []string) {
+func (g *SharedItems) runListing(base context.Context, fl *sharedListing, dirs []string, seq uint64) {
 	ctx, cancel := context.WithTimeout(base, sharedListTimeout)
 	defer cancel()
 	listing, err := g.list(ctx, dirs)
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	g.listing, g.listErr, g.listedAt, g.listed = listing, err, time.Now(), true
+	g.listing, g.listErr, g.listedAt, g.listed, g.listSeq = listing, err, time.Now(), true, seq
 	g.listedDirs = make(map[string]struct{}, len(dirs))
 	for _, d := range dirs {
 		g.listedDirs[d] = struct{}{}

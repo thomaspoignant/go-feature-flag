@@ -111,6 +111,8 @@ type CommonFlagSet struct {
 	// Caches, notifiers, exporters and polling loops stay per flagset.
 	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set.
 	// A change can be detected up to one listing window later than with an independent retriever.
+	// A listing error is cached for min(listing window, 10s) so an outage sends one failing
+	// request per window and not one per flagset.
 	// Not available outside of flagsets.
 	// Default: false
 	UseUnifiedRetriever bool `mapstructure:"useUnifiedRetriever" koanf:"useunifiedretriever"`

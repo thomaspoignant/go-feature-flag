@@ -284,6 +284,23 @@ func TestSharedItemRetriever_Retrieve(t *testing.T) {
 			run:   runWiden,
 		},
 		{
+			name: "keys are opaque, they are not normalized",
+			items: map[string]time.Duration{
+				"./flags.yaml": 0, "dir/../flags.yaml": 0, "/flags.yaml": 0,
+			},
+			run: runOpaqueKeys,
+		},
+		{
+			name:  "new item in an already listed directory refreshes the listing",
+			items: nil,
+			run:   runLateInCoveredDir,
+		},
+		{
+			name:  "missing late item errors after one refresh",
+			items: nil,
+			run:   runLateMissing,
+		},
+		{
 			name:  "empty file",
 			items: map[string]time.Duration{"empty/flags.yaml": 0},
 			run:   runEmptyFile,
@@ -339,6 +356,10 @@ func baseObjects() map[string]fakeObject {
 		"other/flags.yaml":   {etag: `"e4"`, data: "other"},
 		"p1/dev/sub/x.yaml":  {etag: `"e5"`, data: "sub"},
 		"empty/flags.yaml":   {etag: `"e6"`, data: ""},
+		"p1/dev/other.yaml":  {etag: `"e7"`, data: "other-dev"},
+		"./flags.yaml":       {etag: `"e8"`, data: "dot"},
+		"dir/../flags.yaml":  {etag: `"e9"`, data: "dotdot"},
+		"/flags.yaml":        {etag: `"e10"`, data: "slash"},
 	}
 }
 
@@ -592,4 +613,44 @@ func runEmptyFile(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.Share
 		assert.Empty(t, got)
 	}
 	assert.Equal(t, 1, b.getCount("empty/flags.yaml"))
+}
+
+func runOpaqueKeys(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.SharedItemRetriever) {
+	want := map[string]string{"./flags.yaml": "dot", "dir/../flags.yaml": "dotdot", "/flags.yaml": "slash"}
+	for key, data := range want {
+		got, err := r[key].Retrieve(t.Context())
+		require.NoError(t, err)
+		assert.Equal(t, data, string(got))
+	}
+	assert.ElementsMatch(t, []string{"./", "dir/../", "/"}, b.prefixes)
+}
+
+func runLateInCoveredDir(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.SharedItemRetriever) {
+	g := newGroup(t, b)
+	first := initRetriever(t, g, "p1/dev/flags.yaml", time.Minute)
+	_, err := first.Retrieve(t.Context())
+	require.NoError(t, err)
+	lists, gets := b.lists.Load(), b.totalGets()
+
+	second := initRetriever(t, g, "p1/dev/other.yaml", time.Minute)
+	got, err := second.Retrieve(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, "other-dev", string(got))
+	assert.Equal(t, lists+1, b.lists.Load())
+	assert.Equal(t, gets+1, b.totalGets())
+}
+
+func runLateMissing(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.SharedItemRetriever) {
+	g := newGroup(t, b)
+	first := initRetriever(t, g, "p1/dev/flags.yaml", time.Minute)
+	_, err := first.Retrieve(t.Context())
+	require.NoError(t, err)
+	lists := b.lists.Load()
+
+	missing := initRetriever(t, g, "p1/dev/nope.yaml", time.Minute)
+	for range 2 {
+		_, err = missing.Retrieve(t.Context())
+		assert.ErrorContains(t, err, "not found")
+	}
+	assert.Equal(t, lists+1, b.lists.Load(), "one refresh, then the listing is fresh again")
 }
