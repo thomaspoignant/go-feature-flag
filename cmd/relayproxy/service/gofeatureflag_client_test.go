@@ -152,19 +152,31 @@ func Test_initRetrieversWithRegistry(t *testing.T) {
 			}
 			r, err := initRetrieversWithRegistry(&proxyConf, tt.reg)
 			tt.wantErr(t, err)
-			if r != nil {
-				nbRetriever := tt.wantLen
-				if tt.retrievers != nil {
-					nbRetriever += len(*tt.retrievers)
-				}
-				assert.Len(t, r, nbRetriever)
-			}
-			for _, rr := range r {
-				if sr, ok := rr.(*releasingRetriever); ok {
-					require.NoError(t, sr.Shutdown(t.Context()))
-				}
-			}
+			assertRetrieversLen(t, r, tt.wantLen, tt.retrievers)
+			shutdownReleasing(t, r)
 		})
+	}
+}
+
+func assertRetrieversLen(
+	t *testing.T, r []retriever.Retriever, wantLen int, retrievers *[]retrieverconf.RetrieverConf,
+) {
+	t.Helper()
+	if r == nil {
+		return
+	}
+	if retrievers != nil {
+		wantLen += len(*retrievers)
+	}
+	assert.Len(t, r, wantLen)
+}
+
+func shutdownReleasing(t *testing.T, r []retriever.Retriever) {
+	t.Helper()
+	for _, rr := range r {
+		if sr, ok := rr.(*releasingRetriever); ok {
+			require.NoError(t, sr.Shutdown(t.Context()))
+		}
 	}
 }
 

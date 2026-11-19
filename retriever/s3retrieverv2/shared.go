@@ -80,7 +80,7 @@ type SharedItems struct {
 	ttl      time.Duration     // listing TTL, derived from the polling interval
 	contents map[string]*sharedContent
 	// base is the context of the requests of the group, it is cancelled when the last item leaves.
-	base   context.Context
+	base   context.Context // NOSONAR lifecycle context of the group, intentionally detached from callers
 	cancel context.CancelFunc
 	// sem bounds the concurrent downloads.
 	sem chan struct{}

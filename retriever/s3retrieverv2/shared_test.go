@@ -139,8 +139,7 @@ func (b *fakeBucket) DownloadObject(
 ) (*transfermanager.DownloadObjectOutput, error) {
 	cur := b.curGets.Add(1)
 	defer b.curGets.Add(-1)
-	for m := b.maxGets.Load(); cur > m && !b.maxGets.CompareAndSwap(m, cur); m = b.maxGets.Load() {
-	}
+	storeMax(&b.maxGets, cur)
 	if b.downloadGate != nil {
 		<-b.downloadGate
 	}
@@ -981,6 +980,53 @@ func (pc *pollCase) shutdown(t *testing.T) {
 
 func (pc *pollCase) count(item string) int { return int(pc.calls[item].Load()) }
 
+// storeMax raises m to cur when cur is greater than the value stored in m.
+func storeMax(m *atomic.Int32, cur int32) {
+	for old := m.Load(); cur > old; old = m.Load() {
+		if m.CompareAndSwap(old, cur) {
+			return
+		}
+	}
+}
+
+// testRefreshesAreBounded checks that the refreshes are bounded and stop with the group.
+func testRefreshesAreBounded(t *testing.T, cfg s3retrieverv2.PollerConfig) {
+	t.Helper()
+	pc := newPollCase(t, cfg)
+	gate := make(chan struct{})
+	var running, maxRunning atomic.Int32
+	for i := range 2 * s3retrieverv2.MaxConcurrentDownloads {
+		key := fmt.Sprintf("many/%d.yaml", i)
+		pc.b.put(key, `"a"`, "a")
+		r := initRetriever(t, pc.g, key)
+		_, err := r.Retrieve(t.Context())
+		require.NoError(t, err)
+		pc.r[key] = r
+		pc.g.SetRefresh(r, func() bool {
+			cur := running.Add(1)
+			defer running.Add(-1)
+			storeMax(&maxRunning, cur)
+			<-gate
+			return true
+		})
+		pc.b.put(key, `"b"`, "b")
+	}
+	time.Sleep(10 * time.Second)
+	synctest.Wait()
+	assert.EqualValues(t, s3retrieverv2.MaxConcurrentDownloads, running.Load())
+	// the poller is waiting for a free worker: the shutdown of the group stops it, once the
+	// refreshes in flight are over
+	var wg sync.WaitGroup
+	for _, r := range pc.r {
+		wg.Go(func() { assert.NoError(t, r.Shutdown(t.Context())) })
+	}
+	synctest.Wait()
+	close(gate)
+	wg.Wait()
+	synctest.Wait()
+	assert.EqualValues(t, s3retrieverv2.MaxConcurrentDownloads, maxRunning.Load())
+}
+
 func TestSharedItems_SetRefresh(t *testing.T) {
 	t.Parallel()
 	const dev, prod = "p1/dev/flags.yaml", "p1/prod/flags.yaml"
@@ -1065,40 +1111,7 @@ func TestSharedItems_SetRefresh(t *testing.T) {
 			pc.shutdown(t)
 		}},
 		{name: "the refreshes are bounded and stop with the group", run: func(t *testing.T) {
-			pc := newPollCase(t, s3retrieverv2.PollerConfig{Interval: 10 * time.Second})
-			gate := make(chan struct{})
-			var running, maxRunning atomic.Int32
-			for i := range 2 * s3retrieverv2.MaxConcurrentDownloads {
-				key := fmt.Sprintf("many/%d.yaml", i)
-				pc.b.put(key, `"a"`, "a")
-				r := initRetriever(t, pc.g, key)
-				_, err := r.Retrieve(t.Context())
-				require.NoError(t, err)
-				pc.r[key] = r
-				pc.g.SetRefresh(r, func() bool {
-					cur := running.Add(1)
-					defer running.Add(-1)
-					for m := maxRunning.Load(); cur > m && !maxRunning.CompareAndSwap(m, cur); m = maxRunning.Load() {
-					}
-					<-gate
-					return true
-				})
-				pc.b.put(key, `"b"`, "b")
-			}
-			time.Sleep(10 * time.Second)
-			synctest.Wait()
-			assert.EqualValues(t, s3retrieverv2.MaxConcurrentDownloads, running.Load())
-			// the poller is waiting for a free worker: the shutdown of the group stops it, once the
-			// refreshes in flight are over
-			var wg sync.WaitGroup
-			for _, r := range pc.r {
-				wg.Go(func() { assert.NoError(t, r.Shutdown(t.Context())) })
-			}
-			synctest.Wait()
-			close(gate)
-			wg.Wait()
-			synctest.Wait()
-			assert.EqualValues(t, s3retrieverv2.MaxConcurrentDownloads, maxRunning.Load())
+			testRefreshesAreBounded(t, s3retrieverv2.PollerConfig{Interval: 10 * time.Second})
 		}},
 		{name: "the poller stops with the last item and starts again", run: func(t *testing.T) {
 			pc := newPollCase(t, s3retrieverv2.PollerConfig{Interval: 10 * time.Second}, dev, prod)
