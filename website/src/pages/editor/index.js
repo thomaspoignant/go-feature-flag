@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {FormProvider, useFieldArray, useForm} from 'react-hook-form';
 import Layout from '@theme/Layout';
 import {FlagForm} from '../../components/editor/FlagForm';
@@ -80,11 +80,67 @@ function App() {
   );
 }
 
+const STUDIO_CALLOUT_KEY = 'goff-studio-callout-dismissed';
+
+function StudioCallout() {
+  // Hidden until mount so the server render matches the first client render.
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    try {
+      setVisible(localStorage.getItem(STUDIO_CALLOUT_KEY) !== 'true');
+    } catch {
+      setVisible(true);
+    }
+  }, []);
+
+  const close = () => {
+    setVisible(false);
+    try {
+      localStorage.setItem(STUDIO_CALLOUT_KEY, 'true');
+    } catch {
+      // storage unavailable, the callout comes back on next visit
+    }
+  };
+
+  if (!visible) {
+    return null;
+  }
+
+  return (
+    <div className="mx-4 mt-4 flex items-start gap-3 rounded-lg border border-solid border-cyan-300 bg-cyan-50 p-4 text-gray-800 dark:border-cyan-800 dark:bg-cyan-950 dark:text-gray-100">
+      <i className="fa-solid fa-flask mt-1 text-cyan-600 dark:text-cyan-400"></i>
+      <p className="m-0 flex-1">
+        <strong>Coming soon: GO Feature Flag Studio.</strong> This editor helps
+        you write one flag file. Studio is the next step: a full-featured flag
+        management platform for GO Feature Flag, where you create, edit and
+        manage all your flags from a UI instead of editing files by hand.
+        It&apos;s a work in progress, built in the open.{' '}
+        <a
+          href="https://github.com/go-feature-flag/studio"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-cyan-800 dark:text-cyan-300">
+          Follow the project on GitHub →
+        </a>
+      </p>
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={close}
+        className="cursor-pointer border-0 bg-transparent p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100">
+        <i className="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  );
+}
+
 export default function Page() {
   return (
     <Layout
       title="Edit Your Flag"
       description="GO Feature Flag editor is the simplest way to configure your feature flags.">
+      <StudioCallout />
       <App />
     </Layout>
   );

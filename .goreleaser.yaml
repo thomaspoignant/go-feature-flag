@@ -104,27 +104,6 @@ builds:
       - goos: windows
         goarch: arm
 
-  - id: go-feature-flag-editor
-    main: ./cmd/editor
-    binary: go-feature-flag-editor
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-    goarch:
-      - arm64
-    goarm:
-      - 6
-      - 7
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: linux
-        goarch: arm
-        goarm: 6
-      - goos: windows
-        goarch: arm
-
   # Build an AWS lambda compatible binary
   - id: go-feature-flag-lambda
     main: ./cmd/relayproxy
@@ -139,19 +118,6 @@ builds:
       - "7"
 
 archives:
-  - id: go-feature-flag-editor
-    name_template: "go-feature-flag-editor_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    ids:
-      - go-feature-flag-editor
-
   # DEPRECATED: check go-feature-flag
   - id: go-feature-flag-relay-proxy
     name_template: "go-feature-flag-relay-proxy_\

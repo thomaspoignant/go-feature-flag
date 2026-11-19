@@ -80,7 +80,7 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAPIFlagConfiguration(flagsetManager, metric.Metrics{})
@@ -203,7 +203,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAPIFlagConfiguration(flagsetManager, metric.Metrics{})
@@ -269,7 +269,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagConfigurationMetric(t *testing.T) 
 			},
 		},
 	}
-	flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
+	flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil, nil)
 	require.NoError(t, err, "impossible to create flagset manager")
 	defer flagsetManager.Close()
 

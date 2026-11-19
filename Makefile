@@ -36,7 +36,7 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-modules build-relayproxy build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
+build: build-modules build-relayproxy build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
@@ -64,9 +64,6 @@ build-relayproxy-docker: ## Build a local docker image of the relay proxy from s
 
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
-
-build-editor-api: create-out-dir ## Build the editor api in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/editor-api ./cmd/editor/
 
 build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/

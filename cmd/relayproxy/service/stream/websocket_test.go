@@ -90,9 +90,9 @@ func TestBroadcastFlagChangesPayload(t *testing.T) {
 				received = v
 				return nil
 			}
-			websocketService.Register(conn)
+			websocketService.Register(conn, "default")
 
-			websocketService.BroadcastFlagChanges(diff)
+			websocketService.BroadcastFlagChanges("default", diff)
 
 			actualJSON, err := json.Marshal(received)
 			require.NoError(t, err)
@@ -115,8 +115,8 @@ func TestBroadcastFlagChanges(t *testing.T) {
 	conn2 := &mockConn{}
 
 	// Register the mock connections
-	websocketService.Register(conn1)
-	websocketService.Register(conn2)
+	websocketService.Register(conn1, "default")
+	websocketService.Register(conn2, "default")
 
 	// Set up a flag to track if the WriteJSON function is called on the connections
 	conn1WriteJSONCalled := false
@@ -134,7 +134,7 @@ func TestBroadcastFlagChanges(t *testing.T) {
 	}
 
 	// Call the BroadcastFlagChanges function
-	websocketService.BroadcastFlagChanges(diff)
+	websocketService.BroadcastFlagChanges("default", diff)
 
 	// Allow some time for the WriteJSON functions to be executed
 	time.Sleep(time.Millisecond)
@@ -142,6 +142,49 @@ func TestBroadcastFlagChanges(t *testing.T) {
 	// Assertions
 	assert.True(t, conn1WriteJSONCalled, "WriteJSON should be called on conn1")
 	assert.True(t, conn2WriteJSONCalled, "WriteJSON should be called on conn2")
+}
+
+func TestBroadcastFlagChangesPerFlagset(t *testing.T) {
+	tests := []struct {
+		name             string
+		broadcastFlagset string
+		want             map[string]bool
+	}{
+		{
+			name:             "broadcast on flagset-a only reaches flagset-a clients",
+			broadcastFlagset: "flagset-a",
+			want:             map[string]bool{"a1": true, "a2": true, "b1": false},
+		},
+		{
+			name:             "broadcast on flagset-b only reaches flagset-b clients",
+			broadcastFlagset: "flagset-b",
+			want:             map[string]bool{"a1": false, "a2": false, "b1": true},
+		},
+		{
+			name:             "broadcast on a flagset without client reaches nobody",
+			broadcastFlagset: "flagset-c",
+			want:             map[string]bool{"a1": false, "a2": false, "b1": false},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			websocketService := stream.NewWebsocketService()
+			clients := map[string]string{"a1": "flagset-a", "a2": "flagset-a", "b1": "flagset-b"}
+			got := map[string]bool{}
+			for name, flagsetName := range clients {
+				got[name] = false
+				websocketService.Register(&mockConn{writeJSONFunc: func(_ any) error {
+					got[name] = true
+					return nil
+				}}, flagsetName)
+			}
+
+			websocketService.BroadcastFlagChanges(tt.broadcastFlagset, notifier.DiffCache{})
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }
 
 func TestDeregister(t *testing.T) {
@@ -159,14 +202,14 @@ func TestDeregister(t *testing.T) {
 	}
 
 	// Register the mock connection
-	websocketService.Register(conn)
+	websocketService.Register(conn, "default")
 
 	// Call the Deregister function
 	websocketService.Deregister(conn)
 
 	// Call the BroadcastFlagChanges function after deregistering the connection
 	diff := notifier.DiffCache{} // You need to define an appropriate DiffCache
-	websocketService.BroadcastFlagChanges(diff)
+	websocketService.BroadcastFlagChanges("default", diff)
 
 	// Allow some time for the WriteJSON function to be executed
 	time.Sleep(time.Millisecond)
@@ -199,15 +242,15 @@ func TestClose(t *testing.T) {
 	}
 
 	// Register the mock connections
-	websocketService.Register(conn1)
-	websocketService.Register(conn2)
+	websocketService.Register(conn1, "default")
+	websocketService.Register(conn2, "default")
 
 	// Call the Close function
 	websocketService.Close()
 
 	// Call the BroadcastFlagChanges function after closing the connections
 	diff := notifier.DiffCache{} // You need to define an appropriate DiffCache
-	websocketService.BroadcastFlagChanges(diff)
+	websocketService.BroadcastFlagChanges("default", diff)
 
 	// Allow some time for the WriteJSON functions to be executed
 	time.Sleep(time.Millisecond)
@@ -227,14 +270,14 @@ func TestBroadcastFlagChangesDeadLock(t *testing.T) {
 	// this will trigger the deregister of the connection, and the BroadcastFlagChanges will try to lock the mutex
 	// in the past we had a deadlock here (see: https://github.com/thomaspoignant/go-feature-flag/issues/3144)
 	conn2 := &mockConn{throwError: true}
-	websocketService.Register(conn1)
-	websocketService.Register(conn2)
+	websocketService.Register(conn1, "default")
+	websocketService.Register(conn2, "default")
 	conn1WriteJSONCalled := false
 	conn1.writeJSONFunc = func(v any) error {
 		conn1WriteJSONCalled = true
 		return nil
 	}
-	websocketService.BroadcastFlagChanges(diff)
+	websocketService.BroadcastFlagChanges("default", diff)
 	assert.True(t, conn1WriteJSONCalled, "WriteJSON should be called on conn1")
 
 	// We are not testing the error here, we are testing that the function does not deadlock
