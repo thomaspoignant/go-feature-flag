@@ -74,11 +74,8 @@ func newGoFeatureFlagClient(
 		opt(&o)
 	}
 
-	if o.sharedRegistry == nil && cFlagSet.EnableSharedPollerPerBucket {
-		// nothing to share with (exported constructor): the flagset gets a group of its own, which
-		// polls with the interval and the jitter of the flagset.
-		o.sharedRegistry = newSharedBucketRegistry(
-			nil, time.Duration(cFlagSet.PollingInterval)*time.Millisecond, cFlagSet.EnablePollingJitter, logger)
+	if o.sharedRegistry == nil {
+		o.sharedRegistry = standaloneSharedRegistry(cFlagSet, logger)
 	}
 	retrievers, err := initRetrieversWithRegistry(cFlagSet, o.sharedRegistry)
 	if err != nil {
@@ -112,13 +109,8 @@ func newGoFeatureFlagClient(
 	// end of backward compatibility for the notifier field in version v1.66.0
 	notif = append(notif, notifiers...)
 
-	pollingInterval := time.Duration(cFlagSet.PollingInterval) * time.Millisecond
-	if cFlagSet.EnableSharedPollerPerBucket {
-		// the client does not poll, the poller of the bucket group refreshes it when its object changed.
-		pollingInterval = disabledPollingInterval
-	}
 	f := ffclient.Config{
-		PollingInterval:                 pollingInterval,
+		PollingInterval:                 clientPollingInterval(cFlagSet),
 		LeveledLogger:                   initLeveledLogger(cFlagSet, logger),
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
@@ -140,6 +132,26 @@ func newGoFeatureFlagClient(
 		rr.SetRefresh(client.ForceRefresh)
 	}
 	return client, nil
+}
+
+// standaloneSharedRegistry returns, for a flagset that opted in to the shared poller but has nothing to share
+// with (exported constructor), a registry of its own: the flagset gets a group of its own, which polls with the
+// interval and the jitter of the flagset. It returns nil when the flagset did not opt in.
+func standaloneSharedRegistry(cFlagSet *config.FlagSet, logger *zap.Logger) *sharedBucketRegistry {
+	if !cFlagSet.EnableSharedPollerPerBucket {
+		return nil
+	}
+	return newSharedBucketRegistry(
+		nil, time.Duration(cFlagSet.PollingInterval)*time.Millisecond, cFlagSet.EnablePollingJitter, logger)
+}
+
+// clientPollingInterval returns the polling interval of the client: with the shared poller the client does not
+// poll, the poller of the bucket group refreshes it when its object changed.
+func clientPollingInterval(cFlagSet *config.FlagSet) time.Duration {
+	if cFlagSet.EnableSharedPollerPerBucket {
+		return disabledPollingInterval
+	}
+	return time.Duration(cFlagSet.PollingInterval) * time.Millisecond
 }
 
 // disabledPollingInterval disables the polling of a client, the retriever manager starts no
