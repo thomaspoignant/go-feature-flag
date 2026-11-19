@@ -46,7 +46,7 @@ type clientOptions struct {
 type clientOption func(*clientOptions)
 
 // withSharedBucketRegistry sets the registry providing the retrievers of the flagsets with
-// useSharedClientPerBucket, so that they are shared between the clients created with the same registry.
+// enableSharedPollerPerBucket, so that they are shared between the clients created with the same registry.
 func withSharedBucketRegistry(r *sharedBucketRegistry) clientOption {
 	return func(o *clientOptions) { o.sharedRegistry = r }
 }
@@ -74,7 +74,7 @@ func newGoFeatureFlagClient(
 		opt(&o)
 	}
 
-	if o.sharedRegistry == nil && cFlagSet.UseSharedClientPerBucket {
+	if o.sharedRegistry == nil && cFlagSet.EnableSharedPollerPerBucket {
 		// nothing to share with (exported constructor): the flagset gets a group of its own, which
 		// polls with the interval and the jitter of the flagset.
 		o.sharedRegistry = newSharedBucketRegistry(
@@ -84,9 +84,9 @@ func newGoFeatureFlagClient(
 	if err != nil {
 		return nil, err
 	}
-	// If the client can't be created, the shared-client retrievers must leave their shared group,
+	// If the client can't be created, the shared-poller retrievers must leave their shared group,
 	// otherwise their item stays registered forever. Their Shutdown is idempotent.
-	defer releaseSharedClientRetrievers(retrievers, &retErr)
+	defer releaseSharedPollerRetrievers(retrievers, &retErr)
 
 	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
@@ -113,7 +113,7 @@ func newGoFeatureFlagClient(
 	notif = append(notif, notifiers...)
 
 	pollingInterval := time.Duration(cFlagSet.PollingInterval) * time.Millisecond
-	if cFlagSet.UseSharedClientPerBucket {
+	if cFlagSet.EnableSharedPollerPerBucket {
 		// the client does not poll, the poller of the bucket group refreshes it when its object changed.
 		pollingInterval = disabledPollingInterval
 	}
@@ -146,7 +146,7 @@ func newGoFeatureFlagClient(
 // polling goroutine for a negative interval.
 const disabledPollingInterval = -1
 
-// firstSharedRetriever returns the shared-client retriever of the flagset, if it has one.
+// firstSharedRetriever returns the shared-poller retriever of the flagset, if it has one.
 func firstSharedRetriever(retrievers []retriever.Retriever) (*releasingRetriever, bool) {
 	if len(retrievers) == 0 {
 		return nil, false
@@ -155,9 +155,9 @@ func firstSharedRetriever(retrievers []retriever.Retriever) (*releasingRetriever
 	return rr, ok
 }
 
-// releaseSharedClientRetrievers makes the shared-client retrievers leave their shared group when the client
+// releaseSharedPollerRetrievers makes the shared-poller retrievers leave their shared group when the client
 // creation failed, otherwise their item stays registered forever. Their Shutdown is idempotent.
-func releaseSharedClientRetrievers(retrievers []retriever.Retriever, retErr *error) {
+func releaseSharedPollerRetrievers(retrievers []retriever.Retriever, retErr *error) {
 	if *retErr == nil {
 		return
 	}
@@ -181,14 +181,14 @@ func initLeveledLogger(c *config.FlagSet, logger *zap.Logger) *slog.Logger {
 
 // initRetrieversWithRegistry initialize the retrievers based on the configuration, it handles both
 // the `retriever` and `retrievers` fields. The registry provides the retriever of the flagsets with
-// useSharedClientPerBucket, it is required for them.
+// enableSharedPollerPerBucket, it is required for them.
 func initRetrieversWithRegistry(
 	proxyConf *config.FlagSet, registry *sharedBucketRegistry,
 ) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
-	if proxyConf.UseSharedClientPerBucket {
+	if proxyConf.EnableSharedPollerPerBucket {
 		if registry == nil {
-			return nil, fmt.Errorf("useSharedClientPerBucket requires a shared bucket registry")
+			return nil, fmt.Errorf("enableSharedPollerPerBucket requires a shared bucket registry")
 		}
 		r, err := registry.retrieverFor(proxyConf)
 		if err != nil {

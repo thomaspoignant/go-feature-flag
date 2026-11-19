@@ -123,9 +123,9 @@ func s3FlagSet(name, bucket, item string) config.FlagSet {
 		Name:    name,
 		APIKeys: []string{name + "-key"},
 		CommonFlagSet: config.CommonFlagSet{
-			Retriever:                &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: bucket, Item: item},
-			UseSharedClientPerBucket: true,
-			PollingInterval:          60000,
+			Retriever:                   &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: bucket, Item: item},
+			EnableSharedPollerPerBucket: true,
+			PollingInterval:             60000,
 		},
 	}
 }
@@ -290,7 +290,7 @@ func Test_sharedBucketRegistry_preRegisterAll(t *testing.T) {
 	t.Parallel()
 	valid := s3FlagSet("valid", "b1", "p/a.yaml")
 	plain := s3FlagSet("plain", "b1", "p/b.yaml")
-	plain.UseSharedClientPerBucket = false
+	plain.EnableSharedPollerPerBucket = false
 	tests := []struct {
 		name       string
 		reg        func(logger *zap.Logger) *sharedBucketRegistry

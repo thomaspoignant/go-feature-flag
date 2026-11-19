@@ -92,7 +92,7 @@ type flagsetManagerImpl struct {
 	// Logger is the logger for the flagset manager.
 	logger *zap.Logger
 
-	// sharedRegistry shares the S3 requests of the flagsets using useSharedClientPerBucket.
+	// sharedRegistry shares the S3 requests of the flagsets using enableSharedPollerPerBucket.
 	sharedRegistry *sharedBucketRegistry
 }
 
@@ -176,7 +176,7 @@ func newFlagsetManagerWithFlagsetsAndRegistry(
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
-	// Register all the shared-client items first so that the first listing of a bucket covers all of them.
+	// Register all the shared-poller items first so that the first listing of a bucket covers all of them.
 	registry.preRegisterAll(config.FlagSets)
 	defer registry.releasePending()
 
@@ -370,7 +370,7 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 	currentByName := indexNamedFlagsets(currentFlagsets)
 	newByName := indexNamedFlagsets(newConfig.FlagSets)
 
-	// The flagsets using useSharedClientPerBucket follow the top-level pollingInterval and
+	// The flagsets using enableSharedPollerPerBucket follow the top-level pollingInterval and
 	// enablePollingJitter, which are not part of the flagset configuration compared by
 	// reconcileExistingFlagset: they are applied to the running pollers, without rebuilding
 	// the flagsets.
@@ -392,7 +392,7 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 		}
 	}
 
-	// 2. Add the flagsets that are new in the configuration. The shared-client retrievers are
+	// 2. Add the flagsets that are new in the configuration. The shared-poller retrievers are
 	// registered first so that the first listing of a bucket covers all of them.
 	var added []config.FlagSet
 	for name, newFlagset := range newByName {

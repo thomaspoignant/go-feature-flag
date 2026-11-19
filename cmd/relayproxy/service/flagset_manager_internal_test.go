@@ -20,14 +20,14 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 )
 
-func Test_flagsetManagerImpl_sharedClientPerBucket(t *testing.T) {
+func Test_flagsetManagerImpl_sharedPollerPerBucket(t *testing.T) {
 	t.Parallel()
 	synctest.Test(t, func(t *testing.T) {
-		testSharedClientManager(t)
+		testSharedPollerManager(t)
 	})
 }
 
-func testSharedClientManager(t *testing.T) {
+func testSharedPollerManager(t *testing.T) {
 	t.Helper()
 	content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
 	require.NoError(t, err)
@@ -50,10 +50,10 @@ func testSharedClientManager(t *testing.T) {
 	mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(cfg, zap.NewNop(), nil, nil, nil, reg)
 	require.NoError(t, err)
 
-	// two shared-client flagsets on the same bucket share one group, the non shared-client one does not use any
+	// two shared-poller flagsets on the same bucket share one group, the non shared-poller one does not use any
 	assert.EqualValues(t, 1, created.Load())
 	assert.Equal(t, 1, reg.groupCount())
-	// all the shared-client items are pre-registered, so startup lists the directory once
+	// all the shared-poller items are pre-registered, so startup lists the directory once
 	assert.EqualValues(t, 1, f.lists.Load())
 	assert.EqualValues(t, 2, f.gets.Load())
 
@@ -94,7 +94,7 @@ func Test_flagsetManagerImpl_addFlagset_sharedDuplicate(t *testing.T) {
 	})
 }
 
-func Test_flagsetManagerImpl_reloadAddsSharedClientFlagsets(t *testing.T) {
+func Test_flagsetManagerImpl_reloadAddsSharedPollerFlagsets(t *testing.T) {
 	t.Parallel()
 	synctest.Test(t, func(t *testing.T) {
 		content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
@@ -138,7 +138,7 @@ func newPollingManager(
 	return mgr.(*flagsetManagerImpl), reg
 }
 
-func Test_flagsetManagerImpl_sharedClientPoller(t *testing.T) {
+func Test_flagsetManagerImpl_sharedPoller(t *testing.T) {
 	t.Parallel()
 	synctest.Test(t, func(t *testing.T) {
 		f := &fakeS3{}
@@ -165,7 +165,7 @@ func Test_flagsetManagerImpl_sharedClientPoller(t *testing.T) {
 	})
 }
 
-func Test_flagsetManagerImpl_OnConfigChange_sharedClientPolling(t *testing.T) {
+func Test_flagsetManagerImpl_OnConfigChange_sharedPollerPolling(t *testing.T) {
 	t.Parallel()
 	synctest.Test(t, func(t *testing.T) {
 		core, logs := observer.New(zap.InfoLevel)
@@ -197,7 +197,7 @@ func Test_flagsetManagerImpl_OnConfigChange_sharedClientPolling(t *testing.T) {
 		synctest.Wait()
 		assert.Equal(t, lists+1, f.lists.Load())
 
-		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared clients updated").Len())
+		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared pollers updated").Len())
 		// every flagset (the existing one and the one added by the reload) is warned once
 		warns := logs.FilterMessageSnippet("the pollingInterval of the flagset is ignored")
 		require.Equal(t, 2, warns.Len())
@@ -210,7 +210,7 @@ func Test_flagsetManagerImpl_OnConfigChange_sharedClientPolling(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{PollingInterval: 30000},
 			FlagSets:      []config.FlagSet{a, b, added},
 		})
-		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared clients updated").Len())
+		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared pollers updated").Len())
 		mgr.Close()
 		assert.Equal(t, 0, reg.groupCount())
 	})

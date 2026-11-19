@@ -102,22 +102,16 @@ type CommonFlagSet struct {
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
 
-	// UseSharedClientPerBucket (optional) makes the flagsets using the same S3 bucket share
-	// their storage requests: one poller per bucket lists the objects under the longest common
-	// prefix of the items (recursively) once per polling interval, and refreshes only the flagsets
-	// whose object changed (its ETag differs from the one of the cached content). Each flagset keeps
-	// its own client, caches, notifiers and exporters, but its own polling is disabled.
-	// The poller uses the top-level pollingInterval and enablePollingJitter: if the flagset sets
-	// different ones they are ignored and a warning is logged.
-	// Put the flag files under a dedicated prefix: every object under the common prefix is listed.
-	// It needs s3:ListBucket allowed on that prefix (a denied prefix fails the whole group).
-	// Downloads are limited to 16 concurrent GetObject per bucket.
-	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set, the
-	// `timeout` of the retriever has no effect.
-	// A listing error is logged and retried at the next polling interval.
-	// Not available outside of flagsets.
+	// EnableSharedPollerPerBucket (optional) set to true if you want the flag sets reading from the
+	// same S3 bucket to share one poller per bucket instead of polling each their own retriever.
+	// The poller lists the bucket once per polling interval and refreshes only the flag sets whose
+	// file changed. Each flag set keeps its own client (with its own polling turned off), caches,
+	// notifiers and exporters.
+	// The poller uses the top-level pollingInterval and enablePollingJitter, a different value set
+	// in the flag set is ignored and a warning is logged.
+	// Requires a single retriever of kind s3 with item set. Only available inside a flag set.
 	// Default: false
-	UseSharedClientPerBucket bool `mapstructure:"useSharedClientPerBucket" koanf:"usesharedclientperbucket"`
+	EnableSharedPollerPerBucket bool `mapstructure:"enableSharedPollerPerBucket" koanf:"enablesharedpollerperbucket"`
 }
 
 // GetFlagSets returns a shallow copy of the configured flag sets.

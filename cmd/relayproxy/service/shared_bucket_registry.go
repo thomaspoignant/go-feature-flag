@@ -31,7 +31,7 @@ func defaultSharedItemsFactory(ctx context.Context, bucket string) (*s3retriever
 }
 
 // sharedBucketRegistry lazily creates one shared S3 group per bucket and hands out the
-// retrievers of the flagsets using useSharedClientPerBucket. A group is dropped once all its
+// retrievers of the flagsets using enableSharedPollerPerBucket. A group is dropped once all its
 // retrievers have been shut down.
 type sharedBucketRegistry struct {
 	factory sharedItemsFactory
@@ -80,7 +80,7 @@ func pendingKey(fs *config.FlagSet) string {
 // retrieverFor returns the retriever of the flagset (its configuration is expected to be valid).
 // The reference on the bucket group is released when the retriever is shut down.
 func (r *sharedBucketRegistry) retrieverFor(fs *config.FlagSet) (retriever.Retriever, error) {
-	if err := checkSharedClientFlagSet(fs); err != nil {
+	if err := checkSharedPollerFlagSet(fs); err != nil {
 		return nil, err
 	}
 	r.mu.Lock()
@@ -98,7 +98,7 @@ func (r *sharedBucketRegistry) retrieverFor(fs *config.FlagSet) (retriever.Retri
 // already covers it. The next retrieverFor with the same configuration returns this retriever,
 // the ones that are not claimed must be released with releasePending.
 func (r *sharedBucketRegistry) preRegister(fs *config.FlagSet) error {
-	if err := checkSharedClientFlagSet(fs); err != nil {
+	if err := checkSharedPollerFlagSet(fs); err != nil {
 		return err
 	}
 	rr, err := r.newRetriever(fs)
@@ -112,15 +112,15 @@ func (r *sharedBucketRegistry) preRegister(fs *config.FlagSet) error {
 	return nil
 }
 
-// preRegisterAll pre-registers the flagsets using useSharedClientPerBucket, an invalid one is only
+// preRegisterAll pre-registers the flagsets using enableSharedPollerPerBucket, an invalid one is only
 // logged (its client creation reports the error).
 func (r *sharedBucketRegistry) preRegisterAll(flagsets []config.FlagSet) {
 	for i := range flagsets {
-		if !flagsets[i].UseSharedClientPerBucket {
+		if !flagsets[i].EnableSharedPollerPerBucket {
 			continue
 		}
 		if err := r.preRegister(&flagsets[i]); err != nil {
-			r.logger.Warn("unable to pre-register the shared-client retriever of the flagset",
+			r.logger.Warn("unable to pre-register the shared-poller retriever of the flagset",
 				zap.String("flagset", flagsets[i].Name), zap.Error(err))
 		}
 	}
@@ -140,10 +140,10 @@ func (r *sharedBucketRegistry) releasePending() {
 	}
 }
 
-func checkSharedClientFlagSet(fs *config.FlagSet) error {
+func checkSharedPollerFlagSet(fs *config.FlagSet) error {
 	rc := fs.Retriever
 	if fs.Retrievers != nil || rc == nil || rc.Kind != retrieverconf.S3Retriever || rc.Item == "" {
-		return fmt.Errorf("useSharedClientPerBucket requires a single s3 retriever with item set")
+		return fmt.Errorf("enableSharedPollerPerBucket requires a single s3 retriever with item set")
 	}
 	return nil
 }
@@ -202,7 +202,7 @@ func normalizePollingInterval(interval time.Duration) time.Duration {
 func (r *sharedBucketRegistry) pollerConfig(bucket string) s3retrieverv2.PollerConfig {
 	cfg := r.polling
 	cfg.Logger = slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: r.logger}.NewZapHandler()).
-		With(slog.String("component", "shared-client-poller"), slog.String("bucket", bucket))
+		With(slog.String("component", "shared-poller-poller"), slog.String("bucket", bucket))
 	return cfg
 }
 
@@ -226,7 +226,7 @@ func (r *sharedBucketRegistry) warnPollingMismatch(fs *config.FlagSet) {
 
 // warnIgnored warns that a polling setting of the flagset is ignored in favour of the top-level one.
 func (r *sharedBucketRegistry) warnIgnored(fs *config.FlagSet, setting string, fields ...zap.Field) {
-	r.logger.Warn("useSharedClientPerBucket: the "+setting+" of the flagset is ignored, "+
+	r.logger.Warn("enableSharedPollerPerBucket: the "+setting+" of the flagset is ignored, "+
 		"the top-level "+setting+" is used", append([]zap.Field{zap.String("flagset", fs.Name)}, fields...)...)
 }
 
@@ -248,10 +248,10 @@ func (r *sharedBucketRegistry) setPolling(
 		g.items.SetPoller(r.pollerConfig(bucket))
 	}
 	r.mu.Unlock()
-	r.logger.Info("Configuration changed: polling of the shared clients updated",
+	r.logger.Info("Configuration changed: polling of the shared pollers updated",
 		zap.Duration("pollingInterval", interval), zap.Bool("enablePollingJitter", jitter))
 	for i := range flagsets {
-		if flagsets[i].UseSharedClientPerBucket {
+		if flagsets[i].EnableSharedPollerPerBucket {
 			r.warnPollingMismatch(&flagsets[i])
 		}
 	}

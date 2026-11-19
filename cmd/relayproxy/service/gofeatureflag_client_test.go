@@ -59,19 +59,19 @@ func Test_initRetrieversWithRegistry(t *testing.T) {
 		wantErr    assert.ErrorAssertionFunc
 	}{
 		{
-			name:    "shared-client flagset with a registry",
+			name:    "shared-poller flagset with a registry",
 			shared:  &sharedValid,
 			reg:     newSharedBucketRegistry(nil, 0, false, nil),
 			wantLen: 1,
 			wantErr: assert.NoError,
 		},
 		{
-			name:    "shared-client flagset without registry",
+			name:    "shared-poller flagset without registry",
 			shared:  &sharedValid,
 			wantErr: assert.Error,
 		},
 		{
-			name:    "invalid shared-client configuration",
+			name:    "invalid shared-poller configuration",
 			shared:  &sharedFolder,
 			reg:     newSharedBucketRegistry(nil, 0, false, nil),
 			wantErr: assert.Error,
@@ -956,7 +956,7 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 	})
 }
 
-func Test_newGoFeatureFlagClient_ReleasesSharedClientRetrieverOnFailure(t *testing.T) {
+func Test_newGoFeatureFlagClient_ReleasesSharedPollerRetrieverOnFailure(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name string
@@ -1008,7 +1008,7 @@ func Test_firstSharedRetriever(t *testing.T) {
 	}{
 		{name: "no retriever"},
 		{name: "another kind of retriever", retrievers: []retriever.Retriever{file}},
-		{name: "shared-client retriever", retrievers: []retriever.Retriever{r}, want: true},
+		{name: "shared-poller retriever", retrievers: []retriever.Retriever{r}, want: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1022,7 +1022,7 @@ func Test_firstSharedRetriever(t *testing.T) {
 }
 
 // Not parallel: the test uses t.Setenv.
-func Test_newGoFeatureFlagClient_sharedClientWithoutRegistry(t *testing.T) {
+func Test_newGoFeatureFlagClient_sharedPollerWithoutRegistry(t *testing.T) {
 	// no S3 is reachable: the point is that the flagset gets a private registry and releases it
 	t.Setenv("AWS_REGION", "us-east-1")
 	t.Setenv("AWS_ACCESS_KEY_ID", "id")
