@@ -70,13 +70,14 @@ func (r *unifiedRetrieverRegistry) retrieverFor(fs *config.FlagSet) (retriever.R
 		return nil, err
 	}
 	r.mu.Lock()
-	defer r.mu.Unlock()
 	key := pendingKey(fs)
 	if p := r.pending[key]; len(p) > 0 {
 		r.pending[key] = p[1:]
+		r.mu.Unlock()
 		return p[0], nil
 	}
-	return r.newRetrieverLocked(fs)
+	r.mu.Unlock()
+	return r.newRetriever(fs)
 }
 
 // preRegister registers the item of the flagset in its bucket group so that the first listing
@@ -86,12 +87,12 @@ func (r *unifiedRetrieverRegistry) preRegister(fs *config.FlagSet) error {
 	if err := checkUnifiedFlagSet(fs); err != nil {
 		return err
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	rr, err := r.newRetrieverLocked(fs)
+	rr, err := r.newRetriever(fs)
 	if err != nil {
 		return err
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	key := pendingKey(fs)
 	r.pending[key] = append(r.pending[key], rr)
 	return nil
@@ -133,19 +134,39 @@ func checkUnifiedFlagSet(fs *config.FlagSet) error {
 	return nil
 }
 
-// newRetrieverLocked creates the retriever of the flagset, the caller must hold r.mu.
-func (r *unifiedRetrieverRegistry) newRetrieverLocked(fs *config.FlagSet) (*releasingRetriever, error) {
-	rc := fs.Retriever
-	g, ok := r.groups[rc.Bucket]
+// acquire returns the group of the bucket, with one more reference. The group is built outside of
+// the lock (it loads the AWS configuration), if another caller built it meanwhile theirs is used.
+func (r *unifiedRetrieverRegistry) acquire(bucket string) (*registryGroup, error) {
+	r.mu.Lock()
+	if g, ok := r.groups[bucket]; ok {
+		g.refs++
+		r.mu.Unlock()
+		return g, nil
+	}
+	r.mu.Unlock()
+
+	items, err := r.factory(context.Background(), bucket)
+	if err != nil {
+		return nil, err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	g, ok := r.groups[bucket]
 	if !ok {
-		items, err := r.factory(context.Background(), rc.Bucket)
-		if err != nil {
-			return nil, err
-		}
 		g = &registryGroup{items: items}
-		r.groups[rc.Bucket] = g
+		r.groups[bucket] = g
 	}
 	g.refs++
+	return g, nil
+}
+
+// newRetriever creates the retriever of the flagset in the group of its bucket.
+func (r *unifiedRetrieverRegistry) newRetriever(fs *config.FlagSet) (*releasingRetriever, error) {
+	rc := fs.Retriever
+	g, err := r.acquire(rc.Bucket)
+	if err != nil {
+		return nil, err
+	}
 	polling := time.Duration(fs.PollingInterval) * time.Millisecond
 	return &releasingRetriever{
 		SharedItemRetriever: g.items.Retriever(rc.Item, polling),

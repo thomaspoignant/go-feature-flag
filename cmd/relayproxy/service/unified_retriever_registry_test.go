@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"testing/synctest"
@@ -390,4 +391,38 @@ func Test_flagsetManagerImpl_reloadAddsUnifiedFlagsets(t *testing.T) {
 		mgr.Close()
 		assert.Equal(t, 0, reg.groupCount())
 	})
+}
+
+func Test_unifiedRetrieverRegistry_concurrentGroupCreation(t *testing.T) {
+	t.Parallel()
+	const callers = 4
+	var building sync.WaitGroup
+	building.Add(callers)
+	reg := newUnifiedRetrieverRegistry(func(ctx context.Context, bucket string) (*s3retrieverv2.SharedItems, error) {
+		// every caller is building its own group at the same time: only one is kept
+		building.Done()
+		building.Wait()
+		return s3retrieverv2.NewSharedItems(ctx, s3retrieverv2.SharedItemsOptions{
+			Bucket: bucket, Lister: &fakeS3{}, Downloader: &fakeS3{},
+		})
+	})
+	var wg sync.WaitGroup
+	retrievers := make(chan *releasingRetriever, callers)
+	for i := range callers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			fs := s3FlagSet(fmt.Sprintf("f%d", i), "b1", fmt.Sprintf("p/%d.yaml", i))
+			r, err := reg.retrieverFor(&fs)
+			assert.NoError(t, err)
+			retrievers <- r.(*releasingRetriever)
+		}()
+	}
+	wg.Wait()
+	close(retrievers)
+	assert.Equal(t, 1, reg.groupCount())
+	for r := range retrievers {
+		require.NoError(t, r.Shutdown(t.Context()))
+	}
+	assert.Equal(t, 0, reg.groupCount(), "all the references were taken on the same group")
 }
