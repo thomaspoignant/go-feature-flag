@@ -58,10 +58,12 @@ type SharedItemsOptions struct {
 //
 // Once SetRefresh registered a refresh function for at least one item, a single poller lists the
 // bucket once per polling interval (see SetPoller) and calls the refresh function of the items
-// whose listed ETag differs from the cached content, so the items must not poll by themselves.
-// The initial retrievals (before the poller knows the items) share a listing for
-// max(1s, pollingInterval/2). Listing errors are served for min(that window, 10s) so that an
-// outage causes one failing listing per window, not one per item.
+// whose listed ETag differs from the one their retriever last delivered, so the items must not poll
+// by themselves. The poller always lists fresh each interval; the listing TTL only lets the
+// retrievals that happen outside of a poll (the initial one of the items, an admin refresh) and the
+// refresh that follows a poll share a listing: it is max(1s, pollingInterval/2).
+// Listing errors are served for min(that window, 10s) so that an outage causes one failing
+// listing per window, not one per item.
 type SharedItems struct {
 	bucket     string
 	lister     ListerAPI
@@ -124,6 +126,7 @@ type sharedContent struct {
 type sharedDownload struct {
 	done chan struct{}
 	data []byte
+	etag string
 	err  error
 }
 
@@ -184,9 +187,6 @@ func (g *SharedItems) baseLocked() context.Context {
 	return g.base
 }
 
-// Bucket returns the bucket of the group.
-func (g *SharedItems) Bucket() string { return g.bucket }
-
 // Retriever returns the retriever of one item of the bucket. The item joins the group
 // immediately (so that the listing covers it from the first poll) and leaves it on Shutdown.
 func (g *SharedItems) Retriever(item string) *SharedItemRetriever {
@@ -213,14 +213,31 @@ func (g *SharedItems) register(r *SharedItemRetriever) {
 	g.recompute()
 }
 
-func (g *SharedItems) deregister(r *SharedItemRetriever) {
+// deregister removes the item from the group, then waits for the refresh of the item in flight (if
+// any) so that the consumer of the retriever is only closed once it finished. The wait stops when
+// ctx is done. The refresh function must not shut down its own retriever (it would wait for itself
+// until ctx is done).
+func (g *SharedItems) deregister(ctx context.Context, r *SharedItemRetriever) {
+	if inflight := g.leave(r); inflight != nil {
+		select {
+		case <-inflight:
+		case <-ctx.Done():
+		}
+	}
+}
+
+// leave removes the item from the group, and returns the channel closed when its refresh in flight
+// is over (nil if there is none).
+func (g *SharedItems) leave(r *SharedItemRetriever) <-chan struct{} {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	if _, ok := g.items[r]; !ok {
-		return
+		return nil
 	}
 	delete(g.items, r)
 	if r.refresh != nil {
+		// the poller must not refresh the item anymore
+		r.refresh = nil
 		g.refreshers--
 		if g.refreshers == 0 && g.stopPoller != nil {
 			g.stopPoller()
@@ -237,6 +254,7 @@ func (g *SharedItems) deregister(r *SharedItemRetriever) {
 		g.cancel()
 	}
 	g.recompute()
+	return r.inflight
 }
 
 // recompute refreshes the listing prefix. The caller must hold g.mu.
@@ -413,14 +431,15 @@ func (g *SharedItems) listPage(base context.Context, p *s3.ListObjectsV2Paginato
 	return p.NextPage(ctx)
 }
 
-// get returns the content of the key, downloading it only if the listed ETag changed.
-func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
+// get returns the content of the key and its (normalized) ETag, downloading it only if the listed
+// ETag changed.
+func (g *SharedItems) get(ctx context.Context, key string) ([]byte, string, error) {
 	listed, err := g.etagOf(ctx, key)
 	if err != nil {
-		return nil, fmt.Errorf("unable to list S3 bucket %q, %w", g.bucket, err)
+		return nil, "", fmt.Errorf("unable to list S3 bucket %q, %w", g.bucket, err)
 	}
 	if !listed.found {
-		return nil, fmt.Errorf("item %q not found in S3 bucket %q", key, g.bucket)
+		return nil, "", fmt.Errorf("item %q not found in S3 bucket %q", key, g.bucket)
 	}
 
 	g.mu.Lock()
@@ -434,11 +453,11 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 	}
 	g.mu.Unlock()
 
-	data, err := g.content(ctx, c, key, listed)
+	data, etag, err := g.content(ctx, c, key, listed)
 	if err != nil {
-		return nil, fmt.Errorf("unable to download item from S3 %q, %w", key, err)
+		return nil, "", fmt.Errorf("unable to download item from S3 %q, %w", key, err)
 	}
-	return slices.Clone(data), nil
+	return slices.Clone(data), etag, nil
 }
 
 // content returns the cached content if it is still valid for the listing, otherwise it is
@@ -446,11 +465,13 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 // the start of the listing (it is then at least as recent as the listing, even if the object
 // changed between the listing and the download). The callers of the same object share one
 // download, and a caller stops waiting when its ctx is done.
-func (g *SharedItems) content(ctx context.Context, c *sharedContent, key string, listed listedItem) ([]byte, error) {
+func (g *SharedItems) content(
+	ctx context.Context, c *sharedContent, key string, listed listedItem,
+) ([]byte, string, error) {
 	c.mu.Lock()
 	if c.data != nil && ((listed.etag != "" && c.etag == listed.etag) || !c.fetchedAt.Before(listed.start)) {
 		defer c.mu.Unlock()
-		return c.data, nil
+		return c.data, c.etag, nil
 	}
 	dl := c.dl
 	if dl == nil {
@@ -462,9 +483,9 @@ func (g *SharedItems) content(ctx context.Context, c *sharedContent, key string,
 
 	select {
 	case <-dl.done:
-		return dl.data, dl.err
+		return dl.data, dl.etag, dl.err
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return nil, "", ctx.Err()
 	}
 }
 
@@ -478,6 +499,7 @@ func (g *SharedItems) runDownload(base context.Context, c *sharedContent, dl *sh
 	if err == nil {
 		// an empty ETag is never a hit
 		c.etag, c.data, c.fetchedAt = normalizeETag(dlETag), data, startedAt
+		dl.etag = c.etag
 	}
 	dl.data, dl.err = data, err
 	c.dl = nil
@@ -511,9 +533,16 @@ type SharedItemRetriever struct {
 	item   string
 	status atomic.Value // retriever.Status
 
-	// refresh and retry are protected by group.mu.
+	// refresh, retry, delivered, hasDelivered and inflight are protected by group.mu.
 	refresh func() bool // called by the poller when the object changed
 	retry   bool        // the last refresh failed, it must be tried again
+	// delivered is the ETag of the last content returned by Retrieve (hasDelivered is false until
+	// then). It is per retriever, not per object: another retriever of the same object loading a
+	// new version in the shared cache must not hide it from this one.
+	delivered    string
+	hasDelivered bool
+	// inflight is closed when the refresh in progress is over, nil if there is none.
+	inflight chan struct{}
 }
 
 // Init registers the item in the group.
@@ -527,9 +556,13 @@ func (r *SharedItemRetriever) Init(_ context.Context, _ *fflog.FFLogger) error {
 	return nil
 }
 
-// Shutdown removes the item from the group.
-func (r *SharedItemRetriever) Shutdown(_ context.Context) error {
-	r.group.deregister(r)
+// Shutdown removes the item from the group. It waits for the refresh of the item in flight (until
+// ctx is done), so the consumer can be closed safely afterwards.
+func (r *SharedItemRetriever) Shutdown(ctx context.Context) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	r.group.deregister(ctx, r)
 	r.status.Store(retriever.RetrieverNotReady)
 	return nil
 }
@@ -550,7 +583,14 @@ func (r *SharedItemRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.Status() != retriever.RetrieverReady {
 		return nil, errors.New("shared S3 retriever is not initialized")
 	}
-	return r.group.get(ctx, r.item)
+	data, etag, err := r.group.get(ctx, r.item)
+	if err != nil {
+		return nil, err
+	}
+	r.group.mu.Lock()
+	r.delivered, r.hasDelivered = etag, true
+	r.group.mu.Unlock()
+	return data, nil
 }
 
 // OutputFormat returns an empty string like the single file Retriever: the format of the file is
@@ -633,7 +673,9 @@ func (g *SharedItems) nextDelay() time.Duration {
 		return g.interval
 	}
 	// not security sensitive: the jitter only spreads the requests
-	return g.interval + time.Duration((rand.Float64()*0.2-0.1)*float64(g.interval)) //nolint:gosec
+	delay := g.interval + time.Duration((rand.Float64()*0.2-0.1)*float64(g.interval)) //nolint:gosec
+	// the jitter must not go below the minimum interval
+	return max(delay, minSharedListingTTL)
 }
 
 // pollOnce lists the bucket and refreshes the items whose object changed. A listing error is
@@ -656,42 +698,23 @@ func (g *SharedItems) pollOnce(ctx context.Context) {
 	g.refresh(ctx, g.changed(fl.listing))
 }
 
-// changed returns the items to refresh: the ones whose listed ETag differs from the ETag of
-// their cached content (or without cached content), and the ones whose last refresh failed.
+// changed returns the items to refresh: the ones whose listed ETag differs from the ETag of the
+// content their retriever last delivered (or that delivered nothing yet), and the ones whose last
+// refresh failed.
 func (g *SharedItems) changed(listing map[string]string) []*SharedItemRetriever {
-	type candidate struct {
-		r *SharedItemRetriever
-		c *sharedContent
-	}
 	g.mu.Lock()
-	candidates := make([]candidate, 0, g.refreshers)
-	for r := range g.items {
-		if _, listed := listing[r.item]; listed && r.refresh != nil {
-			candidates = append(candidates, candidate{r, g.contents[r.item]})
-		}
-	}
-	g.mu.Unlock()
-
-	// the content lock is taken outside of g.mu to keep the lock order of the downloads
+	defer g.mu.Unlock()
 	var res []*SharedItemRetriever
-	for _, cand := range candidates {
-		if g.needsRefresh(cand.r, cand.c, listing[cand.r.item]) {
-			res = append(res, cand.r)
+	for r := range g.items {
+		etag, listed := listing[r.item]
+		if !listed || r.refresh == nil {
+			continue
+		}
+		if r.retry || !r.hasDelivered || r.delivered != etag {
+			res = append(res, r)
 		}
 	}
 	return res
-}
-
-func (g *SharedItems) needsRefresh(r *SharedItemRetriever, c *sharedContent, listedETag string) bool {
-	g.mu.Lock()
-	retry := r.retry
-	g.mu.Unlock()
-	if retry || c == nil {
-		return true
-	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.data == nil || c.etag != listedETag
 }
 
 // refresh calls the refresh function of the items with a bounded number of workers. A failure
@@ -702,13 +725,7 @@ func (g *SharedItems) refresh(ctx context.Context, items []*SharedItemRetriever)
 	for range min(MaxConcurrentDownloads, len(items)) {
 		wg.Go(func() {
 			for r := range ch {
-				g.mu.Lock()
-				fn := r.refresh
-				g.mu.Unlock()
-				ok := fn()
-				g.mu.Lock()
-				r.retry = !ok
-				g.mu.Unlock()
+				g.refreshOne(r)
 			}
 		})
 	}
@@ -723,4 +740,26 @@ func (g *SharedItems) refresh(ctx context.Context, items []*SharedItemRetriever)
 			return
 		}
 	}
+}
+
+// refreshOne refreshes the item, unless it left the group since the poll picked it. Shutdown
+// waits for the refresh in flight.
+func (g *SharedItems) refreshOne(r *SharedItemRetriever) {
+	g.mu.Lock()
+	fn := r.refresh
+	if _, ok := g.items[r]; !ok || fn == nil {
+		g.mu.Unlock()
+		return
+	}
+	inflight := make(chan struct{})
+	r.inflight = inflight
+	g.mu.Unlock()
+
+	ok := fn()
+
+	g.mu.Lock()
+	r.retry = !ok
+	r.inflight = nil
+	g.mu.Unlock()
+	close(inflight)
 }
