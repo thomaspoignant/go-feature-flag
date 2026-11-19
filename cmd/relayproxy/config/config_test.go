@@ -1936,11 +1936,11 @@ func TestConfigOnlyEnvVars(t *testing.T) {
 	})
 }
 
-func TestConfig_IsValid_UseUnifiedRetriever(t *testing.T) {
+func TestConfig_IsValid_UseSharedClientPerBucket(t *testing.T) {
 	t.Parallel()
 	s3Item := &retrieverconf.RetrieverConf{Kind: retrieverconf.S3Retriever, Bucket: "flags", Item: "a/flags.yaml"}
 	flagset := func(common config.CommonFlagSet) *config.Config {
-		common.UseUnifiedRetriever = true
+		common.UseSharedClientPerBucket = true
 		return &config.Config{
 			Server:   config.Server{Port: 8080},
 			FlagSets: []config.FlagSet{{Name: "fs", APIKeys: []string{"k"}, CommonFlagSet: common}},
@@ -1956,7 +1956,7 @@ func TestConfig_IsValid_UseUnifiedRetriever(t *testing.T) {
 			name: "default (non flagset) config",
 			cfg: &config.Config{
 				Server:        config.Server{Port: 8080},
-				CommonFlagSet: config.CommonFlagSet{Retriever: s3Item, UseUnifiedRetriever: true},
+				CommonFlagSet: config.CommonFlagSet{Retriever: s3Item, UseSharedClientPerBucket: true},
 			},
 			wantErr: "only available inside a flagset",
 		},

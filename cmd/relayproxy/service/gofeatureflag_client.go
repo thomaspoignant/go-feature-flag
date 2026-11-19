@@ -39,16 +39,16 @@ import (
 
 // clientOptions are the internal options of NewGoFeatureFlagClient.
 type clientOptions struct {
-	unifiedRegistry *unifiedRetrieverRegistry
+	sharedRegistry *sharedBucketRegistry
 }
 
 // clientOption customizes NewGoFeatureFlagClient.
 type clientOption func(*clientOptions)
 
-// withUnifiedRetrieverRegistry sets the registry providing the retrievers of the flagsets with
-// useUnifiedRetriever, so that they are shared between the clients created with the same registry.
-func withUnifiedRetrieverRegistry(r *unifiedRetrieverRegistry) clientOption {
-	return func(o *clientOptions) { o.unifiedRegistry = r }
+// withSharedBucketRegistry sets the registry providing the retrievers of the flagsets with
+// useSharedClientPerBucket, so that they are shared between the clients created with the same registry.
+func withSharedBucketRegistry(r *sharedBucketRegistry) clientOption {
+	return func(o *clientOptions) { o.sharedRegistry = r }
 }
 
 func NewGoFeatureFlagClient(
@@ -74,13 +74,13 @@ func newGoFeatureFlagClient(
 		opt(&o)
 	}
 
-	retrievers, err := initRetrieversWithRegistry(cFlagSet, o.unifiedRegistry)
+	retrievers, err := initRetrieversWithRegistry(cFlagSet, o.sharedRegistry)
 	if err != nil {
 		return nil, err
 	}
-	// If the client can't be created, the unified retrievers must leave their shared group,
+	// If the client can't be created, the shared-client retrievers must leave their shared group,
 	// otherwise their item stays registered forever. Their Shutdown is idempotent.
-	defer releaseUnifiedRetrievers(retrievers, &retErr)
+	defer releaseSharedClientRetrievers(retrievers, &retErr)
 
 	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
@@ -106,10 +106,13 @@ func newGoFeatureFlagClient(
 	// end of backward compatibility for the notifier field in version v1.66.0
 	notif = append(notif, notifiers...)
 
+	pollingInterval := time.Duration(cFlagSet.PollingInterval) * time.Millisecond
+	if cFlagSet.UseSharedClientPerBucket {
+		// the client does not poll, the poller of the bucket group refreshes it when its object changed.
+		pollingInterval = disabledPollingInterval
+	}
 	f := ffclient.Config{
-		PollingInterval: time.Duration(
-			cFlagSet.PollingInterval,
-		) * time.Millisecond,
+		PollingInterval:                 pollingInterval,
 		LeveledLogger:                   initLeveledLogger(cFlagSet, logger),
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
@@ -127,12 +130,28 @@ func newGoFeatureFlagClient(
 	if err != nil {
 		return nil, err
 	}
+	if rr, ok := firstSharedRetriever(retrievers); ok {
+		rr.SetRefresh(client.ForceRefresh)
+	}
 	return client, nil
 }
 
-// releaseUnifiedRetrievers makes the unified retrievers leave their shared group when the client
+// disabledPollingInterval disables the polling of a client, the retriever manager starts no
+// polling goroutine for a negative interval.
+const disabledPollingInterval = -1
+
+// firstSharedRetriever returns the shared-client retriever of the flagset, if it has one.
+func firstSharedRetriever(retrievers []retriever.Retriever) (*releasingRetriever, bool) {
+	if len(retrievers) == 0 {
+		return nil, false
+	}
+	rr, ok := retrievers[0].(*releasingRetriever)
+	return rr, ok
+}
+
+// releaseSharedClientRetrievers makes the shared-client retrievers leave their shared group when the client
 // creation failed, otherwise their item stays registered forever. Their Shutdown is idempotent.
-func releaseUnifiedRetrievers(retrievers []retriever.Retriever, retErr *error) {
+func releaseSharedClientRetrievers(retrievers []retriever.Retriever, retErr *error) {
 	if *retErr == nil {
 		return
 	}
@@ -161,15 +180,15 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 }
 
 // initRetrieversWithRegistry is initRetrievers using the registry for the flagsets with
-// useUnifiedRetriever.
+// useSharedClientPerBucket.
 func initRetrieversWithRegistry(
-	proxyConf *config.FlagSet, registry *unifiedRetrieverRegistry,
+	proxyConf *config.FlagSet, registry *sharedBucketRegistry,
 ) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
-	if proxyConf.UseUnifiedRetriever {
+	if proxyConf.UseSharedClientPerBucket {
 		if registry == nil {
 			// no registry to share with: the flagset gets a group of its own.
-			registry = newUnifiedRetrieverRegistry(nil)
+			registry = newSharedBucketRegistry(nil, 0, false, nil)
 		}
 		r, err := registry.retrieverFor(proxyConf)
 		if err != nil {

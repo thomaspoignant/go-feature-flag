@@ -48,7 +48,7 @@ func TestSharedItems_etagOf(t *testing.T) {
 		Bucket: "b", Lister: emptyBucket{}, Downloader: emptyBucket{},
 	})
 	require.NoError(t, err)
-	g.Retriever("a/registered.yaml", 0)
+	g.Retriever("a/registered.yaml")
 	// the key is not registered and out of the listed prefix, so the loop gives up.
 	_, err = g.etagOf(t.Context(), "b/unregistered.yaml")
 	assert.ErrorContains(t, err, "not registered")
@@ -107,7 +107,7 @@ func TestSharedItems_listingKeepsRegisteredKeysOnly(t *testing.T) {
 		Bucket: "b", Lister: unrelatedBucket{n: 5000}, Downloader: emptyBucket{},
 	})
 	require.NoError(t, err)
-	_, err = g.etagOf(t.Context(), g.Retriever("d/flags.yaml", 0).item)
+	_, err = g.etagOf(t.Context(), g.Retriever("d/flags.yaml").item)
 	require.NoError(t, err)
 	g.mu.Lock()
 	defer g.mu.Unlock()

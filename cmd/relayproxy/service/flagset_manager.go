@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -91,8 +92,8 @@ type flagsetManagerImpl struct {
 	// Logger is the logger for the flagset manager.
 	logger *zap.Logger
 
-	// unifiedRegistry shares the S3 requests of the flagsets using useUnifiedRetriever.
-	unifiedRegistry *unifiedRetrieverRegistry
+	// sharedRegistry shares the S3 requests of the flagsets using useSharedClientPerBucket.
+	sharedRegistry *sharedBucketRegistry
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -163,19 +164,20 @@ func newFlagsetManagerWithFlagsets(
 	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
 	return newFlagsetManagerWithFlagsetsAndRegistry(
-		config, logger, notifiers, sseService, wsService, newUnifiedRetrieverRegistry(nil))
+		config, logger, notifiers, sseService, wsService, newSharedBucketRegistry(
+			nil, time.Duration(config.PollingInterval)*time.Millisecond, config.EnablePollingJitter, logger))
 }
 
 func newFlagsetManagerWithFlagsetsAndRegistry(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
 	sseService stream.SSEService, wsService stream.WebsocketService,
-	registry *unifiedRetrieverRegistry,
+	registry *sharedBucketRegistry,
 ) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
-	// Register all the unified items first so that the first listing of a bucket covers all of them.
-	registry.preRegisterAll(config.FlagSets, logger)
+	// Register all the shared-client items first so that the first listing of a bucket covers all of them.
+	registry.preRegisterAll(config.FlagSets)
 	defer registry.releasePending()
 
 	for index, flagset := range config.FlagSets {
@@ -194,7 +196,7 @@ func newFlagsetManagerWithFlagsetsAndRegistry(
 
 		allNotifiers := appendStreamNotifiers(notifiers, sseService, wsService, flagSetName)
 		client, err := newGoFeatureFlagClient(
-			&flagset, logger, allNotifiers, withUnifiedRetrieverRegistry(registry))
+			&flagset, logger, allNotifiers, withSharedBucketRegistry(registry))
 		if err != nil {
 			logger.Error(
 				"failed to create goff client for flagset",
@@ -224,7 +226,7 @@ func newFlagsetManagerWithFlagsetsAndRegistry(
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
 		logger:               logger,
-		unifiedRegistry:      registry,
+		sharedRegistry:       registry,
 	}, nil
 }
 
@@ -368,6 +370,13 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 	currentByName := indexNamedFlagsets(currentFlagsets)
 	newByName := indexNamedFlagsets(newConfig.FlagSets)
 
+	// The flagsets using useSharedClientPerBucket follow the top-level pollingInterval and
+	// enablePollingJitter, which are not part of the flagset configuration compared by
+	// reconcileExistingFlagset: they are applied to the running pollers, without rebuilding
+	// the flagsets.
+	m.sharedRegistry.setPolling(
+		time.Duration(newConfig.PollingInterval)*time.Millisecond, newConfig.EnablePollingJitter, newConfig.FlagSets)
+
 	// 1. Remove the flagsets that are no longer in the configuration.
 	for name, currentFlagset := range currentByName {
 		if _, stillPresent := newByName[name]; !stillPresent {
@@ -375,7 +384,7 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 		}
 	}
 
-	// 2. Add the flagsets that are new in the configuration. The unified retrievers are
+	// 2. Add the flagsets that are new in the configuration. The shared-client retrievers are
 	// registered first so that the first listing of a bucket covers all of them.
 	var added []config.FlagSet
 	for name, newFlagset := range newByName {
@@ -383,8 +392,8 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 			added = append(added, newFlagset)
 		}
 	}
-	m.unifiedRegistry.preRegisterAll(added, m.logger)
-	defer m.unifiedRegistry.releasePending()
+	m.sharedRegistry.preRegisterAll(added)
+	defer m.sharedRegistry.releasePending()
 	for _, newFlagset := range added {
 		m.addFlagset(newFlagset)
 	}
@@ -433,7 +442,7 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 	allNotifiers := appendStreamNotifiers(m.notifiers, m.sseService, m.wsService, flagset.Name)
 	client, err := newGoFeatureFlagClient(
-		&flagset, m.logger, allNotifiers, withUnifiedRetrieverRegistry(m.unifiedRegistry))
+		&flagset, m.logger, allNotifiers, withSharedBucketRegistry(m.sharedRegistry))
 	if err != nil {
 		m.logger.Error(
 			"failed to create the flagset added at runtime, it will not be available until the "+

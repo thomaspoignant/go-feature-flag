@@ -423,12 +423,13 @@ a newly added flag set is started immediately and a removed flag set is stopped.
 
 By default every flag set polls its own retriever, so with `N` flag sets reading `N` files from the same S3 bucket, each relay proxy replica sends `N` `GetObject` requests per polling interval.
 
-Set `useUnifiedRetriever: true` on the flag sets that read from the same bucket to make them share the storage requests:
-the bucket is listed once per listing window for all of them, and a file is only downloaded when its ETag changed.
+Set `useSharedClientPerBucket: true` on the flag sets that read from the same bucket to make them share one poller per bucket.
+Every polling interval the poller does **one recursive listing** of the bucket, compares the ETag of each listed file with the ETag of the content it already holds, and refreshes **only the flag sets whose file changed**, each of them downloading just its own file.
 
 ```yaml title="example goff-proxy.yaml"
+pollingInterval: 5000 # used by the shared poller of every bucket
 flagSets:
-  - name: project-1-prod # no option: keeps its own retriever
+  - name: project-1-prod # no option: keeps its own retriever and its own polling
     apiKeys: ["prod-key"]
     retriever:
       kind: s3
@@ -436,7 +437,7 @@ flagSets:
       item: flags/project-1/prod/flags.yaml
 
   - name: project-1-dev
-    useUnifiedRetriever: true
+    useSharedClientPerBucket: true
     apiKeys: ["dev-key"]
     retriever:
       kind: s3
@@ -444,7 +445,7 @@ flagSets:
       item: flags/project-1/dev/flags.yaml
 
   - name: project-2-dev
-    useUnifiedRetriever: true
+    useSharedClientPerBucket: true
     apiKeys: ["dev-2-key"]
     retriever:
       kind: s3
@@ -453,32 +454,57 @@ flagSets:
 ```
 
 - The flag sets must use a single `retriever` of kind `s3` with `item` set. The relay proxy refuses to start otherwise.
-- Only the flag sets with the same `bucket` and `useUnifiedRetriever: true` are grouped, the others behave as usual. You can keep your production flag sets isolated by not setting the option on them.
-- **Layout**: put the flag files under a dedicated prefix (like `flags/` above). The relay proxy does **one recursive listing** of the longest common key prefix of the grouped items, cut at its last `/` (`flags/` in the example). The listing covers **every object under that prefix, including the unrelated ones**, and items with no common directory (`a/f.yaml` and `b/f.yaml`, or a root-level item) list **the whole bucket**. The keys are used as they are, they are never normalized.
+- Only the flag sets with the same `bucket` and `useSharedClientPerBucket: true` are grouped, the others behave as usual. You can keep your production flag sets isolated by not setting the option on them.
+- **Polling**: the shared poller of a bucket uses the **top-level** [`pollingInterval`](#pollinginterval) and [`enablePollingJitter`](#enablepollingjitter) of the relay proxy (60s by default, 1s at least). The jitter, when enabled, randomizes each wait by +/-10%. The flag sets of the option do not poll by themselves. If such a flag set sets its own `pollingInterval` or `enablePollingJitter` to a different value, the relay proxy logs a **warning** naming the flag set and both values, and still uses the top-level ones: the configuration is not rejected. An `enablePollingJitter: false` on a flag set is the default value, so it is not reported.
+- **Layout**: put the flag files under a dedicated prefix (like `flags/` above). The poller lists the longest common key prefix of the grouped items, cut at its last `/` (`flags/` in the example). The listing covers **every object under that prefix, including the unrelated ones**, and items with no common directory (`a/f.yaml` and `b/f.yaml`, or a root-level item) list **the whole bucket**. The keys are used as they are, they are never normalized.
 - **IAM**: in addition to `s3:GetObject`, the relay proxy needs `s3:ListBucket` on the bucket, and the listing prefix must be allowed (with an `s3:prefix` condition, allow the common prefix; the empty prefix when there is no common directory). If the prefix is denied, the listing fails for **the whole group**.
+
+##### Behaviour
+
+- **Detection delay**: a change is detected at the next listing, so within one `pollingInterval` like with an independent retriever, and the changed flag set then downloads its file.
+- **Startup**: each flag set still downloads its file once when it starts (the initial listing is shared and the downloads are limited to 16 concurrent `GetObject` requests per bucket), and is ready after that first download.
+- **Errors**: a failed refresh of one flag set does not stop the others and is retried at the next poll, even if the file did not change again. A failed listing is logged and retried at the next polling interval, the flag sets of that bucket keep serving their last known flags in the meantime.
+- **Bounded requests**: each listing page request has a 30 second timeout, a listing is limited to 10000 pages and an incomplete listing is an error. The `timeout` of the `retriever` configuration is not used by this path (nor by the other S3 retriever).
+- **Reload**: a new top-level `pollingInterval` or `enablePollingJitter` is applied to the running pollers without rebuilding the flag sets. The warning about a flag set that sets different values is logged again. Like the other flag set options, `useSharedClientPerBucket` itself can't be changed on an existing flag set at runtime.
+- **Lifecycle**: the poller of a bucket starts with its first flag set and stops when the last one is removed or the relay proxy shuts down.
+- Caches, notifiers and exporters stay per flag set, and the shared group keeps a copy of the bytes of each object it downloaded.
 
 ##### Request load on the bucket
 
-Per replica and per polling interval, independent retrievers send `N` `GetObject` requests. With the option, a replica sends about 2 listings of `ceil(objects under the prefix / 1000)` pages each, plus a `GetObject` for each file that changed.
-It lowers the request load on the bucket while the prefix holds **fewer than roughly 500 times as many objects as there are unified flag sets** (and the issue's target, thousands of flag sets in one prefix, is well inside that). Keep the prefix dedicated to the flag files, and leave the option off for a handful of flag sets.
-In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost only goes down while the prefix holds fewer than about 40 times as many objects as unified flag sets: the cost is secondary, the goal is the request load.
+Per replica and per polling interval, independent retrievers send `N` `GetObject` requests. With the option, a replica sends one listing of `ceil(objects under the prefix / 1000)` pages, plus a `GetObject` for each file that changed.
+It lowers the number of requests while the prefix holds fewer than roughly 1,000 times as many objects as there are flag sets with the option. Keep the prefix dedicated to the flag files, and leave the option off for a handful of flag sets.
+In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost only goes down while the prefix holds fewer than about 80 times as many objects as flag sets with the option: the cost is secondary, the goal is the request load.
 
-- **Listing window**: the group lists at most every `max(1s, smallest pollingInterval of the group / 2)`, measured from the end of the previous listing. A change in S3 can be detected up to one window **later** than with an independent retriever (on top of the `pollingInterval`). A single flag set with a very short `pollingInterval` makes the **whole group** list that often: do not mix very short intervals into a group.
-- **Bounded requests**: each listing page request has a 30 second timeout, a listing is limited to 10000 pages and an incomplete listing is an error. Downloads are limited to 16 concurrent `GetObject` requests per group. The `timeout` of the `retriever` configuration is not used by the unified path (nor by the other S3 retriever).
-- **Errors**: a listing error is cached for `min(listing window, 10s)` from the end of the failed listing, so an outage sends one failing request per window (at most 10 seconds) and not one per flag set. For example, with a `pollingInterval` of 60s the listing window is 30s, but a failed listing is retried after 10s.
-- **Startup and restarts**: each replica still downloads each file once when it starts (the concurrency limit of 16 bounds the burst) and then lists once. Replicas restarted together keep polling in step: set [`enablePollingJitter`](#flagsetenablepollingjitter) to spread their requests.
-- Caches, notifiers and exporters stay per flag set, and the shared group keeps a copy of the bytes of each object it downloaded.
-- **Measured behaviour**: in a local benchmark (one relay proxy replica, an in-memory S3 emulator behind a request-counting proxy, 20 flags of about 5KB per file, one flag set per object, a bucket holding only the flag files, `pollingInterval` of 10s, a single run, no errors), the option also lowered the goroutines and the memory of the relay proxy. These are **not production numbers**, and the cause of the reduction was not profiled.
+Measured with a prototype of this design:
 
-  | Flag sets | Goroutines (normal / unified) | RSS (normal / unified) |
-  | --- | --- | --- |
-  | 1,000 | 3,017 / 1,020 | 234 MB / 188 MB |
-  | 4,000 | 12,017 / 4,019 | 701 MB / 492 MB |
-  | 8,000 | 24,020 / 8,019 | 1,434 MB / 949 MB |
+Per pod, 60s window, 5s polling, 1% of flagsets rewritten every polling interval, single run each, local in-memory S3 emulator:
 
-  With 8,000 flag sets the heap in use went from 976 MB to 589 MB. In steady state, over 60 seconds with a 10s polling interval, the normal setup sent 48,018 `GetObject` requests, and the unified one sent 96 listing requests (8 pages, 2 listings per cycle, 6 cycles) and no `GetObject`. At startup both download every object once (8,000 `GetObject`).
-- **Caveats**: the numbers above are for one replica and scale linearly with the number of replicas. Each replica still downloads each object once when it starts (bounded by the concurrent download limit). The listing covers every object under the common prefix, so unrelated objects raise the number of listing pages. `s3:ListBucket` must be allowed on the prefix. One flag set with a very short `pollingInterval` shortens the listing window of the whole group.
-- Like the other flag set options, it can't be changed on an existing flag set at runtime.
+| Flagsets x flags | Metric | Current | SharedRetriever | Delta |
+|---|---|---|---|---|
+| 100 x 10 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
+| | RSS (MiB) | 86.9 | 74.9 | -12.0 (-14%) |
+| | Heap in use (MiB) | 24.0 | 17.1 | -6.9 (-29%) |
+| | Goroutines | 317 | 20 | -297 (16x fewer) |
+| | Allocations (count / bytes) | 5.21M / 331 MiB | 0.20M / 10.5 MiB | 26x / 32x fewer |
+| 100 x 20 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
+| | RSS (MiB) | 89.8 | 81.1 | -8.7 (-10%) |
+| | Heap in use (MiB) | 27.4 | 20.6 | -6.8 (-25%) |
+| | Goroutines | 317 | 20 | -297 (16x fewer) |
+| | Allocations (count / bytes) | 9.70M / 583 MiB | 0.31M / 18.9 MiB | 31x / 31x fewer |
+| 200 x 10 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
+| | RSS (MiB) | 96.8 | 79.1 | -17.7 (-18%) |
+| | Heap in use (MiB) | 29.0 | 21.5 | -7.5 (-26%) |
+| | Goroutines | 620 | 22 | -598 (28x fewer) |
+| | Allocations (count / bytes) | 10.39M / 661 MiB | 0.39M / 21.4 MiB | 27x / 31x fewer |
+| 200 x 20 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
+| | RSS (MiB) | 108.0 | 92.3 | -15.7 (-15%) |
+| | Heap in use (MiB) | 42.6 | 37.1 | -5.5 (-13%) |
+| | Goroutines | 617 | 23 | -594 (27x fewer) |
+| | Allocations (count / bytes) | 19.43M / 1,165 MiB | 0.61M / 36.5 MiB | 32x / 32x fewer |
+
+Prototype measurements: one pod, one run per cell, in-memory S3 emulator on a single host; memory figures are single end-of-window samples. Transferred bytes are not reported because the counting proxy did not capture LIST response sizes. The request reduction depends on the polling interval and on how many objects change: at the production default of 60s with the same write rate it is roughly N / (1 + changed objects per interval), about 8x here, not 50-67x. Multi-replica totals scale linearly with the number of pods for requests (each pod polls independently) but were not measured.
+
+- **Caveats**: each replica still downloads each object once when it starts. The listing covers every object under the common prefix, so unrelated objects raise the number of listing pages. `s3:ListBucket` must be allowed on the prefix.
 
 ### `studio`
 
@@ -842,11 +868,11 @@ Environment identifier for this flag set (e.g., "dev", "staging", "prod").
 
 - [_see `environment`_](#environment)
 
-#### `flagSet.useUnifiedRetriever`
+#### `flagSet.useSharedClientPerBucket`
 
-Share the S3 requests of this flag set with the other flag sets of the same bucket that also set this option.
+Share one poller per bucket with the other flag sets of the same bucket that also set this option. The poller uses the top-level `pollingInterval` and `enablePollingJitter`.
 
-- option name: `useUnifiedRetriever`
+- option name: `useSharedClientPerBucket`
 - type: **boolean**
 - default: **false**
 - mandatory: <NotMandatory />

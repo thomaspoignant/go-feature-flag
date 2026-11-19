@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"math/rand/v2"
 	"slices"
 	"strings"
 	"sync"
@@ -49,17 +51,17 @@ type SharedItemsOptions struct {
 }
 
 // SharedItems lets several single-file S3 retrievers of the same bucket share their storage
-// requests: the objects under the longest common key prefix of the registered items (cut at its
-// last "/") are listed
-// once per listing TTL window (recursively, all the pages) for all of them, and an object is
-// only downloaded when its ETag differs from the cached one. The listing covers every object
-// under that prefix, including the unrelated ones, so the flag files should live under a
-// dedicated prefix.
+// requests. The objects under the longest common key prefix of the registered items (cut at its
+// last "/") are listed recursively (all the pages), and an object is only downloaded when its
+// ETag differs from the cached one. The listing covers every object under that prefix, including
+// the unrelated ones, so the flag files should live under a dedicated prefix.
 //
-// The listing TTL is max(1s, minPollingInterval/2), where minPollingInterval is the lowest
-// polling interval of the registered items. A change in the bucket can therefore be detected up
-// to one TTL later than with an independent retriever. Listing errors are cached for
-// min(TTL, 10s) so that an outage causes one failing listing per window, not one per item.
+// Once SetRefresh registered a refresh function for at least one item, a single poller lists the
+// bucket once per polling interval (see SetPoller) and calls the refresh function of the items
+// whose listed ETag differs from the cached content, so the items must not poll by themselves.
+// The initial retrievals (before the poller knows the items) share a listing for
+// max(1s, pollingInterval/2). Listing errors are served for min(that window, 10s) so that an
+// outage causes one failing listing per window, not one per item.
 type SharedItems struct {
 	bucket     string
 	lister     ListerAPI
@@ -73,7 +75,7 @@ type SharedItems struct {
 	keySeq   map[string]uint64 // key -> seq of its registration
 	listSeq  uint64            // seq at the start of the current listing
 	prefix   string            // listing prefix of the registered items
-	ttl      time.Duration     // listing TTL of the registered items
+	ttl      time.Duration     // listing TTL, derived from the polling interval
 	contents map[string]*sharedContent
 	// base is the context of the requests of the group, it is cancelled when the last item leaves.
 	base   context.Context
@@ -88,6 +90,14 @@ type SharedItems struct {
 	listStart    time.Time // start of the listing
 	listed       bool
 	inflight     *sharedListing
+
+	// poller configuration and state.
+	interval   time.Duration
+	jitter     bool
+	logger     *slog.Logger
+	refreshers int                // number of items with a refresh function
+	stopPoller context.CancelFunc // stops the poller, nil if it is not running
+	wake       chan struct{}      // tells the poller that the interval changed
 }
 
 // sharedListing is a listing in progress, shared by all the callers waiting for it.
@@ -151,7 +161,10 @@ func NewSharedItems(ctx context.Context, opts SharedItemsOptions) (*SharedItems,
 		keyRefs:    map[string]int{},
 		keySeq:     map[string]uint64{},
 		contents:   map[string]*sharedContent{},
-		ttl:        minSharedListingTTL,
+		ttl:        listingTTL(DefaultSharedPollingInterval),
+		interval:   DefaultSharedPollingInterval,
+		logger:     slog.New(slog.DiscardHandler),
+		wake:       make(chan struct{}, 1),
 		sem:        make(chan struct{}, MaxConcurrentDownloads),
 	}, nil
 }
@@ -176,12 +189,8 @@ func (g *SharedItems) Bucket() string { return g.bucket }
 
 // Retriever returns the retriever of one item of the bucket. The item joins the group
 // immediately (so that the listing covers it from the first poll) and leaves it on Shutdown.
-// pollingInterval is used to compute the listing TTL, 0 means the default one (60s).
-func (g *SharedItems) Retriever(item string, pollingInterval time.Duration) *SharedItemRetriever {
-	if pollingInterval <= 0 {
-		pollingInterval = DefaultSharedPollingInterval
-	}
-	r := &SharedItemRetriever{group: g, item: item, pollingInterval: pollingInterval}
+func (g *SharedItems) Retriever(item string) *SharedItemRetriever {
+	r := &SharedItemRetriever{group: g, item: item}
 	g.register(r)
 	return r
 }
@@ -211,6 +220,13 @@ func (g *SharedItems) deregister(r *SharedItemRetriever) {
 		return
 	}
 	delete(g.items, r)
+	if r.refresh != nil {
+		g.refreshers--
+		if g.refreshers == 0 && g.stopPoller != nil {
+			g.stopPoller()
+			g.stopPoller = nil
+		}
+	}
 	if g.keyRefs[r.item]--; g.keyRefs[r.item] <= 0 {
 		delete(g.keyRefs, r.item)
 		delete(g.contents, r.item)
@@ -223,18 +239,18 @@ func (g *SharedItems) deregister(r *SharedItemRetriever) {
 	g.recompute()
 }
 
-// recompute refreshes the listing prefix and the TTL. The caller must hold g.mu.
+// recompute refreshes the listing prefix. The caller must hold g.mu.
 func (g *SharedItems) recompute() {
-	minPolling := time.Duration(0)
 	keys := make([]string, 0, len(g.items))
 	for it := range g.items {
 		keys = append(keys, it.item)
-		if minPolling == 0 || it.pollingInterval < minPolling {
-			minPolling = it.pollingInterval
-		}
 	}
 	g.prefix = listingPrefix(keys)
-	g.ttl = max(minSharedListingTTL, minPolling/2)
+}
+
+// listingTTL is the window during which a listing is served without listing again.
+func listingTTL(interval time.Duration) time.Duration {
+	return max(minSharedListingTTL, interval/2)
 }
 
 // listingPrefix is the longest common prefix of the keys, cut after its last "/" ("" if there is
@@ -298,16 +314,7 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (listedItem, error
 			g.mu.Unlock()
 			return item, err
 		}
-		fl := g.inflight
-		if fl == nil {
-			fl = &sharedListing{done: make(chan struct{})}
-			g.inflight = fl
-			wanted := make(map[string]struct{}, len(g.keyRefs))
-			for k := range g.keyRefs {
-				wanted[k] = struct{}{}
-			}
-			go g.runListing(g.baseLocked(), fl, g.prefix, wanted, g.seq)
-		}
+		fl := g.listingLocked()
 		g.mu.Unlock()
 
 		select {
@@ -326,6 +333,22 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (listedItem, error
 		}
 	}
 	return listedItem{}, errors.New("item is not registered in the shared listing")
+}
+
+// listingLocked returns the listing in progress, and starts one if there is none. The caller must
+// hold g.mu.
+func (g *SharedItems) listingLocked() *sharedListing {
+	if g.inflight != nil {
+		return g.inflight
+	}
+	fl := &sharedListing{done: make(chan struct{})}
+	g.inflight = fl
+	wanted := make(map[string]struct{}, len(g.keyRefs))
+	for k := range g.keyRefs {
+		wanted[k] = struct{}{}
+	}
+	go g.runListing(g.baseLocked(), fl, g.prefix, wanted, g.seq)
+	return fl
 }
 
 // runListing lists the objects under prefix and publishes the result. It does not depend on the
@@ -484,10 +507,13 @@ var (
 
 // SharedItemRetriever is the retriever of one item of a SharedItems group.
 type SharedItemRetriever struct {
-	group           *SharedItems
-	item            string
-	pollingInterval time.Duration
-	status          atomic.Value // retriever.Status
+	group  *SharedItems
+	item   string
+	status atomic.Value // retriever.Status
+
+	// refresh and retry are protected by group.mu.
+	refresh func() bool // called by the poller when the object changed
+	retry   bool        // the last refresh failed, it must be tried again
 }
 
 // Init registers the item in the group.
@@ -530,3 +556,171 @@ func (r *SharedItemRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 // OutputFormat returns an empty string like the single file Retriever: the format of the file is
 // unknown, the global file format applies.
 func (r *SharedItemRetriever) OutputFormat() string { return "" }
+
+// PollerConfig configures the poller of a SharedItems group.
+type PollerConfig struct {
+	// Interval is the time between two listings, 0 means the default one (60s) and the minimum
+	// is 1s.
+	Interval time.Duration
+	// Jitter randomizes each wait by +/-10%.
+	Jitter bool
+	// Logger receives the poller errors, nothing is logged if it is nil.
+	Logger *slog.Logger
+}
+
+// SetPoller sets the configuration of the poller, it is applied to a running poller too.
+func (g *SharedItems) SetPoller(cfg PollerConfig) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.interval = cfg.Interval
+	if g.interval <= 0 {
+		g.interval = DefaultSharedPollingInterval
+	}
+	g.interval = max(g.interval, minSharedListingTTL)
+	g.jitter = cfg.Jitter
+	g.logger = cfg.Logger
+	if g.logger == nil {
+		g.logger = slog.New(slog.DiscardHandler)
+	}
+	g.ttl = listingTTL(g.interval)
+	select {
+	case g.wake <- struct{}{}:
+	default:
+	}
+}
+
+// SetRefresh sets the function the poller calls when the object of the retriever changed (it
+// must refresh the consumer of the retriever, and report if it succeeded). The first refresh
+// function starts the poller, and it stops when the last item leaves the group.
+func (g *SharedItems) SetRefresh(r *SharedItemRetriever, refresh func() bool) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if _, ok := g.items[r]; !ok {
+		return
+	}
+	if r.refresh == nil {
+		g.refreshers++
+	}
+	r.refresh = refresh
+	if g.stopPoller == nil {
+		ctx, cancel := context.WithCancel(context.Background())
+		g.stopPoller = cancel
+		go g.poll(ctx)
+	}
+}
+
+// poll lists the bucket every polling interval until ctx is done.
+func (g *SharedItems) poll(ctx context.Context) {
+	timer := time.NewTimer(g.nextDelay())
+	defer timer.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-g.wake:
+		case <-timer.C:
+			g.pollOnce(ctx)
+		}
+		timer.Reset(g.nextDelay())
+	}
+}
+
+// nextDelay is the time to wait before the next listing.
+func (g *SharedItems) nextDelay() time.Duration {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if !g.jitter {
+		return g.interval
+	}
+	// not security sensitive: the jitter only spreads the requests
+	return g.interval + time.Duration((rand.Float64()*0.2-0.1)*float64(g.interval)) //nolint:gosec
+}
+
+// pollOnce lists the bucket and refreshes the items whose object changed. A listing error is
+// logged, the next poll tries again.
+func (g *SharedItems) pollOnce(ctx context.Context) {
+	g.mu.Lock()
+	fl := g.listingLocked()
+	logger := g.logger
+	g.mu.Unlock()
+	select {
+	case <-fl.done:
+	case <-ctx.Done():
+		return
+	}
+	if fl.err != nil {
+		logger.Error("unable to list the S3 bucket, the flagsets are not refreshed",
+			slog.String("bucket", g.bucket), slog.Any("error", fl.err))
+		return
+	}
+	g.refresh(ctx, g.changed(fl.listing))
+}
+
+// changed returns the items to refresh: the ones whose listed ETag differs from the ETag of
+// their cached content (or without cached content), and the ones whose last refresh failed.
+func (g *SharedItems) changed(listing map[string]string) []*SharedItemRetriever {
+	type candidate struct {
+		r *SharedItemRetriever
+		c *sharedContent
+	}
+	g.mu.Lock()
+	candidates := make([]candidate, 0, g.refreshers)
+	for r := range g.items {
+		if _, listed := listing[r.item]; listed && r.refresh != nil {
+			candidates = append(candidates, candidate{r, g.contents[r.item]})
+		}
+	}
+	g.mu.Unlock()
+
+	// the content lock is taken outside of g.mu to keep the lock order of the downloads
+	var res []*SharedItemRetriever
+	for _, cand := range candidates {
+		if g.needsRefresh(cand.r, cand.c, listing[cand.r.item]) {
+			res = append(res, cand.r)
+		}
+	}
+	return res
+}
+
+func (g *SharedItems) needsRefresh(r *SharedItemRetriever, c *sharedContent, listedETag string) bool {
+	g.mu.Lock()
+	retry := r.retry
+	g.mu.Unlock()
+	if retry || c == nil {
+		return true
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.data == nil || c.etag != listedETag
+}
+
+// refresh calls the refresh function of the items with a bounded number of workers. A failure
+// is remembered so that the item is tried again at the next poll, and does not stop the others.
+func (g *SharedItems) refresh(ctx context.Context, items []*SharedItemRetriever) {
+	ch := make(chan *SharedItemRetriever)
+	var wg sync.WaitGroup
+	for range min(MaxConcurrentDownloads, len(items)) {
+		wg.Go(func() {
+			for r := range ch {
+				g.mu.Lock()
+				fn := r.refresh
+				g.mu.Unlock()
+				ok := fn()
+				g.mu.Lock()
+				r.retry = !ok
+				g.mu.Unlock()
+			}
+		})
+	}
+	defer func() {
+		close(ch)
+		wg.Wait()
+	}()
+	for _, r := range items {
+		select {
+		case ch <- r:
+		case <-ctx.Done():
+			return
+		}
+	}
+}

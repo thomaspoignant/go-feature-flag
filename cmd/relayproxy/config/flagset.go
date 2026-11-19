@@ -102,30 +102,22 @@ type CommonFlagSet struct {
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
 
-	// UseUnifiedRetriever (optional) makes the flagset share its storage requests with the other
-	// flagsets using the same S3 bucket and this option: the objects under the longest common
-	// prefix of their items are listed (recursively) once per listing window
-	// (max(1s, smallest polling interval / 2)) for all of them, and an object is only downloaded
-	// when its ETag changed, instead of one GetObject per flagset per poll.
+	// UseSharedClientPerBucket (optional) makes the flagsets using the same S3 bucket share
+	// their storage requests: one poller per bucket lists the objects under the longest common
+	// prefix of the items (recursively) once per polling interval, and refreshes only the flagsets
+	// whose object changed (its ETag differs from the one of the cached content). Each flagset keeps
+	// its own client, caches, notifiers and exporters, but its own polling is disabled.
+	// The poller uses the top-level pollingInterval and enablePollingJitter: if the flagset sets
+	// different ones they are ignored and a warning is logged.
 	// Put the flag files under a dedicated prefix: every object under the common prefix is listed.
 	// It needs s3:ListBucket allowed on that prefix (a denied prefix fails the whole group).
-	// It lowers the request load on the bucket while the prefix holds fewer than roughly 500
-	// objects per unified flagset (about 2 listings of ceil(objects/1000) pages per polling
-	// interval, versus one GetObject per flagset): leave it off for a few flagsets.
-	// Downloads are limited to 16 concurrent GetObject per bucket and a very short polling
-	// interval in the group makes the whole group list that often.
-	// Caches, notifiers and exporters stay per flagset. In a local benchmark with an in-memory S3
-	// emulator (8000 flagsets, 10s polling) it also lowered the goroutines (24020 to 8019) and the
-	// RSS (1434 MB to 949 MB), and the steady-state requests went from 48018 GetObject to 96 LIST
-	// per 60s; these are not production numbers.
+	// Downloads are limited to 16 concurrent GetObject per bucket.
 	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set, the
 	// `timeout` of the retriever has no effect.
-	// A change can be detected up to one listing window later than with an independent retriever.
-	// A listing error is cached for min(listing window, 10s) from the end of the listing, so an
-	// outage sends one failing request per window and not one per flagset.
+	// A listing error is logged and retried at the next polling interval.
 	// Not available outside of flagsets.
 	// Default: false
-	UseUnifiedRetriever bool `mapstructure:"useUnifiedRetriever" koanf:"useunifiedretriever"`
+	UseSharedClientPerBucket bool `mapstructure:"useSharedClientPerBucket" koanf:"usesharedclientperbucket"`
 }
 
 // GetFlagSets returns a shallow copy of the configured flag sets.
