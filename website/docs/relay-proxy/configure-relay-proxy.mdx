@@ -474,34 +474,34 @@ flagSets:
 With `N` flag sets, `M` objects under the prefix and `C` changed objects per interval, independent retrievers send `N` `GetObject` requests per interval and per replica, and the shared poller sends `ceil(M / 1000)` listing pages plus `C` `GetObject` requests. The request count goes down while `M` is below roughly `1000 * (N - C)`. Keep the prefix dedicated to the flag files, and leave the option off for a handful of flag sets.
 In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost only goes down while `M` is below about `80 * N`: the cost is secondary, the goal is the request load.
 
-These numbers were measured on an earlier prototype of the same design (one poller per bucket, each flag set keeping its own client with polling disabled) and have not been re-measured on this final implementation:
+Measured on this implementation (one poller per bucket, each flag set keeping its own client with polling disabled):
 
 Per pod, 60s window, 5s polling, 1% of flagsets rewritten every polling interval, single run each, local in-memory S3 emulator:
 
 | Flagsets x flags | Metric | Current | SharedRetriever | Delta |
 |---|---|---|---|---|
 | 100 x 10 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
-| | RSS (MiB) | 86.9 | 74.9 | -12.0 (-14%) |
-| | Heap in use (MiB) | 24.0 | 17.1 | -6.9 (-29%) |
-| | Goroutines | 317 | 20 | -297 (16x fewer) |
-| | Allocations (count / bytes) | 5.21M / 331 MiB | 0.20M / 10.5 MiB | 26x / 32x fewer |
+| | RSS (MiB) | 83.0 | 74.4 | -8.5 (-10%) |
+| | Heap in use (MiB) | 23.3 | 17.1 | -6.2 (-27%) |
+| | Goroutines | 318 | 21 | -297 (15x fewer) |
+| | Allocations (count / bytes) | 5.20M / 331 MiB | 0.19M / 10.8 MiB | 27x / 31x fewer |
 | 100 x 20 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
-| | RSS (MiB) | 89.8 | 81.1 | -8.7 (-10%) |
-| | Heap in use (MiB) | 27.4 | 20.6 | -6.8 (-25%) |
-| | Goroutines | 317 | 20 | -297 (16x fewer) |
-| | Allocations (count / bytes) | 9.70M / 583 MiB | 0.31M / 18.9 MiB | 31x / 31x fewer |
+| | RSS (MiB) | 90.1 | 80.8 | -9.3 (-10%) |
+| | Heap in use (MiB) | 27.1 | 21.2 | -5.9 (-22%) |
+| | Goroutines | 317 | 22 | -295 (14x fewer) |
+| | Allocations (count / bytes) | 9.72M / 583 MiB | 0.31M / 19.0 MiB | 31x / 31x fewer |
 | 200 x 10 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
-| | RSS (MiB) | 96.8 | 79.1 | -17.7 (-18%) |
-| | Heap in use (MiB) | 29.0 | 21.5 | -7.5 (-26%) |
-| | Goroutines | 620 | 22 | -598 (28x fewer) |
-| | Allocations (count / bytes) | 10.39M / 661 MiB | 0.39M / 21.4 MiB | 27x / 31x fewer |
+| | RSS (MiB) | 96.3 | 71.5 | -24.8 (-26%) |
+| | Heap in use (MiB) | 37.7 | 25.9 | -11.8 (-31%) |
+| | Goroutines | 617 | 22 | -595 (28x fewer) |
+| | Allocations (count / bytes) | 10.38M / 662 MiB | 0.37M / 21.0 MiB | 28x / 32x fewer |
 | 200 x 20 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
-| | RSS (MiB) | 108.0 | 92.3 | -15.7 (-15%) |
-| | Heap in use (MiB) | 42.6 | 37.1 | -5.5 (-13%) |
-| | Goroutines | 617 | 23 | -594 (27x fewer) |
-| | Allocations (count / bytes) | 19.43M / 1,165 MiB | 0.61M / 36.5 MiB | 32x / 32x fewer |
+| | RSS (MiB) | 107.8 | 95.9 | -12.0 (-11%) |
+| | Heap in use (MiB) | 36.4 | 29.4 | -7.0 (-19%) |
+| | Goroutines | 617 | 22 | -595 (28x fewer) |
+| | Allocations (count / bytes) | 19.39M / 1,166 MiB | 0.59M / 36.6 MiB | 33x / 32x fewer |
 
-Prototype measurements: one pod, one run per cell, in-memory S3 emulator on a single host; memory figures are single end-of-window samples. Transferred bytes are not reported because the counting proxy did not capture LIST response sizes. The request reduction depends on the polling interval and on how many objects change: at the production default of 60s with the same write rate it is roughly N / (1 + changed objects per interval), about 8x here, not 50-67x. Multi-replica totals scale linearly with the number of pods for requests (each pod polls independently) but were not measured.
+Measurements: one pod, one run per cell, in-memory S3 emulator on a single host; memory figures are single end-of-window samples and vary by several MiB between runs. Transferred bytes are not reported because the counting proxy did not capture LIST response sizes. The request reduction depends on the polling interval and on how many objects change: at the production default of 60s with the same write rate it is roughly N / (1 + changed objects per interval), about 8x here, not 50-67x. Multi-replica totals scale linearly with the number of pods for requests (each pod polls independently) but were not measured.
 
 - **Caveats**: each replica still downloads each object once when it starts. The listing covers every object under the common prefix, so unrelated objects raise the number of listing pages. `s3:ListBucket` must be allowed on the prefix.
 
