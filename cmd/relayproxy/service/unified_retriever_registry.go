@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"go.uber.org/zap"
 )
 
 // sharedItemsFactory builds the shared group of a bucket.
@@ -94,6 +95,20 @@ func (r *unifiedRetrieverRegistry) preRegister(fs *config.FlagSet) error {
 	key := pendingKey(fs)
 	r.pending[key] = append(r.pending[key], rr)
 	return nil
+}
+
+// preRegisterAll pre-registers the flagsets using useUnifiedRetriever, an invalid one is only
+// logged (its client creation reports the error).
+func (r *unifiedRetrieverRegistry) preRegisterAll(flagsets []config.FlagSet, logger *zap.Logger) {
+	for i := range flagsets {
+		if !flagsets[i].UseUnifiedRetriever {
+			continue
+		}
+		if err := r.preRegister(&flagsets[i]); err != nil {
+			logger.Warn("unable to pre-register the unified retriever of the flagset",
+				zap.String("flagset", flagsets[i].Name), zap.Error(err))
+		}
+	}
 }
 
 // releasePending shuts down the pre-registered retrievers nobody claimed.

@@ -175,14 +175,7 @@ func newFlagsetManagerWithFlagsetsAndRegistry(
 	apiKeysToFlagSet := make(map[string]string)
 
 	// Register all the unified items first so that the first listing of a bucket covers all of them.
-	for i := range config.FlagSets {
-		if config.FlagSets[i].UseUnifiedRetriever {
-			if err := registry.preRegister(&config.FlagSets[i]); err != nil {
-				logger.Warn("unable to pre-register the unified retriever of the flagset",
-					zap.String("flagset", config.FlagSets[i].Name), zap.Error(err))
-			}
-		}
-	}
+	registry.preRegisterAll(config.FlagSets, logger)
 	defer registry.releasePending()
 
 	for index, flagset := range config.FlagSets {

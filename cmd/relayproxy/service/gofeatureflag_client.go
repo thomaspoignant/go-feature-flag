@@ -80,16 +80,7 @@ func newGoFeatureFlagClient(
 	}
 	// If the client can't be created, the unified retrievers must leave their shared group,
 	// otherwise their item stays registered forever. Their Shutdown is idempotent.
-	defer func() {
-		if retErr == nil {
-			return
-		}
-		for _, r := range retrievers {
-			if ur, ok := r.(*releasingRetriever); ok {
-				_ = ur.Shutdown(context.Background())
-			}
-		}
-	}()
+	defer releaseUnifiedRetrievers(retrievers, &retErr)
 
 	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
@@ -137,6 +128,19 @@ func newGoFeatureFlagClient(
 		return nil, err
 	}
 	return client, nil
+}
+
+// releaseUnifiedRetrievers makes the unified retrievers leave their shared group when the client
+// creation failed, otherwise their item stays registered forever. Their Shutdown is idempotent.
+func releaseUnifiedRetrievers(retrievers []retriever.Retriever, retErr *error) {
+	if *retErr == nil {
+		return
+	}
+	for _, r := range retrievers {
+		if ur, ok := r.(*releasingRetriever); ok {
+			_ = ur.Shutdown(context.Background())
+		}
+	}
 }
 
 // initLeveledLogger initializes the leveled logger

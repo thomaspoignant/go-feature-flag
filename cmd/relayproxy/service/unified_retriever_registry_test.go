@@ -19,6 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 // fakeS3 serves the same flag file for every key and counts the requests.
@@ -241,4 +242,118 @@ func Test_newGoFeatureFlagClient_ReleasesUnifiedRetrieverOnFailure(t *testing.T)
 			})
 		})
 	}
+}
+
+func failingRegistry() *unifiedRetrieverRegistry {
+	return newUnifiedRetrieverRegistry(func(context.Context, string) (*s3retrieverv2.SharedItems, error) {
+		return nil, errors.New("no AWS")
+	})
+}
+
+func Test_unifiedRetrieverRegistry_factoryError(t *testing.T) {
+	t.Parallel()
+	fs := s3FlagSet("a", "b1", "p/a.yaml")
+	reg := failingRegistry()
+	_, err := reg.retrieverFor(&fs)
+	assert.ErrorContains(t, err, "no AWS")
+	assert.ErrorContains(t, reg.preRegister(&fs), "no AWS")
+	assert.Equal(t, 0, reg.groupCount())
+}
+
+func Test_unifiedRetrieverRegistry_preRegisterAll(t *testing.T) {
+	t.Parallel()
+	valid := s3FlagSet("valid", "b1", "p/a.yaml")
+	plain := s3FlagSet("plain", "b1", "p/b.yaml")
+	plain.UseUnifiedRetriever = false
+	tests := []struct {
+		name       string
+		reg        *unifiedRetrieverRegistry
+		wantGroups int
+		wantWarn   int
+	}{
+		{name: "valid flagsets are registered, others skipped", reg: newFakeRegistry(t, &fakeS3{}, &atomic.Int32{}), wantGroups: 1},
+		{name: "factory failure is logged", reg: failingRegistry(), wantWarn: 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			core, logs := observer.New(zap.WarnLevel)
+			tt.reg.preRegisterAll([]config.FlagSet{valid, plain}, zap.New(core))
+			assert.Equal(t, tt.wantGroups, tt.reg.groupCount())
+			assert.Equal(t, tt.wantWarn, logs.Len())
+		})
+	}
+}
+
+// Not parallel: the subtests use t.Setenv.
+func Test_defaultSharedItemsFactory(t *testing.T) {
+	tests := []struct {
+		name    string
+		env     map[string]string
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{name: "default AWS config", wantErr: assert.NoError},
+		{
+			name: "invalid AWS profile",
+			env: map[string]string{
+				"AWS_PROFILE":                 "this-profile-does-not-exist",
+				"AWS_CONFIG_FILE":             "/nonexistent/config",
+				"AWS_SHARED_CREDENTIALS_FILE": "/nonexistent/credentials",
+			},
+			wantErr: assert.Error,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for k, v := range tt.env {
+				t.Setenv(k, v)
+			}
+			_, err := defaultSharedItemsFactory(t.Context(), "bucket")
+			tt.wantErr(t, err)
+		})
+	}
+}
+
+func Test_initRetrieversWithRegistry_unified(t *testing.T) {
+	t.Parallel()
+	valid := s3FlagSet("a", "b1", "p/a.yaml")
+	folder := s3FlagSet("a", "b1", "")
+	tests := []struct {
+		name    string
+		fs      config.FlagSet
+		reg     *unifiedRetrieverRegistry
+		wantLen int
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{name: "no registry gets a private one", fs: valid, reg: nil, wantLen: 1, wantErr: assert.NoError},
+		{name: "invalid configuration", fs: folder, reg: nil, wantErr: assert.Error},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := initRetrieversWithRegistry(&tt.fs, tt.reg)
+			tt.wantErr(t, err)
+			assert.Len(t, got, tt.wantLen)
+		})
+	}
+}
+
+func Test_flagsetManagerImpl_addFlagset_unifiedDuplicate(t *testing.T) {
+	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
+		require.NoError(t, err)
+		reg := newFakeRegistry(t, &fakeS3{content: content}, &atomic.Int32{})
+		first := s3FlagSet("u1", "flags", "p/a.yaml")
+		mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(
+			&config.Config{FlagSets: []config.FlagSet{first}}, zap.NewNop(), nil, nil, nil, reg)
+		require.NoError(t, err)
+
+		// the flagset name is already in the configuration: the new client is closed and released
+		dup := s3FlagSet("u1", "flags", "p/b.yaml")
+		mgr.(*flagsetManagerImpl).addFlagset(dup)
+		assert.Equal(t, 1, reg.groupCount())
+		mgr.Close()
+		assert.Equal(t, 0, reg.groupCount())
+	})
 }
