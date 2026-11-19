@@ -467,7 +467,17 @@ In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost onl
 - **Bounded requests**: each listing page request has a 30 second timeout, a listing is limited to 10000 pages and an incomplete listing is an error. Downloads are limited to 16 concurrent `GetObject` requests per group. The `timeout` of the `retriever` configuration is not used by the unified path (nor by the other S3 retriever).
 - **Errors**: a listing error is cached for `min(listing window, 10s)` from the end of the failed listing, so an outage sends one failing request per window (at most 10 seconds) and not one per flag set. For example, with a `pollingInterval` of 60s the listing window is 30s, but a failed listing is retried after 10s.
 - **Startup and restarts**: each replica still downloads each file once when it starts (the concurrency limit of 16 bounds the burst) and then lists once. Replicas restarted together keep polling in step: set [`enablePollingJitter`](#flagsetenablepollingjitter) to spread their requests.
-- It reduces the number of requests sent to S3 only. It does **not** reduce goroutines, and caches, notifiers, exporters and clients stay per flag set. The content of each file is cached twice (shared content cache and flag set cache) and copied when returned, so expect a transient memory use of 2-3 times the size of the flag files, plus a map of the registered keys for the listing.
+- Caches, notifiers and exporters stay per flag set, and the shared group keeps a copy of the bytes of each object it downloaded.
+- **Measured behaviour**: in a local benchmark (one relay proxy replica, an in-memory S3 emulator behind a request-counting proxy, 20 flags of about 5KB per file, one flag set per object, a bucket holding only the flag files, `pollingInterval` of 10s, a single run, no errors), the option also lowered the goroutines and the memory of the relay proxy. These are **not production numbers**, and the cause of the reduction was not profiled.
+
+  | Flag sets | Goroutines (normal / unified) | RSS (normal / unified) |
+  | --- | --- | --- |
+  | 1,000 | 3,017 / 1,020 | 234 MB / 188 MB |
+  | 4,000 | 12,017 / 4,019 | 701 MB / 492 MB |
+  | 8,000 | 24,020 / 8,019 | 1,434 MB / 949 MB |
+
+  With 8,000 flag sets the heap in use went from 976 MB to 589 MB. In steady state, over 60 seconds with a 10s polling interval, the normal setup sent 48,018 `GetObject` requests, and the unified one sent 96 listing requests (8 pages, 2 listings per cycle, 6 cycles) and no `GetObject`. At startup both download every object once (8,000 `GetObject`).
+- **Caveats**: the numbers above are for one replica and scale linearly with the number of replicas. Each replica still downloads each object once when it starts (bounded by the concurrent download limit). The listing covers every object under the common prefix, so unrelated objects raise the number of listing pages. `s3:ListBucket` must be allowed on the prefix. One flag set with a very short `pollingInterval` shortens the listing window of the whole group.
 - Like the other flag set options, it can't be changed on an existing flag set at runtime.
 
 ### `studio`

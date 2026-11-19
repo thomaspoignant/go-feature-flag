@@ -114,7 +114,10 @@ type CommonFlagSet struct {
 	// interval, versus one GetObject per flagset): leave it off for a few flagsets.
 	// Downloads are limited to 16 concurrent GetObject per bucket and a very short polling
 	// interval in the group makes the whole group list that often.
-	// Caches, notifiers, exporters and polling loops stay per flagset.
+	// Caches, notifiers and exporters stay per flagset. In a local benchmark with an in-memory S3
+	// emulator (8000 flagsets, 10s polling) it also lowered the goroutines (24020 to 8019) and the
+	// RSS (1434 MB to 949 MB), and the steady-state requests went from 48018 GetObject to 96 LIST
+	// per 60s; these are not production numbers.
 	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set, the
 	// `timeout` of the retriever has no effect.
 	// A change can be detected up to one listing window later than with an independent retriever.
