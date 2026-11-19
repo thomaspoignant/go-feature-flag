@@ -316,9 +316,6 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 		// no ETag in the download, the listed one identifies the content
 		dlETag = etag
 	}
-	if data == nil {
-		data = []byte{}
-	}
 	c.etag, c.data = dlETag, data
 	return slices.Clone(c.data), nil
 }
