@@ -31,6 +31,10 @@ type fakeBucket struct {
 	hang bool
 	// noDownloadETag makes the downloads return no ETag.
 	noDownloadETag bool
+	// pageLatency is the duration of each listing page.
+	pageLatency time.Duration
+	// downloadGate blocks the downloads (ignoring their context) until it is closed.
+	downloadGate chan struct{}
 	// prefixes are the prefixes of the listings, in order.
 	prefixes []string
 	// pageSize forces the listing to be paginated when > 0.
@@ -76,8 +80,15 @@ func (b *fakeBucket) ListObjectsV2(
 ) (*s3.ListObjectsV2Output, error) {
 	b.lists.Add(1)
 	b.mu.Lock()
-	hang := b.hang
+	hang, latency := b.hang, b.pageLatency
 	b.mu.Unlock()
+	if latency > 0 {
+		select {
+		case <-time.After(latency):
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	if hang {
 		<-ctx.Done()
 		return nil, ctx.Err()
@@ -112,6 +123,9 @@ func (b *fakeBucket) ListObjectsV2(
 func (b *fakeBucket) DownloadObject(
 	_ context.Context, in *transfermanager.DownloadObjectInput, _ ...func(*transfermanager.Options),
 ) (*transfermanager.DownloadObjectOutput, error) {
+	if b.downloadGate != nil {
+		<-b.downloadGate
+	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	key := aws.ToString(in.Key)
@@ -229,9 +243,9 @@ func TestSharedItemRetriever_Retrieve(t *testing.T) {
 			run:   runSameWindow,
 		},
 		{
-			name: "only the directories of the items are listed, not recursively",
+			name: "one recursive listing of the common prefix",
 			items: map[string]time.Duration{
-				"p1/dev/flags.yaml": time.Minute, "p1/prod/flags.yaml": time.Minute, "p2/flags.yaml": time.Minute,
+				"p1/dev/flags.yaml": time.Minute, "p1/prod/flags.yaml": time.Minute,
 			},
 			run: runDirectories,
 		},
@@ -299,6 +313,17 @@ func TestSharedItemRetriever_Retrieve(t *testing.T) {
 			name:  "missing late item errors after one refresh",
 			items: nil,
 			run:   runLateMissing,
+		},
+		{
+			name:  "pages slower in total than the request timeout still succeed",
+			items: map[string]time.Duration{"p1/dev/flags.yaml": time.Minute, "p1/prod/flags.yaml": time.Minute},
+			setup: func(b *fakeBucket) { b.pageSize, b.pageLatency = 1, 10*time.Second },
+			run:   runSlowPages,
+		},
+		{
+			name:  "a stuck download does not block the other callers",
+			items: nil,
+			run:   runStuckDownload,
 		},
 		{
 			name:  "empty file",
@@ -388,7 +413,7 @@ func runDirectories(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.Sha
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	assert.ElementsMatch(t, []string{"p1/dev/", "p1/prod/", "p2/"}, b.prefixes)
+	assert.ElementsMatch(t, []string{"p1/"}, b.prefixes)
 }
 
 func runTtlExpiry(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.SharedItemRetriever) {
@@ -483,7 +508,7 @@ func runConcurrent(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.Shar
 		}()
 	}
 	wg.Wait()
-	assert.EqualValues(t, 2, b.lists.Load(), "one listing per directory")
+	assert.EqualValues(t, 1, b.lists.Load(), "one shared listing")
 	assert.Equal(t, 1, b.getCount("p1/dev/flags.yaml"))
 	assert.Equal(t, 1, b.getCount("p1/prod/flags.yaml"))
 }
@@ -516,11 +541,11 @@ func runHung(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.SharedItem
 	assert.ErrorContains(t, otherErr, "unable to list S3 bucket")
 	assert.GreaterOrEqual(t, time.Since(start), 30*time.Second)
 
-	// the failure is shared: no new listing inside the window
+	// the listing started 30s ago (more than the error TTL), so the failure is already stale
 	lists := b.lists.Load()
 	_, err = r["p1/dev/flags.yaml"].Retrieve(t.Context())
 	assert.Error(t, err)
-	assert.Equal(t, lists, b.lists.Load())
+	assert.Equal(t, lists+1, b.lists.Load())
 }
 
 func TestSharedItemRetriever_Init(t *testing.T) {
@@ -545,7 +570,7 @@ func TestSharedItemRetriever_Shutdown(t *testing.T) {
 			r2 := initRetriever(t, g, "b/2.yaml", time.Second)
 			_, err := r1.Retrieve(t.Context())
 			require.NoError(t, err)
-			assert.ElementsMatch(t, []string{"a/", "b/"}, b.prefixes, "listing covers both items")
+			assert.Equal(t, []string{""}, b.prefixes, "listing covers both items")
 
 			require.NoError(t, r2.Shutdown(t.Context()))
 			assert.Equal(t, retriever.RetrieverNotReady, r2.Status())
@@ -555,7 +580,7 @@ func TestSharedItemRetriever_Shutdown(t *testing.T) {
 			time.Sleep(2 * time.Second)
 			_, err = r1.Retrieve(t.Context())
 			require.NoError(t, err)
-			assert.ElementsMatch(t, []string{"a/", "b/", "a/"}, b.prefixes, "listing only covers the remaining item")
+			assert.Equal(t, []string{"", "a/"}, b.prefixes, "listing only covers the remaining item")
 		})
 	})
 
@@ -603,7 +628,7 @@ func runWiden(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.SharedIte
 	got, err := late.Retrieve(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, "p2", string(got))
-	assert.Equal(t, []string{"p1/dev/", "p1/dev/", "p2/"}, b.prefixes)
+	assert.Equal(t, []string{"p1/dev/", ""}, b.prefixes)
 }
 
 func runEmptyFile(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.SharedItemRetriever) {
@@ -622,7 +647,7 @@ func runOpaqueKeys(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.Shar
 		require.NoError(t, err)
 		assert.Equal(t, data, string(got))
 	}
-	assert.ElementsMatch(t, []string{"./", "dir/../", "/"}, b.prefixes)
+	assert.Equal(t, []string{""}, b.prefixes, "no common directory")
 }
 
 func runLateInCoveredDir(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.SharedItemRetriever) {
@@ -653,4 +678,35 @@ func runLateMissing(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.Sha
 		assert.ErrorContains(t, err, "not found")
 	}
 	assert.Equal(t, lists+1, b.lists.Load(), "one refresh, then the listing is fresh again")
+}
+
+func runSlowPages(t *testing.T, b *fakeBucket, r map[string]*s3retrieverv2.SharedItemRetriever) {
+	start := time.Now()
+	// p1/prod/flags.yaml is on the 4th page: 40s in total, each page is below the 30s timeout
+	got, err := r["p1/prod/flags.yaml"].Retrieve(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, "prod", string(got))
+	assert.Equal(t, 40*time.Second, time.Since(start))
+	assert.EqualValues(t, 4, b.lists.Load(), "one request per page")
+}
+
+func runStuckDownload(t *testing.T, b *fakeBucket, _ map[string]*s3retrieverv2.SharedItemRetriever) {
+	b.downloadGate = make(chan struct{})
+	g := newGroup(t, b)
+	r1 := initRetriever(t, g, "p2/flags.yaml", time.Minute)
+	r2 := initRetriever(t, g, "p2/flags.yaml", time.Minute)
+	done := make(chan error, 1)
+	go func() {
+		_, err := r1.Retrieve(context.Background())
+		done <- err
+	}()
+	synctest.Wait()
+
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
+	_, err := r2.Retrieve(ctx)
+	assert.ErrorIs(t, err, context.DeadlineExceeded)
+
+	close(b.downloadGate)
+	assert.NoError(t, <-done)
 }
