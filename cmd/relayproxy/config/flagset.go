@@ -103,13 +103,18 @@ type CommonFlagSet struct {
 	Environment string `mapstructure:"environment" koanf:"environment"`
 
 	// UseUnifiedRetriever (optional) makes the flagset share its storage requests with the other
-	// flagsets using the same S3 bucket and this option: the bucket is listed once per listing
-	// window (max(1s, smallest polling interval / 2)) for all of them, and an object is
-	// only downloaded when its ETag changed, instead of one GetObject per flagset per poll.
-	// It needs s3:ListBucket and only saves requests with many flagsets per bucket (roughly
-	// more than 100 per listed directory page): leave it off for a few flagsets.
+	// flagsets using the same S3 bucket and this option: the objects under the longest common
+	// prefix of their items are listed (recursively) once per listing window
+	// (max(1s, smallest polling interval / 2)) for all of them, and an object is only downloaded
+	// when its ETag changed, instead of one GetObject per flagset per poll.
+	// Put the flag files under a dedicated prefix: every object under the common prefix is listed.
+	// It needs s3:ListBucket allowed on that prefix (a denied prefix fails the whole group).
+	// A listing page costs about 12.5 GetObject and a replica lists about twice per polling
+	// interval, so it only saves requests with more than ~25 flagsets per listed page of 1000
+	// objects: leave it off for a few flagsets.
 	// Caches, notifiers, exporters and polling loops stay per flagset.
-	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set.
+	// Only available for flagsets with a single `retriever` of kind `s3` with `item` set, the
+	// `timeout` of the retriever has no effect.
 	// A change can be detected up to one listing window later than with an independent retriever.
 	// A listing error is cached for min(listing window, 10s) so an outage sends one failing
 	// request per window and not one per flagset.
