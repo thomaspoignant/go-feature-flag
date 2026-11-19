@@ -125,7 +125,10 @@ func TestValidUseCase(t *testing.T) {
 	assert.False(t, ffclient.IsOffline())
 	assert.True(t, ffclient.ForceRefresh())
 	ffclient.Track("toto", user, map[string]any{"key": "value"})
-	assert.Equal(t, 1, len(cliExport.ExportedEvents))
+	// the tracking event is exported by the daemon of the exporter, Track() is not waiting for it.
+	require.Eventually(t, func() bool {
+		return len(cliExport.GetExportedEvents()) == 1
+	}, 10*time.Second, 10*time.Millisecond, "the tracking event was never exported")
 }
 
 func TestValidUseCaseToml(t *testing.T) {
