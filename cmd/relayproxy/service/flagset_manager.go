@@ -374,8 +374,16 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 	// enablePollingJitter, which are not part of the flagset configuration compared by
 	// reconcileExistingFlagset: they are applied to the running pollers, without rebuilding
 	// the flagsets.
+	// The flagsets added by this reload are left out: their retriever warns about its own polling.
+	existing := make([]config.FlagSet, 0, len(newConfig.FlagSets))
+	for _, fs := range newConfig.FlagSets {
+		if _, current := currentByName[fs.Name]; isNamedFlagset(fs) && !current {
+			continue
+		}
+		existing = append(existing, fs)
+	}
 	m.sharedRegistry.setPolling(
-		time.Duration(newConfig.PollingInterval)*time.Millisecond, newConfig.EnablePollingJitter, newConfig.FlagSets)
+		time.Duration(newConfig.PollingInterval)*time.Millisecond, newConfig.EnablePollingJitter, existing)
 
 	// 1. Remove the flagsets that are no longer in the configuration.
 	for name, currentFlagset := range currentByName {

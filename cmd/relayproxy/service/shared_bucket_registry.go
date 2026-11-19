@@ -13,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"go.uber.org/zap"
 )
 
@@ -215,23 +214,25 @@ func (r *sharedBucketRegistry) warnPollingMismatch(fs *config.FlagSet) {
 	r.mu.Unlock()
 	own := time.Duration(fs.PollingInterval) * time.Millisecond
 	if own != 0 && own != parent.Interval {
-		r.logger.Warn("useSharedClientPerBucket: the pollingInterval of the flagset is ignored, "+
-			"the top-level pollingInterval is used",
-			zap.String("flagset", fs.Name),
-			zap.Duration("flagsetPollingInterval", own),
-			zap.Duration("pollingInterval", parent.Interval))
+		r.warnIgnored(fs, "pollingInterval",
+			zap.Duration("flagsetPollingInterval", own), zap.Duration("pollingInterval", parent.Interval))
 	}
 	if fs.EnablePollingJitter && !parent.Jitter {
-		r.logger.Warn("useSharedClientPerBucket: the enablePollingJitter of the flagset is ignored, "+
-			"the top-level enablePollingJitter is used",
-			zap.String("flagset", fs.Name),
+		r.warnIgnored(fs, "enablePollingJitter",
 			zap.Bool("flagsetEnablePollingJitter", fs.EnablePollingJitter),
 			zap.Bool("enablePollingJitter", parent.Jitter))
 	}
 }
 
+// warnIgnored warns that a polling setting of the flagset is ignored in favour of the top-level one.
+func (r *sharedBucketRegistry) warnIgnored(fs *config.FlagSet, setting string, fields ...zap.Field) {
+	r.logger.Warn("useSharedClientPerBucket: the "+setting+" of the flagset is ignored, "+
+		"the top-level "+setting+" is used", append([]zap.Field{zap.String("flagset", fs.Name)}, fields...)...)
+}
+
 // setPolling applies a new top-level pollingInterval and enablePollingJitter to the running
-// groups, and warns about the flagsets that set different ones. Nothing happens if they did not
+// groups, and warns about the given flagsets that set different ones (the caller leaves out the
+// flagsets that are about to be added: their retriever warns). Nothing happens if they did not
 // change.
 func (r *sharedBucketRegistry) setPolling(
 	interval time.Duration, jitter bool, flagsets []config.FlagSet,
@@ -265,13 +266,6 @@ func (r *sharedBucketRegistry) release(bucket string, g *registryGroup) {
 	}
 }
 
-// groupCount is the number of live groups.
-func (r *sharedBucketRegistry) groupCount() int {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return len(r.groups)
-}
-
 // releasingRetriever releases its reference on the group the first time it is shut down.
 type releasingRetriever struct {
 	*s3retrieverv2.SharedItemRetriever
@@ -286,10 +280,6 @@ var _ retriever.InitializableRetriever = (*releasingRetriever)(nil)
 // retriever changed, which starts the poller if it is not running.
 func (r *releasingRetriever) SetRefresh(refresh func() bool) {
 	r.group.SetRefresh(r.SharedItemRetriever, refresh)
-}
-
-func (r *releasingRetriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
-	return r.SharedItemRetriever.Init(ctx, logger)
 }
 
 func (r *releasingRetriever) Shutdown(ctx context.Context) error {

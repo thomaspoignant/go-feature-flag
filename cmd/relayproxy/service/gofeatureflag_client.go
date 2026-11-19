@@ -74,6 +74,12 @@ func newGoFeatureFlagClient(
 		opt(&o)
 	}
 
+	if o.sharedRegistry == nil && cFlagSet.UseSharedClientPerBucket {
+		// nothing to share with (exported constructor): the flagset gets a group of its own, which
+		// polls with the interval and the jitter of the flagset.
+		o.sharedRegistry = newSharedBucketRegistry(
+			nil, time.Duration(cFlagSet.PollingInterval)*time.Millisecond, cFlagSet.EnablePollingJitter, logger)
+	}
 	retrievers, err := initRetrieversWithRegistry(cFlagSet, o.sharedRegistry)
 	if err != nil {
 		return nil, err
@@ -173,22 +179,16 @@ func initLeveledLogger(c *config.FlagSet, logger *zap.Logger) *slog.Logger {
 	return slog.New(baseHandler)
 }
 
-// initRetrievers initialize the retrievers based on the configuration
-// it handles both the `retriever` and `retrievers` fields
-func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
-	return initRetrieversWithRegistry(proxyConf, nil)
-}
-
-// initRetrieversWithRegistry is initRetrievers using the registry for the flagsets with
-// useSharedClientPerBucket.
+// initRetrieversWithRegistry initialize the retrievers based on the configuration, it handles both
+// the `retriever` and `retrievers` fields. The registry provides the retriever of the flagsets with
+// useSharedClientPerBucket, it is required for them.
 func initRetrieversWithRegistry(
 	proxyConf *config.FlagSet, registry *sharedBucketRegistry,
 ) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
 	if proxyConf.UseSharedClientPerBucket {
 		if registry == nil {
-			// no registry to share with: the flagset gets a group of its own.
-			registry = newSharedBucketRegistry(nil, 0, false, nil)
+			return nil, fmt.Errorf("useSharedClientPerBucket requires a shared bucket registry")
 		}
 		r, err := registry.retrieverFor(proxyConf)
 		if err != nil {

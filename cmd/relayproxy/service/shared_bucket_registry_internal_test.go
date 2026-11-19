@@ -1,15 +1,18 @@
 package service
 
+// Whitebox: sharedBucketRegistry is unexported, and its tests need the registry internals (the
+// group count, the pending retrievers, the factory) that the exported API does not expose. The
+// fakes of this file are shared by the whitebox tests of gofeatureflag_client.go and
+// flagset_manager.go.
+
 import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
-	"testing/synctest"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -20,8 +23,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
-	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
-	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
@@ -129,168 +130,152 @@ func s3FlagSet(name, bucket, item string) config.FlagSet {
 	}
 }
 
+// groupCount is the number of live groups of the registry.
+func (r *sharedBucketRegistry) groupCount() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return len(r.groups)
+}
+
 func Test_sharedBucketRegistry_retrieverFor(t *testing.T) {
-	t.Parallel()
-	t.Run("same bucket shares a group, other bucket has its own", func(t *testing.T) {
-		t.Parallel()
-		var created atomic.Int32
-		reg := newFakeRegistry(t, &fakeS3{}, &created)
-		fs1, fs2, fs3 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml"),
-			s3FlagSet("c", "b2", "p/c.yaml")
-		r1, err := reg.retrieverFor(&fs1)
-		require.NoError(t, err)
-		_, err = reg.retrieverFor(&fs2)
-		require.NoError(t, err)
-		_, err = reg.retrieverFor(&fs3)
-		require.NoError(t, err)
-		assert.EqualValues(t, 2, created.Load())
-		assert.Equal(t, 2, reg.groupCount())
-
-		// the group is dropped when its last retriever is shut down (Shutdown twice is harmless)
-		require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
-		require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
-		assert.Equal(t, 2, reg.groupCount())
-	})
-
-	t.Run("group is dropped after the last shutdown", func(t *testing.T) {
-		t.Parallel()
-		var created atomic.Int32
-		reg := newFakeRegistry(t, &fakeS3{}, &created)
-		fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml")
-		r1, err := reg.retrieverFor(&fs1)
-		require.NoError(t, err)
-		r2, err := reg.retrieverFor(&fs2)
-		require.NoError(t, err)
-		require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
-		assert.Equal(t, 1, reg.groupCount())
-		require.NoError(t, r2.(*releasingRetriever).Shutdown(t.Context()))
-		assert.Equal(t, 0, reg.groupCount())
-	})
-
-	t.Run("unsupported configurations", func(t *testing.T) {
-		t.Parallel()
-		reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
-		folder := s3FlagSet("a", "b1", "")
-		other := s3FlagSet("a", "b1", "x")
-		other.Retriever.Kind = retrieverconf.HTTPRetriever
-		multi := s3FlagSet("a", "b1", "x")
-		multi.Retrievers = &[]retrieverconf.RetrieverConf{*multi.Retriever}
-		for _, fs := range []config.FlagSet{folder, other, multi} {
-			_, err := reg.retrieverFor(&fs)
-			assert.Error(t, err)
-		}
-		assert.Equal(t, 0, reg.groupCount())
-	})
-}
-
-func TestFlagsetManager_SharedClientPerBucket(t *testing.T) {
-	t.Parallel()
-	synctest.Test(t, func(t *testing.T) {
-		testSharedClientManager(t)
-	})
-}
-
-func testSharedClientManager(t *testing.T) {
-	t.Helper()
-	content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
-	require.NoError(t, err)
-
-	f := &fakeS3{content: content}
-	var created atomic.Int32
-	reg := newFakeRegistry(t, f, &created)
-	nonShared := config.FlagSet{
-		Name:    "isolated",
-		APIKeys: []string{"isolated-key"},
-		CommonFlagSet: config.CommonFlagSet{
-			Retriever: &retrieverconf.RetrieverConf{Kind: retrieverconf.FileRetriever, Path: "../testdata/goff/configuration_flags.yaml"},
-		},
-	}
-	cfg := &config.Config{FlagSets: []config.FlagSet{
-		s3FlagSet("u1", "flags", "p/a.yaml"),
-		s3FlagSet("u2", "flags", "p/b.yaml"),
-		nonShared,
-	}}
-	mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(cfg, zap.NewNop(), nil, nil, nil, reg)
-	require.NoError(t, err)
-
-	// two shared-client flagsets on the same bucket share one group, the non shared-client one does not use any
-	assert.EqualValues(t, 1, created.Load())
-	assert.Equal(t, 1, reg.groupCount())
-	// all the shared-client items are pre-registered, so startup lists the directory once
-	assert.EqualValues(t, 1, f.lists.Load())
-	assert.EqualValues(t, 2, f.gets.Load())
-
-	// a flagset added at runtime joins the same group
-	impl := mgr.(*flagsetManagerImpl)
-	impl.addFlagset(s3FlagSet("u3", "flags", "p/c.yaml"))
-	assert.EqualValues(t, 1, created.Load())
-	assert.Equal(t, 1, reg.groupCount())
-	all, err := mgr.AllFlagSets()
-	require.NoError(t, err)
-	assert.Contains(t, all, "u3")
-
-	// removing flagsets releases the group once the last one is gone
-	impl.removeFlagset(s3FlagSet("u1", "flags", "p/a.yaml"))
-	impl.removeFlagset(s3FlagSet("u2", "flags", "p/b.yaml"))
-	assert.Equal(t, 1, reg.groupCount())
-	mgr.Close()
-	assert.Equal(t, 0, reg.groupCount())
-}
-
-func TestFlagsetManager_SharedClientPerBucket_PreRegister(t *testing.T) {
-	t.Parallel()
-	var created atomic.Int32
-	reg := newFakeRegistry(t, &fakeS3{}, &created)
-	fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "q/b.yaml")
-	require.NoError(t, reg.preRegister(&fs1))
-	require.NoError(t, reg.preRegister(&fs2))
-	assert.EqualValues(t, 1, created.Load())
-
-	// claimed retrievers are the pre-registered ones, no additional reference is taken
-	r1, err := reg.retrieverFor(&fs1)
-	require.NoError(t, err)
-	require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
-	assert.Equal(t, 1, reg.groupCount(), "fs2 is still pending")
-
-	// the unclaimed ones are released
-	reg.releasePending()
-	assert.Equal(t, 0, reg.groupCount())
-
-	bad := s3FlagSet("c", "b1", "")
-	assert.Error(t, reg.preRegister(&bad))
-}
-
-func Test_newGoFeatureFlagClient_ReleasesSharedClientRetrieverOnFailure(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name string
-		s3   *fakeS3
-		mod  func(fs *config.FlagSet)
+		run  func(t *testing.T)
 	}{
-		{
-			name: "invalid exporter",
-			s3:   &fakeS3{content: []byte("{}")},
-			mod: func(fs *config.FlagSet) {
-				fs.Exporter = &config.ExporterConf{Kind: "unknown"}
-			},
-		},
-		{
-			name: "first retrieve fails",
-			s3:   &fakeS3{listErr: errors.New("AccessDenied")},
-			mod:  func(*config.FlagSet) {},
-		},
+		{name: "same bucket shares a group, other bucket has its own", run: func(t *testing.T) {
+			var created atomic.Int32
+			reg := newFakeRegistry(t, &fakeS3{}, &created)
+			fs1, fs2, fs3 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml"),
+				s3FlagSet("c", "b2", "p/c.yaml")
+			r1, err := reg.retrieverFor(&fs1)
+			require.NoError(t, err)
+			_, err = reg.retrieverFor(&fs2)
+			require.NoError(t, err)
+			_, err = reg.retrieverFor(&fs3)
+			require.NoError(t, err)
+			assert.EqualValues(t, 2, created.Load())
+			assert.Equal(t, 2, reg.groupCount())
+
+			// Shutdown twice is harmless
+			require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
+			require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
+			assert.Equal(t, 2, reg.groupCount())
+		}},
+		{name: "group is dropped after the last shutdown", run: func(t *testing.T) {
+			reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
+			fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "p/b.yaml")
+			r1, err := reg.retrieverFor(&fs1)
+			require.NoError(t, err)
+			r2, err := reg.retrieverFor(&fs2)
+			require.NoError(t, err)
+			require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
+			assert.Equal(t, 1, reg.groupCount())
+			require.NoError(t, r2.(*releasingRetriever).Shutdown(t.Context()))
+			assert.Equal(t, 0, reg.groupCount())
+		}},
+		{name: "unsupported configurations", run: func(t *testing.T) {
+			reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
+			folder := s3FlagSet("a", "b1", "")
+			other := s3FlagSet("a", "b1", "x")
+			other.Retriever.Kind = retrieverconf.HTTPRetriever
+			multi := s3FlagSet("a", "b1", "x")
+			multi.Retrievers = &[]retrieverconf.RetrieverConf{*multi.Retriever}
+			for _, fs := range []config.FlagSet{folder, other, multi} {
+				_, err := reg.retrieverFor(&fs)
+				assert.Error(t, err)
+			}
+			assert.Equal(t, 0, reg.groupCount())
+		}},
+		{name: "factory error", run: func(t *testing.T) {
+			fs := s3FlagSet("a", "b1", "p/a.yaml")
+			reg := failingRegistry(nil)
+			_, err := reg.retrieverFor(&fs)
+			assert.ErrorContains(t, err, "no AWS")
+			assert.Equal(t, 0, reg.groupCount())
+		}},
+		{name: "concurrent callers build the group once", run: func(t *testing.T) {
+			const callers = 4
+			var building sync.WaitGroup
+			building.Add(callers)
+			reg := newSharedBucketRegistry(func(ctx context.Context, bucket string) (*s3retrieverv2.SharedItems, error) {
+				// every caller is building its own group at the same time: only one is kept
+				building.Done()
+				building.Wait()
+				return s3retrieverv2.NewSharedItems(ctx, s3retrieverv2.SharedItemsOptions{
+					Bucket: bucket, Lister: &fakeS3{}, Downloader: &fakeS3{},
+				})
+			}, 0, false, nil)
+			var wg sync.WaitGroup
+			retrievers := make(chan *releasingRetriever, callers)
+			for i := range callers {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					fs := s3FlagSet(fmt.Sprintf("f%d", i), "b1", fmt.Sprintf("p/%d.yaml", i))
+					r, err := reg.retrieverFor(&fs)
+					assert.NoError(t, err)
+					retrievers <- r.(*releasingRetriever)
+				}()
+			}
+			wg.Wait()
+			close(retrievers)
+			assert.Equal(t, 1, reg.groupCount())
+			for r := range retrievers {
+				require.NoError(t, r.Shutdown(t.Context()))
+			}
+			assert.Equal(t, 0, reg.groupCount(), "all the references were taken on the same group")
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			synctest.Test(t, func(t *testing.T) {
-				reg := newFakeRegistry(t, tt.s3, &atomic.Int32{})
-				fs := s3FlagSet("a", "b1", "p/a.yaml")
-				tt.mod(&fs)
-				_, err := newGoFeatureFlagClient(&fs, zap.NewNop(), nil, withSharedBucketRegistry(reg))
-				require.Error(t, err)
-				assert.Equal(t, 0, reg.groupCount(), "the retriever must have left its group")
-			})
+			tt.run(t)
+		})
+	}
+}
+
+func Test_sharedBucketRegistry_preRegister(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		run  func(t *testing.T)
+	}{
+		{name: "claimed retrievers are the pre-registered ones, the unclaimed ones are released",
+			run: func(t *testing.T) {
+				var created atomic.Int32
+				reg := newFakeRegistry(t, &fakeS3{}, &created)
+				fs1, fs2 := s3FlagSet("a", "b1", "p/a.yaml"), s3FlagSet("b", "b1", "q/b.yaml")
+				require.NoError(t, reg.preRegister(&fs1))
+				require.NoError(t, reg.preRegister(&fs2))
+				assert.EqualValues(t, 1, created.Load())
+
+				// no additional reference is taken when a pre-registered retriever is claimed
+				r1, err := reg.retrieverFor(&fs1)
+				require.NoError(t, err)
+				require.NoError(t, r1.(*releasingRetriever).Shutdown(t.Context()))
+				assert.Equal(t, 1, reg.groupCount(), "fs2 is still pending")
+
+				reg.releasePending()
+				assert.Equal(t, 0, reg.groupCount())
+			}},
+		{name: "invalid configuration", run: func(t *testing.T) {
+			reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
+			bad := s3FlagSet("c", "b1", "")
+			assert.Error(t, reg.preRegister(&bad))
+			assert.Equal(t, 0, reg.groupCount())
+		}},
+		{name: "factory error", run: func(t *testing.T) {
+			fs := s3FlagSet("a", "b1", "p/a.yaml")
+			reg := failingRegistry(nil)
+			assert.ErrorContains(t, reg.preRegister(&fs), "no AWS")
+			assert.Equal(t, 0, reg.groupCount())
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tt.run(t)
 		})
 	}
 }
@@ -299,16 +284,6 @@ func failingRegistry(logger *zap.Logger) *sharedBucketRegistry {
 	return newSharedBucketRegistry(func(context.Context, string) (*s3retrieverv2.SharedItems, error) {
 		return nil, errors.New("no AWS")
 	}, 0, false, logger)
-}
-
-func Test_sharedBucketRegistry_factoryError(t *testing.T) {
-	t.Parallel()
-	fs := s3FlagSet("a", "b1", "p/a.yaml")
-	reg := failingRegistry(nil)
-	_, err := reg.retrieverFor(&fs)
-	assert.ErrorContains(t, err, "no AWS")
-	assert.ErrorContains(t, reg.preRegister(&fs), "no AWS")
-	assert.Equal(t, 0, reg.groupCount())
 }
 
 func Test_sharedBucketRegistry_preRegisterAll(t *testing.T) {
@@ -372,203 +347,6 @@ func Test_defaultSharedItemsFactory(t *testing.T) {
 	}
 }
 
-func Test_initRetrieversWithRegistry_shared(t *testing.T) {
-	t.Parallel()
-	valid := s3FlagSet("a", "b1", "p/a.yaml")
-	folder := s3FlagSet("a", "b1", "")
-	tests := []struct {
-		name    string
-		fs      config.FlagSet
-		reg     *sharedBucketRegistry
-		wantLen int
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{name: "no registry gets a private one", fs: valid, reg: nil, wantLen: 1, wantErr: assert.NoError},
-		{name: "invalid configuration", fs: folder, reg: nil, wantErr: assert.Error},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got, err := initRetrieversWithRegistry(&tt.fs, tt.reg)
-			tt.wantErr(t, err)
-			assert.Len(t, got, tt.wantLen)
-		})
-	}
-}
-
-func Test_flagsetManagerImpl_addFlagset_sharedDuplicate(t *testing.T) {
-	t.Parallel()
-	synctest.Test(t, func(t *testing.T) {
-		content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
-		require.NoError(t, err)
-		reg := newFakeRegistry(t, &fakeS3{content: content}, &atomic.Int32{})
-		first := s3FlagSet("u1", "flags", "p/a.yaml")
-		mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(
-			&config.Config{FlagSets: []config.FlagSet{first}}, zap.NewNop(), nil, nil, nil, reg)
-		require.NoError(t, err)
-
-		// the flagset name is already in the configuration: the new client is closed and released
-		dup := s3FlagSet("u1", "flags", "p/b.yaml")
-		mgr.(*flagsetManagerImpl).addFlagset(dup)
-		assert.Equal(t, 1, reg.groupCount())
-		mgr.Close()
-		assert.Equal(t, 0, reg.groupCount())
-	})
-}
-
-func Test_flagsetManagerImpl_reloadAddsSharedClientFlagsets(t *testing.T) {
-	t.Parallel()
-	synctest.Test(t, func(t *testing.T) {
-		content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
-		require.NoError(t, err)
-		f := &fakeS3{content: content}
-		flagsets := make([]config.FlagSet, 11)
-		for i := range flagsets {
-			f.keys = append(f.keys, fmt.Sprintf("p/f%d.yaml", i))
-			flagsets[i] = s3FlagSet(fmt.Sprintf("u%d", i), "flags", f.keys[i])
-		}
-		reg := newFakeRegistry(t, f, &atomic.Int32{})
-		mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(
-			&config.Config{FlagSets: flagsets[:1]}, zap.NewNop(), nil, nil, nil, reg)
-		require.NoError(t, err)
-		require.EqualValues(t, 1, f.lists.Load())
-
-		// 10 flagsets added in one reload share one listing
-		mgr.OnConfigChange(&config.Config{Server: config.Server{Port: 8080}, FlagSets: flagsets})
-		all, err := mgr.AllFlagSets()
-		require.NoError(t, err)
-		assert.Len(t, all, 11)
-		assert.EqualValues(t, 2, f.lists.Load())
-		mgr.Close()
-		assert.Equal(t, 0, reg.groupCount())
-	})
-}
-
-func Test_sharedBucketRegistry_concurrentGroupCreation(t *testing.T) {
-	t.Parallel()
-	const callers = 4
-	var building sync.WaitGroup
-	building.Add(callers)
-	reg := newSharedBucketRegistry(func(ctx context.Context, bucket string) (*s3retrieverv2.SharedItems, error) {
-		// every caller is building its own group at the same time: only one is kept
-		building.Done()
-		building.Wait()
-		return s3retrieverv2.NewSharedItems(ctx, s3retrieverv2.SharedItemsOptions{
-			Bucket: bucket, Lister: &fakeS3{}, Downloader: &fakeS3{},
-		})
-	}, 0, false, nil)
-	var wg sync.WaitGroup
-	retrievers := make(chan *releasingRetriever, callers)
-	for i := range callers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			fs := s3FlagSet(fmt.Sprintf("f%d", i), "b1", fmt.Sprintf("p/%d.yaml", i))
-			r, err := reg.retrieverFor(&fs)
-			assert.NoError(t, err)
-			retrievers <- r.(*releasingRetriever)
-		}()
-	}
-	wg.Wait()
-	close(retrievers)
-	assert.Equal(t, 1, reg.groupCount())
-	for r := range retrievers {
-		require.NoError(t, r.Shutdown(t.Context()))
-	}
-	assert.Equal(t, 0, reg.groupCount(), "all the references were taken on the same group")
-}
-
-func newPollingManager(
-	t *testing.T, f *fakeS3, interval time.Duration, logger *zap.Logger,
-) (*flagsetManagerImpl, *sharedBucketRegistry) {
-	t.Helper()
-	content, err := os.ReadFile("../testdata/goff/configuration_flags.yaml")
-	require.NoError(t, err)
-	f.content = content
-	reg := newFakeRegistryWithPolling(t, f, &atomic.Int32{}, interval, false, logger)
-	a, b := s3FlagSet("u1", "flags", "p/a.yaml"), s3FlagSet("u2", "flags", "p/b.yaml")
-	a.PollingInterval, b.PollingInterval = 0, 0
-	mgr, err := newFlagsetManagerWithFlagsetsAndRegistry(
-		&config.Config{FlagSets: []config.FlagSet{a, b}}, logger, nil, nil, nil, reg)
-	require.NoError(t, err)
-	return mgr.(*flagsetManagerImpl), reg
-}
-
-func Test_sharedBucketRegistry_poller(t *testing.T) {
-	t.Parallel()
-	synctest.Test(t, func(t *testing.T) {
-		f := &fakeS3{}
-		mgr, reg := newPollingManager(t, f, 10*time.Second, zap.NewNop())
-		require.EqualValues(t, 1, f.lists.Load())
-		require.EqualValues(t, 2, f.gets.Load())
-
-		// the clients do not poll, one listing per polling interval of the relay proxy
-		time.Sleep(2 * time.Minute)
-		synctest.Wait()
-		assert.EqualValues(t, 1+12, f.lists.Load())
-		assert.EqualValues(t, 2, f.gets.Load(), "nothing changed")
-
-		// only the flagset of the changed object downloads it
-		f.setETag("p/a.yaml", `"y"`)
-		time.Sleep(10 * time.Second)
-		synctest.Wait()
-		assert.EqualValues(t, 1+13, f.lists.Load())
-		assert.Equal(t, 2, f.getCount("p/a.yaml"))
-		assert.Equal(t, 1, f.getCount("p/b.yaml"))
-
-		mgr.Close()
-		assert.Equal(t, 0, reg.groupCount())
-	})
-}
-
-func Test_flagsetManagerImpl_OnConfigChange_sharedClientPolling(t *testing.T) {
-	t.Parallel()
-	synctest.Test(t, func(t *testing.T) {
-		core, logs := observer.New(zap.InfoLevel)
-		f := &fakeS3{}
-		mgr, reg := newPollingManager(t, f, 10*time.Second, zap.New(core))
-		lists := f.lists.Load()
-
-		// a new top-level pollingInterval is applied to the running poller, the flagsets are not rebuilt
-		a, b := s3FlagSet("u1", "flags", "p/a.yaml"), s3FlagSet("u2", "flags", "p/b.yaml")
-		a.PollingInterval, b.PollingInterval = 0, 0
-		b.PollingInterval = 20000
-		before, err := mgr.AllFlagSets()
-		require.NoError(t, err)
-		mgr.config = &config.Config{FlagSets: []config.FlagSet{a, b}}
-		mgr.OnConfigChange(&config.Config{
-			Server:        config.Server{Port: 8080},
-			CommonFlagSet: config.CommonFlagSet{PollingInterval: 30000},
-			FlagSets:      []config.FlagSet{a, b},
-		})
-		after, err := mgr.AllFlagSets()
-		require.NoError(t, err)
-		assert.Same(t, before["u1"], after["u1"])
-
-		time.Sleep(29 * time.Second)
-		synctest.Wait()
-		assert.Equal(t, lists, f.lists.Load())
-		time.Sleep(time.Second)
-		synctest.Wait()
-		assert.Equal(t, lists+1, f.lists.Load())
-
-		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared clients updated").Len())
-		warns := logs.FilterMessageSnippet("the pollingInterval of the flagset is ignored")
-		require.Equal(t, 1, warns.Len())
-		assert.Equal(t, "u2", warns.All()[0].ContextMap()["flagset"])
-
-		// the same polling again changes nothing
-		mgr.OnConfigChange(&config.Config{
-			Server:        config.Server{Port: 8080},
-			CommonFlagSet: config.CommonFlagSet{PollingInterval: 30000},
-			FlagSets:      []config.FlagSet{a, b},
-		})
-		assert.Equal(t, 1, logs.FilterMessageSnippet("polling of the shared clients updated").Len())
-		mgr.Close()
-		assert.Equal(t, 0, reg.groupCount())
-	})
-}
-
 func Test_sharedBucketRegistry_warnPollingMismatch(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -612,34 +390,4 @@ func Test_sharedBucketRegistry_warnPollingMismatch(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_firstSharedRetriever(t *testing.T) {
-	t.Parallel()
-	reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
-	fs := s3FlagSet("a", "b1", "p/a.yaml")
-	r, err := reg.retrieverFor(&fs)
-	require.NoError(t, err)
-	file, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{
-		Kind: retrieverconf.FileRetriever, Path: "../testdata/goff/configuration_flags.yaml",
-	})
-	require.NoError(t, err)
-	tests := []struct {
-		name       string
-		retrievers []retriever.Retriever
-		want       bool
-	}{
-		{name: "no retriever"},
-		{name: "another kind of retriever", retrievers: []retriever.Retriever{file}},
-		{name: "shared-client retriever", retrievers: []retriever.Retriever{r}, want: true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got, ok := firstSharedRetriever(tt.retrievers)
-			assert.Equal(t, tt.want, ok)
-			assert.Equal(t, tt.want, got != nil)
-		})
-	}
-	require.NoError(t, r.(*releasingRetriever).Shutdown(t.Context()))
 }
