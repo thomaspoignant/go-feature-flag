@@ -28,6 +28,10 @@ const (
 	// sharedRequestTimeout bounds one S3 request (a listing page or a download), which is not
 	// tied to the context of a caller.
 	sharedRequestTimeout = 30 * time.Second
+	// MaxConcurrentDownloads bounds the GetObject requests a group sends at the same time.
+	MaxConcurrentDownloads = 16
+	// maxSharedListPages bounds the number of pages of one listing.
+	maxSharedListPages = 10000
 )
 
 // SharedItemsOptions configures a SharedItems group.
@@ -45,7 +49,8 @@ type SharedItemsOptions struct {
 }
 
 // SharedItems lets several single-file S3 retrievers of the same bucket share their storage
-// requests: the objects under the longest common directory of the registered items are listed
+// requests: the objects under the longest common key prefix of the registered items (cut at its
+// last "/") are listed
 // once per listing TTL window (recursively, all the pages) for all of them, and an object is
 // only downloaded when its ETag differs from the cached one. The listing covers every object
 // under that prefix, including the unrelated ones, so the flag files should live under a
@@ -70,11 +75,17 @@ type SharedItems struct {
 	prefix   string            // listing prefix of the registered items
 	ttl      time.Duration     // listing TTL of the registered items
 	contents map[string]*sharedContent
+	// base is the context of the requests of the group, it is cancelled when the last item leaves.
+	base   context.Context
+	cancel context.CancelFunc
+	// sem bounds the concurrent downloads.
+	sem chan struct{}
 
 	listing      map[string]string // registered key -> normalized ETag
 	listedPrefix string
 	listErr      error
-	listedAt     time.Time // start of the listing
+	listedAt     time.Time // end of the listing
+	listStart    time.Time // start of the listing
 	listed       bool
 	inflight     *sharedListing
 }
@@ -82,6 +93,7 @@ type SharedItems struct {
 // sharedListing is a listing in progress, shared by all the callers waiting for it.
 type sharedListing struct {
 	done    chan struct{}
+	start   time.Time
 	prefix  string
 	seq     uint64
 	listing map[string]string
@@ -93,7 +105,9 @@ type sharedContent struct {
 	mu   sync.Mutex
 	etag string
 	data []byte
-	dl   *sharedDownload // download in progress
+	// fetchedAt is the start of the download of data.
+	fetchedAt time.Time
+	dl        *sharedDownload // download in progress
 }
 
 // sharedDownload is a download in progress, shared by all the callers waiting for it.
@@ -138,7 +152,23 @@ func NewSharedItems(ctx context.Context, opts SharedItemsOptions) (*SharedItems,
 		keySeq:     map[string]uint64{},
 		contents:   map[string]*sharedContent{},
 		ttl:        minSharedListingTTL,
+		sem:        make(chan struct{}, MaxConcurrentDownloads),
 	}, nil
+}
+
+// baseContext returns the context of the requests of the group, renewed if it was cancelled
+// because every item left.
+func (g *SharedItems) baseContext() context.Context {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.baseLocked()
+}
+
+func (g *SharedItems) baseLocked() context.Context {
+	if g.base == nil || g.base.Err() != nil {
+		g.base, g.cancel = context.WithCancel(context.Background())
+	}
+	return g.base
 }
 
 // Bucket returns the bucket of the group.
@@ -185,6 +215,10 @@ func (g *SharedItems) deregister(r *SharedItemRetriever) {
 		delete(g.keyRefs, r.item)
 		delete(g.contents, r.item)
 		delete(g.keySeq, r.item)
+	}
+	if len(g.items) == 0 && g.cancel != nil {
+		// nobody needs the requests in flight anymore
+		g.cancel()
 	}
 	g.recompute()
 }
@@ -245,16 +279,24 @@ func (g *SharedItems) freshLocked(key string) bool {
 	return time.Since(g.listedAt) < ttl
 }
 
+// listedItem is the result of a lookup in the listing.
+type listedItem struct {
+	etag  string
+	found bool
+	// start is the start of the listing that returned it.
+	start time.Time
+}
+
 // etagOf returns the ETag of the key in a listing no older than the TTL, listing if needed.
 // Concurrent callers share one listing, and a caller stops waiting when its ctx is done.
-func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, error) {
+func (g *SharedItems) etagOf(ctx context.Context, key string) (listedItem, error) {
 	for range 3 {
 		g.mu.Lock()
 		if g.freshLocked(key) {
 			etag, ok := g.listing[key]
-			err := g.listErr
+			item, err := listedItem{etag: etag, found: ok, start: g.listStart}, g.listErr
 			g.mu.Unlock()
-			return etag, ok, err
+			return item, err
 		}
 		fl := g.inflight
 		if fl == nil {
@@ -264,14 +306,14 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 			for k := range g.keyRefs {
 				wanted[k] = struct{}{}
 			}
-			go g.runListing(context.WithoutCancel(ctx), fl, g.prefix, wanted, g.seq)
+			go g.runListing(g.baseLocked(), fl, g.prefix, wanted, g.seq)
 		}
 		g.mu.Unlock()
 
 		select {
 		case <-fl.done:
 		case <-ctx.Done():
-			return "", false, ctx.Err()
+			return listedItem{}, ctx.Err()
 		}
 		// the waiters use the result of the listing they waited for, even if it is already older
 		// than the TTL (a slow listing), as long as it covers the key.
@@ -280,10 +322,10 @@ func (g *SharedItems) etagOf(ctx context.Context, key string) (string, bool, err
 		g.mu.Unlock()
 		if covered {
 			etag, ok := fl.listing[key]
-			return etag, ok, fl.err
+			return listedItem{etag: etag, found: ok, start: fl.start}, fl.err
 		}
 	}
-	return "", false, errors.New("item is not registered in the shared listing")
+	return listedItem{}, errors.New("item is not registered in the shared listing")
 }
 
 // runListing lists the objects under prefix and publishes the result. It does not depend on the
@@ -296,15 +338,18 @@ func (g *SharedItems) runListing(
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	g.listing, g.listErr, g.listedAt, g.listed, g.listSeq = listing, err, start, true, seq
-	g.listedPrefix = prefix
+	fl.start, fl.prefix, fl.seq, fl.listing, fl.err = start, prefix, seq, listing, err
+	// a listing cancelled because every item left is not kept
+	if base.Err() == nil {
+		g.listing, g.listErr, g.listed, g.listSeq = listing, err, true, seq
+		g.listedAt, g.listStart, g.listedPrefix = time.Now(), start, prefix
+	}
 	g.inflight = nil
-	fl.prefix, fl.seq, fl.listing, fl.err = prefix, seq, listing, err
 	close(fl.done)
 }
 
 // list walks all the pages of the objects under prefix (recursively), each page request has its
-// own timeout. Only the wanted keys are kept.
+// own timeout. Only the wanted keys are kept. A listing that can't be proven complete is an error.
 func (g *SharedItems) list(
 	base context.Context, prefix string, wanted map[string]struct{},
 ) (map[string]string, error) {
@@ -313,17 +358,28 @@ func (g *SharedItems) list(
 	if prefix != "" {
 		input.Prefix = aws.String(prefix)
 	}
-	paginator := s3.NewListObjectsV2Paginator(g.lister, input)
-	for paginator.HasMorePages() {
+	paginator := s3.NewListObjectsV2Paginator(g.lister, input, func(o *s3.ListObjectsV2PaginatorOptions) {
+		o.StopOnDuplicateToken = true
+	})
+	truncated := false
+	for pages := 0; paginator.HasMorePages(); pages++ {
+		if pages >= maxSharedListPages {
+			return nil, fmt.Errorf("the listing of prefix %q has more than %d pages", prefix, maxSharedListPages)
+		}
 		page, err := g.listPage(base, paginator)
 		if err != nil {
 			return nil, err
 		}
+		truncated = aws.ToBool(page.IsTruncated)
 		for _, obj := range page.Contents {
 			if _, ok := wanted[aws.ToString(obj.Key)]; ok {
 				res[aws.ToString(obj.Key)] = normalizeETag(aws.ToString(obj.ETag))
 			}
 		}
+	}
+	if truncated {
+		// no (new) continuation token: the end of the listing was not reached
+		return nil, fmt.Errorf("the listing of prefix %q is incomplete", prefix)
 	}
 	return res, nil
 }
@@ -336,11 +392,11 @@ func (g *SharedItems) listPage(base context.Context, p *s3.ListObjectsV2Paginato
 
 // get returns the content of the key, downloading it only if the listed ETag changed.
 func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
-	etag, found, err := g.etagOf(ctx, key)
+	listed, err := g.etagOf(ctx, key)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list S3 bucket %q, %w", g.bucket, err)
 	}
-	if !found {
+	if !listed.found {
 		return nil, fmt.Errorf("item %q not found in S3 bucket %q", key, g.bucket)
 	}
 
@@ -355,18 +411,21 @@ func (g *SharedItems) get(ctx context.Context, key string) ([]byte, error) {
 	}
 	g.mu.Unlock()
 
-	data, err := g.content(ctx, c, key, etag)
+	data, err := g.content(ctx, c, key, listed)
 	if err != nil {
 		return nil, fmt.Errorf("unable to download item from S3 %q, %w", key, err)
 	}
 	return slices.Clone(data), nil
 }
 
-// content returns the cached content if its ETag is the listed one, otherwise it is downloaded.
-// The callers of the same object share one download, and a caller stops waiting when its ctx is done.
-func (g *SharedItems) content(ctx context.Context, c *sharedContent, key, etag string) ([]byte, error) {
+// content returns the cached content if it is still valid for the listing, otherwise it is
+// downloaded. The content is valid if its ETag is the listed one, or if it was downloaded after
+// the start of the listing (it is then at least as recent as the listing, even if the object
+// changed between the listing and the download). The callers of the same object share one
+// download, and a caller stops waiting when its ctx is done.
+func (g *SharedItems) content(ctx context.Context, c *sharedContent, key string, listed listedItem) ([]byte, error) {
 	c.mu.Lock()
-	if etag != "" && c.etag == etag && c.data != nil {
+	if c.data != nil && ((listed.etag != "" && c.etag == listed.etag) || !c.fetchedAt.Before(listed.start)) {
 		defer c.mu.Unlock()
 		return c.data, nil
 	}
@@ -374,7 +433,7 @@ func (g *SharedItems) content(ctx context.Context, c *sharedContent, key, etag s
 	if dl == nil {
 		dl = &sharedDownload{done: make(chan struct{})}
 		c.dl = dl
-		go g.runDownload(context.WithoutCancel(ctx), c, dl, key, etag)
+		go g.runDownload(g.baseContext(), c, dl, key)
 	}
 	c.mu.Unlock()
 
@@ -388,24 +447,33 @@ func (g *SharedItems) content(ctx context.Context, c *sharedContent, key, etag s
 
 // runDownload downloads the object and publishes the result, it does not depend on the context
 // of a caller so that a cancelled caller does not fail the others.
-func (g *SharedItems) runDownload(base context.Context, c *sharedContent, dl *sharedDownload, key, listedETag string) {
-	ctx, cancel := context.WithTimeout(base, sharedRequestTimeout)
-	defer cancel()
-	data, dlETag, err := downloadObject(ctx, g.downloader, g.bucket, key)
-	dlETag = normalizeETag(dlETag)
-	if dlETag == "" {
-		// no ETag in the download, the listed one identifies the content
-		dlETag = listedETag
-	}
+func (g *SharedItems) runDownload(base context.Context, c *sharedContent, dl *sharedDownload, key string) {
+	data, dlETag, startedAt, err := g.download(base, key)
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if err == nil {
-		c.etag, c.data = dlETag, data
+		// an empty ETag is never a hit
+		c.etag, c.data, c.fetchedAt = normalizeETag(dlETag), data, startedAt
 	}
 	dl.data, dl.err = data, err
 	c.dl = nil
 	close(dl.done)
+}
+
+// download waits for a free download slot, then downloads the object.
+func (g *SharedItems) download(base context.Context, key string) ([]byte, string, time.Time, error) {
+	select {
+	case g.sem <- struct{}{}:
+		defer func() { <-g.sem }()
+	case <-base.Done():
+		return nil, "", time.Time{}, base.Err()
+	}
+	startedAt := time.Now()
+	ctx, cancel := context.WithTimeout(base, sharedRequestTimeout)
+	defer cancel()
+	data, etag, err := downloadObject(ctx, g.downloader, g.bucket, key)
+	return data, etag, startedAt, err
 }
 
 var (

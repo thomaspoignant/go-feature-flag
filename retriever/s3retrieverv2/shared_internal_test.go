@@ -6,6 +6,8 @@ package s3retrieverv2
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -48,7 +50,7 @@ func TestSharedItems_etagOf(t *testing.T) {
 	require.NoError(t, err)
 	g.Retriever("a/registered.yaml", 0)
 	// the key is not registered and out of the listed prefix, so the loop gives up.
-	_, _, err = g.etagOf(t.Context(), "b/unregistered.yaml")
+	_, err = g.etagOf(t.Context(), "b/unregistered.yaml")
 	assert.ErrorContains(t, err, "not registered")
 }
 
@@ -61,17 +63,17 @@ func TestSharedItems_listingPrefix(t *testing.T) {
 	}{
 		{name: "no key", want: ""},
 		{name: "single key", keys: []string{"a/b/flags.yaml"}, want: "a/b/"},
-		{name: "same directory", keys: []string{"a/b/1.yaml", "a/b/2.yaml"}, want: "a/b/"},
+		{name: "same prefix", keys: []string{"a/b/1.yaml", "a/b/2.yaml"}, want: "a/b/"},
 		{name: "cut at the last slash", keys: []string{"a/b/flags1.yaml", "a/b/flags2.yaml"}, want: "a/b/"},
-		{name: "sibling directories", keys: []string{"project-1/dev/f.yaml", "project-1/prod/f.yaml"}, want: "project-1/"},
-		{name: "partial directory name is not a prefix", keys: []string{"proj-a/f.yaml", "proj-b/f.yaml"}, want: ""},
-		{name: "no common directory", keys: []string{"a/f.yaml", "b/f.yaml"}, want: ""},
+		{name: "sibling prefixes", keys: []string{"project-1/dev/f.yaml", "project-1/prod/f.yaml"}, want: "project-1/"},
+		{name: "partial segment is not a prefix", keys: []string{"proj-a/f.yaml", "proj-b/f.yaml"}, want: ""},
+		{name: "no common prefix", keys: []string{"a/f.yaml", "b/f.yaml"}, want: ""},
 		{name: "root level item", keys: []string{"flags.yaml"}, want: ""},
 		{name: "opaque dot key", keys: []string{"./a", "./b"}, want: "./"},
 		{name: "opaque leading slash", keys: []string{"/a", "/b"}, want: "/"},
 		{name: "opaque parent segment", keys: []string{"dir/../a", "dir/../b"}, want: "dir/../"},
 		{name: "never cuts a multi-byte character", keys: []string{"é/é1.yaml", "é/é2.yaml", "è/f.yaml"}, want: ""},
-		{name: "multi-byte directory", keys: []string{"日本/a.yaml", "日本/b.yaml"}, want: "日本/"},
+		{name: "multi-byte prefix", keys: []string{"日本/a.yaml", "日本/b.yaml"}, want: "日本/"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -105,9 +107,65 @@ func TestSharedItems_listingKeepsRegisteredKeysOnly(t *testing.T) {
 		Bucket: "b", Lister: unrelatedBucket{n: 5000}, Downloader: emptyBucket{},
 	})
 	require.NoError(t, err)
-	_, _, err = g.etagOf(t.Context(), g.Retriever("d/flags.yaml", 0).item)
+	_, err = g.etagOf(t.Context(), g.Retriever("d/flags.yaml", 0).item)
 	require.NoError(t, err)
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	assert.Equal(t, map[string]string{"d/flags.yaml": "x"}, g.listing)
+}
+
+// tokenLister returns truncated pages following a token policy.
+type tokenLister struct {
+	calls atomic.Int64
+	// next gives the NextContinuationToken of the page number n.
+	next func(n int64) string
+}
+
+func (l *tokenLister) ListObjectsV2(
+	context.Context, *s3.ListObjectsV2Input, ...func(*s3.Options),
+) (*s3.ListObjectsV2Output, error) {
+	n := l.calls.Add(1)
+	return &s3.ListObjectsV2Output{
+		IsTruncated:           aws.Bool(true),
+		NextContinuationToken: aws.String(l.next(n)),
+	}, nil
+}
+
+func TestSharedItems_list(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name      string
+		next      func(n int64) string
+		wantErr   string
+		wantCalls int64
+	}{
+		{
+			name:      "a repeated token ends the listing with an error",
+			next:      func(int64) string { return "same" },
+			wantErr:   "incomplete",
+			wantCalls: 2,
+		},
+		{
+			name:      "a truncated page without token is an error",
+			next:      func(int64) string { return "" },
+			wantErr:   "incomplete",
+			wantCalls: 1,
+		},
+		{
+			name:      "the number of pages is capped",
+			next:      func(n int64) string { return strconv.FormatInt(n, 10) },
+			wantErr:   "more than",
+			wantCalls: maxSharedListPages,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			l := &tokenLister{next: tt.next}
+			g := &SharedItems{bucket: "b", lister: l}
+			_, err := g.list(t.Context(), "p/", nil)
+			assert.ErrorContains(t, err, tt.wantErr)
+			assert.Equal(t, tt.wantCalls, l.calls.Load())
+		})
+	}
 }
