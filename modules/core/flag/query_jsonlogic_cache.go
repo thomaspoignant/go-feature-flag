@@ -2,7 +2,6 @@ package flag
 
 import (
 	"encoding/json"
-	"strings"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -22,10 +21,6 @@ func getCompiledQuery(raw string) *compiledQuery {
 	if v, ok := compiledQueryCache.Load(raw); ok {
 		return v.(*compiledQuery)
 	}
-	return compileQuery(strings.Clone(raw))
-}
-
-func compileQuery(raw string) *compiledQuery {
 	c := &compiledQuery{trimmed: utils.StrTrim(raw), format: NikunjyQueryFormat}
 	if utils.IsJSONObject(c.trimmed) {
 		c.format = JSONLogicQueryFormat

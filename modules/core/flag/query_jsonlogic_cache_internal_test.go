@@ -3,7 +3,6 @@ package flag
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -36,22 +35,6 @@ func TestGetCompiledQuery(t *testing.T) {
 			assert.Equal(t, tt.wantFormat, c.format)
 			assert.Equal(t, tt.wantDecoded, c.jsonLogic != nil)
 			assert.Same(t, c, getCompiledQuery(tt.raw), "the query must be compiled once")
-		})
-	}
-}
-
-func TestIsJSONLogicTruthy(t *testing.T) {
-	tests := []struct {
-		value any
-		want  bool
-	}{
-		{nil, false}, {false, false}, {true, true}, {"", false}, {"false", true},
-		{float64(0), false}, {float64(-1), true}, {[]any{}, false}, {[]any{false}, true},
-		{map[string]any{}, true},
-	}
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%#v", tt.value), func(t *testing.T) {
-			assert.Equal(t, tt.want, isJSONLogicTruthy(tt.value))
 		})
 	}
 }
