@@ -217,8 +217,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 
 // EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
 func (r *Rule) EvaluateProgressiveRollout(
-	key string,
-	flagName string,
+	key, flagName string,
 	evaluationDate time.Time,
 ) (string, error) {
 	progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
