@@ -62,7 +62,10 @@ function ViewOnGitHubButton() {
 function HeroBackgroundShapes() {
   return (
     <div className={styles.heroShape}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 898.595 671.33">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 898.595 671.33"
+        aria-hidden="true">
         <g data-name="Group 1168">
           <path
             data-name="Path 1352"
@@ -79,7 +82,10 @@ function HeroBackgroundShapes() {
           />
         </g>
       </svg>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 266.025 234.723">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 266.025 234.723"
+        aria-hidden="true">
         <g data-name="Group 1169">
           <path
             data-name="Path 1351"

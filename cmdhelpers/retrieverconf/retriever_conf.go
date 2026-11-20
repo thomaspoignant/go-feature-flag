@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
+	"github.com/thomaspoignant/go-feature-flag/internal/folderloader"
 )
 
 var DefaultRetrieverConfig = struct {
@@ -37,6 +38,9 @@ type RetrieverConf struct {
 	Bucket             string              `mapstructure:"bucket"        koanf:"bucket"`
 	Object             string              `mapstructure:"object"        koanf:"object"`
 	Item               string              `mapstructure:"item"          koanf:"item"`
+	Prefix             string              `mapstructure:"prefix"        koanf:"prefix"`
+	Pattern            string              `mapstructure:"pattern"       koanf:"pattern"`
+	Recursive          bool                `mapstructure:"recursive"     koanf:"recursive"`
 	Namespace          string              `mapstructure:"namespace"     koanf:"namespace"`
 	ConfigMap          string              `mapstructure:"configmap"     koanf:"configmap"`
 	Key                string              `mapstructure:"key"           koanf:"key"`
@@ -73,6 +77,16 @@ type RetrieverConf struct {
 	AccountName string `mapstructure:"accountName"    koanf:"accountname"`
 	AccountKey  string `mapstructure:"accountKey"     koanf:"accountkey"`
 	Container   string `mapstructure:"container"      koanf:"container"`
+
+	// GitHub App authentication fields (GitHub retriever only).
+	// Mutually exclusive with token / githubToken.
+	// AppID and InstallationID are required; supply the private key either inline
+	// (GitHubAppPrivateKey) or as a file path (GitHubAppPrivateKeyFile).
+	GitHubAppID          int64 `mapstructure:"githubAppId"             koanf:"githubappid"`
+	GitHubInstallationID int64 `mapstructure:"githubInstallationId"    koanf:"githubinstallationid"`
+	// nolint:gosec // G117 - these fields hold operator-supplied config, not hardcoded secrets
+	GitHubAppPrivateKey     string `mapstructure:"githubAppPrivateKey"     koanf:"githubappprivatekey"`
+	GitHubAppPrivateKeyFile string `mapstructure:"githubAppPrivateKeyFile" koanf:"githubappprivatekeyfile"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -87,8 +101,10 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever || c.Kind == BitbucketRetriever {
 		return c.validateGitRetriever()
 	}
-	if c.Kind == S3Retriever && c.Item == "" {
-		return err.NewRetrieverConfError("item", string(c.Kind))
+	if c.Kind == S3Retriever {
+		if err := c.validateS3Retriever(); err != nil {
+			return err
+		}
 	}
 	if c.Kind == HTTPRetriever {
 		return c.validateHTTPRetriever()
@@ -172,6 +188,41 @@ func (c *RetrieverConf) validateGitRetriever() error {
 	if c.Path == "" {
 		return err.NewRetrieverConfError("path", string(c.Kind))
 	}
+	if c.Kind == GitHubRetriever {
+		return c.validateGitHubAuth()
+	}
+	return nil
+}
+
+// validateGitHubAuth ensures the authentication configuration is consistent.
+// A config may use either a static token OR GitHub App credentials, not both.
+func (c *RetrieverConf) validateGitHubAuth() error {
+	hasToken := c.AuthToken != "" || c.GithubToken != "" //nolint:staticcheck
+	hasAppFields := c.GitHubAppID != 0 || c.GitHubInstallationID != 0 ||
+		c.GitHubAppPrivateKey != "" || c.GitHubAppPrivateKeyFile != ""
+
+	if hasToken && hasAppFields {
+		return fmt.Errorf(
+			"invalid retriever: token and GitHub App fields (githubAppId, githubInstallationId, "+
+				"githubAppPrivateKey / githubAppPrivateKeyFile) are mutually exclusive for kind %q",
+			string(c.Kind),
+		)
+	}
+
+	if hasAppFields {
+		if c.GitHubAppID == 0 {
+			return err.NewRetrieverConfError("githubAppId", string(c.Kind))
+		}
+		if c.GitHubInstallationID == 0 {
+			return err.NewRetrieverConfError("githubInstallationId", string(c.Kind))
+		}
+		if c.GitHubAppPrivateKey == "" && c.GitHubAppPrivateKeyFile == "" {
+			return err.NewRetrieverConfError(
+				"githubAppPrivateKey or githubAppPrivateKeyFile", string(c.Kind),
+			)
+		}
+	}
+
 	return nil
 }
 
@@ -251,4 +302,12 @@ func (r RetrieverKind) IsValid() error {
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
+}
+
+// validateS3Retriever validates the item/prefix settings (no item means folder mode) of the S3 retriever.
+func (c *RetrieverConf) validateS3Retriever() error {
+	if err := folderloader.Validate("item", c.Item, c.Prefix, c.Pattern, c.Recursive); err != nil {
+		return fmt.Errorf("invalid retriever: %v for kind \"%s\"", err, c.Kind)
+	}
+	return nil
 }

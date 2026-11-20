@@ -8,12 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 	"sync"
 
-	"github.com/luci/go-render/render"
-	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
@@ -21,13 +18,16 @@ import (
 var _ notifier.Notifier = &Notifier{}
 
 const (
-	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	slackFooter         = "go-feature-flag"
-	colorDeleted        = "#FF0000"
-	colorUpdated        = "#FFA500"
-	colorAdded          = "#008000"
-	longSlackAttachment = 35
+	goFFLogo     = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	slackFooter  = "go-feature-flag"
+	colorDeleted = "#FF0000"
+	colorUpdated = "#FFA500"
+	colorAdded   = "#008000"
 )
+
+// slackEscaper escapes the characters Slack reserves for links and mentions, so flag values
+// such as "<!channel>" are shown as typed. See https://api.slack.com/reference/surfaces/formatting#escaping
+var slackEscaper = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;")
 
 // Notifier is the component in charge of sending flag changes to Slack.
 type Notifier struct {
@@ -116,27 +116,15 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Color:      colorUpdated,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
-			Fields:     []Field{},
+			MrkdwnIn:   []string{"text"},
 		}
 
-		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-		for _, change := range changelog {
-			if change.Type == "update" {
-				value := fmt.Sprintf(
-					"%s => %s",
-					render.Render(change.From),
-					render.Render(change.To),
-				)
-				short := len(value) < longSlackAttachment
-				attachment.Fields = append(
-					attachment.Fields,
-					Field{Title: strings.Join(change.Path, "."), Short: short, Value: value},
-				)
-			}
+		changes, err := notifier.DescribeChanges(value.Before, value.After)
+		if err != nil {
+			attachment.Text = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
+		} else {
+			attachment.Text = slackEscaper.Replace(notifier.ChangeList(changes, "• ", 0))
 		}
-
-		sort.Sort(ByTitle(attachment.Fields))
-
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -163,11 +151,13 @@ type slackMessage struct {
 }
 
 type attachment struct {
-	Color      string  `json:"color"`
-	Title      string  `json:"title"`
-	Fields     []Field `json:"fields"`
-	FooterIcon string  `json:"footer_icon,omitempty"`
-	Footer     string  `json:"footer,omitempty"`
+	Color      string   `json:"color"`
+	Title      string   `json:"title"`
+	Text       string   `json:"text,omitempty"`
+	MrkdwnIn   []string `json:"mrkdwn_in,omitempty"`
+	Fields     []Field  `json:"fields"`
+	FooterIcon string   `json:"footer_icon,omitempty"`
+	Footer     string   `json:"footer,omitempty"`
 }
 
 // Field is the representation of a field in a slack message.
@@ -176,10 +166,3 @@ type Field struct {
 	Value string `json:"value"`
 	Short bool   `json:"short"`
 }
-
-// ByTitle implements sort.Interface for []Field based on the Title field.
-type ByTitle []Field
-
-func (a ByTitle) Len() int           { return len(a) }
-func (a ByTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
-func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

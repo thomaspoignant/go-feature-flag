@@ -104,6 +104,10 @@ type Config struct {
 	// There is no inheritance between flag sets.
 	FlagSets []FlagSet `mapstructure:"flagsets" koanf:"flagsets"`
 
+	// Studio (optional) loads the FlagSets from GO Feature Flag Studio instead of the configuration file.
+	// It is enabled when Studio.URL is set.
+	Studio Studio `mapstructure:"studio" koanf:"studio"`
+
 	// ---------- Deprecated fields ----------
 	// ListenPort (optional) is the port we are using to start the proxy
 	//
@@ -170,6 +174,9 @@ type Config struct {
 
 	// logger is the logger for the relay proxy
 	logger *zap.Logger
+
+	// flagSetMode is where the flagSets come from.
+	flagSetMode flagSetMode
 	// ---------- End of private fields ----------
 }
 

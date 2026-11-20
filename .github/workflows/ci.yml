@@ -6,6 +6,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions: {}
+
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -62,6 +64,11 @@ jobs:
           check-latest: true
           cache: false
       - run: make test
+        env:
+          # Packages run in parallel and share one Ryuk reaper; a package can
+          # latch onto a reaper that is shutting down and time out after 60s.
+          # Runners are ephemeral and tests terminate their own containers.
+          TESTCONTAINERS_RYUK_DISABLED: "true"
 
   Test-Windows:
     runs-on: windows-latest
@@ -101,6 +108,8 @@ jobs:
           check-latest: true
           cache: false
       - run: make coverage
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true" # see Test job
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
@@ -150,7 +159,7 @@ jobs:
         run: echo "GOFIPS140=$(cat .fips-version | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: Run GoReleaser .goreleaser.yaml check
-        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           distribution: goreleaser
           version: latest
@@ -177,13 +186,13 @@ jobs:
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 23
           package-manager-cache: false
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: "9.0.x"
       - run: make provider-tests
@@ -208,12 +217,16 @@ jobs:
           cache: false
       - name: Run benchmark
         run: make bench | tee bench-output.txt
+      - name: Read benchmark CPU
+        id: cpu
+        run: |
+          echo "model=$(sed -n 's/^cpu: *//p' bench-output.txt | head -1 | tr -cs '[:alnum:]' '-')" >> "$GITHUB_OUTPUT"
       - name: Download previous benchmark data
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./cache
-          key: ${{ runner.os }}-benchmark-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-benchmark-
+          key: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
@@ -225,6 +238,12 @@ jobs:
           comment-on-alert: true
           alert-comment-cc-users: "@$GITHUB_ACTOR"
           max-items-in-chart: 100
+      - name: Save benchmark data
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-${{ steps.cpu.outputs.model }}-benchmark-${{ github.run_id }}
 
   Python-provider:
     runs-on: ubuntu-latest
@@ -242,12 +261,12 @@ jobs:
         uses: marceloprado/has-changed-path@df1b7a3161b8fb9fd8c90403c66a9e66dfde50cb # v1.0.1
         with:
           paths: ./openfeature/providers/python-provider/
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.10"
       - name: Install uv
         if: steps.changed-files-specific.outputs.changed == 'true'
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: uv sync
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
@@ -260,15 +279,6 @@ jobs:
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: uv run --no-sync --no-build pytest
-  GraddleWrapperValidation:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
   Verify:
     runs-on: ubuntu-latest
     permissions:

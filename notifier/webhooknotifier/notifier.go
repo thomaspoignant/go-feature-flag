@@ -126,20 +126,22 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 		return fmt.Errorf("error: (Webhook Notifier) impossible to read differences; %v", err)
 	}
 
-	if c.Headers == nil {
-		c.Headers = map[string][]string{}
+	// Notifications can overlap, so each request needs its own headers and signature.
+	headers := http.Header(c.Headers).Clone()
+	if headers == nil {
+		headers = make(http.Header)
 	}
-	c.Headers["Content-Type"] = []string{"application/json"}
+	headers.Set("Content-Type", "application/json")
 
 	// if a secret is provided we sign the body and add this signature as a header.
 	if c.Secret != "" {
-		c.Headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(c.Secret))}
+		headers.Set("X-Hub-Signature-256", signer.Sign(payload, []byte(c.Secret)))
 	}
 
 	request := http.Request{
 		Method: "POST",
 		URL:    endpointURL,
-		Header: c.Headers,
+		Header: headers,
 		Body:   io.NopCloser(bytes.NewReader(payload)),
 	}
 	response, err := c.httpClient.Do(&request)

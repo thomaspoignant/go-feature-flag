@@ -64,12 +64,64 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"repositorySlug\" property found for kind \"bitbucket\"",
 		},
 		{
-			name: "kind S3Retriever without item",
+			name: "kind S3Retriever without bucket",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "s3",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"item\" property found for kind \"s3\"",
+			errValue: "invalid retriever: no \"bucket\" property found for kind \"s3\"",
+		},
+		{
+			name: "kind S3Retriever with item and prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Bucket: "testBucket",
+				Item:   "test.yaml",
+				Prefix: "flags/",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: item and prefix are mutually exclusive for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with item and pattern",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Pattern: "*.yaml",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: pattern and recursive can only be used without item for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with item and recursive",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Item: "test.yaml", Recursive: true,
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: pattern and recursive can only be used without item for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with invalid pattern",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Prefix: "flags/", Pattern: "[a-",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: invalid pattern \"[a-\": syntax error in pattern for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with pattern containing a slash",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "s3", Bucket: "testBucket", Prefix: "flags/", Pattern: "sub/*.yaml",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: invalid pattern \"sub/*.yaml\": it is matched against the file name only and can't contain \"/\" for kind \"s3\"",
+		},
+		{
+			name: "kind s3 with prefix and no bucket",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Prefix: "flags/",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"bucket\" property found for kind \"s3\"",
 		},
 		{
 			name: "kind HTTPRetriever without URL",
@@ -181,6 +233,32 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Kind:   "s3",
 				Item:   "test.yaml",
 				Bucket: "testBucket",
+			},
+		},
+		{
+			name: "valid s3 without item nor prefix (bucket root)",
+			fields: retrieverconf.RetrieverConf{
+				Kind:   "s3",
+				Bucket: "testBucket",
+			},
+		},
+		{
+			name: "valid s3 with prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:      "s3",
+				Prefix:    "flags/",
+				Pattern:   "*.yaml",
+				Recursive: true,
+				Bucket:    "testBucket",
+			},
+		},
+		{
+			name: "valid s3 with root prefix",
+			fields: retrieverconf.RetrieverConf{
+				Kind:      "s3",
+				Prefix:    "/",
+				Recursive: true,
+				Bucket:    "testBucket",
 			},
 		},
 		{
@@ -470,6 +548,119 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever configuration, " +
 				"\"maxConnIdleTime\" is not a valid duration for kind \"postgresql\": " +
 				"time: invalid duration \"xyz\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := tt.fields
+			err := c.IsValid()
+			assert.Equal(t, tt.wantErr, err != nil)
+			if tt.wantErr {
+				assert.Equal(t, tt.errValue, err.Error())
+			}
+		})
+	}
+}
+
+func TestRetrieverConf_validateGitHubAuth(t *testing.T) {
+	tests := []struct {
+		name     string
+		fields   retrieverconf.RetrieverConf
+		wantErr  bool
+		errValue string
+	}{
+		{
+			name: "valid: App auth with inline PEM key",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: App auth with key file",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                    "github",
+				RepositorySlug:          "myorg/myrepo",
+				Path:                    "flags/config.yaml",
+				GitHubAppID:             12345,
+				GitHubInstallationID:    67890,
+				GitHubAppPrivateKeyFile: "/var/secrets/app.pem",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: PAT auth (no App fields)",
+			fields: retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "flags/config.yaml",
+				AuthToken:      "ghp_xxxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid: no auth",
+			fields: retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "flags/config.yaml",
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid: token and App fields together",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				AuthToken:            "ghp_xxxx",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: token and GitHub App fields (githubAppId, githubInstallationId, githubAppPrivateKey / githubAppPrivateKeyFile) are mutually exclusive for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing AppID",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubInstallationID: 67890,
+				GitHubAppPrivateKey:  "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubAppId" property found for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing InstallationID",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                "github",
+				RepositorySlug:      "myorg/myrepo",
+				Path:                "flags/config.yaml",
+				GitHubAppID:         12345,
+				GitHubAppPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\n...",
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubInstallationId" property found for kind "github"`,
+		},
+		{
+			name: "invalid: App fields missing private key",
+			fields: retrieverconf.RetrieverConf{
+				Kind:                 "github",
+				RepositorySlug:       "myorg/myrepo",
+				Path:                 "flags/config.yaml",
+				GitHubAppID:          12345,
+				GitHubInstallationID: 67890,
+			},
+			wantErr:  true,
+			errValue: `invalid retriever: no "githubAppPrivateKey or githubAppPrivateKeyFile" property found for kind "github"`,
 		},
 	}
 	for _, tt := range tests {

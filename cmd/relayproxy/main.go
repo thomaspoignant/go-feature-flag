@@ -13,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/docs"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	stream "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
@@ -105,18 +104,19 @@ func main() {
 	wsService := stream.NewWebsocketService(stream.WithFlagDetails(!proxyConf.DisableFlagDetailsInStream))
 	sseService := stream.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
-	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
 	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
-		proxyNotifier,
-	}, sseService)
+	}, sseService, wsService)
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
 			zap.Error(err),
 		)
 		return
+	}
+	if err := metricsV2.RegisterFlagLoaded(flagsetManager); err != nil {
+		logger.ZapLogger.Error("impossible to register the flag_loaded metric", zap.Error(err))
 	}
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -128,14 +128,25 @@ func main() {
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
 
-	// Defers run LIFO: streaming clients disconnect first, then HTTP server stops.
-	defer func() {
-		logger.ZapLogger.Info("Stopping API server")
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		wsService.Close()
-		sseService.Close()
-		apiServer.Stop(ctx)
-	}()
+	defer shutdown(logger.ZapLogger, &apiServer, wsService, sseService, flagsetManager)
 	apiServer.StartWithContext(context.Background())
+}
+
+// shutdown stops the relay proxy: streaming clients disconnect first, then the HTTP server stops,
+// and finally the flagsets are closed.
+func shutdown(
+	logger *zap.Logger,
+	apiServer interface{ Stop(ctx context.Context) },
+	wsService stream.WebsocketService,
+	sseService stream.SSEService,
+	flagsetManager service.FlagsetManager,
+) {
+	logger.Info("Stopping API server")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	wsService.Close()
+	sseService.Close()
+	apiServer.Stop(ctx)
+	// Closing the flagsets flushes the exporters, once the server no longer accepts requests.
+	flagsetManager.Close()
 }

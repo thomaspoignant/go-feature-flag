@@ -78,6 +78,24 @@ func TestBuildHash(t *testing.T) {
 			},
 			want: 0,
 		},
+		{
+			name: "multibyte flag key and bucketing key",
+			args: args{
+				flagKey:       "flàg",
+				bucketingKey:  "ключ",
+				maxPercentage: 1000,
+			},
+			want: 605,
+		},
+		{
+			name: "max percentage is the largest uint32",
+			args: args{
+				flagKey:       "flag",
+				bucketingKey:  "user",
+				maxPercentage: 4294967295,
+			},
+			want: 3459711972,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

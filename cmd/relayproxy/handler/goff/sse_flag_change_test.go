@@ -253,6 +253,7 @@ func Test_SSE_FlagChange_Errors(t *testing.T) {
 			apiKey: "",
 			flagsetMgr: &mockFlagsetManagerSSE{
 				isDefault: false,
+				err:       fmt.Errorf("apiKey is required when using flagsets"),
 			},
 			expectedStatus: http.StatusBadRequest,
 		},

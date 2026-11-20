@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_localEvaluation(t *testing.T) {
@@ -45,4 +48,20 @@ func Test_localEvaluation(t *testing.T) {
 func Test_main(_ *testing.T) {
 	// just to make sure that the main function exists for tinygo
 	main()
+}
+
+// FuzzLocalEvaluation checks that any input yields a JSON result the host can
+// parse, and never a panic (which would trap the WASM instance in production).
+func FuzzLocalEvaluation(f *testing.F) {
+	inputs, err := filepath.Glob("testdata/local_evaluation_inputs/*.json")
+	require.NoError(f, err)
+	for _, input := range inputs {
+		content, err := os.ReadFile(input)
+		require.NoError(f, err)
+		f.Add(string(content))
+	}
+	f.Fuzz(func(t *testing.T, input string) {
+		got := localEvaluation(input)
+		assert.True(t, json.Valid([]byte(got)), "result is not valid JSON: %q", got)
+	})
 }

@@ -32,11 +32,11 @@ WHITE  := $(shell tput -Txterm setaf 7)
 CYAN   := $(shell tput -Txterm setaf 6)
 RESET  := $(shell tput -Txterm sgr0)
 
-.PHONY: all test build vendor
+.PHONY: all test build vendor fuzz
 
 all: help
 ## Build:
-build: build-modules build-relayproxy build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
+build: build-modules build-relayproxy build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
@@ -64,9 +64,6 @@ build-relayproxy-docker: ## Build a local docker image of the relay proxy from s
 
 build-cli: create-out-dir ## Build the cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
-
-build-editor-api: create-out-dir ## Build the editor api in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/editor-api ./cmd/editor/
 
 build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
@@ -115,9 +112,17 @@ verify: ## Run go mod verify for all modules to validate checksums match go.sum
 	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Verifying $(module)"; cd $(module) && $(GOWORK_ENV) $(GOCMD) mod verify) &&) true
 
 ## Dev:
+# The replace is needed because xitongsys/parquet-go-source pulls cloud.google.com/go/compute v1.5.0
+# (via gocloud.dev v0.26.0), which still contains the metadata package and clashes with
+# cloud.google.com/go/compute/metadata in workspace mode. v1.12.0 is the first version without it.
+# Remove it once we drop xitongsys/parquet-go.
+#
+# "go work sync" pushes the root module's dependency versions into modules/core and cmd/wasm, which
+# bumps their go directive to 1.26. Those 2 modules must stay on go 1.25 to remain compatible with tinygo.
 workspace-init:
 	go work init
 	$(foreach module, $(ALL_GO_MOD_DIRS), go work use $(module);)
+	go work edit -replace cloud.google.com/go/compute=cloud.google.com/go/compute@v1.12.0
 	go work sync
 
 watch-relayproxy: ## Launch the relay proxy in watch mode.
@@ -160,6 +165,9 @@ test: ## Run the tests of the project
 		cd - >/dev/null; \
 	done
 
+fuzz: ## Run every fuzz test for a bounded time (usage: make fuzz FUZZTIME=10s)
+	@FUZZTIME="$(or $(FUZZTIME),10s)" GOWORK_ENV="$(GOWORK_ENV)" GOCMD="$(GOCMD)" .github/ci-scripts/fuzz.sh $(ALL_GO_MOD_DIRS)
+
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
@@ -169,7 +177,7 @@ coverage: ## Run the tests of the project and export the coverage for all module
 		echo "Running coverage for $$module..."; \
 		export original_path=$(shell pwd); \
 		covfile="coverage-$$(basename $$module).cov.tmp"; \
-		cd $$module && $(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=$${original_path}/$${covfile} ./...; \
+		cd $$module && $(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=$${original_path}/$${covfile} ./... || exit 1; \
 		cd $$original_path; \
 	done
 	@echo "mode: count" > coverage.cov && cat *.cov.tmp | grep -v "mode: count" | grep -v "/examples/" >> coverage.cov

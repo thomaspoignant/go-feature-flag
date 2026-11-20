@@ -35,15 +35,13 @@ async function fetchGOFFPullRequests(repoSlug, prefix){
 }
 
 async function findAllPR(repos){
+    const results = await Promise.all(
+        repos.map(({slug, prefix}) => fetchGOFFPullRequests(slug, prefix))
+    )
     let allPR= {}
-    for (let value of repos) {
-        const {slug, prefix} = value
-        const open_prs = await fetchGOFFPullRequests(slug, prefix)
-        const newObj = {
-            [slug]: open_prs
-        }
-        allPR = { ...allPR, ...newObj}
-    }
+    repos.forEach(({slug}, index) => {
+        allPR = { ...allPR, [slug]: results[index]}
+    })
     return allPR
 }
 

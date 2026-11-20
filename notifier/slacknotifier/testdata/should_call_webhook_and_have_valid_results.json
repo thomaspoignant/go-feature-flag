@@ -12,58 +12,11 @@
     {
       "color": "#FFA500",
       "title": "✏️ Flag \"test-flag2\" updated",
-      "fields": [
-        {
-          "title": "DefaultRule.Percentages",
-          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "short": false
-        },
-        {
-          "title": "DefaultRule.VariationResult",
-          "value": "nil =\u003e (*string)(\"Default\")",
-          "short": true
-        },
-        {
-          "title": "Disable",
-          "value": "nil =\u003e (*bool)(true)",
-          "short": true
-        },
-        {
-          "title": "Experimentation",
-          "value": "(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil",
-          "short": false
-        },
-        {
-          "title": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}",
-          "short": false
-        },
-        {
-          "title": "TrackEvents",
-          "value": "nil =\u003e (*bool)(false)",
-          "short": true
-        },
-        {
-          "title": "Variations.Default",
-          "value": "false =\u003e \"strDefault\"",
-          "short": true
-        },
-        {
-          "title": "Variations.False",
-          "value": "false =\u003e \"strFalse\"",
-          "short": true
-        },
-        {
-          "title": "Variations.True",
-          "value": "true =\u003e \"strTrue\"",
-          "short": true
-        },
-        {
-          "title": "Version",
-          "value": "nil =\u003e (*string)(\"1.1\")",
-          "short": true
-        }
+      "text": "• Flag disabled\n• Event tracking turned off\n• Version set to `1.1`\n• Variation `Default` changed from `false` to `\"strDefault\"`\n• Variation `False` changed from `false` to `\"strFalse\"`\n• Variation `True` changed from `true` to `\"strTrue\"`\n• Targeting rule `rule1` added: serves `False` 20%, `True` 80% when `key eq \"not-a-ke\"`\n• Default rule now serves `Default` (was `False` 0%, `True` 100%)\n• Experimentation removed (was from 2004-09-17 00:03:20 UTC to 2004-09-16 21:43:20 UTC)",
+      "mrkdwn_in": [
+        "text"
       ],
+      "fields": null,
       "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
       "footer": "go-feature-flag"
     },

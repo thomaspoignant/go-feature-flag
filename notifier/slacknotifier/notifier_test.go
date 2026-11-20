@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -106,8 +107,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 									},
 								},
 								Experimentation: &flag.ExperimentationRollout{
-									Start: testconvert.Time(time.Unix(1095379400, 0)),
-									End:   testconvert.Time(time.Unix(1095371000, 0)),
+									Start: testconvert.Time(time.Unix(1095379400, 0).UTC()),
+									End:   testconvert.Time(time.Unix(1095371000, 0).UTC()),
 								},
 							},
 							After: &flag.InternalFlag{
@@ -212,6 +213,43 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
+		})
+	}
+}
+
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
+func TestConvertUpdatedFlagsToSlackMessage_diffError(t *testing.T) {
+	broken := otherFlag{}
+	attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
+	})
+	assert.Len(t, attachments, 1)
+	assert.Contains(t, attachments[0].Text, notifier.ChangesUnavailable)
+	assert.Contains(t, attachments[0].Text, "impossible to describe changes")
+}
+
+func TestConvertUpdatedFlagsToSlackMessage_escapesSlackControlCharacters(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "should escape a channel mention", value: "<!channel>", want: "&lt;!channel&gt;"},
+		{name: "should escape an ampersand", value: "a & b", want: "a &amp; b"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			attachments := convertUpdatedFlagsToSlackMessage(notifier.DiffCache{
+				Updated: map[string]notifier.DiffUpdated{"test-flag": {
+					Before: &flag.InternalFlag{},
+					After:  &flag.InternalFlag{Metadata: &map[string]any{"owner": tt.value}},
+				}},
+			})
+			require.Len(t, attachments, 1)
+			assert.Contains(t, attachments[0].Text, tt.want)
+			assert.NotContains(t, attachments[0].Text, tt.value)
 		})
 	}
 }

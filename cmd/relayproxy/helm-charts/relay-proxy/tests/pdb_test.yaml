@@ -1,8 +1,11 @@
 suite: test pod disruption budget
 templates:
   - pdb.yaml
+  - deployment.yaml
+  - configmap.yaml
 tests:
   - it: should not create PDB when pdb.enable is false
+    template: pdb.yaml
     set:
       pdb.enable: false
     asserts:
@@ -10,6 +13,7 @@ tests:
           count: 0
 
   - it: should create PDB when pdb.enable is true
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.minAvailable: 1
@@ -23,6 +27,7 @@ tests:
           value: policy/v1
 
   - it: should set correct metadata name
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.minAvailable: 1
@@ -33,6 +38,7 @@ tests:
           value: my-relay-proxy
 
   - it: should set minAvailable when specified
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.minAvailable: 2
@@ -44,6 +50,7 @@ tests:
           path: spec.maxUnavailable
 
   - it: should default minAvailable to 1 if set but no value given
+    template: pdb.yaml
     set:
       pdb.enable: true
     asserts:
@@ -52,6 +59,7 @@ tests:
           value: 1
 
   - it: should set maxUnavailable when minAvailable is not set
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.maxUnavailable: 1
@@ -62,7 +70,20 @@ tests:
       - isNull:
           path: spec.minAvailable
 
+  - it: should set maxUnavailable to 0 when explicitly set
+    template: pdb.yaml
+    set:
+      pdb.enable: true
+      pdb.maxUnavailable: 0
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 0
+      - isNull:
+          path: spec.minAvailable
+
   - it: should set maxUnavailable when both are specified
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.minAvailable: 2
@@ -74,17 +95,50 @@ tests:
           path: spec.maxUnavailable
           value: 1
 
-  - it: should set correct selector labels
+  - it: should select pods with the chart selector labels
+    template: pdb.yaml
+    release:
+      name: my-release
     set:
       pdb.enable: true
       pdb.minAvailable: 1
       fullnameOverride: my-relay-proxy
     asserts:
       - equal:
-          path: spec.selector.matchLabels.name
-          value: my-relay-proxy
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/name: relay-proxy
+            app.kubernetes.io/instance: my-release
+
+  - it: should use the same selector as the deployment pods
+    release:
+      name: my-release
+    set:
+      pdb.enable: true
+      commonLabels:
+        team: backend
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/name: relay-proxy
+            app.kubernetes.io/instance: my-release
+        template: pdb.yaml
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/name: relay-proxy
+            app.kubernetes.io/instance: my-release
+        template: deployment.yaml
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            app.kubernetes.io/name: relay-proxy
+            app.kubernetes.io/instance: my-release
+        template: deployment.yaml
 
   - it: should only set maxUnavailable when minAvailable is false/0
+    template: pdb.yaml
     set:
       pdb.enable: true
       pdb.minAvailable: 0

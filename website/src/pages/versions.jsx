@@ -76,7 +76,7 @@ const VersionList = () => {
       }
     };
 
-    fetchVersions();
+    void fetchVersions();
   }, []);
 
   function isDocusaurusVersion(version) {

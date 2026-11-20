@@ -12,7 +12,7 @@ Please take a moment to review the following guidelines.
 1. [How Can I Contribute?](#-how-can-i-contribute)
 1. [Where can I ask questions about the project?](#-where-can-i-ask-questions-about-the-project)
 1. [Book a Meeting](#-book-a-meeting)
-1. [Development Setup](#-development-setup)
+1. [Development Setup](#‍-development-setup)
 1. [Documentation](#-documentation)
 1. [License](#-license)
 
@@ -36,7 +36,7 @@ If you encounter any bugs or issues with the project, please [create a new issue
 
 ### Feature Requests
 
-If you have a feature idea that you would like to see implemented, please [create a new issue](<../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=(feature)+<title>>) with the following information:
+If you have a feature idea that you would like to see implemented, please [create a new issue](../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=%28feature%29+%3Ctitle%3E) with the following information:
 
 - A clear and descriptive title
 - A detailed description of the feature

@@ -1,0 +1,495 @@
+# Flags used by feature_flag_bench_test.go (one flag per type and scenario).
+# Rollout dates are fixed far in the past/future so the progressive rollout is always
+# in progress and the scheduled rollout always has one applied and one pending step.
+
+bool-no-rule-100:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+bool-no-rule-0:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+bool-no-rule-50:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+bool-rule:
+  variations:
+    A: true
+    B: false
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+bool-rule-complex:
+  variations:
+    A: true
+    B: false
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+bool-rollout-progressive:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+bool-rollout-scheduled:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0
+
+string-no-rule-100:
+  variations:
+    A: "a"
+    B: "b"
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+string-no-rule-0:
+  variations:
+    A: "a"
+    B: "b"
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+string-no-rule-50:
+  variations:
+    A: "a"
+    B: "b"
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+string-rule:
+  variations:
+    A: "a"
+    B: "b"
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+string-rule-complex:
+  variations:
+    A: "a"
+    B: "b"
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+string-rollout-progressive:
+  variations:
+    A: "a"
+    B: "b"
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+string-rollout-scheduled:
+  variations:
+    A: "a"
+    B: "b"
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0
+
+int-no-rule-100:
+  variations:
+    A: 1
+    B: 2
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+int-no-rule-0:
+  variations:
+    A: 1
+    B: 2
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+int-no-rule-50:
+  variations:
+    A: 1
+    B: 2
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+int-rule:
+  variations:
+    A: 1
+    B: 2
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+int-rule-complex:
+  variations:
+    A: 1
+    B: 2
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+int-rollout-progressive:
+  variations:
+    A: 1
+    B: 2
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+int-rollout-scheduled:
+  variations:
+    A: 1
+    B: 2
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0
+
+float64-no-rule-100:
+  variations:
+    A: 1.1
+    B: 2.2
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+float64-no-rule-0:
+  variations:
+    A: 1.1
+    B: 2.2
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+float64-no-rule-50:
+  variations:
+    A: 1.1
+    B: 2.2
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+float64-rule:
+  variations:
+    A: 1.1
+    B: 2.2
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+float64-rule-complex:
+  variations:
+    A: 1.1
+    B: 2.2
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+float64-rollout-progressive:
+  variations:
+    A: 1.1
+    B: 2.2
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+float64-rollout-scheduled:
+  variations:
+    A: 1.1
+    B: 2.2
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0
+
+json-no-rule-100:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+json-no-rule-0:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+json-no-rule-50:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+json-rule:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+json-rule-complex:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+json-rollout-progressive:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+json-rollout-scheduled:
+  variations:
+    A: {k: a}
+    B: {k: b}
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0
+
+jsonArr-no-rule-100:
+  variations:
+    A: [a]
+    B: [b]
+  defaultRule:
+    percentage:
+      A: 100
+      B: 0
+
+jsonArr-no-rule-0:
+  variations:
+    A: [a]
+    B: [b]
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+
+jsonArr-no-rule-50:
+  variations:
+    A: [a]
+    B: [b]
+  defaultRule:
+    percentage:
+      A: 50
+      B: 50
+
+jsonArr-rule:
+  variations:
+    A: [a]
+    B: [b]
+  targeting:
+    - query: key eq "user-5"
+      variation: A
+  defaultRule:
+    variation: B
+
+jsonArr-rule-complex:
+  variations:
+    A: [a]
+    B: [b]
+  targeting:
+    - query: key eq "user-5" or key eq "user-36" or key eq "user-1500"
+      variation: A
+  defaultRule:
+    variation: B
+
+jsonArr-rollout-progressive:
+  variations:
+    A: [a]
+    B: [b]
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: B
+        percentage: 0
+        date: 2000-01-01T00:00:00Z
+      end:
+        variation: A
+        percentage: 100
+        date: 2050-01-01T00:00:00Z
+
+jsonArr-rollout-scheduled:
+  variations:
+    A: [a]
+    B: [b]
+  defaultRule:
+    percentage:
+      A: 0
+      B: 100
+  scheduledRollout:
+    - date: 2000-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 50
+          B: 50
+    - date: 2100-01-01T00:00:00Z
+      defaultRule:
+        percentage:
+          A: 100
+          B: 0

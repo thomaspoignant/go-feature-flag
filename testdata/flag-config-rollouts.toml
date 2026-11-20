@@ -1,0 +1,33 @@
+[rollout-flag]
+trackEvents = true
+
+[rollout-flag.variations]
+on = true
+off = false
+
+[rollout-flag.defaultRule]
+name = "default"
+
+[rollout-flag.defaultRule.progressiveRollout.initial]
+variation = "off"
+percentage = 0
+date = 2026-01-01T10:00:00Z
+
+[rollout-flag.defaultRule.progressiveRollout.end]
+variation = "on"
+percentage = 100
+date = 2026-02-01T10:00:00Z
+
+[[rollout-flag.scheduledRollout]]
+date = 2026-03-01T10:00:00Z
+disable = false
+[rollout-flag.scheduledRollout.defaultRule]
+variation = "on"
+
+[[rollout-flag.scheduledRollout]]
+date = 2026-04-01T10:00:00Z
+trackEvents = false
+
+[rollout-flag.experimentation]
+start = 2026-05-01T10:00:00Z
+end = 2026-06-01T10:00:00Z

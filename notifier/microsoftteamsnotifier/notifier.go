@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
-	"github.com/luci/go-render/render"
-	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
@@ -72,18 +69,14 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
 	for _, key := range updatedKeys {
 		value := diffCache.Updated[key]
 		msgText += fmt.Sprintf("\n * ✏️ Flag **%s** updated", key)
-		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-
-		// sort the changelog by path
-		sort.Slice(changelog, func(i, j int) bool {
-			return strings.Join(changelog[i].Path, ".") < strings.Join(changelog[j].Path, ".")
-		})
-
-		for _, change := range changelog {
-			if change.Type == "update" {
-				msgText += fmt.Sprintf("\n   * %s: %s => %s", strings.Join(change.Path, "."),
-					render.Render(change.From), render.Render(change.To))
-			}
+		// Adaptive Card markdown has no inline code, so the changes are described without it.
+		changes, err := notifier.DescribeChangesPlain(value.Before, value.After)
+		if err != nil {
+			msgText += fmt.Sprintf("\n   * %s: %s", notifier.ChangesUnavailable, err)
+			continue
+		}
+		if len(changes) > 0 {
+			msgText += "\n" + notifier.ChangeList(changes, "   * ", 0)
 		}
 	}
 	return msgText

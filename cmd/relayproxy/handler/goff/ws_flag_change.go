@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
@@ -38,9 +39,14 @@ func (c *threadSafeConn) ping() error {
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
-func NewWsFlagChange(websocketService stream.WebsocketService, logger *zap.Logger) *WSFlagChange {
+func NewWsFlagChange(
+	websocketService stream.WebsocketService,
+	flagsetManager service.FlagsetManager,
+	logger *zap.Logger,
+) *WSFlagChange {
 	return &WSFlagChange{
 		websocketService: websocketService,
+		flagsetManager:   flagsetManager,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(_ *http.Request) bool {
 				return true
@@ -57,6 +63,7 @@ const defaultPingInterval = 1 * time.Second
 // WSFlagChange is the implementation of the controller
 type WSFlagChange struct {
 	websocketService stream.WebsocketService
+	flagsetManager   service.FlagsetManager
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
 	// pingInterval is the keep-alive ping period; defaults to defaultPingInterval.
@@ -99,6 +106,12 @@ func (f *WSFlagChange) LegacyHandler(c *echo.Context) error {
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/ws/flag/change [get]
 func (f *WSFlagChange) Handler(c *echo.Context) error {
+	// The flagset is resolved before the upgrade, so a failure is a plain HTTP error.
+	flagsetName, err := f.flagsetManager.FlagSetName(c.QueryParam("apiKey"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -110,7 +123,7 @@ func (f *WSFlagChange) Handler(c *echo.Context) error {
 	// concurrent writer.
 	safeConn := &threadSafeConn{conn: conn}
 
-	f.websocketService.Register(safeConn)
+	f.websocketService.Register(safeConn, flagsetName)
 	defer f.websocketService.Deregister(safeConn)
 	f.logger.Debug("registering new websocket connection", zap.Any("connection", conn))
 

@@ -13,7 +13,7 @@ import (
 func (s *Server) addStreamRoutes() {
 	authorize := custommiddleware.StreamAuthorizer(s.config)
 
-	cWsFlagChange := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
+	cWsFlagChange := controller.NewWsFlagChange(s.services.WebsocketService, s.services.FlagsetManager, s.zapLog)
 	cSSEFlagChange := controller.NewSSEFlagChange(s.services.SSEService, s.services.FlagsetManager, s.zapLog)
 
 	streamV1 := s.apiEcho.Group("/stream/v1", authorize)

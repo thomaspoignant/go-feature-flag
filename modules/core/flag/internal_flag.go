@@ -2,8 +2,10 @@ package flag
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
+	"slices"
 	"sort"
 	"time"
 
@@ -160,41 +162,44 @@ func (f *InternalFlag) isCacheable() bool {
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
 func (f *InternalFlag) selectVariation(
-	flagName string, key string, ctx ffcontext.Context) (*variationSelection, error) {
+	flagName string, key string, ctx ffcontext.Context) (variationSelection, error) {
 	hasRule := len(f.GetRules()) != 0
+	// Shared by all the rules below: the context is converted to a map at most once.
+	queryCtx := &queryContext{ctx: ctx}
 	// Check all targeting in order, the first to match will be the one used.
 	if hasRule {
 		for ruleIndex, target := range f.GetRules() {
-			variationName, err := target.Evaluate(key, ctx, flagName, false)
+			variationName, err := target.evaluate(key, queryCtx, flagName, false)
 			if err != nil {
 				// the targeting does not apply
-				if _, ok := err.(*internalerror.RuleNotApplyError); ok {
+				if errors.Is(err, errRuleNotApply) {
 					continue
 				}
-				return nil, err
+				return variationSelection{}, err
 			}
+			matchedIndex := ruleIndex
 			reason := selectEvaluationReason(hasRule, true, target.IsDynamic(), false)
-			return &variationSelection{
+			return variationSelection{
 				name:      variationName,
 				reason:    reason,
-				ruleIndex: &ruleIndex,
-				ruleName:  f.GetRules()[ruleIndex].Name,
+				ruleIndex: &matchedIndex,
+				ruleName:  f.GetRules()[matchedIndex].Name,
 				cacheable: f.isCacheable() && target.ProgressiveRollout == nil,
 			}, err
 		}
 	}
 
 	if f.DefaultRule == nil {
-		return nil, fmt.Errorf("no default targeting for the flag")
+		return variationSelection{}, fmt.Errorf("no default targeting for the flag")
 	}
 
-	variationName, err := f.GetDefaultRule().Evaluate(key, ctx, flagName, true)
+	variationName, err := f.GetDefaultRule().evaluate(key, queryCtx, flagName, true)
 	if err != nil {
-		return nil, err
+		return variationSelection{}, err
 	}
 
 	reason := selectEvaluationReason(hasRule, false, f.GetDefaultRule().IsDynamic(), true)
-	return &variationSelection{
+	return variationSelection{
 		name:      variationName,
 		reason:    reason,
 		cacheable: f.isCacheable() && f.GetDefaultRule().ProgressiveRollout == nil,
@@ -291,7 +296,9 @@ func (f *InternalFlag) IsValid() error {
 
 	// Check that all variation has the same types
 	expectedVarType := ""
-	for name, value := range f.GetVariations() {
+	variations := f.GetVariations()
+	for _, name := range slices.Sorted(maps.Keys(variations)) {
+		value := variations[name]
 		if value == nil {
 			return fmt.Errorf("nil value for variation: %s", name)
 		}

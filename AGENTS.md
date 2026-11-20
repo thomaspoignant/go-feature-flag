@@ -47,7 +47,7 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 
 **Root Level:**
 - Root `.go` files: Core `ffclient` package (`variation.go`, `feature_flag.go`, `config.go`, `tracking.go`, `variation_all_flags.go`, `config_exporter.go`)
-- `cmd/`: Applications (relayproxy, cli, lint, editor, jsonschema-generator, wasm)
+- `cmd/`: Applications (relayproxy, cli, lint, jsonschema-generator, wasm)
 - `retriever/`, `exporter/`, `notifier/`: Integration packages
 - `modules/`: Separate Go modules (`core` only)
 - `internal/`: Internal packages (cache, flagstate, notification, signer)
@@ -164,7 +164,7 @@ pre-commit install   # Install pre-commit hooks
 ```
 
 **Common Commands:**
-- **Build:** `make build`, `make build-relayproxy`, `make build-cli`, `make build-wasm`, `make build-wasi`, `make build-editor-api`, `make build-jsonschema-generator`, `make build-modules`
+- **Build:** `make build`, `make build-relayproxy`, `make build-cli`, `make build-wasm`, `make build-wasi`, `make build-jsonschema-generator`, `make build-modules`
 - **Dev:** `make watch-relayproxy`, `make watch-doc`, `make serve-doc`
 - **Test:** `make test`, `make coverage`, `make bench`, `make provider-tests`
 - **Quality:** `make lint`, `make tidy`, `make vendor`

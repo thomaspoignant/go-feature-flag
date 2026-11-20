@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -69,6 +70,22 @@ func (r *Rule) RequiresBucketing() bool {
 // If yes, it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
+	v, err := r.evaluate(key, &queryContext{ctx: ctx}, flagName, isDefault)
+	if errors.Is(err, errRuleNotApply) {
+		return "", &internalerror.RuleNotApplyError{Context: ctx}
+	}
+	return v, err
+}
+
+// errRuleNotApply is returned by evaluate when the rule does not apply to the context.
+// It is a sentinel to avoid allocating a RuleNotApplyError for every non-matching rule.
+var errRuleNotApply = errors.New("rule does not apply")
+
+// evaluate is Evaluate reading the context through queryCtx, which the caller can share
+// across the rules of a flag.
+func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isDefault bool,
+) (string, error) {
+	ctx := queryCtx.ctx
 	// Only require key if this rule needs bucketing
 	if key == "" && r.RequiresBucketing() {
 		return "", fmt.Errorf("evaluate Rule: no key for bucketing-required rule")
@@ -81,9 +98,13 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	}
 
 	// Check if the rule applies for this user
-	ruleApply := isDefault || evaluateRule(r.GetTrimmedQuery(), r.GetQueryFormat(), ctx)
+	ruleApply := isDefault
+	if !ruleApply {
+		query := r.GetTrimmedQuery()
+		ruleApply = evaluateRule(query, queryFormatOf(query), queryCtx)
+	}
 	if !ruleApply || (!isDefault && r.IsDisable()) {
-		return "", &internalerror.RuleNotApplyError{Context: ctx}
+		return "", errRuleNotApply
 	}
 	if r.ProgressiveRollout != nil {
 		if key == "" {
@@ -103,11 +124,39 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) (success bool) {
+// queryContext is the evaluation context as targeting queries read it. The map is built on
+// first use and shared by every rule of a flag, so a flag with several targeting rules
+// converts the context once per evaluation instead of once per rule. Because it is shared,
+// the query engines must only read the map, never modify it. The JSON form JsonLogic reads
+// is shared the same way.
+type queryContext struct {
+	ctx                  ffcontext.Context
+	parsedEvalCtxAsMap   map[string]any
+	parsedEvalCtxAsBytes []byte
+}
+
+func (q *queryContext) mapOnce() map[string]any {
+	if q.parsedEvalCtxAsMap == nil {
+		q.parsedEvalCtxAsMap = utils.ContextToMap(q.ctx)
+	}
+	return q.parsedEvalCtxAsMap
+}
+
+func (q *queryContext) jsonOnce() ([]byte, error) {
+	if q.parsedEvalCtxAsBytes == nil {
+		var err error
+		if q.parsedEvalCtxAsBytes, err = json.Marshal(q.mapOnce()); err != nil {
+			return nil, err
+		}
+	}
+	return q.parsedEvalCtxAsBytes, nil
+}
+
+func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
 	if query == "" {
 		return true
 	}
-	mapCtx := utils.ContextToMap(ctx)
+	mapCtx := queryCtx.mapOnce()
 
 	// Catch any panics that may occur during evaluation
 	defer func() {
@@ -120,9 +169,10 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		}
 	}()
 
+	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
 	switch queryFormat {
 	case JSONLogicQueryFormat:
-		strCtx, err := json.Marshal(mapCtx)
+		strCtx, err := queryCtx.jsonOnce()
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
@@ -259,42 +309,29 @@ func (r *Rule) getVariationFromProgressiveRollout(
 }
 
 func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
-	for key, bucket := range r.getPercentageBuckets() {
-		if uint32(bucket.start) <= hash && uint32(bucket.end) > hash {
-			return key, nil
-		}
-	}
-	return "", fmt.Errorf("impossible to find the variation")
-}
-
-// getPercentageBuckets compute a map containing the buckets of each variation for this rule.
-func (r *Rule) getPercentageBuckets() map[string]percentageBucket {
-	percentageBuckets := make(map[string]percentageBucket, len(r.GetPercentages()))
 	percentage := r.GetPercentages()
 
-	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
+	// we need to sort the names to be sure we are constantly affecting the users to the same bucket.
 	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the
 	// buckets every time we are in this function.
-	variationNames := make([]string, 0, len(percentage))
+	var buf [16]string
+	names := buf[:0]
 	for k := range percentage {
-		variationNames = append(variationNames, k)
+		names = append(names, k)
 	}
-	// HACK: we are reversing the sort to support the legacy format of the flags (before 1.0.0) and to be sure to always
-	// have "True" before "False"
-	sort.Sort(sort.Reverse(sort.StringSlice(variationNames)))
+	slices.Sort(names)
 
-	for index, varName := range variationNames {
-		startBucket := float64(0)
-		if index != 0 {
-			startBucket = percentageBuckets[variationNames[index-1]].end
+	// HACK: we are iterating in reverse order to support the legacy format of the flags (before 1.0.0) and to be sure
+	// to always have "True" before "False"
+	start := float64(0)
+	for i := len(names) - 1; i >= 0; i-- {
+		end := start + (percentage[names[i]] * PercentageMultiplier)
+		if uint32(start) <= hash && uint32(end) > hash {
+			return names[i], nil
 		}
-		endBucket := startBucket + (percentage[varName] * PercentageMultiplier)
-		percentageBuckets[varName] = percentageBucket{
-			start: startBucket,
-			end:   endBucket,
-		}
+		start = end
 	}
-	return percentageBuckets
+	return "", fmt.Errorf("impossible to find the variation")
 }
 
 // MergeRules is merging 2 rules.
@@ -346,7 +383,12 @@ func (r *Rule) GetTrimmedQuery() string {
 
 // GetQueryFormat is returning the format used for the query
 func (r *Rule) GetQueryFormat() QueryFormat {
-	if utils.IsJSONObject(r.GetTrimmedQuery()) {
+	return queryFormatOf(r.GetTrimmedQuery())
+}
+
+// queryFormatOf returns the format of an already trimmed query.
+func queryFormatOf(trimmedQuery string) QueryFormat {
+	if utils.IsJSONObject(trimmedQuery) {
 		return JSONLogicQueryFormat
 	}
 	return NikunjyQueryFormat

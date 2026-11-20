@@ -129,7 +129,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
@@ -246,7 +246,7 @@ func Test_Bulk_Evaluation_EventStreams(t *testing.T) {
 					},
 				},
 			}
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			require.NoError(t, err)
 			defer flagsetManager.Close()
 
@@ -288,6 +288,18 @@ func Test_Evaluate(t *testing.T) {
 		args args
 		want want
 	}{
+		{
+			name: "flag key with an escaped reserved character",
+			args: args{
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
+				configFlagsLocation: testdataDir + "/ofrep/config_flags_special_chars.yaml",
+				flagKey:             "team%3Acheckout",
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: testdataDir + "/ofrep/responses/valid_evaluation_special_chars.json",
+			},
+		},
 		{
 			name: "valid evaluation",
 			args: args{
@@ -401,7 +413,7 @@ func Test_Evaluate(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			assert.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 
@@ -478,7 +490,7 @@ func Test_Evaluate_FlagEvaluationMetric(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil)
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil, nil, nil)
 			require.NoError(t, err, "failed to create flagset manager")
 			defer flagsetManager.Close()
 

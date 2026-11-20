@@ -4,6 +4,8 @@ on:
     - cron: "0 23 * * *"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   j1:
     if: github.repository == 'thomaspoignant/go-feature-flag'

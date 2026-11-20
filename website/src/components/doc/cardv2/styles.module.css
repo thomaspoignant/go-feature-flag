@@ -79,7 +79,7 @@
     font-family: helvetica neue, helvetica, arial, sans-serif;
     font-size: 3rem;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease;
     background-color: var(--goff-card-round-color);
 }
 

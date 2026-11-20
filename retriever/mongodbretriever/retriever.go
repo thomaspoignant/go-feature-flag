@@ -3,6 +3,7 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -59,6 +60,10 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 // Retrieve Reads flag configuration from mongodb and returns it
 // if a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
+	if r.dbConnection == nil {
+		return nil, fmt.Errorf("database connection is not initialized")
+	}
+
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
 

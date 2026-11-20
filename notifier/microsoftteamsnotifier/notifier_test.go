@@ -94,8 +94,8 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 								},
 							},
 							Experimentation: &flag.ExperimentationRollout{
-								Start: testconvert.Time(time.Unix(1095379400, 0)),
-								End:   testconvert.Time(time.Unix(1095371000, 0)),
+								Start: testconvert.Time(time.Unix(1095379400, 0).UTC()),
+								End:   testconvert.Time(time.Unix(1095371000, 0).UTC()),
 							},
 						},
 						After: &flag.InternalFlag{
@@ -204,4 +204,15 @@ func (rt *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	rt.requestBody = string(body)
 	req.Body = io.NopCloser(bytes.NewBuffer(body))
 	return rt.response, nil
+}
+
+// otherFlag is a flag.Flag that DescribeChanges cannot describe.
+type otherFlag struct{ flag.Flag }
+
+func TestConvertToMicrosoftTeamsMessage_diffError(t *testing.T) {
+	broken := otherFlag{}
+	msg := convertToMicrosoftTeamsMessage(notifier.DiffCache{
+		Updated: map[string]notifier.DiffUpdated{"test-flag": {Before: broken, After: broken}},
+	})
+	assert.Contains(t, msg, notifier.ChangesUnavailable+": impossible to describe changes")
 }

@@ -1,0 +1,20 @@
+{
+  "name": "goff-web-provider-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5174 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "blocker": "node stream-blocker.mjs"
+  },
+  "dependencies": {
+    "@openfeature/core": "^1.12.0",
+    "@openfeature/go-feature-flag-web-provider": "^0.2.10",
+    "@openfeature/web-sdk": "^1.10.0",
+    "copy-anything": "^3.0.5"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "^7.0.0"
+  }
+}

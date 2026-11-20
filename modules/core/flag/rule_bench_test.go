@@ -1,6 +1,8 @@
 package flag_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -48,5 +50,94 @@ func BenchmarkRuleEvaluate_NikunjySimple(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = rule.Evaluate("user-1", ctx, "test-flag", false)
+	}
+}
+
+// BenchmarkRuleEvaluate_NikunjyLargeIn evaluates a rule that targets 400 UUID-length
+// tenant IDs, the shape of a flag that lists individual targets, with a context
+// that is not in the list.
+func BenchmarkRuleEvaluate_NikunjyLargeIn(b *testing.B) {
+	tenants := make([]string, 400)
+	for i := range tenants {
+		tenants[i] = fmt.Sprintf(`"%08d-0000-4000-8000-000000000000"`, i)
+	}
+	rule := flag.Rule{
+		Name:            testconvert.String("large-in"),
+		VariationResult: testconvert.String("on"),
+		Query:           testconvert.String(`tenantId in [` + strings.Join(tenants, ", ") + `]`),
+	}
+	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
+		AddCustom("tenantId", "ffffffff-0000-4000-8000-000000000000").
+		Build()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = rule.Evaluate("user-1", ctx, "test-flag", false)
+	}
+}
+
+// BenchmarkInternalFlagValue_MultiRule evaluates a flag whose targeting rules all
+// carry a query, the last one matching, so every rule reads the evaluation context.
+func BenchmarkInternalFlagValue_MultiRule(b *testing.B) {
+	rules := make([]flag.Rule, 0, 5)
+	for _, tenant := range []string{"tenant-a", "tenant-b", "tenant-c", "tenant-d", "tenant-e"} {
+		rules = append(rules, flag.Rule{
+			Query:           testconvert.String(`tenantId eq "` + tenant + `" and plan eq "pro"`),
+			VariationResult: testconvert.String("on"),
+		})
+	}
+	f := flag.InternalFlag{
+		Variations: &map[string]*any{
+			"on":  testconvert.Interface(true),
+			"off": testconvert.Interface(false),
+		},
+		Rules:       &rules,
+		DefaultRule: &flag.Rule{VariationResult: testconvert.String("off")},
+	}
+	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
+		AddCustom("tenantId", "tenant-e").
+		AddCustom("plan", "pro").
+		AddCustom("region", "eu").
+		AddCustom("beta", true).
+		Build()
+	flagCtx := flag.Context{DefaultSdkValue: false}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = f.Value("multi-rule", ctx, flagCtx)
+	}
+}
+
+// BenchmarkInternalFlagValue_MultiRuleJSONLogic is BenchmarkInternalFlagValue_MultiRule
+// with JsonLogic queries, which read the evaluation context as JSON.
+func BenchmarkInternalFlagValue_MultiRuleJSONLogic(b *testing.B) {
+	rules := make([]flag.Rule, 0, 5)
+	for _, tenant := range []string{"tenant-a", "tenant-b", "tenant-c", "tenant-d", "tenant-e"} {
+		rules = append(rules, flag.Rule{
+			Query: testconvert.String(
+				`{"and": [{"==": [{"var": "tenantId"}, "` + tenant + `"]}, {"==": [{"var": "plan"}, "pro"]}]}`,
+			),
+			VariationResult: testconvert.String("on"),
+		})
+	}
+	f := flag.InternalFlag{
+		Variations: &map[string]*any{
+			"on":  testconvert.Interface(true),
+			"off": testconvert.Interface(false),
+		},
+		Rules:       &rules,
+		DefaultRule: &flag.Rule{VariationResult: testconvert.String("off")},
+	}
+	ctx := ffcontext.NewEvaluationContextBuilder("user-1").
+		AddCustom("tenantId", "tenant-e").
+		AddCustom("plan", "pro").
+		AddCustom("region", "eu").
+		AddCustom("beta", true).
+		Build()
+	flagCtx := flag.Context{DefaultSdkValue: false}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = f.Value("multi-rule-jsonlogic", ctx, flagCtx)
 	}
 }

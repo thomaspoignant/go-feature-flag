@@ -1,0 +1,76 @@
+---
+sidebar_position: 30
+description: How to configure a File System exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'File System'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# File System
+
+## Overview
+{info.longDescription ?? info.description}
+
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new file will be added to {exporterName}.
+
+:::info
+If for some reason the {exporterName} upload fails, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+:::
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {exporterName} exporter, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: file
+    outputDir: /output-data/
+# ...
+```
+
+| Field name                |    Mandatory     | Type   | Default                                                                                                                            | Description                                                                                                                                                                                                                                                                                                                                                                           |
+|---------------------------|:----------------:|--------|------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`                    |  <Mandatory />   | string | **none**                                                                                                                           | **Value should be `file`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                                                                                                                                                                                                |
+| `outputDir`               |  <Mandatory />   | string | **none**                                                                                                                           | OutputDir is the location of the directory where to store the exported files.                                                                                                                                                                                                                                                                                                         |
+| `flushInterval`           | <NotMandatory /> | int    | `60000`                                                                                                                            | The interval in millisecond between 2 calls to the webhook _(if the `maxEventInMemory` is reached before the flushInterval we will call the exporter before)_.                                                                                                                                                                                                                        |
+| `maxEventInMemory`        | <NotMandatory /> | int    | `100000`                                                                                                                           | If we hit that limit we will call the exporter.                                                                                                                                                                                                                                                                                                                                       |
+| `format`                  | <NotMandatory /> | string | `JSON`                                                                                                                             | Format is the output format you want in your exported file. Available format: `JSON`, `CSV`, `Parquet`.                                                                                                                                                                                                                                                                               |
+| `filename`                | <NotMandatory /> | string | `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`                                                                       | You can use a config template to define the name of your exported files. Available replacements are `{{ .Hostname}}`, `{{ .Timestamp}}` and `{{ .Format}`                                                                                                                                                                                                                             |
+| `csvTemplate`             | <NotMandatory /> | string | `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}};{{ .Source}}\n` | CsvTemplate is used if your output format is CSV.<br/>This field will be ignored if you are using format other than CSV.<br/>You can decide which fields you want in your CSV line with a go-template syntax, please check [`exporter/feature_event.go`](https://github.com/thomaspoignant/go-feature-flag/blob/main/exporter/feature_event.go) to see what are the fields available. |
+| `parquetCompressionCodec` | <NotMandatory /> | string | `SNAPPY`                                                                                                                           | ParquetCompressionCodec is the parquet compression codec for better space efficiency. [Available options](https://github.com/apache/parquet-format/blob/master/Compression.md)                                                                                                                                                                                                        |
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+config := ffclient.Config{
+    // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &fileexporter.Exporter{
+            OutputDir: "/output-data/",
+            Format: "csv",
+            FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}};{{ .Source}}\n"
+        },
+    },
+    // ...
+}
+err := ffclient.Init(config)
+defer ffclient.Close()
+```
+
+| Field name                |    Mandatory     | Default                                                                                                                            | Description                                                                                                                                                                                                                                                                                                                                                                           |
+|---------------------------|:----------------:|------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `OutputDir `              |  <Mandatory />   | none                                                                                                                               | OutputDir is the location of the directory to store the exported files.                                                                                                                                                                                                                                                                                                               |
+| `FlushInterval`           | <NotMandatory /> | `60000`                                                                                                                            | The interval in millisecond between 2 calls to the webhook _(if the `maxEventInMemory` is reached before the flushInterval we will call the exporter before)_.                                                                                                                                                                                                                        |
+| `MaxEventInMemory`        | <NotMandatory /> | `100000`                                                                                                                           | If we hit that limit we will call the exporter.                                                                                                                                                                                                                                                                                                                                       |
+| `Format`                  | <NotMandatory /> | `JSON`                                                                                                                             | Format is the output format you want in your exported file. Available format: `JSON`, `CSV`, `Parquet`.                                                                                                                                                                                                                                                                               |
+| `Filename`                | <NotMandatory /> | `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`                                                                       | You can use a config template to define the name of your exported files. Available replacements are `{{ .Hostname}}`, `{{ .Timestamp}}` and `{{ .Format}`                                                                                                                                                                                                                             |
+| `CsvTemplate`             | <NotMandatory /> | `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}};{{ .Source}}\n` | CsvTemplate is used if your output format is CSV.<br/>This field will be ignored if you are using format other than CSV.<br/>You can decide which fields you want in your CSV line with a go-template syntax, please check [`exporter/feature_event.go`](https://github.com/thomaspoignant/go-feature-flag/blob/main/exporter/feature_event.go) to see what are the fields available. |`
+| `Path`                    | <NotMandatory /> | **bucket root level**                                                                                                              | The location of the directory in S3.                                                                                                                                                                                                                                                                                                                                                  |
+| `ParquetCompressionCodec` | <NotMandatory /> | `SNAPPY`                                                                                                                           | ParquetCompressionCodec is the parquet compression codec for better space efficiency. [Available options](https://github.com/apache/parquet-format/blob/master/Compression.md)                                                                                                                                                                                                        |`

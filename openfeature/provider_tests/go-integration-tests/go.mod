@@ -1,10 +1,10 @@
 module github.com/thomaspoignant/go-feature-flag/openfeature/provider_tests/go-integration-tests
 
-go 1.26.0
+go 1.26.11
 
 require (
-	github.com/open-feature/go-sdk v1.19.0
-	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v1.1.1
+	github.com/open-feature/go-sdk v1.20.0
+	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v1.1.3
 	github.com/stretchr/testify v1.12.1
 )
 

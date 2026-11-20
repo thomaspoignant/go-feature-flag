@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.8.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.1...modules/core/v0.8.2) (2026-11-18)
+
+
+### 🔧 Chores
+
+* Bump go-feature-flag/rules fork in all modules ([#6529](https://github.com/thomaspoignant/go-feature-flag/issues/6529)) ([321d9c8](https://github.com/thomaspoignant/go-feature-flag/commit/321d9c8c06ba70328c48a071d76285bd775dc947))
+
+## [0.8.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.0...modules/core/v0.8.1) (2026-11-17)
+
+
+### 💨 Performances
+
+* **core:** skip the JSON decode for queries that cannot be JSON objects ([#6459](https://github.com/thomaspoignant/go-feature-flag/issues/6459)) ([374b8fb](https://github.com/thomaspoignant/go-feature-flag/commit/374b8fba91992c2312dde4fef986dcde805cd979))
+* cut allocations on the flag evaluation hot path ([#6441](https://github.com/thomaspoignant/go-feature-flag/issues/6441)) ([04bb570](https://github.com/thomaspoignant/go-feature-flag/commit/04bb570f01c6800f4c39095e7ab60529aee61df2))
+* raise stack buffer for percentage variation names to 16 ([#6511](https://github.com/thomaspoignant/go-feature-flag/issues/6511)) ([28af32d](https://github.com/thomaspoignant/go-feature-flag/commit/28af32d73468c95d36b7f2d693b4f64c7849ef74))
+
+
+### 🐛 Bug Fixes
+
+* **core:** bump jsonlogic to v3.10.2 for GHSA-mw4w-7w23-cg45 ([#6515](https://github.com/thomaspoignant/go-feature-flag/issues/6515)) ([5ecd85d](https://github.com/thomaspoignant/go-feature-flag/commit/5ecd85d69887c2bd00d321070e619e31f57733a7))
+* **core:** guard nil progressive rollout steps in IsValid ([#6438](https://github.com/thomaspoignant/go-feature-flag/issues/6438)) ([21d0320](https://github.com/thomaspoignant/go-feature-flag/commit/21d0320301e6acac8540995a0da85f5bf585e3e8))
+* **core:** reject negative and non-finite percentages ([#6450](https://github.com/thomaspoignant/go-feature-flag/issues/6450)) ([c13da31](https://github.com/thomaspoignant/go-feature-flag/commit/c13da31092057154b68b821613742862eaff30eb))
+* **core:** reject negative and non-finite progressive rollout percentages ([#6454](https://github.com/thomaspoignant/go-feature-flag/issues/6454)) ([22d7815](https://github.com/thomaspoignant/go-feature-flag/commit/22d7815a3eaf4a6db106de17e50d5706e3406e45))
+
+
+### 🔧 Chores
+
+* bump Go version across modules ([#6462](https://github.com/thomaspoignant/go-feature-flag/issues/6462)) ([6c4dcbb](https://github.com/thomaspoignant/go-feature-flag/commit/6c4dcbb21e65f227b8f09591ad9f207d524920aa))
+* replace hairyhenderson/rules fork with go-feature-flag/rules ([#6512](https://github.com/thomaspoignant/go-feature-flag/issues/6512)) ([756767f](https://github.com/thomaspoignant/go-feature-flag/commit/756767fb73a17b7cc77f1938a950989989bd2c99))
+
+## [0.8.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.2...modules/core/v0.8.0) (2026-11-02)
+
+
+### 🚀 New Features
+
+* migrate the relay proxy from echo v4 to v5 ([#6000](https://github.com/thomaspoignant/go-feature-flag/issues/6000)) ([27ef744](https://github.com/thomaspoignant/go-feature-flag/commit/27ef744d94cc3700e5f6c38f3b17de49b5f91db3))
+
+
+### 💨 Performances
+
+* **core:** cache the query context JSON and make the shared map explicit ([#6388](https://github.com/thomaspoignant/go-feature-flag/issues/6388)) ([9e482cc](https://github.com/thomaspoignant/go-feature-flag/commit/9e482ccaf9e3ad2bca198943950987ac1c305db9))
+* **core:** convert the evaluation context once per flag evaluation ([#6385](https://github.com/thomaspoignant/go-feature-flag/issues/6385)) ([d6df28b](https://github.com/thomaspoignant/go-feature-flag/commit/d6df28be48a8aade17cfdef45da0abcbb3dbee61))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.43.8 ([#5953](https://github.com/thomaspoignant/go-feature-flag/issues/5953)) ([c1931fb](https://github.com/thomaspoignant/go-feature-flag/commit/c1931fb95064a1a2cb5c6c615aa5d3ff625b60fa))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.46.0 to 1.47.0 ([#6067](https://github.com/thomaspoignant/go-feature-flag/issues/6067)) ([04cba7c](https://github.com/thomaspoignant/go-feature-flag/commit/04cba7c83b5a097df1fb460daa0364ceadb75baf))
+* Bump github.com/aws/aws-sdk-go-v2 from 1.47.0 to 1.47.1 ([#6154](https://github.com/thomaspoignant/go-feature-flag/issues/6154)) ([2f54b43](https://github.com/thomaspoignant/go-feature-flag/commit/2f54b43bc3ce4535fa7236a2a494cd4f2b7e82bc))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.33.4 to 1.33.5 ([#6096](https://github.com/thomaspoignant/go-feature-flag/issues/6096)) ([83f71d5](https://github.com/thomaspoignant/go-feature-flag/commit/83f71d5f2987a77621c32035b80aee880dfbbaf3))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6091](https://github.com/thomaspoignant/go-feature-flag/issues/6091)) ([9488035](https://github.com/thomaspoignant/go-feature-flag/commit/94880359b2e96d799edd58486b9edfb21ebba5c2))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6123](https://github.com/thomaspoignant/go-feature-flag/issues/6123)) ([ba87b8d](https://github.com/thomaspoignant/go-feature-flag/commit/ba87b8d4d84e4a9bdf3d9f05016cb3ebf0b9b0c1))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6230](https://github.com/thomaspoignant/go-feature-flag/issues/6230)) ([8f5654d](https://github.com/thomaspoignant/go-feature-flag/commit/8f5654d56cec20414c651a47dd5fc65f7945a135))
+* Bump go.opentelemetry.io/otel/sdk from 1.46.0 to 1.47.0 ([#6216](https://github.com/thomaspoignant/go-feature-flag/issues/6216)) ([031d419](https://github.com/thomaspoignant/go-feature-flag/commit/031d4191f0ab8be2094afd83452b6c208021bcd0))
+* Bump go.opentelemetry.io/otel/trace from 1.46.0 to 1.47.0 ([#6218](https://github.com/thomaspoignant/go-feature-flag/issues/6218)) ([6540241](https://github.com/thomaspoignant/go-feature-flag/commit/6540241b3ee985a1db38608b30b75fc440b36cf5))
+
 ## [0.7.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.7.1...modules/core/v0.7.2) (2026-07-01)
 
 

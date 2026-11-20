@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -54,7 +55,7 @@ func ZapLogger(log *zap.Logger, isDebugEnabled bool) echo.MiddlewareFunc {
 				zap.String("remote_ip", c.RealIP()),
 				zap.String("latency", time.Since(v.StartTime).String()),
 				zap.String("host", req.Host),
-				zap.String("request", fmt.Sprintf("%s %s", req.Method, req.RequestURI)),
+				zap.String("request", fmt.Sprintf("%s %s", req.Method, redactAPIKey(req.RequestURI))),
 				zap.Int("status", status),
 				zap.Int64("size", size),
 				zap.String("user_agent", req.UserAgent()),
@@ -80,4 +81,21 @@ func ZapLogger(log *zap.Logger, isDebugEnabled bool) echo.MiddlewareFunc {
 			return nil
 		},
 	})
+}
+
+// redactAPIKey masks the apiKey query parameter value so it never reaches the logs.
+// Stream endpoints receive the key as a query param, because browsers can't set websocket headers (#4330).
+func redactAPIKey(uri string) string {
+	path, query, found := strings.Cut(uri, "?")
+	if !found {
+		return uri
+	}
+	params := strings.Split(query, "&")
+	for i, p := range params {
+		key, _, _ := strings.Cut(p, "=")
+		if k, err := url.QueryUnescape(key); err == nil && k == "apiKey" {
+			params[i] = key + "=REDACTED"
+		}
+	}
+	return path + "?" + strings.Join(params, "&")
 }

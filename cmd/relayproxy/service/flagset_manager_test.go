@@ -3,9 +3,11 @@ package service_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,6 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -102,7 +105,7 @@ func TestNewFlagsetManager(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, tt.notifiers, nil)
+			manager, err := service.NewFlagsetManager(tt.config, tt.logger, tt.notifiers, nil, nil)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -119,54 +122,110 @@ func TestNewFlagsetManager(t *testing.T) {
 	}
 }
 
-func TestNewFlagsetManager_WithSSEService(t *testing.T) {
+// fakeSSEService records the flagset name of every broadcast.
+type fakeSSEService struct {
+	stream.SSEService
+	mu      sync.Mutex
+	streams []string
+}
+
+func (f *fakeSSEService) BroadcastFlagChanges(flagsetName string, _ notifier.DiffCache) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.streams = append(f.streams, flagsetName)
+	return nil
+}
+
+func (f *fakeSSEService) Streams() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return append([]string(nil), f.streams...)
+}
+
+// fakeWebsocketService counts the broadcasts.
+type fakeWebsocketService struct {
+	stream.WebsocketService
+	broadcasts atomic.Int32
+}
+
+func (f *fakeWebsocketService) BroadcastFlagChanges(string, notifier.DiffCache) {
+	f.broadcasts.Add(1)
+}
+
+// newStreamManager wires the stream services the way main.go does.
+func newStreamManager(
+	t *testing.T, cfg *config.Config,
+) (service.FlagsetManager, *fakeSSEService, *fakeWebsocketService) {
+	t.Helper()
+	sse, ws := &fakeSSEService{}, &fakeWebsocketService{}
+	manager, err := service.NewFlagsetManager(cfg, zap.NewNop(), nil, sse, ws)
+	require.NoError(t, err)
+	t.Cleanup(func() { manager.Close() })
+	return manager, sse, ws
+}
+
+// assertBroadcasts checks that every flagset broadcast once on its own SSE stream and once on
+// the websocket service.
+func assertBroadcasts(t *testing.T, sse *fakeSSEService, ws *fakeWebsocketService, flagsets []string) {
+	t.Helper()
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		assert.ElementsMatch(c, flagsets, sse.Streams())
+		assert.Equal(c, int32(len(flagsets)), ws.broadcasts.Load())
+	}, 5*time.Second, 10*time.Millisecond)
+}
+
+func TestFlagsetManager_StreamNotifiers(t *testing.T) {
 	flagConfig := "../testdata/goff/configuration_flags.yaml"
+	flagset := func(name string) config.FlagSet {
+		return config.FlagSet{
+			Name: name,
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{Kind: "file", Path: flagConfig},
+			},
+			APIKeys: []string{name + "-key"},
+		}
+	}
 
 	tests := []struct {
-		name   string
-		config *config.Config
+		name     string
+		config   *config.Config
+		flagsets []string
 	}{
 		{
-			name: "default mode with SSE service attaches SSE notifier",
+			name: "default mode",
 			config: &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &retrieverconf.RetrieverConf{
-						Kind: "file",
-						Path: flagConfig,
-					},
+					Retriever: &retrieverconf.RetrieverConf{Kind: "file", Path: flagConfig},
 				},
 			},
+			flagsets: []string{utils.DefaultFlagSetName},
 		},
 		{
-			name: "flagsets mode with SSE service attaches SSE notifier per flagset",
+			name: "flagsets mode",
 			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &retrieverconf.RetrieverConf{
-								Kind: "file",
-								Path: flagConfig,
-							},
-						},
-						APIKeys: []string{"test-api-key"},
-					},
-				},
+				FlagSets: []config.FlagSet{flagset("flagset-1"), flagset("flagset-2")},
 			},
+			flagsets: []string{"flagset-1", "flagset-2"},
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sseService := stream.NewSSEService()
-			defer sseService.Close()
-
-			manager, err := service.NewFlagsetManager(tt.config, zap.NewNop(), []notifier.Notifier{}, sseService)
-			require.NoError(t, err)
-			require.NotNil(t, manager)
-			defer manager.Close()
+			_, sse, ws := newStreamManager(t, tt.config)
+			assertBroadcasts(t, sse, ws, tt.flagsets)
 		})
 	}
+
+	t.Run("flagset added at runtime", func(t *testing.T) {
+		manager, sse, ws := newStreamManager(t, &config.Config{
+			FlagSets: []config.FlagSet{flagset("flagset-1")},
+		})
+		assertBroadcasts(t, sse, ws, []string{"flagset-1"})
+
+		manager.OnConfigChange(&config.Config{
+			FlagSets: []config.FlagSet{flagset("flagset-1"), flagset("flagset-2")},
+		})
+		assertBroadcasts(t, sse, ws, []string{"flagset-1", "flagset-2"})
+	})
 }
 
 func TestFlagsetManager_FlagSet(t *testing.T) {
@@ -190,7 +249,7 @@ func TestFlagsetManager_FlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -233,7 +292,7 @@ func TestFlagsetManager_FlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -269,7 +328,7 @@ func TestFlagsetManager_FlagSetName(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -287,6 +346,12 @@ func TestFlagsetManager_FlagSetName(t *testing.T) {
 			assert.Equal(t, "", name)
 			assert.Equal(t, "no flag set associated to the API key", err.Error())
 		})
+		t.Run("empty api key", func(t *testing.T) {
+			name, err := manager.FlagSetName("")
+			assert.Error(t, err)
+			assert.Equal(t, "", name)
+			assert.Equal(t, "apiKey is required when using flagsets", err.Error())
+		})
 	})
 
 	// Test default mode
@@ -302,7 +367,7 @@ func TestFlagsetManager_FlagSetName(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -348,7 +413,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -389,7 +454,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -416,7 +481,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -446,7 +511,7 @@ func TestFlagsetManager_Default(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -475,7 +540,7 @@ func TestFlagsetManager_Default(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -503,7 +568,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -531,7 +596,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -547,6 +612,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 
 	// Test default mode
 	t.Run("default mode", func(t *testing.T) {
+		outputDir := t.TempDir()
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -554,23 +620,24 @@ func TestFlagsetManager_Close(t *testing.T) {
 					Kind: "file",
 					Path: flagConfig,
 				},
+				Exporter: bufferedFileExporter(outputDir),
 			},
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
 		assert.NotNil(t, manager)
 
-		assert.NotPanics(t, func() {
-			manager.Close()
-		})
+		_, _ = manager.Default().BoolVariation("test-flag-rule-apply", ffcontext.NewEvaluationContext("user-key"), false)
+		assertFlushedOnClose(t, manager, outputDir)
 	})
 
 	// Test flagset mode
 	t.Run("flagset mode", func(t *testing.T) {
+		outputDir := t.TempDir()
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
@@ -580,6 +647,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 							Kind: "file",
 							Path: flagConfig,
 						},
+						Exporter: bufferedFileExporter(outputDir),
 					},
 					APIKeys: []string{"test-api-key"},
 				},
@@ -587,16 +655,42 @@ func TestFlagsetManager_Close(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
 		assert.NotNil(t, manager)
 
-		assert.NotPanics(t, func() {
-			manager.Close()
-		})
+		flagset, err := manager.FlagSet("test-api-key")
+		require.NoError(t, err)
+		_, _ = flagset.BoolVariation("test-flag-rule-apply", ffcontext.NewEvaluationContext("user-key"), false)
+		assertFlushedOnClose(t, manager, outputDir)
 	})
+}
+
+// bufferedFileExporter returns a file exporter whose flush interval is long enough
+// that events stay in memory until the flagset manager is closed.
+func bufferedFileExporter(outputDir string) *config.ExporterConf {
+	return &config.ExporterConf{
+		Kind:             config.FileExporter,
+		OutputDir:        outputDir,
+		FlushInterval:    time.Hour.Milliseconds(),
+		MaxEventInMemory: 10_000,
+	}
+}
+
+// assertFlushedOnClose checks that the buffered events are only written once the manager is closed.
+func assertFlushedOnClose(t *testing.T, manager service.FlagsetManager, outputDir string) {
+	t.Helper()
+	files, err := os.ReadDir(outputDir)
+	require.NoError(t, err)
+	require.Empty(t, files, "events should still be buffered before Close")
+
+	manager.Close()
+
+	files, err = os.ReadDir(outputDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, files, "Close should flush the buffered events to the exporter")
 }
 
 // setupManager is a helper function to create a manager and capture log messages
@@ -604,7 +698,7 @@ func setupManager(t *testing.T, cfg *config.Config) (service.FlagsetManager, *ob
 	t.Helper()
 	obs, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(obs)
-	manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
+	manager, err := service.NewFlagsetManager(cfg, logger, nil, nil, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { manager.Close() })
 	return manager, logs
@@ -1258,7 +1352,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.InfoLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -1308,7 +1402,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.WarnLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -1363,7 +1457,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.WarnLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -1476,6 +1570,42 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		name2, err = manager.FlagSetName("new-key-2")
 		assert.NoError(t, err)
 		assert.Equal(t, "flagset-2", name2)
+	})
+
+	t.Run("should only notify the websocket clients of the flagset added at runtime", func(t *testing.T) {
+		flagset := func(name, apiKey string) config.FlagSet {
+			return config.FlagSet{
+				Name: name,
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{Kind: "file", Path: flagConfig},
+				},
+				APIKeys: []string{apiKey},
+			}
+		}
+		existing := flagset("flagset-1", "key-1")
+		// flagset-1 never notifies, so its client must not receive anything.
+		existing.DisableNotifierOnInit = true
+
+		wsService := stream.NewWebsocketService()
+		manager, err := service.NewFlagsetManager(
+			&config.Config{FlagSets: []config.FlagSet{existing}}, zap.NewNop(), nil, nil, wsService)
+		require.NoError(t, err)
+		t.Cleanup(func() { manager.Close() })
+
+		conn1, conn2 := &countingWSConn{}, &countingWSConn{}
+		wsService.Register(conn1, "flagset-1")
+		wsService.Register(conn2, "flagset-2")
+
+		manager.OnConfigChange(&config.Config{
+			FlagSets: []config.FlagSet{existing, flagset("flagset-2", "key-2")},
+		})
+
+		// The flags loaded by the new flagset are notified as added.
+		assert.Eventually(t, func() bool { return conn2.writes.Load() > 0 },
+			5*time.Second, 10*time.Millisecond)
+		// Close waits for the in-flight broadcast, so every client it targets has been written.
+		wsService.Close()
+		assert.Zero(t, conn1.writes.Load())
 	})
 
 	t.Run("should add a new flagset at runtime", func(t *testing.T) {
@@ -1781,7 +1911,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.WarnLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -2076,4 +2206,12 @@ func TestFlagsetManager_RemoveFlagsetGracefullyCloses(t *testing.T) {
 	// exported (no data loss). Close() flushes synchronously, so the call has completed here.
 	assert.GreaterOrEqual(t, exportCalls.Load(), int64(1),
 		"removing a flagset must gracefully close it and flush its buffered events")
+}
+
+// countingWSConn is a stream.WebsocketConnector counting the messages written to it.
+type countingWSConn struct{ writes atomic.Int32 }
+
+func (c *countingWSConn) WriteJSON(_ any) error {
+	c.writes.Add(1)
+	return nil
 }

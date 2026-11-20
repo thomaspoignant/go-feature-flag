@@ -1,0 +1,73 @@
+---
+sidebar_position: 40
+description: How to configure a Kafka exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'Apache Kafka'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# Apache Kafka
+
+## Overview
+{info.longDescription ?? info.description}
+
+:::info
+{exporterName} is an exporter of type queue, it means that it send events as soon as he receives them it does not work in bulk but in near real time.
+:::
+## Configure the relay proxy
+
+To configure your relay proxy to use the {exporterName} exporter, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: kafka
+    kafka:
+      topic: "go-feature-flag-events"
+      addresses:
+        - "localhost:9092"
+# ...
+```
+
+| Field name        |    Mandatory     | Type     | Default           | Description                                                                                                                                                                                                                                                                                                |
+|-------------------|:----------------:|----------|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`            |  <Mandatory />   | string   | **none**          | **Value should be `kafka`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                                                                                                                    |
+| `kafka.topic`     |  <Mandatory />   | string   | **none**          | Kafka topic to bind to.                                                                                                                                                                                                                                                                                    |
+| `kafka.addresses` |  <Mandatory />   | []string | **none**          | List of bootstrap addresses for the Kafka cluster.                                                                                                                                                                                                                                                         |
+| `kafka.config`    | <NotMandatory /> | object   | _see description_ | This field allows fine tuning of the Kafka reader. This object should contain the [Sarama configuration](https://pkg.go.dev/github.com/IBM/sarama#Config) that the reader will use. On empty, a sensible default is created using [sarama.NewConfig()](https://pkg.go.dev/github.com/IBM/sarama#NewConfig) |
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+config := ffclient.Config{
+   // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &kafkaexporter.Exporter{
+           Settings: kafkaexporter.Settings{
+              Topic: "go-feature-flag-events",
+              Addresses: []string{"localhost:9092", "cluster2:9092"},
+           },
+        },
+    },
+    // ...
+}
+err := ffclient.Init(config)
+defer ffclient.Close()
+```
+
+| Field        |    Mandatory     | Description                                                                                                                                                                                    |
+|--------------|:----------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Format `     |  <NotMandatory />   | The format to produce in the topic (only `JSON` is supported for now).                                                                                                                                                         |
+| `Settings ` |  <Mandatory />   | A extension of the `*sarama.Config` struct that holds additional settings for the producer, such as timeouts, TLS settings, etc. If not populated, a default will be used by calling `sarama.NewConfig()` |                                                                                                                                         |                                                                                                                                                     |
+
+In the settings we have the following fields:
+
+| Field        |    Mandatory     | Description                                                                                                                                                                                    |
+|--------------|:----------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Topic `     |  <Mandatory />   | Name of the topic to publish messages                                                                                                                                                          |
+| `Addresses ` |  <Mandatory />   | The list of addresses for the Kafka boostrap servers                                                                                                                                           |

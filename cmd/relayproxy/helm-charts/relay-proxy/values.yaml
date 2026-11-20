@@ -60,6 +60,8 @@ serviceAccount:
 pdb:
   enable: false
   minAvailable: 1
+  # -- (int or string) Maximum number (or percentage, e.g. "25%") of pods that can be unavailable. When set, it takes precedence over `minAvailable`.
+  maxUnavailable: null
 
 # -- Pod annotations to add to the deployment
 podAnnotations: {}
@@ -82,6 +84,28 @@ securityContext: {}
 # readOnlyRootFilesystem: true
 # runAsNonRoot: true
 # runAsUser: 1000
+
+nonRoot:
+  # -- Run the relay proxy as the distroless `nonroot` user (uid/gid 65532) with a hardened
+  # security context (runAsNonRoot, fsGroup, RuntimeDefault seccomp, no privilege escalation,
+  # all capabilities dropped). Each key you set in `podSecurityContext` / `securityContext` replaces
+  # the matching default as a whole (e.g. setting `capabilities` replaces `capabilities.drop: [ALL]`).
+  # `readOnlyRootFilesystem` is not set: the file exporter and `persistentFlagConfigurationFile`
+  # write to the container filesystem.
+  enabled: false
+
+# -- Lifecycle hooks for the relay proxy container. A `preStop` sleep keeps the pod serving
+# while its endpoint is removed from Services and ingress controllers, avoiding failed
+# requests during rollouts and node drains. Use the native `sleep` action (Kubernetes 1.30+):
+# the default image is distroless and has no shell for `exec` hooks.
+lifecycle: {}
+# preStop:
+#   sleep:
+#     seconds: 10
+
+# -- (int) Time in seconds given to the pod to terminate gracefully, including any `preStop` hook.
+# Uses the Kubernetes default (30s) when not set.
+terminationGracePeriodSeconds: null
 
 service:
   # -- The type of service to create
@@ -146,9 +170,12 @@ extraManifests: []
 #      name: feature-flags-relay-proxy
 #      namespace: "{{ .Release.Namespace }}"
 #    rules:
+#      # The Kubernetes retriever only reads the flag ConfigMap with a single `get`.
 #      - apiGroups: [""]
 #        resources:
 #          - configmaps
+#        resourceNames:
+#          - my-flags-configmap
 #        verbs:
 #          - get
 #  - kind: RoleBinding
@@ -158,8 +185,9 @@ extraManifests: []
 #      namespace: "{{ .Release.Namespace }}"
 #    subjects:
 #    - kind: ServiceAccount
-#      name: feature-flags-relay-proxy
+#      name: '{{ include "relay-proxy.serviceAccountName" . }}'
+#      namespace: "{{ .Release.Namespace }}"
 #    roleRef:
 #      kind: Role
 #      name: feature-flags-relay-proxy
-#      apiGroup: ""
+#      apiGroup: rbac.authorization.k8s.io
