@@ -13,8 +13,7 @@ import (
 // CallHTTPAPI is the default function to make an HTTP call in the retrievers.
 func CallHTTPAPI(
 	ctx context.Context,
-	url string, method string,
-	body string,
+	url, method, body string,
 	timeout time.Duration,
 	header http.Header,
 	httpClient internal.HTTPClient) (*http.Response, error) {
