@@ -28,7 +28,7 @@ type PoolConfig struct {
 }
 
 // IsZero reports whether no pool setting has been configured. When true,
-// GetPool builds the pool exactly as it did before pool settings existed.
+// GetPoolWithConfig builds the pool exactly as it did before pool settings existed.
 func (p PoolConfig) IsZero() bool {
 	return p.MaxConns == 0 &&
 		p.MinConns == 0 &&
@@ -58,11 +58,17 @@ var (
 )
 
 // GetPool returns a pool for a given URI, creating it if needed.
+// It uses the default pool settings; use GetPoolWithConfig to tune the pool.
+func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
+	return GetPoolWithConfig(ctx, uri, PoolConfig{})
+}
+
+// GetPoolWithConfig returns a pool for a given URI and pool configuration,
+// creating it if needed.
 //
-// The optional poolCfg controls the connection pool sizing and lifetimes. When
-// it is the zero value, the pool is built exactly as before so existing
-// behavior is unchanged.
-func GetPool(ctx context.Context, uri string, poolCfg PoolConfig) (*pgxpool.Pool, error) {
+// poolCfg controls the connection pool sizing and lifetimes. When it is the
+// zero value, the pool is built exactly as GetPool builds it.
+func GetPoolWithConfig(ctx context.Context, uri string, poolCfg PoolConfig) (*pgxpool.Pool, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -126,10 +132,16 @@ func newPool(ctx context.Context, uri string, poolCfg PoolConfig) (*pgxpool.Pool
 }
 
 // ReleasePool decreases refCount and closes/removes when it hits zero.
+// It releases the pool obtained with GetPool (default pool settings).
+func ReleasePool(ctx context.Context, uri string) {
+	ReleasePoolWithConfig(ctx, uri, PoolConfig{})
+}
+
+// ReleasePoolWithConfig decreases refCount and closes/removes when it hits zero.
 //
-// poolCfg must match the value passed to GetPool so the correct cached pool is
-// released; the zero value targets the default (URI-only) pool.
-func ReleasePool(_ context.Context, uri string, poolCfg PoolConfig) {
+// poolCfg must match the value passed to GetPoolWithConfig so the correct
+// cached pool is released; the zero value targets the default (URI-only) pool.
+func ReleasePoolWithConfig(_ context.Context, uri string, poolCfg PoolConfig) {
 	mu.Lock()
 	defer mu.Unlock()
 

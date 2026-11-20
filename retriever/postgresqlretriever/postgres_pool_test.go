@@ -163,3 +163,56 @@ func TestCacheKey(t *testing.T) {
 		})
 	}
 }
+
+// Compile-time guard: the pre-existing exported signatures must keep working
+// for applications that call them directly.
+var (
+	_ func(context.Context, string) (*pgxpool.Pool, error) = GetPool
+	_ func(context.Context, string)                        = ReleasePool
+)
+
+// TestGetPool_DefaultSignatureSharesDefaultPool checks that the two-argument
+// GetPool/ReleasePool use the same cached pool as GetPoolWithConfig with a zero
+// PoolConfig. The pool is seeded in the cache so no live database is needed.
+func TestGetPool_DefaultSignatureSharesDefaultPool(t *testing.T) {
+	ctx := context.Background()
+	const uri = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable&application_name=compat"
+
+	seeded, err := newPool(ctx, uri, PoolConfig{})
+	assert.NoError(t, err)
+	mu.Lock()
+	poolMap[uri] = &poolEntry{pool: seeded, refCount: 1}
+	mu.Unlock()
+	t.Cleanup(func() {
+		mu.Lock()
+		defer mu.Unlock()
+		if entry, ok := poolMap[uri]; ok {
+			entry.pool.Close()
+			delete(poolMap, uri)
+		}
+	})
+
+	got, err := GetPool(ctx, uri)
+	assert.NoError(t, err)
+	assert.Same(t, seeded, got)
+
+	gotWithCfg, err := GetPoolWithConfig(ctx, uri, PoolConfig{})
+	assert.NoError(t, err)
+	assert.Same(t, seeded, gotWithCfg)
+
+	mu.Lock()
+	assert.Equal(t, 3, poolMap[uri].refCount)
+	mu.Unlock()
+
+	ReleasePool(ctx, uri)
+	ReleasePoolWithConfig(ctx, uri, PoolConfig{})
+	mu.Lock()
+	assert.Equal(t, 1, poolMap[uri].refCount)
+	mu.Unlock()
+
+	ReleasePool(ctx, uri)
+	mu.Lock()
+	_, stillCached := poolMap[uri]
+	mu.Unlock()
+	assert.False(t, stillCached)
+}

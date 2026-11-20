@@ -49,7 +49,7 @@ func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger, flagset *s
 		r.logger.Info("Initializing PostgreSQL retriever")
 		r.logger.Debug("Using columns", "columns", r.columns)
 
-		pool, err := GetPool(ctx, r.URI, r.Pool)
+		pool, err := GetPoolWithConfig(ctx, r.URI, r.Pool)
 		if err != nil {
 			r.status = retriever.RetrieverError
 			return err
@@ -73,7 +73,7 @@ func (r *Retriever) Status() retriever.Status {
 // Shutdown closes the database connection.
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	if r.pool != nil {
-		ReleasePool(ctx, r.URI, r.Pool)
+		ReleasePoolWithConfig(ctx, r.URI, r.Pool)
 		r.pool = nil
 	}
 	return nil
