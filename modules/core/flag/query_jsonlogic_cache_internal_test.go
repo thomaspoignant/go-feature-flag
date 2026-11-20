@@ -47,6 +47,7 @@ func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 		`{"or": [{"==": [{"var": "anonymous"}, true]}, {"!": {"var": "missing"}}]}`,
 		`{"cat": ["t", "r", "u", "e"]}`,
 		`{"var": "floor"}`,
+		`{"var": "plan"}`,
 		`{"-": [{"var": "floor"}, {"var": "floor"}]}`,
 		`{"filter": [{"var": "tags"}, {"==": [{"var": ""}, "b"]}]}`,
 		`{"filter": [{"var": "tags"}, {"==": [{"var": ""}, "z"]}]}`,

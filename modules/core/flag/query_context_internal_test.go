@@ -82,6 +82,18 @@ func TestQueryContext_JSONOnceDoesNotCacheAnError(t *testing.T) {
 	assert.Nil(t, queryCtx.parsedEvalCtxAsBytes)
 }
 
+func TestQueryContext_DataOnceDoesNotCacheAnError(t *testing.T) {
+	queryCtx := &queryContext{
+		ctx: ffcontext.NewEvaluationContextBuilder("user-1").AddCustom("unsupported", make(chan int)).Build(),
+	}
+
+	_, err := queryCtx.dataOnce()
+
+	assert.Error(t, err)
+	assert.Nil(t, queryCtx.parsedEvalCtxAsData)
+	assert.False(t, evaluateRule(`{"==": [{"var": "key"}, "user-1"]}`, JSONLogicQueryFormat, queryCtx))
+}
+
 func TestRule_EvaluateBuildsTheMapOnlyForAQuery(t *testing.T) {
 	tests := []struct {
 		name       string
