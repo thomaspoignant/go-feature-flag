@@ -173,7 +173,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 }
 
 // fetch calls the contents API with the given token and records the rate limit headers.
-func (r *Retriever) fetch(ctx context.Context, contentsURL string, token string) (*http.Response, error) {
+func (r *Retriever) fetch(ctx context.Context, contentsURL, token string) (*http.Response, error) {
 	resp, err := shared.CallHTTPAPI(ctx, contentsURL, http.MethodGet, "", r.Timeout, r.buildHeaders(token), r.httpClient)
 	if err != nil {
 		return nil, err

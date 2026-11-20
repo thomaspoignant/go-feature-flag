@@ -7,11 +7,11 @@ import castai from '@site/static/img/using-it/castai.png';
 import grafana from '@site/static/img/using-it/grafana.png';
 import alternativepayment from '@site/static/img/using-it/alternativepayment.png';
 import agentero from '@site/static/img/using-it/agentero.png';
-import mecena from '@site/static/img/using-it/mecena.png';
 import landsend from '@site/static/img/using-it/landsend.png';
-import helloworldcs from '@site/static/img/using-it/helloworldcs.png';
 import miro from '@site/static/img/using-it/miro.png';
-import stacklok from '@site/static/img/using-it/stacklok.png';
+import solaris from '@site/static/img/using-it/solaris.png';
+import kargo from '@site/static/img/using-it/kargo.png';
+import datagalaxy from '@site/static/img/using-it/datagalaxy.png';
 
 export function UsingIt() {
   const companies = [
@@ -28,12 +28,6 @@ export function UsingIt() {
       imgClassName: 'max-w-32',
     },
     {
-      name: 'Cast.ai',
-      logo: castai,
-      url: 'https://cast.ai',
-      imgClassName: 'max-w-24',
-    },
-    {
       name: 'Lyft',
       logo: lyft,
       url: 'https://lyft.com',
@@ -45,14 +39,10 @@ export function UsingIt() {
       url: 'https://tencent.com',
     },
     {
-      name: 'Minder',
-      logo: minder,
-      url: 'https://github.com/mindersec/minder',
-    },
-    {
-      name: 'Agentero',
-      logo: agentero,
-      url: 'https://agentero.com/',
+      name: 'Cast.ai',
+      logo: castai,
+      url: 'https://cast.ai',
+      imgClassName: 'max-w-24',
     },
     {
       name: "Lands'end",
@@ -60,24 +50,37 @@ export function UsingIt() {
       url: 'https://www.landsend.com/',
     },
     {
+      name: 'Solaris',
+      logo: solaris,
+      url: 'https://www.solarisgroup.com/',
+      imgClassName: 'max-w-32',
+    },
+    {
+      name: 'Kargo',
+      logo: kargo,
+      url: 'https://www.kargo.com/',
+      imgClassName: 'max-w-20',
+    },
+    {
+      name: 'DataGalaxy',
+      logo: datagalaxy,
+      url: 'https://www.datagalaxy.com/',
+      imgClassName: 'max-w-36',
+    },
+    {
+      name: 'Minder',
+      logo: minder,
+      url: 'https://github.com/mindersec/minder',
+    },
+    {
       name: 'Alternative Payments',
       logo: alternativepayment,
       url: 'https://www.alternativepayments.io/',
     },
     {
-      name: 'mecena',
-      logo: mecena,
-      url: 'https://mecena.co/',
-    },
-    {
-      name: 'HelloWorld CS',
-      logo: helloworldcs,
-      url: 'https://helloworldcs.org/',
-    },
-    {
-      name: 'Stacklok',
-      logo: stacklok,
-      url: 'https://github.com/stacklok/',
+      name: 'Agentero',
+      logo: agentero,
+      url: 'https://agentero.com/',
     },
   ];
 

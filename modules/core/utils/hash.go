@@ -10,7 +10,7 @@ func Hash(s string) uint32 {
 }
 
 // BuildHash is building the hash based on the different properties of the evaluation.
-func BuildHash(flagName string, bucketingKey string, maxPercentage uint32) uint32 {
+func BuildHash(flagName, bucketingKey string, maxPercentage uint32) uint32 {
 	// this is not supposed to happen, but to avoid a crash if maxPercentage is 0 we are returning 0
 	if maxPercentage == uint32(0) {
 		return uint32(0)
