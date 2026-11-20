@@ -162,7 +162,7 @@ func (f *InternalFlag) isCacheable() bool {
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
 func (f *InternalFlag) selectVariation(
-	flagName string, key string, ctx ffcontext.Context) (variationSelection, error) {
+	flagName, key string, ctx ffcontext.Context) (variationSelection, error) {
 	hasRule := len(f.GetRules()) != 0
 	// Shared by all the rules below: the context is converted to a map at most once.
 	queryCtx := &queryContext{ctx: ctx}

@@ -369,8 +369,7 @@ func (c *realBigQueryClient) Inserter(dataset, table string) inserter {
 
 func (c *realBigQueryClient) EnsureTable(
 	ctx context.Context,
-	dataset string,
-	table string,
+	dataset, table string,
 	schema bigquery.Schema,
 ) error {
 	bqDataset := c.client.Dataset(dataset)
