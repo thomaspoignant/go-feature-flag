@@ -27,6 +27,12 @@ func TestExporterConf_IsValid(t *testing.T) {
 		StreamName              string
 		Container               string
 		AccountName             string
+		Database                string
+		ClusterIdentifier       string
+		WorkgroupName           string
+		TableName               string
+		DbUser                  string
+		SecretArn               string
 	}
 	tests := []struct {
 		name     string
@@ -252,6 +258,117 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid exporter: \"projectID\" and \"datasetID\" are required for kind \"bigquery\"",
 		},
+		{
+			name: "kind Redshift valid with cluster",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind Redshift valid with workgroup",
+			fields: fields{
+				Kind:          "redshift",
+				Database:      "analytics",
+				WorkgroupName: "my-workgroup",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind Redshift valid with schema and table name",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+				TableName:         "goff.feature_flag_evaluations",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind Redshift with invalid table name",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+				TableName:         "events; DROP TABLE users",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"tableName\" \"events; DROP TABLE users\" is not a valid table name for kind \"redshift\"",
+		},
+		{
+			name: "kind Redshift without database",
+			fields: fields{
+				Kind:              "redshift",
+				ClusterIdentifier: "my-cluster",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"database\" property found for kind \"redshift\"",
+		},
+		{
+			name: "kind Redshift without cluster or workgroup",
+			fields: fields{
+				Kind:     "redshift",
+				Database: "analytics",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: exactly one of \"clusterIdentifier\" or \"workgroupName\" is required for kind \"redshift\"",
+		},
+		{
+			name: "kind Redshift with both cluster and workgroup",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+				WorkgroupName:     "my-workgroup",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: exactly one of \"clusterIdentifier\" or \"workgroupName\" is required for kind \"redshift\"",
+		},
+		{
+			name: "kind Redshift valid with cluster and dbUser",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+				DbUser:            "goff_writer",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind Redshift valid with workgroup and secretArn",
+			fields: fields{
+				Kind:          "redshift",
+				Database:      "analytics",
+				WorkgroupName: "my-workgroup",
+				SecretArn:     "arn:aws:secretsmanager:us-east-1:123456789012:secret:goff",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind Redshift with dbUser and workgroup",
+			fields: fields{
+				Kind:          "redshift",
+				Database:      "analytics",
+				WorkgroupName: "my-workgroup",
+				DbUser:        "goff_writer",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"dbUser\" cannot be used with \"workgroupName\" for kind \"redshift\"",
+		},
+		{
+			name: "kind Redshift with dbUser and secretArn",
+			fields: fields{
+				Kind:              "redshift",
+				Database:          "analytics",
+				ClusterIdentifier: "my-cluster",
+				DbUser:            "goff_writer",
+				SecretArn:         "arn:aws:secretsmanager:us-east-1:123456789012:secret:goff",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"dbUser\" and \"secretArn\" are mutually exclusive for kind \"redshift\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -274,6 +391,12 @@ func TestExporterConf_IsValid(t *testing.T) {
 				StreamName:              tt.fields.StreamName,
 				AccountName:             tt.fields.AccountName,
 				Container:               tt.fields.Container,
+				Database:                tt.fields.Database,
+				ClusterIdentifier:       tt.fields.ClusterIdentifier,
+				WorkgroupName:           tt.fields.WorkgroupName,
+				TableName:               tt.fields.TableName,
+				DbUser:                  tt.fields.DbUser,
+				SecretArn:               tt.fields.SecretArn,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)
