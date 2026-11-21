@@ -177,7 +177,8 @@ This is the format of your flag configuration file.
 
 ### `pollingInterval`
 
-This is the time interval **in millisecond** when the relay proxy is reloading the configuration file.
+This is the time interval **in millisecond** when the relay proxy is reloading the configuration file.  
+It is also the interval of the shared pollers of the flag sets using [`enableSharedPollerPerBucket`](#flagsetenablesharedpollerperbucket).
 
 - option name: `pollingInterval`
 - type: **int**
@@ -188,7 +189,8 @@ This is the time interval **in millisecond** when the relay proxy is reloading t
 
 ### `enablePollingJitter`
 
-Set to true if you want to avoid having true periodicity when retrieving your flags. It is useful to avoid having spike on your flag configuration storage in case your application is starting multiple instance at the same time.
+Set to true if you want to avoid having true periodicity when retrieving your flags. It is useful to avoid having spike on your flag configuration storage in case your application is starting multiple instance at the same time.  
+It is also used by the shared pollers of the flag sets using [`enableSharedPollerPerBucket`](#flagsetenablesharedpollerperbucket).
 
 :::info
 We ensure a deviation that is maximum ±10% of your polling interval.
@@ -418,6 +420,90 @@ a newly added flag set is started immediately and a removed flag set is stopped.
 - **Modifying** an existing flag set (its `retrievers`, `exporters`, `notifiers`, `pollingInterval`, …) is **not supported at runtime**. The only exception is its `apiKeys`, which can be changed live. Any other modification is **ignored** and an error is logged; the change will only be applied the next time the relay proxy is **restarted**.
 - Runtime add/remove only works for flag sets that have an explicit, unique [`name`](#flagsetname). Flag sets without a name (or named `default`) get a generated name at startup and cannot be added or removed at runtime.
 :::
+
+#### Sharing S3 requests between flag sets
+
+By default every flag set polls its own retriever, so `N` flag sets reading `N` files from the same S3 bucket send `N` `GetObject` requests per polling interval and per relay proxy replica.
+
+With [`enableSharedPollerPerBucket`](#flagsetenablesharedpollerperbucket) set to **true**, the flag sets of the same bucket share **one poller**.
+Every polling interval the poller does **one recursive listing** of the bucket, compares the ETag of each file with the one it already holds, and refreshes **only the flag sets whose file changed**, each of them downloading just its own file.
+
+```yaml title="example goff-proxy.yaml"
+pollingInterval: 5000 # used by the shared poller of every bucket
+flagSets:
+  - name: project-1-prod # no option: keeps its own retriever and its own polling
+    apiKeys: ["prod-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: flags/project-1/prod/flags.yaml
+
+  - name: project-1-dev
+    enableSharedPollerPerBucket: true
+    apiKeys: ["dev-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: flags/project-1/dev/flags.yaml
+
+  - name: project-2-dev
+    enableSharedPollerPerBucket: true
+    apiKeys: ["dev-2-key"]
+    retriever:
+      kind: s3
+      bucket: flags
+      item: flags/project-2/dev/flags.yaml
+```
+
+- Only the flag sets with the same `bucket` and `enableSharedPollerPerBucket: true` are grouped, the others behave as usual. Keep your production flag sets isolated by not setting the option on them.
+- **Polling**: the shared poller uses the top-level `pollingInterval` and `enablePollingJitter` (60s by default, 1s at least). If an opted-in flag set sets a different `pollingInterval` or `enablePollingJitter`, a **warning** naming the flag set and both values is logged and the top-level values are used. The configuration is not rejected.
+- **Layout**: put the flag files under a dedicated prefix (like `flags/` above). The poller lists the longest common key prefix of the items, cut at its last `/`, and the listing covers **every object under it**. Items with no common directory list **the whole bucket**.
+- **IAM**: in addition to `s3:GetObject`, the relay proxy needs `s3:ListBucket` on the bucket for the listing prefix. A denied prefix fails the listing for **the whole group**.
+
+##### Behaviour
+
+- **Detection delay**: a change is detected at the next listing, so within one `pollingInterval` like with an independent retriever.
+- **Startup**: each flag set downloads its file once when it starts and is ready after that. Downloads are limited to 16 concurrent `GetObject` requests per bucket.
+- **Errors**: a failed refresh of one flag set does not stop the others and is retried at the next poll. A failed listing is logged and retried at the next polling interval, the flag sets keep serving their last known flags meanwhile. Each listing page request has a 30 second timeout and a listing is limited to 10000 pages.
+- **Reload**: a new top-level `pollingInterval` or `enablePollingJitter` is applied to the running pollers without rebuilding the flag sets. Like the other flag set options, `enableSharedPollerPerBucket` can't be changed on an existing flag set at runtime.
+- **Lifecycle**: the poller of a bucket starts with its first flag set and stops when the last one is removed or the relay proxy shuts down.
+- The `timeout` of the `retriever` is not used by this path.
+
+##### Request load on the bucket
+
+With `N` flag sets, `M` objects under the prefix and `C` changed objects per interval, independent retrievers send `N` `GetObject` requests per interval and per replica, and the shared poller sends `ceil(M / 1000)` listing pages plus `C` `GetObject` requests. The request count goes down while `M` is below roughly `1000 * (N - C)`. Keep the prefix dedicated to the flag files, and leave the option off for a handful of flag sets.
+In dollars, a listing page costs about 12.5 times a `GetObject`, so the cost only goes down while `M` is below about `80 * N`: the cost is secondary, the goal is the request load.
+
+Measured on this implementation (one poller per bucket, each flag set keeping its own client with polling disabled):
+
+Per pod, 60s window, 5s polling, 1% of flagsets rewritten every polling interval, single run each, local in-memory S3 emulator:
+
+| Flagsets x flags | Metric | Current | SharedRetriever | Delta |
+|---|---|---|---|---|
+| 100 x 10 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
+| | RSS (MiB) | 83.0 | 74.4 | -8.5 (-10%) |
+| | Heap in use (MiB) | 23.3 | 17.1 | -6.2 (-27%) |
+| | Goroutines | 318 | 21 | -297 (15x fewer) |
+| | Allocations (count / bytes) | 5.20M / 331 MiB | 0.19M / 10.8 MiB | 27x / 31x fewer |
+| 100 x 20 | S3 requests | 1,200 GET | 12 LIST + 12 GET | -1,176 (50x fewer) |
+| | RSS (MiB) | 90.1 | 80.8 | -9.3 (-10%) |
+| | Heap in use (MiB) | 27.1 | 21.2 | -5.9 (-22%) |
+| | Goroutines | 317 | 22 | -295 (14x fewer) |
+| | Allocations (count / bytes) | 9.72M / 583 MiB | 0.31M / 19.0 MiB | 31x / 31x fewer |
+| 200 x 10 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
+| | RSS (MiB) | 96.3 | 71.5 | -24.8 (-26%) |
+| | Heap in use (MiB) | 37.7 | 25.9 | -11.8 (-31%) |
+| | Goroutines | 617 | 22 | -595 (28x fewer) |
+| | Allocations (count / bytes) | 10.38M / 662 MiB | 0.37M / 21.0 MiB | 28x / 32x fewer |
+| 200 x 20 | S3 requests | 2,400 GET | 12 LIST + 24 GET | -2,364 (67x fewer) |
+| | RSS (MiB) | 107.8 | 95.9 | -12.0 (-11%) |
+| | Heap in use (MiB) | 36.4 | 29.4 | -7.0 (-19%) |
+| | Goroutines | 617 | 22 | -595 (28x fewer) |
+| | Allocations (count / bytes) | 19.39M / 1,166 MiB | 0.59M / 36.6 MiB | 33x / 32x fewer |
+
+Measurements: one pod, one run per cell, in-memory S3 emulator on a single host; memory figures are single end-of-window samples and vary by several MiB between runs. Transferred bytes are not reported because the counting proxy did not capture LIST response sizes. The request reduction depends on the polling interval and on how many objects change: at the production default of 60s with the same write rate it is roughly N / (1 + changed objects per interval), about 8x here, not 50-67x. Multi-replica totals scale linearly with the number of pods for requests (each pod polls independently) but were not measured.
+
+- **Caveats**: each replica still downloads each object once when it starts. The listing covers every object under the common prefix, so unrelated objects raise the number of listing pages. `s3:ListBucket` must be allowed on the prefix.
 
 ### `studio`
 
@@ -780,6 +866,19 @@ File path to persist flag configurations for this flag set.
 Environment identifier for this flag set (e.g., "dev", "staging", "prod").
 
 - [_see `environment`_](#environment)
+
+#### `flagSet.enableSharedPollerPerBucket`
+
+If `enableSharedPollerPerBucket` is set to **true**, the flag set does not poll its own retriever: it shares one poller per bucket with the other flag sets of the same S3 bucket that also set this option. Each flag set keeps its own client (with its own polling turned off), caches, notifiers and exporters.  
+The shared poller uses the top-level [`pollingInterval`](#pollinginterval) and [`enablePollingJitter`](#enablepollingjitter). If the flag set sets different values, the relay proxy logs a warning and the top-level values win.  
+It requires a single `retriever` of kind `s3` with `item` set, and it is only available inside a flag set.
+
+See [Sharing S3 requests between flag sets](#sharing-s3-requests-between-flag-sets) for the details.
+
+- option name: `enableSharedPollerPerBucket`
+- type: **boolean**
+- default: **false**
+- mandatory: <NotMandatory />
 
 ### type `notifier`
 

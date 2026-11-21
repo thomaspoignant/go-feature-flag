@@ -101,6 +101,17 @@ type CommonFlagSet struct {
 
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
+
+	// EnableSharedPollerPerBucket (optional) set to true if you want the flag sets reading from the
+	// same S3 bucket to share one poller per bucket instead of polling each their own retriever.
+	// The poller lists the bucket once per polling interval and refreshes only the flag sets whose
+	// file changed. Each flag set keeps its own client (with its own polling turned off), caches,
+	// notifiers and exporters.
+	// The poller uses the top-level pollingInterval and enablePollingJitter, a different value set
+	// in the flag set is ignored and a warning is logged.
+	// Requires a single retriever of kind s3 with item set. Only available inside a flag set.
+	// Default: false
+	EnableSharedPollerPerBucket bool `mapstructure:"enableSharedPollerPerBucket" koanf:"enablesharedpollerperbucket"`
 }
 
 // GetFlagSets returns a shallow copy of the configured flag sets.

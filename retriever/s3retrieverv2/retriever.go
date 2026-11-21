@@ -196,9 +196,14 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 // downloadWithETag fetches the content of a single object, with the ETag of the downloaded version.
 func (s *Retriever) downloadWithETag(ctx context.Context, key string) ([]byte, string, error) {
+	return downloadObject(ctx, s.downloader, s.Bucket, key)
+}
+
+// downloadObject fetches the content of a single object, with the ETag of the downloaded version.
+func downloadObject(ctx context.Context, d DownloaderAPI, bucket, key string) ([]byte, string, error) {
 	writerAt := types.NewWriteAtBuffer([]byte{})
-	out, err := s.downloader.DownloadObject(ctx, &transfermanager.DownloadObjectInput{
-		Bucket:   aws.String(s.Bucket),
+	out, err := d.DownloadObject(ctx, &transfermanager.DownloadObjectInput{
+		Bucket:   aws.String(bucket),
 		Key:      aws.String(key),
 		WriterAt: writerAt,
 	})
