@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.2...modules/core/v0.8.3) (2026-11-21)
+
+
+### 🐛 Bug Fixes
+
+* **sonar:** resolve SonarCloud issues reported on main ([#6562](https://github.com/thomaspoignant/go-feature-flag/issues/6562)) ([7885c66](https://github.com/thomaspoignant/go-feature-flag/commit/7885c6697cecd698ecde426fa0971ab3e502ee52))
+
 ## [0.8.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.1...modules/core/v0.8.2) (2026-11-18)
 
 
