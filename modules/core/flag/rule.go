@@ -1,14 +1,12 @@
 package flag
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
@@ -100,8 +98,8 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 	// Check if the rule applies for this user
 	ruleApply := isDefault
 	if !ruleApply {
-		query := r.GetTrimmedQuery()
-		ruleApply = evaluateRule(query, queryFormatOf(query), queryCtx)
+		compiled := getCompiledQuery(r.GetQuery())
+		ruleApply = evaluateRule(compiled.trimmed, compiled.format, queryCtx)
 	}
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", errRuleNotApply
@@ -133,6 +131,7 @@ type queryContext struct {
 	ctx                  ffcontext.Context
 	parsedEvalCtxAsMap   map[string]any
 	parsedEvalCtxAsBytes []byte
+	parsedEvalCtxAsData  any
 }
 
 func (q *queryContext) mapOnce() map[string]any {
@@ -150,6 +149,22 @@ func (q *queryContext) jsonOnce() ([]byte, error) {
 		}
 	}
 	return q.parsedEvalCtxAsBytes, nil
+}
+
+// dataOnce is the context decoded from its JSON form, which is the only shape JsonLogic accepts.
+func (q *queryContext) dataOnce() (any, error) {
+	if q.parsedEvalCtxAsData == nil {
+		raw, err := q.jsonOnce()
+		if err != nil {
+			return nil, err
+		}
+		var data any
+		if err := json.Unmarshal(raw, &data); err != nil {
+			return nil, err
+		}
+		q.parsedEvalCtxAsData = data
+	}
+	return q.parsedEvalCtxAsData, nil
 }
 
 func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
@@ -172,32 +187,19 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
 	switch queryFormat {
 	case JSONLogicQueryFormat:
-		strCtx, err := queryCtx.jsonOnce()
+		data, err := queryCtx.dataOnce()
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
-		var result bytes.Buffer
-		err = jsonlogic.Apply(
-			strings.NewReader(query),
-			bytes.NewReader(strCtx),
-			&result,
-		)
+		result, err := jsonlogic.ApplyInterface(getCompiledQuery(query).jsonLogic, data)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
-		resStr := utils.StrTrim(result.String())
-		// As per JSONLogic spec, falsy values are: false, null, "", 0, and []
-		// All other values are truthy.
-		switch resStr {
-		case "false", "null", `""`, "0", "[]":
-			return false
-		default:
-			return true
-		}
+		return isJSONLogicTruthy(result)
 	default:
 		ev, err := getNikunjyEvaluator(query)
 		if err != nil {
@@ -377,20 +379,12 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 
 // GetTrimmedQuery is removing the break lines and return
 func (r *Rule) GetTrimmedQuery() string {
-	return utils.StrTrim(r.GetQuery())
+	return getCompiledQuery(r.GetQuery()).trimmed
 }
 
 // GetQueryFormat is returning the format used for the query
 func (r *Rule) GetQueryFormat() QueryFormat {
-	return queryFormatOf(r.GetTrimmedQuery())
-}
-
-// queryFormatOf returns the format of an already trimmed query.
-func queryFormatOf(trimmedQuery string) QueryFormat {
-	if utils.IsJSONObject(trimmedQuery) {
-		return JSONLogicQueryFormat
-	}
-	return NikunjyQueryFormat
+	return getCompiledQuery(r.GetQuery()).format
 }
 
 func (r *Rule) GetQuery() string {

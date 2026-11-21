@@ -1,6 +1,7 @@
 package flag
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -80,6 +81,31 @@ func TestQueryContext_JSONOnceDoesNotCacheAnError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, queryCtx.parsedEvalCtxAsBytes)
+}
+
+func TestQueryContext_DataOnceDoesNotCacheAnError(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+	}{
+		{name: "context that does not encode", value: make(chan int)},
+		{name: "context that encodes but does not decode", value: json.Number("1e1000")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			queryCtx := &queryContext{
+				ctx: ffcontext.NewEvaluationContextBuilder("user-1").AddCustom("bad", tt.value).Build(),
+			}
+			query := `{"==": [{"var": "key"}, "user-1"]}`
+
+			_, err := queryCtx.dataOnce()
+
+			assert.Error(t, err)
+			assert.Nil(t, queryCtx.parsedEvalCtxAsData)
+			assert.False(t, evaluateRule(query, JSONLogicQueryFormat, queryCtx), "first rule")
+			assert.False(t, evaluateRule(query, JSONLogicQueryFormat, queryCtx), "later rules must not see partial data")
+		})
+	}
 }
 
 func TestRule_EvaluateBuildsTheMapOnlyForAQuery(t *testing.T) {
