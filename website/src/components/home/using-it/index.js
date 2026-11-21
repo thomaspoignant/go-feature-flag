@@ -17,68 +17,80 @@ export function UsingIt() {
   const companies = [
     {
       name: 'Grafana Labs',
+      mobileClassName: 'h-5',
       logo: grafana,
       url: 'https://grafana.com',
-      imgClassName: 'max-w-48',
+      imgClassName: 'lg:max-w-48',
     },
     {
       name: 'Miro',
+      mobileClassName: 'h-8',
       logo: miro,
       url: 'https://miro.com',
-      imgClassName: 'max-w-32',
+      imgClassName: 'lg:max-w-32',
     },
     {
       name: 'Lyft',
+      mobileClassName: 'h-10',
       logo: lyft,
       url: 'https://lyft.com',
-      imgClassName: 'max-w-12',
+      imgClassName: 'lg:max-w-12',
     },
     {
       name: 'Tencent',
+      mobileClassName: 'h-4',
       logo: tencent,
       url: 'https://tencent.com',
     },
     {
       name: 'Cast.ai',
+      mobileClassName: 'h-8',
       logo: castai,
       url: 'https://cast.ai',
-      imgClassName: 'max-w-24',
+      imgClassName: 'lg:max-w-24',
     },
     {
       name: "Lands'end",
+      mobileClassName: 'h-4',
       logo: landsend,
       url: 'https://www.landsend.com/',
     },
     {
       name: 'Solaris',
+      mobileClassName: 'h-6',
       logo: solaris,
       url: 'https://www.solarisgroup.com/',
-      imgClassName: 'max-w-32',
+      imgClassName: 'lg:max-w-32',
     },
     {
       name: 'Kargo',
+      mobileClassName: 'h-7',
       logo: kargo,
       url: 'https://www.kargo.com/',
-      imgClassName: 'max-w-20',
+      imgClassName: 'lg:max-w-20',
     },
     {
       name: 'DataGalaxy',
+      mobileClassName: 'h-5',
       logo: datagalaxy,
       url: 'https://www.datagalaxy.com/',
-      imgClassName: 'max-w-36',
+      imgClassName: 'lg:max-w-36',
     },
     {
       name: 'Minder',
+      mobileClassName: 'h-6',
       logo: minder,
       url: 'https://github.com/mindersec/minder',
     },
     {
       name: 'Alternative Payments',
+      mobileClassName: 'h-6.5',
       logo: alternativepayment,
       url: 'https://www.alternativepayments.io/',
     },
     {
       name: 'Agentero',
+      mobileClassName: 'h-7',
       logo: agentero,
       url: 'https://agentero.com/',
     },
@@ -103,19 +115,35 @@ UsingItLogos.propTypes = {
       logo: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       imgClassName: PropTypes.string,
+      mobileClassName: PropTypes.string,
     })
   ).isRequired,
 };
 
 function UsingItLogos({companies}) {
   return (
-    <div className={'grid grid-cols-2 lg:grid-cols-6 mt-8 items-center mb-0'}>
+    <div
+      className={
+        'grid grid-cols-2 gap-x-6 gap-y-6 max-w-sm mx-auto mt-8 mb-8 items-center ' +
+        'lg:grid-cols-6 lg:gap-0 lg:max-w-none lg:mx-0 lg:mb-0'
+      }>
       {companies.map(company => (
-        <div key={company.name}>
+        <div
+          key={company.name}
+          className={
+            'flex items-center justify-center h-10 lg:block lg:h-auto'
+          }>
           <img
             src={company.logo}
             alt={company.name}
-            className={company.imgClassName ? company.imgClassName : 'max-w-28'}
+            className={[
+              // Mobile: height normalized per logo so they share the same visual weight.
+              company.mobileClassName ?? 'h-6',
+              'w-auto max-w-full object-contain',
+              // Desktop: keep the original sizing.
+              'lg:h-auto',
+              company.imgClassName ? company.imgClassName : 'lg:max-w-28',
+            ].join(' ')}
           />
         </div>
       ))}
