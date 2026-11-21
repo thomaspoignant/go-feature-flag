@@ -112,7 +112,7 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 	attachments := make([]attachment, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
 		attachment := attachment{
-			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
+			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated%s", key, notifier.UpdatedBySuffix(value.After)),
 			Color:      colorUpdated,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
@@ -132,9 +132,9 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 
 func convertAddedFlagsToSlackMessage(diff notifier.DiffCache) []attachment {
 	attachments := make([]attachment, 0, len(diff.Added))
-	for key := range diff.Added {
+	for key, value := range diff.Added {
 		attachment := attachment{
-			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
+			Title:      fmt.Sprintf("🆕 Flag \"%s\" created%s", key, notifier.UpdatedBySuffix(value)),
 			Color:      colorAdded,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
