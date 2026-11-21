@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.59.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.59.1...v1.59.2) (2026-11-21)
+
+
+### 🐛 Bug Fixes
+
+* **sonar:** resolve SonarCloud issues reported on main ([#6546](https://github.com/thomaspoignant/go-feature-flag/issues/6546)) ([03b1c0b](https://github.com/thomaspoignant/go-feature-flag/commit/03b1c0be1e913f383dd9e8bd70ab3940df947eea))
+* **sonar:** resolve SonarCloud issues reported on main ([#6562](https://github.com/thomaspoignant/go-feature-flag/issues/6562)) ([7885c66](https://github.com/thomaspoignant/go-feature-flag/commit/7885c6697cecd698ecde426fa0971ab3e502ee52))
+
+
+### 🔧 Chores
+
+* Bump @typescript-eslint/eslint-plugin ([#6555](https://github.com/thomaspoignant/go-feature-flag/issues/6555)) ([6218eee](https://github.com/thomaspoignant/go-feature-flag/commit/6218eeedf2069dc52e4df7a37a85e174df1bfd92))
+* Bump @typescript-eslint/parser ([#6554](https://github.com/thomaspoignant/go-feature-flag/issues/6554)) ([17a2c51](https://github.com/thomaspoignant/go-feature-flag/commit/17a2c5133b2aa8ab7b757785435f5bf276d5887d))
+* Bump @vitejs/plugin-react ([#6556](https://github.com/thomaspoignant/go-feature-flag/issues/6556)) ([8d8b382](https://github.com/thomaspoignant/go-feature-flag/commit/8d8b382230960fd09f32a860bbf45bb08da424d3))
+* Bump anthropics/claude-code-action from 1.0.268 to 1.0.275 ([#6558](https://github.com/thomaspoignant/go-feature-flag/issues/6558)) ([6494489](https://github.com/thomaspoignant/go-feature-flag/commit/64944892aa3a0b33166d0429ac56ec95233f8ed3))
+* Bump azure/setup-helm from 5.0.1 to 5.1.0 ([#6557](https://github.com/thomaspoignant/go-feature-flag/issues/6557)) ([7d01d9f](https://github.com/thomaspoignant/go-feature-flag/commit/7d01d9f0d2378289893116595d63b5e34b9ba098))
+* Bump github.com/jackc/pgx/v5 from 5.12.0 to 5.13.0 ([#6544](https://github.com/thomaspoignant/go-feature-flag/issues/6544)) ([cfe552a](https://github.com/thomaspoignant/go-feature-flag/commit/cfe552afb24c21df90db66b7688dd8029c01a9c5))
+* Bump github.com/labstack/echo/v5 from 5.4.4 to 5.4.5 ([#6552](https://github.com/thomaspoignant/go-feature-flag/issues/6552)) ([d3ed8cc](https://github.com/thomaspoignant/go-feature-flag/commit/d3ed8ccc5827ef887a7a6377651a342a83393f68))
+* Bump github.com/prometheus/common from 0.73.1 to 0.74.0 ([#6548](https://github.com/thomaspoignant/go-feature-flag/issues/6548)) ([879ad82](https://github.com/thomaspoignant/go-feature-flag/commit/879ad8246d9f4f465caeacb8d0656a9f7034d38c))
+* Bump google.golang.org/api from 0.312.0 to 0.313.0 ([#6543](https://github.com/thomaspoignant/go-feature-flag/issues/6543)) ([c12b6d8](https://github.com/thomaspoignant/go-feature-flag/commit/c12b6d8cc660cedb715b3c1120f6c524175abae6))
+* Bump google.golang.org/api from 0.313.0 to 0.314.0 ([#6549](https://github.com/thomaspoignant/go-feature-flag/issues/6549)) ([13d5116](https://github.com/thomaspoignant/go-feature-flag/commit/13d5116ba52bd3fd91ec001813628cd57ca7e187))
+* Bump gradle-wrapper ([#6550](https://github.com/thomaspoignant/go-feature-flag/issues/6550)) ([d5d86db](https://github.com/thomaspoignant/go-feature-flag/commit/d5d86db35eb5389c2fef8befe12bc5e19b4e31c9))
+* Bump Microsoft.NET.Test.Sdk from 18.11.1 to 18.12.0 ([#6545](https://github.com/thomaspoignant/go-feature-flag/issues/6545)) ([7e9d9d2](https://github.com/thomaspoignant/go-feature-flag/commit/7e9d9d26c6b99ff367c6d3cd02c63b41b2ce6154))
+* Bump peter-evans/create-pull-request from 8.1.2 to 8.1.3 ([#6559](https://github.com/thomaspoignant/go-feature-flag/issues/6559)) ([a5f2114](https://github.com/thomaspoignant/go-feature-flag/commit/a5f211412340d9c0effe813ef7aa9425adccb811))
+* Bump sass in /examples/openfeature_web/webapp ([#6551](https://github.com/thomaspoignant/go-feature-flag/issues/6551)) ([fe398c4](https://github.com/thomaspoignant/go-feature-flag/commit/fe398c4ed6eb2ba8457bc5535d8ebb088d80d9b3))
+* Bump vite in /examples/openfeature_react/react-app ([#6553](https://github.com/thomaspoignant/go-feature-flag/issues/6553)) ([fb101ef](https://github.com/thomaspoignant/go-feature-flag/commit/fb101efef2c2095ba3ba5b69f541f45907b10322))
+* remove unused editor API (cmd/editor) ([#6539](https://github.com/thomaspoignant/go-feature-flag/issues/6539)) ([9787905](https://github.com/thomaspoignant/go-feature-flag/commit/9787905cbf3c36f3c84bd5820ac6ba776756713c)), closes [#6536](https://github.com/thomaspoignant/go-feature-flag/issues/6536)
+
 ## [1.59.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.59.0...v1.59.1) (2026-11-18)
 
 
