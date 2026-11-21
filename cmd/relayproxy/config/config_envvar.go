@@ -51,7 +51,7 @@ func (c *ConfigLoader) mapEnvVariablesProvider(prefix string, log *zap.Logger) k
 }
 
 // Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
-func loadArrayEnv(s string, v string, configMap map[string]any) (map[string]any, error) {
+func loadArrayEnv(s, v string, configMap map[string]any) (map[string]any, error) {
 	paths := normalizePaths(s)
 	prefixKey := paths[0]
 
@@ -195,8 +195,8 @@ func parseArrayValue(v string) []string {
 }
 
 // updateConfigArray updates the configuration array and returns the modified config map
-func updateConfigArray(configArray []any, index int, configItem map[string]any,
-	configMap map[string]any, prefixKey string) (map[string]any, error) {
+func updateConfigArray(configArray []any, index int, configItem, configMap map[string]any,
+	prefixKey string) (map[string]any, error) {
 	outRange := index > len(configArray)-1
 
 	if outRange {
