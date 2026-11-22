@@ -25,7 +25,7 @@ func bodyDumpHandler(logger *zap.Logger) middleware.BodyDumpHandler {
 		},
 	}
 
-	return func(_ *echo.Context, reqBody []byte, _ []byte, _ error) {
+	return func(_ *echo.Context, reqBody, _ []byte, _ error) {
 		if len(reqBody) <= maxBodyLogSize {
 			logger.Debug("Request info", zap.ByteString("request_body", reqBody))
 			return

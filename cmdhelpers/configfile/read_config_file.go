@@ -18,8 +18,7 @@ var ConfigFileDefaultLocations = []string{
 }
 
 func LoadConfigFile(
-	inputFilePath string,
-	configFormat string,
+	inputFilePath, configFormat string,
 	defaultLocations []string,
 ) (map[string]dto.DTO, error) {
 	filename := "flags.goff"

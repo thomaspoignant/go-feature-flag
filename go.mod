@@ -30,7 +30,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/invopop/jsonschema v0.14.0
-	github.com/jackc/pgx/v5 v5.12.0
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/knadh/koanf/parsers/json v1.0.1
@@ -44,13 +44,13 @@ require (
 	github.com/labstack/echo-contrib/v5 v5.0.1
 	github.com/labstack/echo-otel/v5 v5.0.0
 	github.com/labstack/echo-prometheus v0.0.1
-	github.com/labstack/echo/v5 v5.4.4
+	github.com/labstack/echo/v5 v5.4.5
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/pablor21/echo-etag/v5 v5.0.0
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
-	github.com/prometheus/common v0.73.1
+	github.com/prometheus/common v0.74.0
 	github.com/pterm/pterm v0.12.84
 	github.com/r3labs/diff/v3 v3.0.2
 	github.com/r3labs/sse/v2 v2.10.0
@@ -80,7 +80,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.47.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/net v0.62.0
-	google.golang.org/api v0.312.0
+	google.golang.org/api v0.314.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -229,7 +229,7 @@ require (
 	github.com/nikunjy/rules v1.5.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pandatix/go-abnf v0.5.3 // indirect
+	github.com/pandatix/go-abnf v0.5.5 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.31 // indirect
@@ -283,7 +283,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
