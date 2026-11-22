@@ -6,7 +6,20 @@ import (
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 )
 
-const flagNameLabel = "flag_name"
+const (
+	flagNameLabel = "flag_name"
+	outcomeLabel  = "outcome"
+)
+
+// Outcomes of a call to the validate flags endpoint.
+const (
+	// ValidateFlagsOutcomeValid is used when all the flags of the file are valid.
+	ValidateFlagsOutcomeValid = "valid"
+	// ValidateFlagsOutcomeInvalid is used when at least one flag of the file is invalid.
+	ValidateFlagsOutcomeInvalid = "invalid"
+	// ValidateFlagsOutcomeError is used when the file could not be validated (bad content type, too large, unparseable).
+	ValidateFlagsOutcomeError = "error"
+)
 
 // FlagNotFoundLabelValue is the value of the flag_name label used for the evaluation of flags that do not exist.
 const FlagNotFoundLabelValue = "FLAG_NOT_FOUND"
@@ -116,6 +129,13 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	})
 
+	// counts the number of call to the validate flags endpoint per outcome
+	validateFlagsCounterVec := prom.NewCounterVec(prom.CounterOpts{
+		Name:      "validate_flags_total",
+		Help:      "Counter events for number of calls to the validate flags endpoint, per outcome.",
+		Subsystem: GOFFSubSystem,
+	}, []string{outcomeLabel})
+
 	// counts the number of call to the flag configuration endpoint
 	flagConfigurationCounter := prom.NewCounter(prom.CounterOpts{
 		Name:      "flag_configuration_total",
@@ -143,6 +163,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		flagDeleteCounterVec,
 		flagCreateCounterVec,
 		forceRefreshCounter,
+		validateFlagsCounterVec,
 		flagConfigurationCounter,
 		getManifestCounter,
 		versioncollector.NewCollector(GOFFSubSystem),
@@ -171,6 +192,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		flagDeleteCounterVec:     *flagDeleteCounterVec,
 		flagCreateCounterVec:     *flagCreateCounterVec,
 		forceRefreshCounter:      forceRefreshCounter,
+		validateFlagsCounterVec:  *validateFlagsCounterVec,
 		flagConfigurationCounter: flagConfigurationCounter,
 		getManifestCounter:       getManifestCounter,
 		Registry:                 customRegistry,
@@ -190,6 +212,7 @@ type Metrics struct {
 	flagDeleteCounter        prom.Counter
 	flagUpdateCounter        prom.Counter
 	forceRefreshCounter      prom.Counter
+	validateFlagsCounterVec  prom.CounterVec
 	flagConfigurationCounter prom.Counter
 	flagUpdateCounterVec     prom.CounterVec
 	flagDeleteCounterVec     prom.CounterVec
@@ -228,6 +251,14 @@ func (m *Metrics) IncAllFlag(flagNames ...string) {
 func (m *Metrics) IncForceRefresh() {
 	if m.forceRefreshCounter != nil {
 		m.forceRefreshCounter.Inc()
+	}
+}
+
+// IncValidateFlags increment the number of call to the validate flags endpoint for the given outcome
+// (ValidateFlagsOutcomeValid, ValidateFlagsOutcomeInvalid or ValidateFlagsOutcomeError).
+func (m *Metrics) IncValidateFlags(outcome string) {
+	if m.validateFlagsCounterVec.MetricVec != nil {
+		m.validateFlagsCounterVec.With(prom.Labels{outcomeLabel: outcome}).Inc()
 	}
 }
 
