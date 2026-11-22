@@ -8,7 +8,7 @@ import (
 )
 
 // compiledQueryCache memoizes the trimmed form, format and decoded JsonLogic rule per raw query.
-// Entries are not evicted: queries come from flag config, so the set is bounded in practice.
+// Only evaluation stores entries, so the set is bounded by the evaluated flag config.
 var compiledQueryCache sync.Map // map[string]*compiledQuery
 
 type compiledQuery struct {
@@ -21,9 +21,9 @@ func getCompiledQuery(raw string) *compiledQuery {
 	if v, ok := compiledQueryCache.Load(raw); ok {
 		return v.(*compiledQuery)
 	}
-	c := &compiledQuery{trimmed: utils.StrTrim(raw), format: NikunjyQueryFormat}
-	if utils.IsJSONObject(c.trimmed) {
-		c.format = JSONLogicQueryFormat
+	trimmed := utils.StrTrim(raw)
+	c := &compiledQuery{trimmed: trimmed, format: queryFormatOf(trimmed)}
+	if c.format == JSONLogicQueryFormat {
 		var rule any
 		if json.Unmarshal([]byte(c.trimmed), &rule) == nil {
 			c.jsonLogic = rule
@@ -45,5 +45,5 @@ func isJSONLogicTruthy(v any) bool {
 	}
 	// Other results are checked through JSON like jsonlogic.Apply did, so NaN and ±Inf are falsy.
 	b, err := json.Marshal(v)
-	return err == nil && string(b) != "0" && string(b) != "[]"
+	return err == nil && string(b) != "0" && string(b) != "[]" && string(b) != "null"
 }

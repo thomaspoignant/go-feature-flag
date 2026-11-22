@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
@@ -40,7 +41,7 @@ func TestGetCompiledQuery(t *testing.T) {
 	}
 }
 
-func TestIsJSONLogicTruthy_NonFinite(t *testing.T) {
+func TestIsJSONLogicTruthy_Falsy(t *testing.T) {
 	tests := []struct {
 		name  string
 		value any
@@ -49,12 +50,40 @@ func TestIsJSONLogicTruthy_NonFinite(t *testing.T) {
 		{name: "NaN", value: math.NaN()},
 		{name: "infinity in an array", value: []any{true, math.Inf(-1)}},
 		{name: "NaN in an object", value: map[string]any{"a": map[string]any{"b": math.NaN()}}},
+		{name: "nil slice", value: []any(nil)},
+		{name: "nil map", value: map[string]any(nil)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.False(t, isJSONLogicTruthy(tt.value))
 		})
 	}
+}
+
+func TestGetCompiledQuery_OnlyEvaluationStores(t *testing.T) {
+	t.Cleanup(compiledQueryCache.Clear)
+	compiledQueryCache.Clear()
+	query := "{\n  \"==\": [{\"var\": \"key\"}, \"abc\"]\n}"
+	r := Rule{Query: &query, VariationResult: testconvert.String("A")}
+
+	assert.NoError(t, r.isQueryValid(false))
+	assert.Equal(t, JSONLogicQueryFormat, r.GetQueryFormat())
+	assert.Equal(t, `{"==": [{"var": "key"}, "abc"]}`, r.GetTrimmedQuery())
+	assert.Zero(t, compiledQueryCacheLen(), "validation must not store queries")
+
+	ctx := ffcontext.NewEvaluationContext("abc")
+	_, err := r.Evaluate("abc", ctx, "flag", false)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, compiledQueryCacheLen(), "a multi-line query is stored once")
+}
+
+func compiledQueryCacheLen() int {
+	n := 0
+	compiledQueryCache.Range(func(_, _ any) bool {
+		n++
+		return true
+	})
+	return n
 }
 
 // TestEvaluateRule_JSONLogicMatchesApply checks the cached path gives the same answer as jsonlogic.Apply.
@@ -96,10 +125,68 @@ func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 	for _, q := range queries {
 		for _, ctx := range ctxs {
 			t.Run(q+"/"+ctx.GetKey(), func(t *testing.T) {
-				assert.Equal(t, applyReference(t, q, ctx), evaluateRule(q, JSONLogicQueryFormat, &queryContext{ctx: ctx}))
+				assert.Equal(t, applyReference(t, q, ctx), evaluateRule(getCompiledQuery(q), &queryContext{ctx: ctx}))
 			})
 		}
 	}
+}
+
+func TestEvaluateRule_JSONLogicTypedNilOperatorResult(t *testing.T) {
+	jsonlogic.AddOperator("goff_test_nil_slice", func(_, _ any) any { return []any(nil) })
+	jsonlogic.AddOperator("goff_test_nil_map", func(_, _ any) any { return map[string]any(nil) })
+	ctx := ffcontext.NewEvaluationContext("abc")
+	for _, q := range []string{`{"goff_test_nil_slice": []}`, `{"goff_test_nil_map": []}`} {
+		t.Run(q, func(t *testing.T) {
+			assert.False(t, applyReference(t, q, ctx))
+			assert.False(t, evaluateRule(getCompiledQuery(q), &queryContext{ctx: ctx}))
+		})
+	}
+}
+
+func FuzzEvaluateRule_JSONLogicMatchesApply(f *testing.F) {
+	ctx := `{"dsp": "ttd", "floor": 1.2, "tags": ["a", "b"], "orgs": [{"plan": "enterprise"}]}`
+	for _, q := range []string{
+		`{"==": [{"var": "key"}, "abc"]}`,
+		`{"and": [{"in": [{"var": "dsp"}, ["ttd", "dv360"]]}, {">": [{"var": "floor"}, 0.5]}]}`,
+		`{"some": [{"var": "orgs"}, {"==": [{"var": "plan"}, "enterprise"]}]}`,
+		`{"/": [1, {"var": "floor"}]}`,
+		`{"merge": [{"var": "tags"}, ["x"]]}`,
+	} {
+		f.Add(q, ctx)
+	}
+	f.Fuzz(func(t *testing.T, query, ctxJSON string) {
+		t.Cleanup(compiledQueryCache.Clear)
+		var attributes map[string]any
+		if json.Unmarshal([]byte(ctxJSON), &attributes) != nil {
+			return
+		}
+		compiled := getCompiledQuery(query)
+		if compiled.format != JSONLogicQueryFormat {
+			return
+		}
+		evalCtx := utils.ConvertEvaluationCtxFromRequest("key", attributes)
+		assert.Equal(t, applyReference(t, compiled.trimmed, evalCtx), evaluateRule(compiled, &queryContext{ctx: evalCtx}))
+	})
+}
+
+func BenchmarkEvaluateRule_JSONLogic(b *testing.B) {
+	query := `{"and": [{"in": [{"var": "dsp"}, ["ttd", "dv360"]]}, {"==": [{"var": "inventory"}, "web"]}]}`
+	ctx := ffcontext.NewEvaluationContextBuilder("request-1").AddCustom("dsp", "ttd").AddCustom("inventory", "web").Build()
+	b.Run("jsonlogic.Apply", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			strCtx, _ := json.Marshal(utils.ContextToMap(ctx))
+			var result bytes.Buffer
+			_ = jsonlogic.Apply(strings.NewReader(query), bytes.NewReader(strCtx), &result)
+		}
+	})
+	b.Run("cached", func(b *testing.B) {
+		compiled := getCompiledQuery(query)
+		b.ReportAllocs()
+		for b.Loop() {
+			evaluateRule(compiled, &queryContext{ctx: ctx})
+		}
+	})
 }
 
 func TestEvaluateRule_JSONLogicConcurrent(t *testing.T) {
@@ -112,7 +199,7 @@ func TestEvaluateRule_JSONLogicConcurrent(t *testing.T) {
 			dsp := []string{"ttd", "xandr"}[i%2]
 			ctx := ffcontext.NewEvaluationContextBuilder("k").AddCustom("dsp", dsp).AddCustom("tags", []any{"a", "b"}).Build()
 			for range 200 {
-				assert.Equal(t, dsp == "ttd", evaluateRule(q, JSONLogicQueryFormat, &queryContext{ctx: ctx}))
+				assert.Equal(t, dsp == "ttd", evaluateRule(getCompiledQuery(q), &queryContext{ctx: ctx}))
 			}
 		}()
 	}

@@ -98,8 +98,7 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 	// Check if the rule applies for this user
 	ruleApply := isDefault
 	if !ruleApply {
-		compiled := getCompiledQuery(r.GetQuery())
-		ruleApply = evaluateRule(compiled.trimmed, compiled.format, queryCtx)
+		ruleApply = evaluateRule(getCompiledQuery(r.GetQuery()), queryCtx)
 	}
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", errRuleNotApply
@@ -167,7 +166,8 @@ func (q *queryContext) dataOnce() (any, error) {
 	return q.parsedEvalCtxAsData, nil
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
+func evaluateRule(compiled *compiledQuery, queryCtx *queryContext) (success bool) {
+	query := compiled.trimmed
 	if query == "" {
 		return true
 	}
@@ -185,15 +185,15 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 	}()
 
 	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
-	switch queryFormat {
+	switch compiled.format {
 	case JSONLogicQueryFormat:
 		data, err := queryCtx.dataOnce()
 		if err != nil {
-			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
+			slog.ErrorContext(context.Background(), "error while marshalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
-		result, err := jsonlogic.ApplyInterface(getCompiledQuery(query).jsonLogic, data)
+		result, err := jsonlogic.ApplyInterface(compiled.jsonLogic, data)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err.Error()))
@@ -379,12 +379,20 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 
 // GetTrimmedQuery is removing the break lines and return
 func (r *Rule) GetTrimmedQuery() string {
-	return getCompiledQuery(r.GetQuery()).trimmed
+	return utils.StrTrim(r.GetQuery())
 }
 
 // GetQueryFormat is returning the format used for the query
 func (r *Rule) GetQueryFormat() QueryFormat {
-	return getCompiledQuery(r.GetQuery()).format
+	return queryFormatOf(r.GetTrimmedQuery())
+}
+
+// queryFormatOf returns the format of an already trimmed query.
+func queryFormatOf(trimmedQuery string) QueryFormat {
+	if utils.IsJSONObject(trimmedQuery) {
+		return JSONLogicQueryFormat
+	}
+	return NikunjyQueryFormat
 }
 
 func (r *Rule) GetQuery() string {

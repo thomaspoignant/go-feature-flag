@@ -102,8 +102,8 @@ func TestQueryContext_DataOnceDoesNotCacheAnError(t *testing.T) {
 
 			assert.Error(t, err)
 			assert.Nil(t, queryCtx.parsedEvalCtxAsData)
-			assert.False(t, evaluateRule(query, JSONLogicQueryFormat, queryCtx), "first rule")
-			assert.False(t, evaluateRule(query, JSONLogicQueryFormat, queryCtx), "later rules must not see partial data")
+			assert.False(t, evaluateRule(getCompiledQuery(query), queryCtx), "first rule")
+			assert.False(t, evaluateRule(getCompiledQuery(query), queryCtx), "later rules must not see partial data")
 		})
 	}
 }
