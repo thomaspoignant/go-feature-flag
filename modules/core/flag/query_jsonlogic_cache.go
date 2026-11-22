@@ -2,7 +2,6 @@ package flag
 
 import (
 	"encoding/json"
-	"math"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -35,11 +34,7 @@ func getCompiledQuery(raw string) *compiledQuery {
 }
 
 // isJSONLogicTruthy treats false, null, "", 0 and [] as falsy, as per the JsonLogic spec.
-// A result holding NaN or ±Inf is falsy, matching jsonlogic.Apply, which fails to encode it.
 func isJSONLogicTruthy(v any) bool {
-	if !isJSONEncodable(v) {
-		return false
-	}
 	switch val := v.(type) {
 	case nil:
 		return false
@@ -47,31 +42,8 @@ func isJSONLogicTruthy(v any) bool {
 		return val
 	case string:
 		return val != ""
-	case float64:
-		return val != 0
-	case []any:
-		return len(val) > 0
-	default:
-		return true
 	}
-}
-
-func isJSONEncodable(v any) bool {
-	switch val := v.(type) {
-	case float64:
-		return !math.IsNaN(val) && !math.IsInf(val, 0)
-	case []any:
-		for _, e := range val {
-			if !isJSONEncodable(e) {
-				return false
-			}
-		}
-	case map[string]any:
-		for _, e := range val {
-			if !isJSONEncodable(e) {
-				return false
-			}
-		}
-	}
-	return true
+	// Other results are checked through JSON like jsonlogic.Apply did, so NaN and ±Inf are falsy.
+	b, err := json.Marshal(v)
+	return err == nil && string(b) != "0" && string(b) != "[]"
 }

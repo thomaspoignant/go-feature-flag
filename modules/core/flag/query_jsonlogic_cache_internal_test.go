@@ -80,6 +80,8 @@ func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 		`{"merge": [[{"/": [1, {"var": "floor"}]}]]}`,
 		`{"if": [true, {"nested": {"/": [1, {"var": "floor"}]}}, false]}`,
 		`{"map": [{"var": "tags"}, {"/": [1, 0]}]}`,
+		`{"*": [-1, 0]}`,
+		`{"+": [0.5, 0.5]}`,
 	}
 	ctxs := []ffcontext.Context{
 		ffcontext.NewEvaluationContext("abc"),
