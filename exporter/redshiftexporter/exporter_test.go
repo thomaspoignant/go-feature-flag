@@ -343,6 +343,7 @@ func TestTruncateUTF8(t *testing.T) {
 		{name: "cut in a 4 bytes rune", value: "a😀", maxBytes: 4, want: "a"},
 		{name: "multibyte runes fit", value: "éé", maxBytes: 4, want: "éé"},
 		{name: "invalid UTF-8", value: "a\xffb", maxBytes: 10, want: "a\uFFFDb"},
+		{name: "NUL byte", value: "a\x00b", maxBytes: 10, want: "a\uFFFDb"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

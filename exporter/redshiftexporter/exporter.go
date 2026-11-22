@@ -614,9 +614,10 @@ func prepareRows(columns []column, rows []row, prefixSize int) ([]row, []string)
 }
 
 // truncateUTF8 makes the value valid UTF-8 and truncates it to maxBytes without
-// splitting a multibyte character.
+// splitting a multibyte character. NUL bytes are replaced too: Redshift silently
+// truncates a VARCHAR value at the first one.
 func truncateUTF8(value string, maxBytes int) string {
-	value = strings.ToValidUTF8(value, "\uFFFD")
+	value = strings.ReplaceAll(strings.ToValidUTF8(value, "\uFFFD"), "\x00", "\uFFFD")
 	if len(value) <= maxBytes {
 		return value
 	}
