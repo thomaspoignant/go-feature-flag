@@ -93,6 +93,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 							TrackEvents: testconvert.Bool(true),
 							Disable:     testconvert.Bool(false),
 							Version:     testconvert.String("1.1"),
+							Metadata:    &map[string]any{notifier.UpdatedByMetadataKey: "jane"},
 						},
 					},
 					Deleted: map[string]flag.Flag{
@@ -112,6 +113,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
 							},
+							Metadata: &map[string]any{notifier.UpdatedByMetadataKey: "jane"},
 							DefaultRule: &flag.Rule{
 								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
@@ -133,6 +135,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 										"True":  100,
 									},
 								},
+								Metadata: &map[string]any{notifier.UpdatedByMetadataKey: "john"},
 								Experimentation: &flag.ExperimentationRollout{
 									Start: testconvert.Time(time.Unix(1095379400, 0).UTC()),
 									End:   testconvert.Time(time.Unix(1095371000, 0).UTC()),
@@ -161,6 +164,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 								Disable:     testconvert.Bool(true),
 								TrackEvents: testconvert.Bool(false),
 								Version:     testconvert.String("1.1"),
+								Metadata:    &map[string]any{notifier.UpdatedByMetadataKey: "jane"},
 							},
 						},
 					},

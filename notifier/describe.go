@@ -58,6 +58,36 @@ func describeChanges(before, after flag.Flag, code func(string) string) ([]strin
 	return d.lines, nil
 }
 
+// UpdatedByMetadataKey is the metadata key GO Feature Flag Studio sets to who last changed a flag.
+const UpdatedByMetadataKey = "updatedBy"
+
+// UpdatedBy returns the updatedBy metadata of a *flag.InternalFlag, or "" when it is missing, empty or not a string.
+func UpdatedBy(f flag.Flag) string {
+	internalFlag, ok := f.(*flag.InternalFlag)
+	if !ok || internalFlag == nil {
+		return ""
+	}
+	name, _ := internalFlag.GetMetadata()[UpdatedByMetadataKey].(string)
+	return strings.TrimSpace(name)
+}
+
+// UpdatedBySuffix returns " by <name>" for a flag title when the flag says who changed it, and "" otherwise.
+func UpdatedBySuffix(f flag.Flag) string {
+	if name := UpdatedBy(f); name != "" {
+		return " by " + name
+	}
+	return ""
+}
+
+func withoutUpdatedBy(metadata map[string]any) map[string]any {
+	if _, ok := metadata[UpdatedByMetadataKey]; !ok {
+		return metadata
+	}
+	filtered := maps.Clone(metadata)
+	delete(filtered, UpdatedByMetadataKey)
+	return filtered
+}
+
 // MaxListedChanges is the number of changes ChangeList shows for one flag.
 const MaxListedChanges = 50
 
@@ -124,7 +154,8 @@ func (d *describer) flag(b, a *flag.InternalFlag) {
 	} else {
 		d.scheduled(b.Scheduled, a.Scheduled)
 	}
-	mapChanges(d, "Metadata", b.GetMetadata(), a.GetMetadata(), ReadableValue, stepNote)
+	oldMetadata, newMetadata := withoutUpdatedBy(b.GetMetadata()), withoutUpdatedBy(a.GetMetadata())
+	mapChanges(d, "Metadata", oldMetadata, newMetadata, ReadableValue, stepNote)
 }
 
 // toggle describes an optional boolean. Setting or removing it without changing its

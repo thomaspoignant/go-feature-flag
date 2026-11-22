@@ -127,7 +127,8 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
-		e := embed{Title: fmt.Sprintf("✏️ Flag \"%s\" updated", key), Color: colorUpdated}
+		title := fmt.Sprintf("✏️ Flag \"%s\" updated%s", key, notifier.UpdatedBySuffix(value.After))
+		e := embed{Title: title, Color: colorUpdated}
 		changes, err := notifier.DescribeChanges(value.Before, value.After)
 		if err != nil {
 			e.Description = fmt.Sprintf("%s: %s", notifier.ChangesUnavailable, err.Error())
@@ -142,9 +143,9 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 
 func convertAddedFlagsToDiscordEmbed(diff notifier.DiffCache) []embed {
 	embeds := make([]embed, 0, len(diff.Added))
-	for key := range diff.Added {
+	for key, value := range diff.Added {
 		embeds = append(embeds, embed{
-			Title: fmt.Sprintf("🆕 Flag \"%s\" created", key),
+			Title: fmt.Sprintf("🆕 Flag \"%s\" created%s", key, notifier.UpdatedBySuffix(value)),
 			Color: colorAdded,
 		})
 	}
