@@ -10,6 +10,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -22,6 +23,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
+	"github.com/thomaspoignant/go-feature-flag/exporter/redshiftexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -494,6 +496,31 @@ func Test_initExporter_BigQueryCredentialsAndTrackingEventType(t *testing.T) {
 	assert.Equal(t, "tracking-events", bigQueryExporter.TableName)
 	assert.Equal(t, []byte(credentials), bigQueryExporter.GoogleCredentials)
 	assert.True(t, bigQueryExporter.AutoMigrate)
+}
+
+func Test_initExporter_Redshift(t *testing.T) {
+	got, err := initDataExporter(&config.ExporterConf{
+		Kind:              config.RedshiftExporter,
+		WorkgroupName:     "my-workgroup",
+		Database:          "analytics",
+		SecretArn:         "arn:aws:secretsmanager:us-east-1:123456789012:secret:goff",
+		TableName:         "tracking_events",
+		AwsRegion:         "eu-west-3",
+		AutoMigrate:       true,
+		ExporterEventType: ffclient.TrackingEventExporter,
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, ffclient.TrackingEventExporter, got.ExporterEventType)
+	redshiftExporter, ok := got.Exporter.(*redshiftexporter.Exporter)
+	require.True(t, ok)
+	assert.Equal(t, "my-workgroup", redshiftExporter.WorkgroupName)
+	assert.Empty(t, redshiftExporter.ClusterIdentifier)
+	assert.Equal(t, "analytics", redshiftExporter.Database)
+	assert.Equal(t, "arn:aws:secretsmanager:us-east-1:123456789012:secret:goff", redshiftExporter.SecretArn)
+	assert.Equal(t, "tracking_events", redshiftExporter.TableName)
+	assert.True(t, redshiftExporter.AutoMigrate)
+	assert.Equal(t, "eu-west-3", redshiftExporter.AwsConfig.Region)
 }
 
 func Test_initNotifier(t *testing.T) {

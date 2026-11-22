@@ -1,0 +1,214 @@
+---
+sidebar_position: 14
+description: How to configure an AWS Redshift exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'AWS Redshift'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# AWS Redshift
+
+## Overview
+{info.longDescription ?? info.description}
+
+:::info
+{exporterName} is a bulk exporter. Events are collected in memory and inserted in Redshift when `FlushInterval` or `MaxEventInMemory` is reached.
+:::
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {exporterName} exporter, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: redshift
+    clusterIdentifier: "my-cluster"
+    database: "analytics"
+    dbUser: "goff_writer"
+    tableName: "feature_flag_evaluations"
+    awsRegion: "us-east-1"
+    autoMigrate: true
+    eventType: "feature"
+# ...
+```
+
+:::info
+In the relay proxy each exporter is wired to a single `eventType` (defaulting to
+`feature`). To export **both** evaluation and tracking events, declare two
+Redshift exporters, one per `eventType`:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: redshift
+    workgroupName: "my-workgroup"
+    database: "analytics"
+    tableName: "feature_flag_evaluations"
+    autoMigrate: true
+    eventType: "feature"
+  - kind: redshift
+    workgroupName: "my-workgroup"
+    database: "analytics"
+    tableName: "tracking_events"
+    autoMigrate: true
+    eventType: "tracking"
+# ...
+```
+:::
+
+| Field name          |    Mandatory     | Type    | Default                                                       | Description                                                                                                         |
+|---------------------|:----------------:|---------|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `kind`              |  <Mandatory />   | string  | **none**                                                      | **Value should be `redshift`**.<br/>_This field is mandatory and describes which exporter you are using._            |
+| `database`          |  <Mandatory />   | string  | **none**                                                      | Name of the Redshift database receiving the events.                                                                 |
+| `clusterIdentifier` | <NotMandatory /> | string  | **none**                                                      | Identifier of a provisioned Redshift cluster. Set either `clusterIdentifier` or `workgroupName`.                    |
+| `workgroupName`     | <NotMandatory /> | string  | **none**                                                      | Name or ARN of a Redshift Serverless workgroup. Set either `clusterIdentifier` or `workgroupName`.                  |
+| `dbUser`            | <NotMandatory /> | string  | **none**                                                      | Database user used with `clusterIdentifier` to get temporary credentials. It cannot be used with `workgroupName` or `secretArn`. |
+| `secretArn`         | <NotMandatory /> | string  | **none**                                                      | ARN of an AWS Secrets Manager secret containing the database credentials. It cannot be used with `dbUser`.          |
+| `tableName`         | <NotMandatory /> | string  | `feature_flag_evaluations` (feature), `tracking_events` (tracking) | Table used by this exporter instance, it can be prefixed by a schema (`my_schema.my_table`).                    |
+| `awsRegion`         | <NotMandatory /> | string  | **none**                                                      | AWS region of your Redshift cluster or workgroup. If empty, the default AWS configuration is used.                  |
+| `autoMigrate`       | <NotMandatory /> | boolean | `false`                                                       | When `true`, the exporter creates the table if it does not exist.                                                   |
+| `eventType`         | <NotMandatory /> | string  | `feature`                                                     | Event type to export. Use `feature` for evaluation events or `tracking` for tracking events.                        |
+| `flushInterval`     | <NotMandatory /> | int     | `60000`                                                       | The interval in millisecond between 2 calls to the exporter _(if the `maxEventInMemory` is reached before the flushInterval we will call the exporter before)_. |
+| `maxEventInMemory`  | <NotMandatory /> | int     | `100000`                                                      | If we hit that limit we will call the exporter.                                                                     |
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+awsConfig, _ := config.LoadDefaultConfig(context.Background())
+
+ffConfig := ffclient.Config{
+    // ...
+    DataExporters: []ffclient.DataExporter{
+        {
+            ExporterEventType: ffclient.FeatureEventExporter,
+            Exporter: &redshiftexporter.Exporter{
+                ClusterIdentifier: "my-cluster",
+                Database:          "analytics",
+                DbUser:            "goff_writer",
+                TableName:         "feature_flag_evaluations",
+                AwsConfig:         &awsConfig,
+                AutoMigrate:       true,
+            },
+        },
+        {
+            ExporterEventType: ffclient.TrackingEventExporter,
+            Exporter: &redshiftexporter.Exporter{
+                ClusterIdentifier: "my-cluster",
+                Database:          "analytics",
+                DbUser:            "goff_writer",
+                TableName:         "tracking_events",
+                AwsConfig:         &awsConfig,
+                AutoMigrate:       true,
+            },
+        },
+    },
+    // ...
+}
+err := ffclient.Init(ffConfig)
+defer ffclient.Close()
+```
+
+| Field               |    Mandatory     | Default                                                            | Description                                                                                       |
+|---------------------|:----------------:|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `Database`          |  <Mandatory />   | **none**                                                           | Name of the Redshift database receiving the events.                                               |
+| `ClusterIdentifier` | <NotMandatory /> | **none**                                                           | Identifier of a provisioned Redshift cluster. Set either `ClusterIdentifier` or `WorkgroupName`.  |
+| `WorkgroupName`     | <NotMandatory /> | **none**                                                           | Name or ARN of a Redshift Serverless workgroup. Set either `ClusterIdentifier` or `WorkgroupName`.|
+| `DbUser`            | <NotMandatory /> | **none**                                                           | Database user used with `ClusterIdentifier` to get temporary credentials. It cannot be used with `WorkgroupName` or `SecretArn`. |
+| `SecretArn`         | <NotMandatory /> | **none**                                                           | ARN of an AWS Secrets Manager secret containing the database credentials. It cannot be used with `DbUser`. |
+| `TableName`         | <NotMandatory /> | `feature_flag_evaluations` (feature), `tracking_events` (tracking) | Table used by this exporter instance, it can be prefixed by a schema.                             |
+| `AwsConfig`         | <NotMandatory /> | **none**                                                           | AWS SDK configuration. If empty, the default AWS configuration is loaded.                         |
+| `AutoMigrate`       | <NotMandatory /> | `false`                                                            | When `true`, the exporter creates the table if it does not exist.                                 |
+
+`FlushInterval` and `MaxEventInMemory` are fields of `ffclient.DataExporter` (next to `Exporter`), not of `redshiftexporter.Exporter`:
+
+| Field              |    Mandatory     | Default    | Description                                                                                                                                            |
+|--------------------|:----------------:|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `FlushInterval`    | <NotMandatory /> | `1 minute` | The interval (`time.Duration`) between 2 calls to the exporter _(if the `MaxEventInMemory` is reached before the FlushInterval we will call the exporter before)_. |
+| `MaxEventInMemory` | <NotMandatory /> | `100000`   | If we hit that limit we will call the exporter.                                                                                                        |
+
+## Authentication
+
+The exporter uses the [Redshift Data API](https://docs.aws.amazon.com/redshift/latest/mgmt/data-api.html),
+so no JDBC connection or database password is needed. Depending on the fields you set, it authenticates with:
+
+| Authentication method                       | Fields                                                      | Permission required by the method                                                                              |
+|---------------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| **IAM identity**                            | `clusterIdentifier` (or `workgroupName`) and `database`     | `redshift:GetClusterCredentialsWithIAM` for a provisioned cluster, `redshift-serverless:GetCredentials` for Serverless. The database user is derived from the IAM identity. |
+| **Temporary credentials for a database user** | `clusterIdentifier`, `database` and `dbUser` (provisioned clusters only) | `redshift:GetClusterCredentials`                                                                |
+| **AWS Secrets Manager**                     | `clusterIdentifier` (or `workgroupName`), `database` and `secretArn` | `secretsmanager:GetSecretValue` on the secret                                                          |
+
+In addition to the permission of the authentication method, the IAM identity used by GO Feature Flag needs these Redshift Data API permissions:
+
+- `redshift-data:BatchExecuteStatement` to run the `INSERT` (and `CREATE TABLE`) statements.
+- `redshift-data:DescribeStatement` to wait for the result of the statements. It is **required**: without it the `INSERT` still runs,
+  but the exporter cannot know it succeeded, so the export fails and the events are inserted again on the next flush.
+- `redshift-data:CancelStatement` to cancel a transaction that takes too long.
+
+## How events are inserted
+
+Each flush is inserted with multi-rows `INSERT` statements. Every value is sent as a named parameter of the statement,
+and large flushes are split into several statements to stay under the Redshift Data API limits
+(at most 500 rows and about 100KB per statement).
+
+The statements of a flush are sent with `BatchExecuteStatement` and run in a **single transaction**: if one of them fails,
+nothing from that transaction is inserted and the events are retried on the next flush.
+A transaction contains up to 40 statements and about 1MB; a bigger flush is split in several transactions and if one of them fails,
+the events are retried and the rows of the transactions already committed are inserted again (at-least-once delivery).
+
+The Redshift Data API is asynchronous, the exporter waits for the transaction to complete before returning.
+A transaction that takes more than 5 minutes is cancelled and the events are retried on the next flush.
+
+### Values that do not fit in the table
+
+A flush that fails is retried with the same events, so the exporter avoids sending rows that Redshift would reject because of their size:
+
+- Text values longer than their column (see the schemas below, sizes are in bytes) are truncated, without splitting a multibyte character.
+- Events with a JSON value (`value`, `metadata`, `tracking_details`, `evaluation_context`) larger than 65,535 bytes,
+  or too large to fit in a single statement, are skipped. A warning with the number of skipped events and their flag keys is logged.
+
+## AutoMigrate
+
+When `autoMigrate` / `AutoMigrate` is enabled, the exporter runs a `CREATE TABLE IF NOT EXISTS` for the table it is about to write,
+using the schemas below. It is done once per exporter instance.
+
+:::warning
+AutoMigrate only creates the **table**, not the schema. If you use a schema-qualified `tableName` (e.g. `my_schema.my_table`),
+create the schema first (`CREATE SCHEMA IF NOT EXISTS my_schema`), otherwise the `CREATE TABLE` fails.
+:::
+
+## Table schemas
+
+### `feature_flag_evaluations`
+
+| Column          | Redshift type | Source field   |
+|-----------------|---------------|----------------|
+| `kind`          | VARCHAR(50)   | `Kind`         |
+| `context_kind`  | VARCHAR(50)   | `ContextKind`  |
+| `user_key`      | VARCHAR(512)  | `UserKey`      |
+| `creation_date` | BIGINT        | `CreationDate` |
+| `key`           | VARCHAR(256)  | `Key`          |
+| `variation`     | VARCHAR(256)  | `Variation`    |
+| `value`         | SUPER         | `Value`        |
+| `default`       | BOOLEAN       | `Default`      |
+| `version`       | VARCHAR(64)   | `Version`      |
+| `source`        | VARCHAR(64)   | `Source`       |
+| `metadata`      | SUPER         | `Metadata`     |
+
+### `tracking_events`
+
+| Column               | Redshift type | Source field        |
+|----------------------|---------------|---------------------|
+| `kind`               | VARCHAR(50)   | `Kind`              |
+| `context_kind`       | VARCHAR(50)   | `ContextKind`       |
+| `user_key`           | VARCHAR(512)  | `UserKey`           |
+| `creation_date`      | BIGINT        | `CreationDate`      |
+| `key`                | VARCHAR(256)  | `Key`               |
+| `tracking_details`   | SUPER         | `TrackingDetails`   |
+| `evaluation_context` | SUPER         | `EvaluationContext` |
+
+`SUPER` columns are inserted with `JSON_PARSE`.

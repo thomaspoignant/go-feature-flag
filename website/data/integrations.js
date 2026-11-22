@@ -235,6 +235,15 @@ export const integrations = {
       docLink: 'aws-sqs',
     },
     {
+      name: 'AWS Redshift',
+      description: 'Export evaluation and tracking data to AWS Redshift.',
+      longDescription: `The AWS Redshift exporter inserts feature flag evaluation and tracking events directly into Redshift tables using the Redshift Data API.`,
+      type: 'bulk',
+      bgColor: '#222e3c',
+      faLogo: 'fa-solid fa-database fa-inverse',
+      docLink: 'aws-redshift',
+    },
+    {
       name: 'Webhook',
       description: 'Export evaluation data by calling a HTTP Webhook.',
       type: 'sync',
