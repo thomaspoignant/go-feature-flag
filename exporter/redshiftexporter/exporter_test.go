@@ -221,7 +221,8 @@ func TestExporter_ExportChunksLargeBatches(t *testing.T) {
 				}
 				return events
 			}(),
-			wantStatements: []int{4},
+			// 4 statements, but their ~250KB of parameters need 2 BatchExecuteStatement calls
+			wantStatements: []int{2, 2},
 		},
 	}
 	for _, tt := range tests {
@@ -301,6 +302,7 @@ func TestExporter_ExportLimitsBatchBytes(t *testing.T) {
 			size += len(aws.ToString(p.Name)) + len(aws.ToString(p.Value))
 		}
 		assert.LessOrEqual(t, size, maxBatchBytes)
+		assert.LessOrEqual(t, paramsSize(input.Parameters), maxBatchParamBytes)
 	}
 	assert.Equal(t, len(events), rows)
 }

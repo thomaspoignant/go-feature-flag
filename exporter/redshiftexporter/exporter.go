@@ -18,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata"
 	"github.com/aws/aws-sdk-go-v2/service/redshiftdata/types"
 	"github.com/aws/smithy-go"
+	smithyjson "github.com/aws/smithy-go/encoding/json"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
@@ -37,9 +38,13 @@ const (
 	// maxStatementsPerBatch is the maximum number of SQL statements of a BatchExecuteStatement call.
 	maxStatementsPerBatch = 40
 	// maxBatchBytes bounds the size of a BatchExecuteStatement call (SQL text + parameters).
-	// The parameters are shared by the whole batch and the Data API rejects more than 200KB of them,
-	// we keep a safe margin.
-	maxBatchBytes = 100 * 1024
+	maxBatchBytes = 1 << 20
+	// maxBatchParamBytes bounds the parameters of a BatchExecuteStatement call: they are shared by all
+	// its statements and the Data API rejects more than 200KB of them ("Parameter size exceeds 200 kB").
+	// They are measured JSON-encoded, as sent on the wire, with a safe margin.
+	maxBatchParamBytes = 180 * 1024
+	// paramOverheadBytes is the JSON envelope of a parameter: {"name":,"value":},
+	paramOverheadBytes = 20
 	// maxSuperBytes is the maximum size of a JSON value: it is sent as a VARCHAR parameter to JSON_PARSE,
 	// and a Redshift VARCHAR cannot be longer than 65535 bytes.
 	maxSuperBytes = 65535
@@ -190,6 +195,8 @@ type row struct {
 	values []string
 	// size is an upper bound of the size of the row in an INSERT (SQL + parameters).
 	size int
+	// paramSize is the JSON-encoded size of the row parameters.
+	paramSize int
 }
 
 // chunk is a group of rows inserted by a single INSERT statement.
@@ -197,6 +204,8 @@ type chunk struct {
 	rows []row
 	// size is an upper bound of the size of the statement (SQL + parameters).
 	size int
+	// paramSize is the JSON-encoded size of the statement parameters.
+	paramSize int
 }
 
 type batch struct {
@@ -592,8 +601,10 @@ func prepareRows(columns []column, rows []row, prefixSize int) ([]row, []string)
 				tooLarge = tooLarge || len(r.values[i]) > maxSuperBytes
 			}
 		}
-		_, _, r.size = buildRowValues(columns, r.values, paramIndexUpperBound)
-		if tooLarge || prefixSize+r.size > maxStatementBytes {
+		var params []types.SqlParameter
+		_, params, r.size = buildRowValues(columns, r.values, paramIndexUpperBound)
+		r.paramSize = paramsSize(params)
+		if tooLarge || prefixSize+r.size > maxStatementBytes || r.paramSize > maxBatchParamBytes {
 			skippedKeys = append(skippedKeys, r.key)
 			continue
 		}
@@ -637,17 +648,18 @@ func insertPrefix(table string, columns []column) string {
 }
 
 // buildBatches builds multi-rows INSERT statements and groups them in batches of up to
-// maxStatementsPerBatch statements and maxBatchBytes. Parameters are shared by all the
-// statements of a batch, so they are numbered across the whole batch.
+// maxStatementsPerBatch statements, maxBatchBytes and maxBatchParamBytes. Parameters are shared
+// by all the statements of a batch, so they are numbered across the whole batch.
 func buildBatches(table string, columns []column, rows []row) []batch {
 	prefix := insertPrefix(table, columns)
 	var batches []batch
 	var b batch
-	batchBytes := 0
+	batchBytes, batchParamBytes := 0, 0
 	for _, c := range chunkRows(rows, len(prefix)) {
-		if len(b.sqls) > 0 && (len(b.sqls) == maxStatementsPerBatch || batchBytes+c.size > maxBatchBytes) {
+		if len(b.sqls) > 0 && (len(b.sqls) == maxStatementsPerBatch || batchBytes+c.size > maxBatchBytes ||
+			batchParamBytes+c.paramSize > maxBatchParamBytes) {
 			batches = append(batches, b)
-			b, batchBytes = batch{}, 0
+			b, batchBytes, batchParamBytes = batch{}, 0, 0
 		}
 		var sql strings.Builder
 		sql.WriteString(prefix)
@@ -661,6 +673,7 @@ func buildBatches(table string, columns []column, rows []row) []batch {
 		}
 		b.sqls = append(b.sqls, sql.String())
 		batchBytes += c.size
+		batchParamBytes += c.paramSize
 	}
 	if len(b.sqls) > 0 {
 		batches = append(batches, b)
@@ -671,22 +684,39 @@ func buildBatches(table string, columns []column, rows []row) []batch {
 // chunkRows splits the rows to stay under the Redshift Data API limits for a single statement.
 func chunkRows(rows []row, prefixSize int) []chunk {
 	var chunks []chunk
-	start, size := 0, prefixSize
+	start, size, paramSize := 0, prefixSize, 0
 	for i, r := range rows {
 		nbRows := i - start
-		if nbRows > 0 && (nbRows == maxRowsPerStatement || size+len(", ")+r.size > maxStatementBytes) {
-			chunks = append(chunks, chunk{rows: rows[start:i], size: size})
-			start, size = i, prefixSize
+		if nbRows > 0 && (nbRows == maxRowsPerStatement || size+len(", ")+r.size > maxStatementBytes ||
+			paramSize+r.paramSize > maxBatchParamBytes) {
+			chunks = append(chunks, chunk{rows: rows[start:i], size: size, paramSize: paramSize})
+			start, size, paramSize = i, prefixSize, 0
 		}
 		if i > start {
 			size += len(", ")
 		}
 		size += r.size
+		paramSize += r.paramSize
 	}
 	if start < len(rows) {
-		chunks = append(chunks, chunk{rows: rows[start:], size: size})
+		chunks = append(chunks, chunk{rows: rows[start:], size: size, paramSize: paramSize})
 	}
 	return chunks
+}
+
+// paramsSize returns the size of the parameters as sent to the Data API, JSON-encoded.
+func paramsSize(params []types.SqlParameter) int {
+	size := 0
+	for _, p := range params {
+		size += jsonStringSize(aws.ToString(p.Name)) + jsonStringSize(aws.ToString(p.Value)) + paramOverheadBytes
+	}
+	return size
+}
+
+func jsonStringSize(s string) int {
+	enc := smithyjson.NewEncoder()
+	enc.Value.String(s)
+	return len(enc.Bytes())
 }
 
 // buildRowValues returns the "(...)" SQL fragment of a row, its parameters and its size
