@@ -45,5 +45,12 @@ func isJSONLogicTruthy(v any) bool {
 	}
 	// Other results are checked through JSON like jsonlogic.Apply did, so NaN and ±Inf are falsy.
 	b, err := json.Marshal(v)
-	return err == nil && string(b) != "0" && string(b) != "[]" && string(b) != "null"
+	if err != nil {
+		return false
+	}
+	switch string(b) {
+	case "false", "null", `""`, "0", "[]":
+		return false
+	}
+	return true
 }

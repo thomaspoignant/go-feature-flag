@@ -41,10 +41,16 @@ func TestGetCompiledQuery(t *testing.T) {
 	}
 }
 
-func TestIsJSONLogicTruthy_Falsy(t *testing.T) {
+type namedBool bool
+
+type namedString string
+
+func TestIsJSONLogicTruthy(t *testing.T) {
+	f, tr, empty := false, true, ""
 	tests := []struct {
 		name  string
 		value any
+		want  bool
 	}{
 		{name: "infinity", value: math.Inf(1)},
 		{name: "NaN", value: math.NaN()},
@@ -52,10 +58,20 @@ func TestIsJSONLogicTruthy_Falsy(t *testing.T) {
 		{name: "NaN in an object", value: map[string]any{"a": map[string]any{"b": math.NaN()}}},
 		{name: "nil slice", value: []any(nil)},
 		{name: "nil map", value: map[string]any(nil)},
+		{name: "*bool false", value: &f},
+		{name: "named bool false", value: namedBool(false)},
+		{name: "*string empty", value: &empty},
+		{name: "named string empty", value: namedString("")},
+		{name: "raw false", value: json.RawMessage("false")},
+		{name: "*bool true", value: &tr, want: true},
+		{name: "named bool true", value: namedBool(true), want: true},
+		{name: "named string", value: namedString("x"), want: true},
+		{name: "raw 1", value: json.RawMessage("1"), want: true},
+		{name: "non-empty slice", value: []any{"a"}, want: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.False(t, isJSONLogicTruthy(tt.value))
+			assert.Equal(t, tt.want, isJSONLogicTruthy(tt.value))
 		})
 	}
 }
@@ -131,14 +147,27 @@ func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 	}
 }
 
-func TestEvaluateRule_JSONLogicTypedNilOperatorResult(t *testing.T) {
-	jsonlogic.AddOperator("goff_test_nil_slice", func(_, _ any) any { return []any(nil) })
-	jsonlogic.AddOperator("goff_test_nil_map", func(_, _ any) any { return map[string]any(nil) })
+func TestEvaluateRule_JSONLogicCustomOperatorMatchesApply(t *testing.T) {
+	f, tr, empty := false, true, ""
+	results := map[string]any{
+		"nil_slice":    []any(nil),
+		"nil_map":      map[string]any(nil),
+		"ptr_false":    &f,
+		"named_false":  namedBool(false),
+		"ptr_empty":    &empty,
+		"named_empty":  namedString(""),
+		"raw_false":    json.RawMessage("false"),
+		"ptr_true":     &tr,
+		"named_true":   namedBool(true),
+		"named_string": namedString("x"),
+	}
 	ctx := ffcontext.NewEvaluationContext("abc")
-	for _, q := range []string{`{"goff_test_nil_slice": []}`, `{"goff_test_nil_map": []}`} {
-		t.Run(q, func(t *testing.T) {
-			assert.False(t, applyReference(t, q, ctx))
-			assert.False(t, evaluateRule(getCompiledQuery(q), &queryContext{ctx: ctx}))
+	for name, result := range results {
+		op := "goff_test_" + name
+		jsonlogic.AddOperator(op, func(_, _ any) any { return result })
+		q := `{"` + op + `": []}`
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, applyReference(t, q, ctx), evaluateRule(getCompiledQuery(q), &queryContext{ctx: ctx}))
 		})
 	}
 }
