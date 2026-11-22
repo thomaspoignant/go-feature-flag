@@ -108,6 +108,9 @@ type Config struct {
 	// It is enabled when Studio.URL is set.
 	Studio Studio `mapstructure:"studio" koanf:"studio"`
 
+	// Endpoints (optional) configures the endpoints of the relay proxy.
+	Endpoints Endpoints `mapstructure:"endpoints" koanf:"endpoints"`
+
 	// ---------- Deprecated fields ----------
 	// ListenPort (optional) is the port we are using to start the proxy
 	//
