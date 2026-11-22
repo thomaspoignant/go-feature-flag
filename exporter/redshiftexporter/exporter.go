@@ -37,7 +37,9 @@ const (
 	// maxStatementsPerBatch is the maximum number of SQL statements of a BatchExecuteStatement call.
 	maxStatementsPerBatch = 40
 	// maxBatchBytes bounds the size of a BatchExecuteStatement call (SQL text + parameters).
-	maxBatchBytes = 1 << 20
+	// The parameters are shared by the whole batch and the Data API rejects more than 200KB of them,
+	// we keep a safe margin.
+	maxBatchBytes = 100 * 1024
 	// maxSuperBytes is the maximum size of a JSON value: it is sent as a VARCHAR parameter to JSON_PARSE,
 	// and a Redshift VARCHAR cannot be longer than 65535 bytes.
 	maxSuperBytes = 65535
