@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -329,7 +330,8 @@ func (f *InternalFlag) IsValid() error {
 
 	// Retained before the rules are validated, so the parses made by the validation
 	// stay cached even if a previous configuration's rules are collected meanwhile.
-	nikunjyEvaluators.retain(f.Rules)
+	known := nikunjyEvaluators.known(f.Rules)
+	ruleQueries := nikunjyEvaluators.retain(f.Rules, known)
 
 	const isDefaultRule = true
 	// Validate rules
@@ -338,8 +340,16 @@ func (f *InternalFlag) IsValid() error {
 	}
 
 	ruleNames := map[string]any{}
-	for _, rule := range f.GetRules() {
-		if err := rule.IsValid(!isDefaultRule, f.GetVariations()); err != nil {
+	rules := f.GetRules()
+	evaluators := make([]*parser.Evaluator, len(rules))
+	for i := range rules {
+		rule := &rules[i]
+		var err error
+		var knownEvaluator *parser.Evaluator
+		if known != nil {
+			knownEvaluator = known[i].evaluator
+		}
+		if evaluators[i], err = rule.validate(!isDefaultRule, f.GetVariations(), knownEvaluator); err != nil {
 			return err
 		}
 
@@ -351,6 +361,8 @@ func (f *InternalFlag) IsValid() error {
 		}
 	}
 
+	// The queries are parsed now: index them to evaluate the rules without hashing them.
+	nikunjyEvaluators.index(f.Rules, ruleQueries, evaluators)
 	return nil
 }
 
