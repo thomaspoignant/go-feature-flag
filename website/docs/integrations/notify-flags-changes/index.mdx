@@ -25,6 +25,21 @@ GO Feature Flag can handle more than one notifier at a time.
 If a flag has a `metadata.updatedBy` value (GO Feature Flag Studio sets it to the name of the person who last changed the flag),
 the Slack, Discord and Microsoft Teams notifications name who created or updated the flag, for example `✏️ Flag "dark-mode" updated by jane`.
 
+If you edit your flag file yourself, set it as a plain string, for example from your CI with the commit author:
+
+```yaml
+dark-mode:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: enabled
+  metadata:
+    updatedBy: jane
+```
+
+GO Feature Flag shows the value as it is in the file and does not verify it, so update it with every change or the notification names the previous editor.
+
 :::warning **Limitation if you are running multiple GO Feature Flag**
 By nature, GO Feature Flag is 100% stateless, so if you run multiple instance of GO Feature Flag, you will receive notification for changes from each instance.
 In each notification you will have the `hostname` of the instance, it can be useful if you have multiple GO Feature Flag running.
