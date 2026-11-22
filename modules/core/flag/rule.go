@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
+	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
@@ -49,6 +50,13 @@ type Rule struct {
 
 	// Disable indicates that this rule is disabled.
 	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty" jsonschema:"title=disable,description=Indicates that this rule is disabled."` // nolint: lll
+
+	// QueryHash is the hash of Query that InternalFlag.IsValid computes once, when the flag is
+	// loaded, to find the evaluator of the query without hashing it for every evaluation.
+	// It is derived data: it is never read from or written to a configuration. It is exported
+	// only because the notifier compares flags with cmp.Equal, which rejects unexported
+	// fields; flags with the same queries have the same hash, so it does not make flags differ.
+	QueryHash uint64 `json:"-" yaml:"-" toml:"-" jsonschema:"-"`
 }
 
 // RequiresBucketing checks if this rule requires a bucketing key for evaluation
@@ -100,8 +108,7 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 	// Check if the rule applies for this user
 	ruleApply := isDefault
 	if !ruleApply {
-		query := r.GetTrimmedQuery()
-		ruleApply = evaluateRule(query, queryFormatOf(query), queryCtx)
+		ruleApply = r.evaluateQuery(queryCtx)
 	}
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", errRuleNotApply
@@ -152,6 +159,45 @@ func (q *queryContext) jsonOnce() ([]byte, error) {
 	return q.parsedEvalCtxAsBytes, nil
 }
 
+// evaluateQuery evaluates the query of the rule. A nikunjy query that was validated with its
+// rule has its evaluator found by the hash that validation saved in the rule, which does not
+// read the query. Any other query is read, trimmed and hashed.
+func (r *Rule) evaluateQuery(queryCtx *queryContext) bool {
+	if r.QueryHash != 0 { // the rule was validated
+		raw := r.GetQuery()
+		if ev := nikunjyEvaluators.lookup(r.QueryHash, raw); ev != nil {
+			return evaluateNikunjy(ev, raw, queryCtx)
+		}
+	}
+	query := r.GetTrimmedQuery()
+	return evaluateRule(query, queryFormatOf(query), queryCtx)
+}
+
+// evaluateNikunjy is evaluateRule for the nikunjy query that ev evaluates.
+func evaluateNikunjy(ev *parser.Evaluator, query string, queryCtx *queryContext) (success bool) {
+	// Catch any panics that may occur during evaluation
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(context.Background(), "panic recovered while evaluating query",
+				slog.Any("panic", r),
+				slog.String("query", query),
+			)
+			success = false
+		}
+	}()
+	return processNikunjy(ev, query, queryCtx.mapOnce())
+}
+
+func processNikunjy(ev *parser.Evaluator, query string, mapCtx map[string]any) bool {
+	ok, err := ev.Process(mapCtx)
+	if err != nil {
+		slog.Error("error while evaluating the nikunjy query",
+			slog.String("query", query), slog.Any("error", err))
+		return false
+	}
+	return ok
+}
+
 func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
 	if query == "" {
 		return true
@@ -199,19 +245,13 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 			return true
 		}
 	default:
-		ev, err := getNikunjyEvaluator(query)
+		ev, err := nikunjyEvaluators.get(query)
 		if err != nil {
 			slog.Error("error while parsing the nikunjy query",
 				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
-		ok, err := ev.process(mapCtx)
-		if err != nil {
-			slog.Error("error while evaluating the nikunjy query",
-				slog.String("query", query), slog.Any("error", err))
-			return false
-		}
-		return ok
+		return processNikunjy(ev, query, mapCtx)
 	}
 }
 
@@ -342,6 +382,7 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 
 	if updatedRule.Query != nil {
 		r.Query = updatedRule.Query
+		r.QueryHash = 0
 	}
 
 	if updatedRule.VariationResult != nil {

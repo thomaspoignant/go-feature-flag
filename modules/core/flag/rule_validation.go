@@ -11,31 +11,48 @@ import (
 
 // IsValid is checking if the rule is valid
 func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
+	_, err := r.validate(defaultRule, variations, nil)
+	return err
+}
+
+// validate is IsValid. It also returns the evaluator that validated the nikunjy query of the
+// rule, so that the caller does not have to look the query up again. It is nil if the rule has
+// no nikunjy query to validate.
+//
+// known is the evaluator of a nikunjy query that was validated already: the query is not
+// validated again.
+func (r *Rule) validate(
+	defaultRule bool, variations map[string]*any, known *parser.Evaluator,
+) (*parser.Evaluator, error) {
 	if !defaultRule && r.IsDisable() {
-		return nil
+		return nil, nil
 	}
 
 	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult == nil {
-		return fmt.Errorf("impossible to return value")
+		return nil, fmt.Errorf("impossible to return value")
 	}
 
-	if err := r.isQueryValid(defaultRule); err != nil {
-		return err
+	ev := known
+	if ev == nil {
+		var err error
+		if ev, err = r.validateQuery(defaultRule); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := r.validatePercentages(variations); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := r.validateProgressiveRollout(variations); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := r.validateVariationResult(variations); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return ev, nil
 }
 
 // validatePercentages validates the percentage configuration of the rule.
@@ -155,35 +172,28 @@ func (r *Rule) validateVariationResult(variations map[string]*any) error {
 // It checks that the query is not empty and that the query format is valid.
 // The query format can be either JSONLogic or Nikunjy.
 func (r *Rule) isQueryValid(defaultRule bool) error {
+	_, err := r.validateQuery(defaultRule)
+	return err
+}
+
+// validateQuery is isQueryValid. It also returns the evaluator of a nikunjy query.
+func (r *Rule) validateQuery(defaultRule bool) (*parser.Evaluator, error) {
 	if defaultRule {
-		return nil
+		return nil, nil
 	}
 
 	if r.Query == nil {
-		return fmt.Errorf("each targeting should have a query")
+		return nil, fmt.Errorf("each targeting should have a query")
 	}
 
 	// Validate the query with the parser
 	switch r.GetQueryFormat() {
 	case JSONLogicQueryFormat:
 		if !jsonlogic.IsValid(strings.NewReader(r.GetQuery())) {
-			return fmt.Errorf("invalid jsonlogic query")
+			return nil, fmt.Errorf("invalid jsonlogic query")
 		}
-		return nil
+		return nil, nil
 	default:
-		return validateNikunjyQuery(r.GetTrimmedQuery())
+		return nikunjyEvaluators.validateEvaluator(r.GetTrimmedQuery())
 	}
-}
-
-// validateNikunjyQuery validates the Nikunjy query configuration of the rule.
-func validateNikunjyQuery(query string) error {
-	ev, err := parser.NewEvaluator(query)
-	if err != nil {
-		return fmt.Errorf("invalid query: %w", err)
-	}
-	_, err = ev.Process(map[string]any{})
-	if err != nil {
-		return fmt.Errorf("invalid query: %w", err)
-	}
-	return nil
 }
