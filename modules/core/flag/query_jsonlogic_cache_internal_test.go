@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/stretchr/testify/assert"
@@ -84,6 +85,51 @@ func compiledQueryCacheLen() int {
 		return true
 	})
 	return n
+}
+
+func TestAsJSONData_MatchesJSONRoundTrip(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+	}{
+		{name: "flat context", value: map[string]any{"key": "user-1", "anonymous": false, "dsp": "42", "score": 1.5}},
+		{name: "ints", value: map[string]any{"a": 1, "b": int64(1 << 60), "c": int32(-7)}},
+		{name: "nested", value: map[string]any{"a": map[string]any{"b": []any{"x", 2, nil, true}}}},
+		{name: "empty", value: map[string]any{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := asJSONData(tt.value)
+			assert.True(t, ok)
+			raw, err := json.Marshal(tt.value)
+			assert.NoError(t, err)
+			var want any
+			assert.NoError(t, json.Unmarshal(raw, &want))
+			assert.Equal(t, want, got)
+		})
+	}
+}
+
+func TestAsJSONData_FallsBackWhenUnsure(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+	}{
+		{name: "invalid utf8 value", value: map[string]any{"a": "\xff"}},
+		{name: "invalid utf8 key", value: map[string]any{"\xff": "a"}},
+		{name: "NaN", value: map[string]any{"a": math.NaN()}},
+		{name: "infinity in array", value: []any{math.Inf(1)}},
+		{name: "json number", value: map[string]any{"a": json.Number("1")}},
+		{name: "time", value: map[string]any{"a": time.Unix(0, 0)}},
+		{name: "typed slice", value: map[string]any{"a": []string{"x"}}},
+		{name: "float32", value: map[string]any{"a": float32(0.1)}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, ok := asJSONData(tt.value)
+			assert.False(t, ok)
+		})
+	}
 }
 
 // TestEvaluateRule_JSONLogicMatchesApply checks the cached path gives the same answer as jsonlogic.Apply.
