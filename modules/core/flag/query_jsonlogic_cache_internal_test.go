@@ -3,6 +3,7 @@ package flag
 import (
 	"bytes"
 	"encoding/json"
+	"math"
 	"strings"
 	"sync"
 	"testing"
@@ -39,6 +40,23 @@ func TestGetCompiledQuery(t *testing.T) {
 	}
 }
 
+func TestIsJSONLogicTruthy_NonFinite(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+	}{
+		{name: "infinity", value: math.Inf(1)},
+		{name: "NaN", value: math.NaN()},
+		{name: "infinity in an array", value: []any{true, math.Inf(-1)}},
+		{name: "NaN in an object", value: map[string]any{"a": map[string]any{"b": math.NaN()}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.False(t, isJSONLogicTruthy(tt.value))
+		})
+	}
+}
+
 // TestEvaluateRule_JSONLogicMatchesApply checks the cached path gives the same answer as jsonlogic.Apply.
 func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 	queries := []string{
@@ -57,6 +75,11 @@ func TestEvaluateRule_JSONLogicMatchesApply(t *testing.T) {
 		`{"if": [{"<": [{"var": "floor"}, 1]}, "", "yes"]}`,
 		`{"substr": [{"var": "key"}, 0, 0]}`,
 		`{"xxx": [{"var": "key"}, "abc"]}`,
+		`{"/": [1, {"var": "floor"}]}`,
+		`{"/": [0, {"var": "floor"}]}`,
+		`{"merge": [[{"/": [1, {"var": "floor"}]}]]}`,
+		`{"if": [true, {"nested": {"/": [1, {"var": "floor"}]}}, false]}`,
+		`{"map": [{"var": "tags"}, {"/": [1, 0]}]}`,
 	}
 	ctxs := []ffcontext.Context{
 		ffcontext.NewEvaluationContext("abc"),
