@@ -104,6 +104,10 @@ func compiledQueryCacheLen() int {
 }
 
 func TestAsJSONData(t *testing.T) {
+	cyclicMap := map[string]any{}
+	cyclicMap["self"] = cyclicMap
+	cyclicSlice := []any{nil}
+	cyclicSlice[0] = cyclicSlice
 	tests := []struct {
 		name   string
 		value  any
@@ -122,10 +126,12 @@ func TestAsJSONData(t *testing.T) {
 		{name: "time", value: map[string]any{"a": time.Unix(0, 0)}},
 		{name: "typed slice", value: map[string]any{"a": []string{"x"}}},
 		{name: "float32", value: map[string]any{"a": float32(0.1)}},
+		{name: "cyclic map", value: cyclicMap},
+		{name: "cyclic slice", value: cyclicSlice},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, ok := asJSONData(tt.value)
+			got, ok := asJSONData(tt.value, 0)
 			assert.Equal(t, tt.wantOK, ok)
 			if !tt.wantOK {
 				return

@@ -57,8 +57,13 @@ func isJSONLogicTruthy(v any) bool {
 	return true
 }
 
+const maxJSONDataDepth = 100
+
 // asJSONData returns v as a JSON round trip would, or false when only a real round trip can tell.
-func asJSONData(v any) (any, bool) {
+func asJSONData(v any, depth int) (any, bool) {
+	if depth > maxJSONDataDepth {
+		return nil, false
+	}
 	switch val := v.(type) {
 	case nil, bool:
 		return val, true
@@ -81,7 +86,7 @@ func asJSONData(v any) (any, bool) {
 			if !utf8.ValidString(k) {
 				return nil, false
 			}
-			d, ok := asJSONData(e)
+			d, ok := asJSONData(e, depth+1)
 			if !ok {
 				return nil, false
 			}
@@ -94,7 +99,7 @@ func asJSONData(v any) (any, bool) {
 		}
 		out := make([]any, len(val))
 		for i, e := range val {
-			d, ok := asJSONData(e)
+			d, ok := asJSONData(e, depth+1)
 			if !ok {
 				return nil, false
 			}
