@@ -191,27 +191,21 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	return dataExp, nil
 }
 
+// valueOrDefault returns value, or def when value is empty.
+func valueOrDefault(value, def string) string {
+	if value != "" {
+		return value
+	}
+	return def
+}
+
 // nolint: funlen
 func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
-	format := config.DefaultExporter.Format
-	if c.Format != "" {
-		format = c.Format
-	}
-
-	filename := config.DefaultExporter.FileName
-	if c.Filename != "" {
-		filename = c.Filename
-	}
-
-	csvTemplate := config.DefaultExporter.CsvFormat
-	if c.CsvTemplate != "" {
-		csvTemplate = c.CsvTemplate
-	}
-
-	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
-	if c.ParquetCompressionCodec != "" {
-		parquetCompressionCodec = c.ParquetCompressionCodec
-	}
+	format := valueOrDefault(c.Format, config.DefaultExporter.Format)
+	filename := valueOrDefault(c.Filename, config.DefaultExporter.FileName)
+	csvTemplate := valueOrDefault(c.CsvTemplate, config.DefaultExporter.CsvFormat)
+	parquetCompressionCodec := valueOrDefault(
+		c.ParquetCompressionCodec, config.DefaultExporter.ParquetCompressionCodec)
 
 	switch c.Kind {
 	case config.WebhookExporter:
@@ -231,12 +225,7 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		}, nil
 	case config.LogExporter:
 		return &logsexporter.Exporter{
-			LogFormat: func() string {
-				if c.LogFormat != "" {
-					return c.LogFormat
-				}
-				return config.DefaultExporter.LogFormat
-			}(),
+			LogFormat: valueOrDefault(c.LogFormat, config.DefaultExporter.LogFormat),
 		}, nil
 	case config.S3Exporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
