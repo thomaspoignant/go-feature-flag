@@ -755,8 +755,8 @@ github.com/labstack/echo-otel/v5 v5.0.0 h1:/mcXe6HyOSoGJe8z4WuhWBfK3uFOkBi2oFEva
 github.com/labstack/echo-otel/v5 v5.0.0/go.mod h1:rMC5ekJzX2voZtHAW7SYMmxWBuTQBobCB+JC2gqfdxE=
 github.com/labstack/echo-prometheus v0.0.1 h1:wofgid4PiNJ3kvxAJsuMAaCD/U6n/fvL8WH8BKq7IY8=
 github.com/labstack/echo-prometheus v0.0.1/go.mod h1:UAeQwHjvCT2MJGyP3mXyp8iVH14oC+Dyl2H6+pOIapQ=
-github.com/labstack/echo/v5 v5.4.5 h1:lEPtXOQXgDcJNgrFy85WU2xBPZ/m9R2R+pc4eAxymjA=
-github.com/labstack/echo/v5 v5.4.5/go.mod h1:4iEGNQiPPZnkfYpNR/L6fINd3NLiGWUD5+eBotFALas=
+github.com/labstack/echo/v5 v5.4.6 h1:i5xgG49AudvUPKjuE6Q8Jb3onm2Tfs/7xjUWbbcQPmo=
+github.com/labstack/echo/v5 v5.4.6/go.mod h1:4iEGNQiPPZnkfYpNR/L6fINd3NLiGWUD5+eBotFALas=
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.1.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=

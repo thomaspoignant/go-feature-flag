@@ -45,7 +45,7 @@ require (
 	github.com/labstack/echo-contrib/v5 v5.0.1
 	github.com/labstack/echo-otel/v5 v5.0.0
 	github.com/labstack/echo-prometheus v0.0.1
-	github.com/labstack/echo/v5 v5.4.5
+	github.com/labstack/echo/v5 v5.4.6
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/pablor21/echo-etag/v5 v5.0.0
 	github.com/pelletier/go-toml/v2 v2.4.3
