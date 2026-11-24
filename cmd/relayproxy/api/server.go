@@ -142,6 +142,7 @@ func (s *Server) initRoutes() {
 // corsMiddleware allows any origin and answers every preflight with a fixed list of methods.
 // AllowMethods is set explicitly because, when left empty, echo v5 answers the preflight with
 // the methods registered on the route, which would change the CORS contract of the relay proxy.
+// ETag is exposed so browser clients (e.g. the OFREP web provider) can send If-None-Match.
 func corsMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -149,6 +150,7 @@ func corsMiddleware() echo.MiddlewareFunc {
 			http.MethodGet, http.MethodHead, http.MethodPut,
 			http.MethodPatch, http.MethodPost, http.MethodDelete,
 		},
+		ExposeHeaders: []string{"ETag"},
 	})
 }
 
