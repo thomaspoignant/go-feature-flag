@@ -18,8 +18,7 @@ func NewFeatureEvent(
 	value any,
 	variation string,
 	failed bool,
-	version string,
-	source string,
+	version, source string,
 	metadata FeatureEventMetadata,
 ) FeatureEvent {
 	contextKind := "user"

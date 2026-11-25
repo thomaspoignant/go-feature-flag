@@ -37,6 +37,7 @@ func FuzzEvaluateRule(f *testing.F) {
 	f.Fuzz(func(t *testing.T, query, ctxJSON string) {
 		// Every fuzzed query would otherwise stay in the evaluator cache forever.
 		useFreshNikunjyEvaluators(t)
+		t.Cleanup(compiledQueryCache.Clear)
 		var attributes map[string]any
 		if json.Unmarshal([]byte(ctxJSON), &attributes) != nil {
 			return

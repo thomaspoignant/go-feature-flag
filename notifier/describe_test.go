@@ -576,6 +576,21 @@ func TestDescribeChanges(t *testing.T) {
 			want: []string{"Default rule now serves `off` 101%, `on` -1% (was `off` 80%, `on` 20%)"},
 		},
 		{
+			name: "should not list updatedBy among the metadata changes",
+			setup: func(f *flag.InternalFlag) {
+				f.Metadata = &map[string]any{"owner": "payments", notifier.UpdatedByMetadataKey: "john"}
+			},
+			update: func(f *flag.InternalFlag) {
+				f.Metadata = &map[string]any{"owner": "growth", notifier.UpdatedByMetadataKey: "jane"}
+			},
+			want: []string{"Metadata `owner` changed from `\"payments\"` to `\"growth\"`"},
+		},
+		{
+			name:   "should not list an added updatedBy",
+			update: func(f *flag.InternalFlag) { (*f.Metadata)[notifier.UpdatedByMetadataKey] = "jane" },
+			want:   nil,
+		},
+		{
 			name:   "should return nothing for an unchanged flag",
 			update: func(_ *flag.InternalFlag) {},
 			want:   nil,
@@ -734,6 +749,38 @@ func TestDescribeChangesPlain(t *testing.T) {
 			got, err := notifier.DescribeChangesPlain(before, after)
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestUpdatedBy(t *testing.T) {
+	withMetadata := func(metadata map[string]any) *flag.InternalFlag {
+		return &flag.InternalFlag{Metadata: &metadata}
+	}
+	tests := []struct {
+		name       string
+		flag       flag.Flag
+		want       string
+		wantSuffix string
+	}{
+		{
+			name:       "should return the name when updatedBy is set",
+			flag:       withMetadata(map[string]any{notifier.UpdatedByMetadataKey: "jane"}),
+			want:       "jane",
+			wantSuffix: " by jane",
+		},
+		{name: "should return nothing when updatedBy is absent", flag: withMetadata(map[string]any{"owner": "payments"})},
+		{name: "should return nothing without metadata", flag: &flag.InternalFlag{}},
+		{name: "should return nothing when updatedBy is empty", flag: withMetadata(map[string]any{notifier.UpdatedByMetadataKey: ""})},
+		{name: "should return nothing when updatedBy is blank", flag: withMetadata(map[string]any{notifier.UpdatedByMetadataKey: "  "})},
+		{name: "should return nothing when updatedBy is not a string", flag: withMetadata(map[string]any{notifier.UpdatedByMetadataKey: 42})},
+		{name: "should return nothing for a nil flag", flag: (*flag.InternalFlag)(nil)},
+		{name: "should return nothing for another flag type", flag: otherFlag{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, notifier.UpdatedBy(tt.flag))
+			assert.Equal(t, tt.wantSuffix, notifier.UpdatedBySuffix(tt.flag))
 		})
 	}
 }

@@ -1,14 +1,12 @@
 package flag
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
@@ -100,8 +98,7 @@ func (r *Rule) evaluate(key string, queryCtx *queryContext, flagName string, isD
 	// Check if the rule applies for this user
 	ruleApply := isDefault
 	if !ruleApply {
-		query := r.GetTrimmedQuery()
-		ruleApply = evaluateRule(query, queryFormatOf(query), queryCtx)
+		ruleApply = evaluateRule(getCompiledQuery(r.GetQuery()), queryCtx)
 	}
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", errRuleNotApply
@@ -133,6 +130,7 @@ type queryContext struct {
 	ctx                  ffcontext.Context
 	parsedEvalCtxAsMap   map[string]any
 	parsedEvalCtxAsBytes []byte
+	parsedEvalCtxAsData  any
 }
 
 func (q *queryContext) mapOnce() map[string]any {
@@ -152,7 +150,24 @@ func (q *queryContext) jsonOnce() ([]byte, error) {
 	return q.parsedEvalCtxAsBytes, nil
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext) (success bool) {
+// dataOnce is the context decoded from its JSON form, which is the only shape JsonLogic accepts.
+func (q *queryContext) dataOnce() (any, error) {
+	if q.parsedEvalCtxAsData == nil {
+		raw, err := q.jsonOnce()
+		if err != nil {
+			return nil, err
+		}
+		var data any
+		if err := json.Unmarshal(raw, &data); err != nil {
+			return nil, err
+		}
+		q.parsedEvalCtxAsData = data
+	}
+	return q.parsedEvalCtxAsData, nil
+}
+
+func evaluateRule(compiled *compiledQuery, queryCtx *queryContext) (success bool) {
+	query := compiled.trimmed
 	if query == "" {
 		return true
 	}
@@ -170,34 +185,21 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 	}()
 
 	// mapCtx is shared by every rule of the flag: a query engine must not modify it.
-	switch queryFormat {
+	switch compiled.format {
 	case JSONLogicQueryFormat:
-		strCtx, err := queryCtx.jsonOnce()
+		data, err := queryCtx.dataOnce()
 		if err != nil {
-			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
+			slog.ErrorContext(context.Background(), "error while marshalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
-		var result bytes.Buffer
-		err = jsonlogic.Apply(
-			strings.NewReader(query),
-			bytes.NewReader(strCtx),
-			&result,
-		)
+		result, err := jsonlogic.ApplyInterface(compiled.jsonLogic, data)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
-		resStr := utils.StrTrim(result.String())
-		// As per JSONLogic spec, falsy values are: false, null, "", 0, and []
-		// All other values are truthy.
-		switch resStr {
-		case "false", "null", `""`, "0", "[]":
-			return false
-		default:
-			return true
-		}
+		return isJSONLogicTruthy(result)
 	default:
 		ev, err := nikunjyEvaluators.get(query)
 		if err != nil {
@@ -217,8 +219,7 @@ func evaluateRule(query string, queryFormat QueryFormat, queryCtx *queryContext)
 
 // EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
 func (r *Rule) EvaluateProgressiveRollout(
-	key string,
-	flagName string,
+	key, flagName string,
 	evaluationDate time.Time,
 ) (string, error) {
 	progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)

@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 	"sync"
 
 	echootel "github.com/labstack/echo-otel/v5"
@@ -72,10 +71,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(echootel.NewMiddleware("go-feature-flag"))
 	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c *echo.Context) bool {
-			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
-			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
-		},
+		Skipper: bodyDumpSkipper(s.zapLog),
 		Handler: bodyDumpHandler(s.zapLog),
 	}))
 	if s.services.Metrics != (metric.Metrics{}) {
@@ -121,6 +117,8 @@ func (s *Server) initRoutes() {
 		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
+	cValidateFlags := controller.NewValidateFlags(
+		s.config.Version, s.services.Metrics, s.config.Endpoints.ValidateFlags)
 	cFlagChangeAPI := controller.NewAPIFlagChange(
 		s.services.FlagsetManager,
 		s.services.Metrics,
@@ -137,13 +135,14 @@ func (s *Server) initRoutes() {
 	s.addOFREPRoutes(cFlagEvalOFREP, userAuth)
 	s.addStreamRoutes()
 	s.addMonitoringRoutes()
-	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
+	s.addAdminRoutes(cRetrieverRefresh, cValidateFlags, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)
 }
 
 // corsMiddleware allows any origin and answers every preflight with a fixed list of methods.
 // AllowMethods is set explicitly because, when left empty, echo v5 answers the preflight with
 // the methods registered on the route, which would change the CORS contract of the relay proxy.
+// ETag is exposed so browser clients (e.g. the OFREP web provider) can send If-None-Match.
 func corsMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -151,6 +150,7 @@ func corsMiddleware() echo.MiddlewareFunc {
 			http.MethodGet, http.MethodHead, http.MethodPut,
 			http.MethodPatch, http.MethodPost, http.MethodDelete,
 		},
+		ExposeHeaders: []string{"ETag"},
 	})
 }
 

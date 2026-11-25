@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -105,7 +106,7 @@ func Test_CORS_SimpleRequest(t *testing.T) {
 				assert.Equal(t, "*", resp.Header.Get("Access-Control-Allow-Origin"))
 				assert.Contains(t, resp.Header.Values("Vary"), "Origin")
 				assert.Empty(t, resp.Header.Get("Access-Control-Allow-Credentials"))
-				assert.Empty(t, resp.Header.Get("Access-Control-Expose-Headers"))
+				assert.Equal(t, "ETag", resp.Header.Get("Access-Control-Expose-Headers"))
 			})
 
 			t.Run("without Origin header", func(t *testing.T) {
@@ -150,6 +151,36 @@ func Test_CORS_Preflight(t *testing.T) {
 			assert.Empty(t, resp.Header.Get("Access-Control-Max-Age"))
 		})
 	}
+}
+
+// Test_CORS_OFREPExposesETag checks that a browser can read the ETag of an OFREP bulk evaluation,
+// both on the first response and on the 304 returned when it sends the ETag back.
+func Test_CORS_OFREPExposesETag(t *testing.T) {
+	baseURL := startTestServer(t, testConfig(t))
+	evaluate := func(etag string) *http.Response {
+		req, err := http.NewRequest(http.MethodPost, baseURL+"/ofrep/v1/evaluate/flags",
+			strings.NewReader(`{"context":{"targetingKey":"user-1"}}`))
+		require.NoError(t, err)
+		req.Header.Set("Origin", "https://example.com")
+		req.Header.Set("Content-Type", "application/json")
+		if etag != "" {
+			req.Header.Set("If-None-Match", etag)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = resp.Body.Close() })
+		return resp
+	}
+
+	resp := evaluate("")
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "ETag", resp.Header.Get("Access-Control-Expose-Headers"))
+	etag := resp.Header.Get("ETag")
+	require.NotEmpty(t, etag)
+
+	resp = evaluate(etag)
+	assert.Equal(t, http.StatusNotModified, resp.StatusCode)
+	assert.Equal(t, "ETag", resp.Header.Get("Access-Control-Expose-Headers"))
 }
 
 // Test_CORS_MonitoringPort checks that the CORS middleware is also active on the monitoring

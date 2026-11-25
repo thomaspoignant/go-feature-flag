@@ -24,6 +24,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
+	"github.com/thomaspoignant/go-feature-flag/exporter/redshiftexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -190,27 +191,21 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	return dataExp, nil
 }
 
+// valueOrDefault returns value, or def when value is empty.
+func valueOrDefault(value, def string) string {
+	if value != "" {
+		return value
+	}
+	return def
+}
+
 // nolint: funlen
 func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
-	format := config.DefaultExporter.Format
-	if c.Format != "" {
-		format = c.Format
-	}
-
-	filename := config.DefaultExporter.FileName
-	if c.Filename != "" {
-		filename = c.Filename
-	}
-
-	csvTemplate := config.DefaultExporter.CsvFormat
-	if c.CsvTemplate != "" {
-		csvTemplate = c.CsvTemplate
-	}
-
-	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
-	if c.ParquetCompressionCodec != "" {
-		parquetCompressionCodec = c.ParquetCompressionCodec
-	}
+	format := valueOrDefault(c.Format, config.DefaultExporter.Format)
+	filename := valueOrDefault(c.Filename, config.DefaultExporter.FileName)
+	csvTemplate := valueOrDefault(c.CsvTemplate, config.DefaultExporter.CsvFormat)
+	parquetCompressionCodec := valueOrDefault(
+		c.ParquetCompressionCodec, config.DefaultExporter.ParquetCompressionCodec)
 
 	switch c.Kind {
 	case config.WebhookExporter:
@@ -230,12 +225,7 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		}, nil
 	case config.LogExporter:
 		return &logsexporter.Exporter{
-			LogFormat: func() string {
-				if c.LogFormat != "" {
-					return c.LogFormat
-				}
-				return config.DefaultExporter.LogFormat
-			}(),
+			LogFormat: valueOrDefault(c.LogFormat, config.DefaultExporter.LogFormat),
 		}, nil
 	case config.S3Exporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
@@ -303,6 +293,25 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			DatasetID:         c.DatasetID,
 			TableName:         c.TableName,
 			GoogleCredentials: []byte(c.GoogleCredentials),
+			AutoMigrate:       c.AutoMigrate,
+		}, nil
+	case config.RedshiftExporter:
+		var awsOpts []func(*awsConf.LoadOptions) error
+		if c.AwsRegion != "" {
+			awsOpts = append(awsOpts, awsConf.WithRegion(c.AwsRegion))
+		}
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background(), awsOpts...)
+		if err != nil {
+			return nil, err
+		}
+		return &redshiftexporter.Exporter{
+			ClusterIdentifier: c.ClusterIdentifier,
+			WorkgroupName:     c.WorkgroupName,
+			Database:          c.Database,
+			DbUser:            c.DbUser,
+			SecretArn:         c.SecretArn,
+			TableName:         c.TableName,
+			AwsConfig:         &awsConfig,
 			AutoMigrate:       c.AutoMigrate,
 		}, nil
 	case config.AzureExporter:
