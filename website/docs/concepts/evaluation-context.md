@@ -74,15 +74,17 @@ For instance, **GO Feature Flag** ensures that in cases where a feature is being
 
 ## Reserved properties in the evaluation context
 :::danger
-If you put a key named `gofeatureflag` in your evaluation context, it may break internal features of GO Feature Flag.
-This property name is reserved for internal use.
+The `gofeatureflag` key is reserved. Only set the properties listed below, any other usage may break internal features of GO Feature Flag.
+
+**Do not use `gofeatureflag` or any of its properties in your targeting queries.**  
+They are internal to GO Feature Flag and may be absent depending on the provider and the evaluation mode _(remote or in-process)_, so the same rule could return different results.  
+If you need to target on one of these values, add it to the evaluation context under your own key.
 :::
 
-When you create an evaluation context some fields are reserved for GO Feature Flag.  
-Those fields are used by GO Feature Flag directly, you can use them as will in your targeting queries, but you should be aware that they are used internally for GO Feature Flag.
+You can set these properties to change how GO Feature Flag behaves:
 
 | Field                            | Description                                                                                                                                                                                                                  |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `gofeatureflag.currentDateTime`  | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RFC3339 format.                  |
 | `gofeatureflag.flagList`         | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is to evaluate all the flags.<br/>**Format:** []string |
-| `gofeatureflag.exporterMetadata` | If this property is set, we will add all the fields in the feature event send to the provider.<br/>**Format:** map[string]string\|number\|bool                                                                               |
+| `gofeatureflag.exporterMetadata` | Metadata added to the feature events sent to the exporter when the flag is evaluated by the relay proxy or the GO module.<br/>OpenFeature providers may set it automatically, use the exporter metadata option of your provider instead.<br/>**Format:** map[string]string\|number\|bool |
