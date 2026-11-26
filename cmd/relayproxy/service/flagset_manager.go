@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -90,6 +91,9 @@ type flagsetManagerImpl struct {
 
 	// Logger is the logger for the flagset manager.
 	logger *zap.Logger
+
+	// sharedRegistry shares the S3 requests of the flagsets using enableSharedPollerPerBucket.
+	sharedRegistry *sharedBucketRegistry
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -159,8 +163,22 @@ func newFlagsetManagerWithFlagsets(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
 	sseService stream.SSEService, wsService stream.WebsocketService,
 ) (FlagsetManager, error) {
+	return newFlagsetManagerWithFlagsetsAndRegistry(
+		config, logger, notifiers, sseService, wsService, newSharedBucketRegistry(
+			nil, time.Duration(config.PollingInterval)*time.Millisecond, config.EnablePollingJitter, logger))
+}
+
+func newFlagsetManagerWithFlagsetsAndRegistry(
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
+	sseService stream.SSEService, wsService stream.WebsocketService,
+	registry *sharedBucketRegistry,
+) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
+
+	// Register all the shared-poller items first so that the first listing of a bucket covers all of them.
+	registry.preRegisterAll(config.FlagSets)
+	defer registry.releasePending()
 
 	for index, flagset := range config.FlagSets {
 		flagSetName := flagset.Name
@@ -177,7 +195,8 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		allNotifiers := appendStreamNotifiers(notifiers, sseService, wsService, flagSetName)
-		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
+		client, err := newGoFeatureFlagClient(
+			&flagset, logger, allNotifiers, withSharedBucketRegistry(registry))
 		if err != nil {
 			logger.Error(
 				"failed to create goff client for flagset",
@@ -207,6 +226,7 @@ func newFlagsetManagerWithFlagsets(
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
 		logger:               logger,
+		sharedRegistry:       registry,
 	}, nil
 }
 
@@ -350,6 +370,21 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 	currentByName := indexNamedFlagsets(currentFlagsets)
 	newByName := indexNamedFlagsets(newConfig.FlagSets)
 
+	// The flagsets using enableSharedPollerPerBucket follow the top-level pollingInterval and
+	// enablePollingJitter, which are not part of the flagset configuration compared by
+	// reconcileExistingFlagset: they are applied to the running pollers, without rebuilding
+	// the flagsets.
+	// The flagsets added by this reload are left out: their retriever warns about its own polling.
+	existing := make([]config.FlagSet, 0, len(newConfig.FlagSets))
+	for _, fs := range newConfig.FlagSets {
+		if _, current := currentByName[fs.Name]; isNamedFlagset(fs) && !current {
+			continue
+		}
+		existing = append(existing, fs)
+	}
+	m.sharedRegistry.setPolling(
+		time.Duration(newConfig.PollingInterval)*time.Millisecond, newConfig.EnablePollingJitter, existing)
+
 	// 1. Remove the flagsets that are no longer in the configuration.
 	for name, currentFlagset := range currentByName {
 		if _, stillPresent := newByName[name]; !stillPresent {
@@ -357,11 +392,18 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 		}
 	}
 
-	// 2. Add the flagsets that are new in the configuration.
+	// 2. Add the flagsets that are new in the configuration. The shared-poller retrievers are
+	// registered first so that the first listing of a bucket covers all of them.
+	var added []config.FlagSet
 	for name, newFlagset := range newByName {
 		if _, alreadyExists := currentByName[name]; !alreadyExists {
-			m.addFlagset(newFlagset)
+			added = append(added, newFlagset)
 		}
+	}
+	m.sharedRegistry.preRegisterAll(added)
+	defer m.sharedRegistry.releasePending()
+	for _, newFlagset := range added {
+		m.addFlagset(newFlagset)
 	}
 
 	// 3. Reconcile the flagsets that are present in both configurations: only their API keys
@@ -407,7 +449,8 @@ func indexNamedFlagsets(flagsets []config.FlagSet) map[string]config.FlagSet {
 // can serve evaluations immediately.
 func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 	allNotifiers := appendStreamNotifiers(m.notifiers, m.sseService, m.wsService, flagset.Name)
-	client, err := NewGoFeatureFlagClient(&flagset, m.logger, allNotifiers)
+	client, err := newGoFeatureFlagClient(
+		&flagset, m.logger, allNotifiers, withSharedBucketRegistry(m.sharedRegistry))
 	if err != nil {
 		m.logger.Error(
 			"failed to create the flagset added at runtime, it will not be available until the "+

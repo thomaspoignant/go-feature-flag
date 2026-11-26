@@ -32,6 +32,9 @@ func (c *Config) IsValid() error {
 	if c.flagSetMode == flagSetModeLocal && c.Studio.URL != "" {
 		return errors.New("flagSets and studio cannot be used together, remove flagSets from your configuration")
 	}
+	if c.EnableSharedPollerPerBucket {
+		return errors.New("enableSharedPollerPerBucket is only available inside a flagset")
+	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}
@@ -118,6 +121,9 @@ func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
 	if err := validateRetrievers(flagset.Retriever, flagset.Retrievers); err != nil {
 		return err
 	}
+	if err := validateSharedPollerPerBucket(flagset); err != nil {
+		return err
+	}
 
 	if err := validateExporters(flagset.Exporter, flagset.Exporters); err != nil {
 		return err
@@ -176,6 +182,25 @@ func validateNotifiers(notifiers []NotifierConf) error {
 				return fmt.Errorf("notifier at index %d validation failed: %w", i, err)
 			}
 		}
+	}
+	return nil
+}
+
+// validateSharedPollerPerBucket checks that a flagset using enableSharedPollerPerBucket has a single S3 retriever
+// in single file mode.
+func validateSharedPollerPerBucket(flagset *FlagSet) error {
+	if !flagset.EnableSharedPollerPerBucket {
+		return nil
+	}
+	if flagset.Retrievers != nil {
+		return errors.New("enableSharedPollerPerBucket can't be used with retrievers, use a single retriever")
+	}
+	r := flagset.Retriever
+	if r == nil || r.Kind != retrieverconf.S3Retriever {
+		return errors.New("enableSharedPollerPerBucket is only supported with a retriever of kind s3")
+	}
+	if r.Item == "" {
+		return errors.New("enableSharedPollerPerBucket requires the s3 retriever to set item (folder mode is not supported)")
 	}
 	return nil
 }

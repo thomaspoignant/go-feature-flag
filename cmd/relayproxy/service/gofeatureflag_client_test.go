@@ -1,11 +1,18 @@
 package service
 
+// Whitebox: the tests reach unexported functions (initRetrieversWithRegistry, firstSharedRetriever,
+// newGoFeatureFlagClient) and inject a fake shared bucket registry. The fakes are in
+// shared_bucket_registry_internal_test.go.
+
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
+	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -14,6 +21,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/bigqueryexporter"
@@ -32,6 +40,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
@@ -39,12 +48,35 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-func Test_initRetrievers(t *testing.T) {
+func Test_initRetrieversWithRegistry(t *testing.T) {
+	sharedValid := s3FlagSet("a", "b1", "p/a.yaml")
+	sharedFolder := s3FlagSet("a", "b1", "")
 	tests := []struct {
 		name       string
 		retrievers *[]retrieverconf.RetrieverConf
+		shared     *config.FlagSet
+		reg        *sharedBucketRegistry
+		wantLen    int
 		wantErr    assert.ErrorAssertionFunc
 	}{
+		{
+			name:    "shared-poller flagset with a registry",
+			shared:  &sharedValid,
+			reg:     newSharedBucketRegistry(nil, 0, false, nil),
+			wantLen: 1,
+			wantErr: assert.NoError,
+		},
+		{
+			name:    "shared-poller flagset without registry",
+			shared:  &sharedValid,
+			wantErr: assert.Error,
+		},
+		{
+			name:    "invalid shared-poller configuration",
+			shared:  &sharedFolder,
+			reg:     newSharedBucketRegistry(nil, 0, false, nil),
+			wantErr: assert.Error,
+		},
 		{
 			name:    "both retriever and retrievers",
 			wantErr: assert.NoError,
@@ -116,16 +148,36 @@ func Test_initRetrievers(t *testing.T) {
 					Retrievers: tt.retrievers,
 				},
 			}
-			r, err := initRetrievers(&proxyConf)
-			tt.wantErr(t, err)
-			if r != nil {
-				nbRetriever := 0
-				if tt.retrievers != nil {
-					nbRetriever += len(*tt.retrievers)
-				}
-				assert.Len(t, r, nbRetriever)
+			if tt.shared != nil {
+				proxyConf = *tt.shared
 			}
+			r, err := initRetrieversWithRegistry(&proxyConf, tt.reg)
+			tt.wantErr(t, err)
+			assertRetrieversLen(t, r, tt.wantLen, tt.retrievers)
+			shutdownReleasing(t, r)
 		})
+	}
+}
+
+func assertRetrieversLen(
+	t *testing.T, r []retriever.Retriever, wantLen int, retrievers *[]retrieverconf.RetrieverConf,
+) {
+	t.Helper()
+	if r == nil {
+		return
+	}
+	if retrievers != nil {
+		wantLen += len(*retrievers)
+	}
+	assert.Len(t, r, wantLen)
+}
+
+func shutdownReleasing(t *testing.T, r []retriever.Retriever) {
+	t.Helper()
+	for _, rr := range r {
+		if sr, ok := rr.(*releasingRetriever); ok {
+			require.NoError(t, sr.Shutdown(t.Context()))
+		}
 	}
 }
 
@@ -940,4 +992,86 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 			})
 		}
 	})
+}
+
+func Test_newGoFeatureFlagClient_ReleasesSharedPollerRetrieverOnFailure(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		s3   *fakeS3
+		mod  func(fs *config.FlagSet)
+	}{
+		{
+			name: "invalid exporter",
+			s3:   &fakeS3{content: []byte("{}")},
+			mod: func(fs *config.FlagSet) {
+				fs.Exporter = &config.ExporterConf{Kind: "unknown"}
+			},
+		},
+		{
+			name: "first retrieve fails",
+			s3:   &fakeS3{listErr: errors.New("AccessDenied")},
+			mod:  func(*config.FlagSet) {},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			synctest.Test(t, func(t *testing.T) {
+				reg := newFakeRegistry(t, tt.s3, &atomic.Int32{})
+				fs := s3FlagSet("a", "b1", "p/a.yaml")
+				tt.mod(&fs)
+				_, err := newGoFeatureFlagClient(&fs, zap.NewNop(), nil, withSharedBucketRegistry(reg))
+				require.Error(t, err)
+				assert.Equal(t, 0, reg.groupCount(), "the retriever must have left its group")
+			})
+		})
+	}
+}
+
+func Test_firstSharedRetriever(t *testing.T) {
+	t.Parallel()
+	reg := newFakeRegistry(t, &fakeS3{}, &atomic.Int32{})
+	fs := s3FlagSet("a", "b1", "p/a.yaml")
+	r, err := reg.retrieverFor(&fs)
+	require.NoError(t, err)
+	file, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{
+		Kind: retrieverconf.FileRetriever, Path: "../testdata/goff/configuration_flags.yaml",
+	})
+	require.NoError(t, err)
+	tests := []struct {
+		name       string
+		retrievers []retriever.Retriever
+		want       bool
+	}{
+		{name: "no retriever"},
+		{name: "another kind of retriever", retrievers: []retriever.Retriever{file}},
+		{name: "shared-poller retriever", retrievers: []retriever.Retriever{r}, want: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, ok := firstSharedRetriever(tt.retrievers)
+			assert.Equal(t, tt.want, ok)
+			assert.Equal(t, tt.want, got != nil)
+		})
+	}
+	require.NoError(t, r.(*releasingRetriever).Shutdown(t.Context()))
+}
+
+// Not parallel: the test uses t.Setenv.
+func Test_newGoFeatureFlagClient_sharedPollerWithoutRegistry(t *testing.T) {
+	// no S3 is reachable: the point is that the flagset gets a private registry and releases it
+	t.Setenv("AWS_REGION", "us-east-1")
+	t.Setenv("AWS_ACCESS_KEY_ID", "id")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
+	t.Setenv("AWS_ENDPOINT_URL", "http://127.0.0.1:1")
+	t.Setenv("AWS_MAX_ATTEMPTS", "1")
+	t.Setenv("AWS_EC2_METADATA_DISABLED", "true")
+	t.Setenv("AWS_CONFIG_FILE", "/nonexistent/config")
+	t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "/nonexistent/credentials")
+	fs := s3FlagSet("a", "b1", "p/a.yaml")
+	fs.PollingInterval, fs.EnablePollingJitter = 5000, true
+	_, err := NewGoFeatureFlagClient(&fs, zap.NewNop(), nil)
+	assert.Error(t, err)
 }
