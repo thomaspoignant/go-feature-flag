@@ -50,6 +50,10 @@ type DTO struct {
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
 	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty" jsonschema:"title=metadata,description=A field containing information about your flag such as an issue tracker link a description etc..."` // nolint: lll
+
+	// Needs is the list of dependencies this flag has on other flags. The flag is only evaluated
+	// normally when all the dependencies are satisfied, otherwise it is considered disabled.
+	Needs *[]flag.NeedsDependency `json:"needs,omitempty" yaml:"needs,omitempty" toml:"needs,omitempty" jsonschema:"title=needs,description=List of dependencies on other flags. The flag is only evaluated when all the dependencies are satisfied otherwise it is considered disabled."` // nolint: lll
 }
 
 // Convert is converting the DTO into a flag.InternalFlag.
