@@ -33,6 +33,7 @@ type VariationError struct {
 // Callers can check the flag definition separately using dto.DTO.Convert and
 // the resulting flag's IsValid method.
 func ValidateVariations(flagKey string, definition dto.DTO, schemaJSON []byte) ([]VariationError, error) {
+	// Each call registers its schema under this internal key, independent of the working directory.
 	const schemaID = "mem:///schema.json"
 	compiler := jsonschema.NewCompiler()
 	compiler.LoadURL = func(url string) (io.ReadCloser, error) {
