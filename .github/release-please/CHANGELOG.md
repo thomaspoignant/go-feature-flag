@@ -1,5 +1,78 @@
 # Changelog
 
+## [1.60.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.59.1...v1.60.0) (2026-11-27)
+
+
+### 🚀 New Features
+
+* add AWS Redshift exporter ([#6416](https://github.com/thomaspoignant/go-feature-flag/issues/6416)) ([4311f59](https://github.com/thomaspoignant/go-feature-flag/commit/4311f59c01aaa12bd0c42901f2de7aeb402cff92))
+* **notifier:** show who changed a flag when metadata.updatedBy is set ([#6519](https://github.com/thomaspoignant/go-feature-flag/issues/6519)) ([6b2c4b9](https://github.com/thomaspoignant/go-feature-flag/commit/6b2c4b959c98ce1ff204c00f51749c4a650a84a3))
+* **relayproxy:** add admin endpoint to validate a flag file ([#6437](https://github.com/thomaspoignant/go-feature-flag/issues/6437)) ([5b6053a](https://github.com/thomaspoignant/go-feature-flag/commit/5b6053adac91530b22a666ddbbd02d0414e5df46))
+
+
+### 🐛 Bug Fixes
+
+* **relayproxy:** expose ETag header through CORS for browser OFREP clients ([#6583](https://github.com/thomaspoignant/go-feature-flag/issues/6583)) ([b976e04](https://github.com/thomaspoignant/go-feature-flag/commit/b976e04013985fdabc700356b2cd598a594ae6f1))
+* **sonar:** resolve SonarCloud issues reported on main ([#6546](https://github.com/thomaspoignant/go-feature-flag/issues/6546)) ([03b1c0b](https://github.com/thomaspoignant/go-feature-flag/commit/03b1c0be1e913f383dd9e8bd70ab3940df947eea))
+* **sonar:** resolve SonarCloud issues reported on main ([#6562](https://github.com/thomaspoignant/go-feature-flag/issues/6562)) ([7885c66](https://github.com/thomaspoignant/go-feature-flag/commit/7885c6697cecd698ecde426fa0971ab3e502ee52))
+* **sonar:** resolve SonarCloud issues reported on main ([#6567](https://github.com/thomaspoignant/go-feature-flag/issues/6567)) ([46d319f](https://github.com/thomaspoignant/go-feature-flag/commit/46d319f463c49967543abf5ec57cd69c6118a960))
+* **sonar:** resolve SonarCloud issues reported on main ([#6579](https://github.com/thomaspoignant/go-feature-flag/issues/6579)) ([df297b6](https://github.com/thomaspoignant/go-feature-flag/commit/df297b611c6e816a8f4ae88d4c2eb100bd8f728a))
+
+
+### 🔧 Chores
+
+* Bump @openfeature/go-feature-flag-provider ([#6588](https://github.com/thomaspoignant/go-feature-flag/issues/6588)) ([c745cc8](https://github.com/thomaspoignant/go-feature-flag/commit/c745cc8b6fb598a529f4946e9b1709255c0a36be))
+* Bump @openfeature/go-feature-flag-provider ([#6597](https://github.com/thomaspoignant/go-feature-flag/issues/6597)) ([de7ac5c](https://github.com/thomaspoignant/go-feature-flag/commit/de7ac5cd0c0ead33870aa11ac13be123fc52ffb9))
+* Bump @typescript-eslint/eslint-plugin ([#6555](https://github.com/thomaspoignant/go-feature-flag/issues/6555)) ([6218eee](https://github.com/thomaspoignant/go-feature-flag/commit/6218eeedf2069dc52e4df7a37a85e174df1bfd92))
+* Bump @typescript-eslint/eslint-plugin ([#6606](https://github.com/thomaspoignant/go-feature-flag/issues/6606)) ([d543246](https://github.com/thomaspoignant/go-feature-flag/commit/d543246ac39a850acd0fa788ec3c41ea44ebb49e))
+* Bump @typescript-eslint/parser ([#6554](https://github.com/thomaspoignant/go-feature-flag/issues/6554)) ([17a2c51](https://github.com/thomaspoignant/go-feature-flag/commit/17a2c5133b2aa8ab7b757785435f5bf276d5887d))
+* Bump @typescript-eslint/parser ([#6603](https://github.com/thomaspoignant/go-feature-flag/issues/6603)) ([c310b85](https://github.com/thomaspoignant/go-feature-flag/commit/c310b85d2df4fad3882d27cd33092257de9a6160))
+* Bump @vitejs/plugin-react ([#6556](https://github.com/thomaspoignant/go-feature-flag/issues/6556)) ([8d8b382](https://github.com/thomaspoignant/go-feature-flag/commit/8d8b382230960fd09f32a860bbf45bb08da424d3))
+* Bump actions/setup-go from 7.0.0 to 7.1.0 ([#6612](https://github.com/thomaspoignant/go-feature-flag/issues/6612)) ([406d8bc](https://github.com/thomaspoignant/go-feature-flag/commit/406d8bc500767e52d973f8f3f585df48775520cc))
+* Bump actions/setup-java from 6.2.0 to 6.3.0 ([#6614](https://github.com/thomaspoignant/go-feature-flag/issues/6614)) ([aa426a1](https://github.com/thomaspoignant/go-feature-flag/commit/aa426a121c1951d45a57ca3be2d27bd2c2db6ae3))
+* Bump anthropics/claude-code-action from 1.0.268 to 1.0.275 ([#6558](https://github.com/thomaspoignant/go-feature-flag/issues/6558)) ([6494489](https://github.com/thomaspoignant/go-feature-flag/commit/64944892aa3a0b33166d0429ac56ec95233f8ed3))
+* Bump anthropics/claude-code-action from 1.0.275 to 1.0.284 ([#6613](https://github.com/thomaspoignant/go-feature-flag/issues/6613)) ([6fc43f2](https://github.com/thomaspoignant/go-feature-flag/commit/6fc43f2d649fcd3d44202fbc16475887e327844b))
+* Bump astral-sh/setup-uv from 10.3.3 to 10.4.0 ([#6611](https://github.com/thomaspoignant/go-feature-flag/issues/6611)) ([1aabd74](https://github.com/thomaspoignant/go-feature-flag/commit/1aabd74e462d192d4cb7ceb8f8ec32407779ce50))
+* Bump autoprefixer in /examples/openfeature_react/react-app ([#6605](https://github.com/thomaspoignant/go-feature-flag/issues/6605)) ([873c459](https://github.com/thomaspoignant/go-feature-flag/commit/873c459f19df778cde580423669e412f2ade4127))
+* Bump autoprefixer in /examples/openfeature_web/webapp ([#6596](https://github.com/thomaspoignant/go-feature-flag/issues/6596)) ([0242334](https://github.com/thomaspoignant/go-feature-flag/commit/024233406db6624000a6d2424dacf9289f5dbfb1))
+* Bump azure/setup-helm from 5.0.1 to 5.1.0 ([#6557](https://github.com/thomaspoignant/go-feature-flag/issues/6557)) ([7d01d9f](https://github.com/thomaspoignant/go-feature-flag/commit/7d01d9f0d2378289893116595d63b5e34b9ba098))
+* Bump cloud.google.com/go/bigquery from 1.86.2 to 1.86.3 ([#6586](https://github.com/thomaspoignant/go-feature-flag/issues/6586)) ([9fdd147](https://github.com/thomaspoignant/go-feature-flag/commit/9fdd147cc31837b0be255c91f41c9a504ad455b6))
+* Bump cloud.google.com/go/storage from 1.70.0 to 1.71.0 ([#6582](https://github.com/thomaspoignant/go-feature-flag/issues/6582)) ([4fcbeab](https://github.com/thomaspoignant/go-feature-flag/commit/4fcbeab49a54c681cf0ae523c2accafc54e1644c))
+* Bump coverlet.collector from 10.1.0 to 10.1.1 ([#6576](https://github.com/thomaspoignant/go-feature-flag/issues/6576)) ([0a576b6](https://github.com/thomaspoignant/go-feature-flag/commit/0a576b654431c5b20c0e0d7b8ed6c32cdcb6e4f1))
+* Bump dev.openfeature.contrib.providers:go-feature-flag ([#6593](https://github.com/thomaspoignant/go-feature-flag/issues/6593)) ([264b249](https://github.com/thomaspoignant/go-feature-flag/commit/264b2498f8bbc1fc8c161ce65bcbd98349e0f17e))
+* Bump dev.openfeature.contrib.providers:go-feature-flag ([#6595](https://github.com/thomaspoignant/go-feature-flag/issues/6595)) ([a50afbb](https://github.com/thomaspoignant/go-feature-flag/commit/a50afbb3fa35293db05e36e418aeba85d1f3324d))
+* Bump eslint in /examples/openfeature_react/react-app ([#6604](https://github.com/thomaspoignant/go-feature-flag/issues/6604)) ([b8bccd5](https://github.com/thomaspoignant/go-feature-flag/commit/b8bccd5b9f4f3040986ce151bc2f983aeee60fc8))
+* Bump eslint in /examples/openfeature_web/webapp ([#6598](https://github.com/thomaspoignant/go-feature-flag/issues/6598)) ([d3e163b](https://github.com/thomaspoignant/go-feature-flag/commit/d3e163bf0eb43b85662c8d4345a9d272ddcb20a9))
+* Bump eslint-plugin-react-refresh ([#6607](https://github.com/thomaspoignant/go-feature-flag/issues/6607)) ([2488538](https://github.com/thomaspoignant/go-feature-flag/commit/2488538e64d016a53c9005f215b46aff9c66ea85))
+* Bump github.com/aws/aws-sdk-go-v2/service/redshiftdata ([#6572](https://github.com/thomaspoignant/go-feature-flag/issues/6572)) ([3b44e93](https://github.com/thomaspoignant/go-feature-flag/commit/3b44e937cb4c542628314c787d18a95af991c424))
+* Bump github.com/dustin/go-humanize from 1.0.1 to 1.1.0 ([#6574](https://github.com/thomaspoignant/go-feature-flag/issues/6574)) ([446082e](https://github.com/thomaspoignant/go-feature-flag/commit/446082eb65a0fd11b394d691dec197a3dd36109b))
+* Bump github.com/IBM/sarama from 1.61.1 to 1.62.0 ([#6609](https://github.com/thomaspoignant/go-feature-flag/issues/6609)) ([b8dd66b](https://github.com/thomaspoignant/go-feature-flag/commit/b8dd66bc2f586264a78b56fc0798e2f8f04586df))
+* Bump github.com/jackc/pgx/v5 from 5.12.0 to 5.13.0 ([#6544](https://github.com/thomaspoignant/go-feature-flag/issues/6544)) ([cfe552a](https://github.com/thomaspoignant/go-feature-flag/commit/cfe552afb24c21df90db66b7688dd8029c01a9c5))
+* Bump github.com/labstack/echo/v5 from 5.4.4 to 5.4.5 ([#6552](https://github.com/thomaspoignant/go-feature-flag/issues/6552)) ([d3ed8cc](https://github.com/thomaspoignant/go-feature-flag/commit/d3ed8ccc5827ef887a7a6377651a342a83393f68))
+* Bump github.com/labstack/echo/v5 from 5.4.5 to 5.4.6 ([#6573](https://github.com/thomaspoignant/go-feature-flag/issues/6573)) ([5095856](https://github.com/thomaspoignant/go-feature-flag/commit/50958567cef69c21ee956283ab1e80489efb798c))
+* Bump github.com/open-feature/go-sdk-contrib/providers/go-feature-flag ([#6589](https://github.com/thomaspoignant/go-feature-flag/issues/6589)) ([6512c5d](https://github.com/thomaspoignant/go-feature-flag/commit/6512c5d4b2d2728ea5c624c61e22cc2822418daa))
+* Bump github.com/prometheus/common from 0.73.1 to 0.74.0 ([#6548](https://github.com/thomaspoignant/go-feature-flag/issues/6548)) ([879ad82](https://github.com/thomaspoignant/go-feature-flag/commit/879ad8246d9f4f465caeacb8d0656a9f7034d38c))
+* Bump golang.org/x/net from 0.62.0 to 0.63.0 ([#6585](https://github.com/thomaspoignant/go-feature-flag/issues/6585)) ([993d060](https://github.com/thomaspoignant/go-feature-flag/commit/993d0607ff84cfd581ee2423ffad43ba6dfdc827))
+* Bump google.golang.org/api from 0.312.0 to 0.313.0 ([#6543](https://github.com/thomaspoignant/go-feature-flag/issues/6543)) ([c12b6d8](https://github.com/thomaspoignant/go-feature-flag/commit/c12b6d8cc660cedb715b3c1120f6c524175abae6))
+* Bump google.golang.org/api from 0.313.0 to 0.314.0 ([#6549](https://github.com/thomaspoignant/go-feature-flag/issues/6549)) ([13d5116](https://github.com/thomaspoignant/go-feature-flag/commit/13d5116ba52bd3fd91ec001813628cd57ca7e187))
+* Bump google.golang.org/api from 0.314.0 to 0.315.0 ([#6575](https://github.com/thomaspoignant/go-feature-flag/issues/6575)) ([f3c4078](https://github.com/thomaspoignant/go-feature-flag/commit/f3c40784830f191e747e2796279250fbfdba6f63))
+* Bump google.golang.org/api from 0.315.0 to 0.316.0 ([#6587](https://github.com/thomaspoignant/go-feature-flag/issues/6587)) ([a164e46](https://github.com/thomaspoignant/go-feature-flag/commit/a164e4619e6bf1992bd54e4de1de7a3bf47f4fd7))
+* Bump gradle-wrapper ([#6550](https://github.com/thomaspoignant/go-feature-flag/issues/6550)) ([d5d86db](https://github.com/thomaspoignant/go-feature-flag/commit/d5d86db35eb5389c2fef8befe12bc5e19b4e31c9))
+* Bump gradle-wrapper ([#6601](https://github.com/thomaspoignant/go-feature-flag/issues/6601)) ([435f3f3](https://github.com/thomaspoignant/go-feature-flag/commit/435f3f36969f8778c400d308a78fc031edb72a93))
+* Bump htmlnano in /examples/openfeature_web/webapp ([#6602](https://github.com/thomaspoignant/go-feature-flag/issues/6602)) ([3efce41](https://github.com/thomaspoignant/go-feature-flag/commit/3efce41a537f0281e906f2aa62ae0c5bb40023e5))
+* Bump Microsoft.NET.Test.Sdk from 18.11.1 to 18.12.0 ([#6545](https://github.com/thomaspoignant/go-feature-flag/issues/6545)) ([7e9d9d2](https://github.com/thomaspoignant/go-feature-flag/commit/7e9d9d26c6b99ff367c6d3cd02c63b41b2ce6154))
+* Bump ossf/scorecard-action from 2.5.0 to 2.6.0 ([#6610](https://github.com/thomaspoignant/go-feature-flag/issues/6610)) ([40ec836](https://github.com/thomaspoignant/go-feature-flag/commit/40ec8368e0c036e1edabb150bbbd4062a7aac979))
+* Bump peter-evans/create-pull-request from 8.1.2 to 8.1.3 ([#6559](https://github.com/thomaspoignant/go-feature-flag/issues/6559)) ([a5f2114](https://github.com/thomaspoignant/go-feature-flag/commit/a5f211412340d9c0effe813ef7aa9425adccb811))
+* Bump postcss in /examples/openfeature_react/react-app ([#6599](https://github.com/thomaspoignant/go-feature-flag/issues/6599)) ([6e67d33](https://github.com/thomaspoignant/go-feature-flag/commit/6e67d33a1a0622678e7f71aa837256058f2d0113))
+* Bump sass in /examples/openfeature_web/webapp ([#6551](https://github.com/thomaspoignant/go-feature-flag/issues/6551)) ([fe398c4](https://github.com/thomaspoignant/go-feature-flag/commit/fe398c4ed6eb2ba8457bc5535d8ebb088d80d9b3))
+* Bump the aws group with 3 updates ([#6581](https://github.com/thomaspoignant/go-feature-flag/issues/6581)) ([3a1e460](https://github.com/thomaspoignant/go-feature-flag/commit/3a1e460048c97e33fee61f8e1559aebec46e3da6))
+* Bump the aws group with 3 updates ([#6584](https://github.com/thomaspoignant/go-feature-flag/issues/6584)) ([368b542](https://github.com/thomaspoignant/go-feature-flag/commit/368b54231f4451af89f769aa9c033586a14af3b3))
+* Bump the aws group with 3 updates ([#6608](https://github.com/thomaspoignant/go-feature-flag/issues/6608)) ([a568e38](https://github.com/thomaspoignant/go-feature-flag/commit/a568e38102116e9992dfa42be37b946471ded44e))
+* Bump the aws group with 5 updates ([#6591](https://github.com/thomaspoignant/go-feature-flag/issues/6591)) ([8523a3f](https://github.com/thomaspoignant/go-feature-flag/commit/8523a3f42a3f3d9358e9f63605c7b645e0cb7354))
+* Bump vite in /examples/openfeature_react/react-app ([#6553](https://github.com/thomaspoignant/go-feature-flag/issues/6553)) ([fb101ef](https://github.com/thomaspoignant/go-feature-flag/commit/fb101efef2c2095ba3ba5b69f541f45907b10322))
+* Bump webpack in /examples/openfeature_web/webapp ([#6600](https://github.com/thomaspoignant/go-feature-flag/issues/6600)) ([7d7d7e2](https://github.com/thomaspoignant/go-feature-flag/commit/7d7d7e2a8efa222b98dd29cbed6610e5c7f48c25))
+* remove unused editor API (cmd/editor) ([#6539](https://github.com/thomaspoignant/go-feature-flag/issues/6539)) ([9787905](https://github.com/thomaspoignant/go-feature-flag/commit/9787905cbf3c36f3c84bd5820ac6ba776756713c)), closes [#6536](https://github.com/thomaspoignant/go-feature-flag/issues/6536)
+
 ## [1.59.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.59.0...v1.59.1) (2026-11-18)
 
 
