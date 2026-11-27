@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.8.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.2...modules/core/v0.8.3) (2026-11-27)
+
+
+### 💨 Performances
+
+* **core:** cache the decoded JsonLogic query instead of re-parsing it on every evaluation ([#6565](https://github.com/thomaspoignant/go-feature-flag/issues/6565)) ([4b01ee5](https://github.com/thomaspoignant/go-feature-flag/commit/4b01ee52ecebff4a7cd6760623fbcb3f5a14b234))
+
+
+### 🐛 Bug Fixes
+
+* **sonar:** resolve SonarCloud issues reported on main ([#6562](https://github.com/thomaspoignant/go-feature-flag/issues/6562)) ([7885c66](https://github.com/thomaspoignant/go-feature-flag/commit/7885c6697cecd698ecde426fa0971ab3e502ee52))
+
+
+### 🔧 Chores
+
+* **dependencies:** Bump github.com/diegoholiveira/jsonlogic/v3 ([#6592](https://github.com/thomaspoignant/go-feature-flag/issues/6592)) ([466dfb1](https://github.com/thomaspoignant/go-feature-flag/commit/466dfb10b8f62d0f5164daac610bf4f2767d1857))
+
 ## [0.8.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.8.1...modules/core/v0.8.2) (2026-11-18)
 
 
