@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.1) (2026-11-27)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#6230](https://github.com/thomaspoignant/go-feature-flag/issues/6230)) ([8f5654d](https://github.com/thomaspoignant/go-feature-flag/commit/8f5654d56cec20414c651a47dd5fc65f7945a135))
+* Bump go.opentelemetry.io/otel/sdk from 1.46.0 to 1.47.0 ([#6216](https://github.com/thomaspoignant/go-feature-flag/issues/6216)) ([031d419](https://github.com/thomaspoignant/go-feature-flag/commit/031d4191f0ab8be2094afd83452b6c208021bcd0))
+* Bump go.opentelemetry.io/otel/trace from 1.46.0 to 1.47.0 ([#6218](https://github.com/thomaspoignant/go-feature-flag/issues/6218)) ([6540241](https://github.com/thomaspoignant/go-feature-flag/commit/6540241b3ee985a1db38608b30b75fc440b36cf5))
+
 ## [1.0.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/kotlin-provider/v1.0.0...openfeature/providers/kotlin-provider/v1.0.0) (2026-02-05)
 
 
