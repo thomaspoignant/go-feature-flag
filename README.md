@@ -297,6 +297,8 @@ test-flag:
 
 This flag split the usage of this flag, 20% will use the variation `my-new-feature` and 80% the variation `my-old-feature`.
 
+To check JSON variation values before publishing a flag, see [Validate structured variations in Go](https://gofeatureflag.org/docs/next/tooling/linter#validate-structured-variations-in-go).
+
 ### SDK Initialisation
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go linenums="1"
