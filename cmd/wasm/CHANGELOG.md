@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.3.1...cmd/wasm/v0.3.2) (2026-11-27)
+
+
+### 🔧 Chores
+
+* Bump go-feature-flag/rules fork in all modules ([#6529](https://github.com/thomaspoignant/go-feature-flag/issues/6529)) ([321d9c8](https://github.com/thomaspoignant/go-feature-flag/commit/321d9c8c06ba70328c48a071d76285bd775dc947))
+* **dependency:** Bump module modules/core 0.8.2 ([#6532](https://github.com/thomaspoignant/go-feature-flag/issues/6532)) ([a331deb](https://github.com/thomaspoignant/go-feature-flag/commit/a331debe455bb7abd9f1596f03791abb956485a2))
+
 ## [0.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.3.0...cmd/wasm/v0.3.1) (2026-11-17)
 
 
