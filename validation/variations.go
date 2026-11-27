@@ -33,15 +33,15 @@ type VariationError struct {
 // Callers can check the flag definition separately using dto.DTO.Convert and
 // the resulting flag's IsValid method.
 func ValidateVariations(flagKey string, definition dto.DTO, schemaJSON []byte) ([]VariationError, error) {
-	const schemaURL = "https://go-feature-flag.invalid/variation-schema.json"
+	const schemaID = "mem:///schema.json"
 	compiler := jsonschema.NewCompiler()
 	compiler.LoadURL = func(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("external JSON Schema resource %q is not supported", url)
 	}
-	if err := compiler.AddResource(schemaURL, bytes.NewReader(schemaJSON)); err != nil {
+	if err := compiler.AddResource(schemaID, bytes.NewReader(schemaJSON)); err != nil {
 		return nil, fmt.Errorf("parse JSON Schema for flag %q: %w", flagKey, err)
 	}
-	schema, err := compiler.Compile(schemaURL)
+	schema, err := compiler.Compile(schemaID)
 	if err != nil {
 		return nil, fmt.Errorf("compile JSON Schema for flag %q: %w", flagKey, err)
 	}

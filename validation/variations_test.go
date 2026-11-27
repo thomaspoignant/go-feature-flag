@@ -2,6 +2,8 @@ package validation_test
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -92,6 +94,20 @@ func TestValidateVariations(t *testing.T) {
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestValidateVariationsWithSpecialCharactersInWorkingDirectory(t *testing.T) {
+	workingDir := filepath.Join(t.TempDir(), "schema-%#")
+	require.NoError(t, os.Mkdir(workingDir, 0o700))
+	t.Chdir(workingDir)
+
+	var definition dto.DTO
+	require.NoError(t, json.Unmarshal([]byte(`{"variations":{"baseline":"on"}}`), &definition))
+
+	const schema = `{"$defs":{"value":{"type":"string"}},"$ref":"#/$defs/value"}`
+	violations, err := validation.ValidateVariations("storefront-banner", definition, []byte(schema))
+	require.NoError(t, err)
+	require.Empty(t, violations)
 }
 
 func TestValidateVariationsInvalidSchema(t *testing.T) {
