@@ -1,0 +1,86 @@
+{
+    "version": "v1.0.0",
+    "entity": {
+        "type": "individual",
+        "role": "owner",
+        "name": "Thomas Poignant",
+        "email": "thomas.poignant@gofeatureflag.org",
+        "description": "I am the owner and maintainer of GO Feature Flag, a simple, complete and lightweight self-hosted feature flag solution 100% Open Source.",
+        "webpageUrl": {
+            "url": "https://gofeatureflag.org"
+        }
+    },
+
+    "projects": [{
+        "guid": "goff",
+        "name": "GO Feature Flag",
+        "description": "GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution 100% Open Source.",
+        "webpageUrl": {
+            "url": "https://gofeatureflag.org"
+        },
+        "repositoryUrl": {
+            "url": "https://github.com/thomaspoignant/go-feature-flag",
+            "wellKnown": "https://github.com/thomaspoignant/go-feature-flag/blob/main/.well-known/funding-manifest-urls"
+        },
+        "licenses": ["mit"],
+        "tags": ["developer-tools", "feature-flags", "feature-flagging", "experimentation"]        
+    }],
+
+    "funding": {
+        "channels": [{
+            "guid": "github-sponsors",
+            "type": "payment-provider",
+            "address": "https://github.com/sponsors/thomaspoignant",
+            "description": "Support me on GitHub Sponsors for ongoing development."
+        },
+        {
+            "guid": "bank-transfer",
+            "type": "bank",
+            "address": "contact@gofeatureflag.org",
+            "description": "If you prefer a wire transfer, please contact GO Feature Flag directly."
+        }],
+
+        "plans": [
+            {
+                "guid": "one-time-support",
+                "status": "active",
+                "name": "One time Support Plan",
+                "description": "Support the ongoing development of GO Feature Flag by making a one-time donation.",
+                "amount": 0,
+                "currency": "USD",
+                "frequency": "one-time",
+                "channels": ["github-sponsors"]
+            },
+            {
+                "guid": "monthly-support",
+                "status": "active",
+                "name": "Monthly Support Plan",
+                "description": "Help GO Feature Flag to be sustainable and make donation every months.",
+                "amount": 0,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": ["github-sponsors", "bank-transfer"]
+            },
+            {
+                "guid": "premium-support",
+                "status": "active",
+                "name": "Premium Support Plan",
+                "description": "Help us shape the future of GO Feature Flag with your ideas by making a donation every month. A maintainer can join your slack/teams organisation and be available to answer your questions directly there.",
+                "amount": 800,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": ["github-sponsors", "bank-transfer"]
+            }
+        ],
+
+        "history": [{
+            "year": 2024,
+            "income": 1955,
+            "expenses": 0,
+            "taxes": 0,
+            "currency": "EUR",
+            "description": "GitHub Sponsors for 2024"
+        }]
+    }
+}
+
