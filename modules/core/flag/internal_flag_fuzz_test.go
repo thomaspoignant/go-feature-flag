@@ -36,7 +36,7 @@ func FuzzInternalFlagValue(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, flagJSON, ctxJSON string, evalUnix int64) {
 		// Every fuzzed query would otherwise stay in the evaluator cache forever.
-		t.Cleanup(nikunjyEvaluatorCache.Clear)
+		useFreshNikunjyEvaluators(t)
 		t.Cleanup(compiledQueryCache.Clear)
 		var internalFlag InternalFlag
 		var attributes map[string]any
