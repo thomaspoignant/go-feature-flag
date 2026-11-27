@@ -1,7 +1,9 @@
 package init
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -20,6 +22,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 )
 
+// outOfInt32Range is one past math.MaxInt32. It is built from a variable so the
+// conversion to int does not overflow a constant on 32-bit targets.
+var outOfInt32Range int64 = math.MaxInt32 + 1
+
 func Test_InitRetriever(t *testing.T) {
 	tests := []struct {
 		name                   string
@@ -28,6 +34,7 @@ func Test_InitRetriever(t *testing.T) {
 		wantErr                assert.ErrorAssertionFunc
 		wantType               retriever.Retriever
 		skipCompleteValidation bool
+		skipOn32Bit            bool
 	}{
 		{
 			name:    "Convert Github Retriever",
@@ -307,9 +314,71 @@ func Test_InitRetriever(t *testing.T) {
 			},
 			wantType: &postgresqlretriever.Retriever{},
 		},
+		{
+			name:    "Convert Postgres Retriever with pool config",
+			wantErr: assert.NoError,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:            "postgresql",
+				URI:             "postgresql://user:password@localhost:5432/database",
+				Table:           "flags",
+				MaxConns:        25,
+				MinConns:        5,
+				MaxConnLifetime: "1h",
+				MaxConnIdleTime: "30m",
+			},
+			want: &postgresqlretriever.Retriever{
+				URI:   "postgresql://user:password@localhost:5432/database",
+				Table: "flags",
+				Pool: postgresqlretriever.PoolConfig{
+					MaxConns:        25,
+					MinConns:        5,
+					MaxConnLifetime: time.Hour,
+					MaxConnIdleTime: 30 * time.Minute,
+				},
+			},
+			wantType: &postgresqlretriever.Retriever{},
+		},
+		{
+			name:    "Convert Postgres Retriever with maxConns out of range",
+			wantErr: assert.Error,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:     "postgresql",
+				URI:      "postgresql://user:password@localhost:5432/database",
+				Table:    "flags",
+				MaxConns: int(outOfInt32Range),
+			},
+			wantType:    &postgresqlretriever.Retriever{},
+			skipOn32Bit: true,
+		},
+		{
+			name:    "Convert Postgres Retriever with minConns out of range",
+			wantErr: assert.Error,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:     "postgresql",
+				URI:      "postgresql://user:password@localhost:5432/database",
+				Table:    "flags",
+				MinConns: int(outOfInt32Range),
+			},
+			wantType:    &postgresqlretriever.Retriever{},
+			skipOn32Bit: true,
+		},
+		{
+			name:    "Convert Postgres Retriever with invalid duration",
+			wantErr: assert.Error,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:            "postgresql",
+				URI:             "postgresql://user:password@localhost:5432/database",
+				Table:           "flags",
+				MaxConnLifetime: "not-a-duration",
+			},
+			wantType: &postgresqlretriever.Retriever{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.skipOn32Bit && strconv.IntSize == 32 {
+				t.Skip("int cannot hold a value above math.MaxInt32 on 32-bit targets")
+			}
 			got, err := InitRetriever(tt.conf)
 			tt.wantErr(t, err)
 			if err == nil {
