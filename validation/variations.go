@@ -3,6 +3,7 @@ package validation
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -25,7 +26,7 @@ type VariationError struct {
 // ValidateVariations checks the base and scheduled variation values of a parsed
 // flag definition against a caller-provided JSON Schema. The schema is compiled
 // once per call. References within the schema are resolved without loading
-// external files or URLs.
+// external files or URLs. Variation values are checked in their JSON form.
 //
 // Schema violations are returned in the slice. An invalid schema or a
 // validation failure other than a schema violation is returned as an error.
@@ -65,11 +66,7 @@ func validateValues(
 	violations []VariationError, schema *jsonschema.Schema, flagKey string, values map[string]*any, step *int,
 ) ([]VariationError, error) {
 	for _, name := range slices.Sorted(maps.Keys(values)) {
-		var value any
-		if raw := values[name]; raw != nil {
-			value = *raw
-		}
-		err := schema.Validate(value)
+		err := validateJSONValue(schema, values[name])
 		if err == nil {
 			continue
 		}
@@ -81,6 +78,21 @@ func validateValues(
 		violations = appendViolations(violations, location, violation)
 	}
 	return violations, nil
+}
+
+func validateJSONValue(schema *jsonschema.Schema, value *any) error {
+	// YAML and TOML can produce Go values such as time.Time, which encode as JSON strings.
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(encoded))
+	decoder.UseNumber()
+	var instance any
+	if err := decoder.Decode(&instance); err != nil {
+		return err
+	}
+	return schema.Validate(instance)
 }
 
 func appendViolations(

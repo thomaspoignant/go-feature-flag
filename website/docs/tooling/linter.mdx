@@ -97,3 +97,17 @@ lint-job:
 ## Lint Feature Flags Programmatically
 You can also lint/validate a GO Feature Flag configuration programmatically without using the CLI.
 Check the [example repository](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/lint_flag_programmatically/README.md) to see how to do it in Go.
+
+### Validate structured variations in Go
+
+Use `validation.ValidateVariations` to check the values inside object or array variations before
+saving or publishing a flag. Pass the flag key, a parsed `dto.DTO`, and the bytes of your
+JSON Schema. The function checks base values and values added or replaced by scheduled rollouts.
+
+Check the returned error for an invalid schema or an input that cannot be validated.
+If the error is nil, inspect the returned violations. Each violation includes a JSON Pointer
+into the value. A nil `ScheduledStep` identifies a base variation. Otherwise, the field holds
+the zero-based index of the step in `scheduledRollout`.
+
+See the [runnable Go example](https://github.com/thomaspoignant/go-feature-flag/blob/main/validation/variations_example_test.go)
+for a scheduled value that supplies a string where the schema requires an integer.
