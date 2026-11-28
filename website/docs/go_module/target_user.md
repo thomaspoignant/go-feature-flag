@@ -187,3 +187,23 @@ The `MarshalJSON()` function will return something like below, that can be direc
 :::caution
 There is no tracking done when evaluating all the flag at once.
 :::
+
+## Read a flag's configured metadata
+
+Use `GetFlagMetadata` to look up one flag in the local cache without evaluating its rules.
+It works for disabled flags as well. The package-level function uses the default client.
+Clients created with `ffclient.New` expose the same method.
+
+```go
+metadata, err := ffclient.GetFlagMetadata("checkout")
+if err != nil {
+    return err
+}
+if owner, ok := metadata["owner"].(string); ok {
+    fmt.Println(owner)
+}
+```
+
+A flag with no configured metadata returns `nil, nil`. A missing flag or an unavailable
+cache returns an error. You can modify the returned map and its nested values independently
+of the cached flag.
